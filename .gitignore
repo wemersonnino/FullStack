@@ -1,8 +1,8 @@
 /Frontend/web-app1/
 /Frontend/web-app3/.env
 /Frontend/web-app3/escala/.env.local
-/Dados/postgres/.env
-/Dados/postgres/init.sql
+/Data/postgres/.env
+/Data/postgres/init.sql
 /.idea/copilot.data.migration.agent.xml
 /.idea/copilot.data.migration.ask.xml
 /.idea/copilot.data.migration.ask2agent.xml
@@ -12,3 +12,6 @@
 /.idea/prettier.xml
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/vcs.xml
+/.idea/git_toolbox_prj.xml
+/.idea/sqldialects.xml
+/Data/postgres/.idea/workspace.xml
