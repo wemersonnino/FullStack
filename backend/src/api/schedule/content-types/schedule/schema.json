@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "schedules",
+  "info": {
+    "singularName": "schedule",
+    "pluralName": "schedules",
+    "displayName": "Schedule",
+    "description": "Work schedules management"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "startDate": {
+      "type": "date",
+      "required": true
+    },
+    "endDate": {
+      "type": "date",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "users": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "schedules"
+    },
+    "shifts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::shift.shift",
+      "mappedBy": "schedules"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "active", "completed", "cancelled"],
+      "default": "draft"
+    }
+  }
+}

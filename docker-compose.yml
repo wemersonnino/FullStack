@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: escala-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi
+      POSTGRES_DB: escala
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U strapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: escala-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: escala
+      DATABASE_USERNAME: strapi
+      DATABASE_PASSWORD: strapi
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      API_TOKEN_SALT: ${API_TOKEN_SALT:-change-me-in-production}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-change-me-in-production}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT:-change-me-in-production}
+      APP_KEYS: ${APP_KEYS:-app1,app2,app3,app4}
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./backend:/app
+      - backend-node-modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run develop
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: escala-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:1337/api
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-me-in-production}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    command: npm run dev
+
+volumes:
+  postgres-data:
+  backend-node-modules:
+  frontend-node-modules:

@@ -1,0 +1,29 @@
+{
+  "app": {
+    "title": "Escala - Gestão de Turnos",
+    "description": "Gerencie turnos, escalas e anúncios"
+  },
+  "nav": {
+    "home": "Início",
+    "shifts": "Turnos",
+    "schedules": "Escalas",
+    "announcements": "Anúncios",
+    "users": "Usuários",
+    "audit": "Log de Auditoria"
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "email": "E-mail",
+    "password": "Senha",
+    "welcome": "Bem-vindo ao Escala"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "loading": "Carregando..."
+  }
+}

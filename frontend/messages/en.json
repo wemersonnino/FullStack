@@ -1,0 +1,29 @@
+{
+  "app": {
+    "title": "Escala - Schedule Management",
+    "description": "Manage shifts, schedules and announcements"
+  },
+  "nav": {
+    "home": "Home",
+    "shifts": "Shifts",
+    "schedules": "Schedules",
+    "announcements": "Announcements",
+    "users": "Users",
+    "audit": "Audit Log"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "welcome": "Welcome to Escala"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading..."
+  }
+}

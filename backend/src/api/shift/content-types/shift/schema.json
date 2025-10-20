@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "shifts",
+  "info": {
+    "singularName": "shift",
+    "pluralName": "shifts",
+    "displayName": "Shift",
+    "description": "Work shifts configuration"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "startTime": {
+      "type": "time",
+      "required": true
+    },
+    "endTime": {
+      "type": "time",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "schedules": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::schedule.schedule",
+      "inversedBy": "shifts"
+    }
+  }
+}
