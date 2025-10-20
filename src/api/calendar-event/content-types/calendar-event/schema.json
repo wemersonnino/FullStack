@@ -1,0 +1,62 @@
+{
+  "kind": "collectionType",
+  "collectionName": "calendar-events",
+  "info": {
+    "singularName": "calendar-event",
+    "pluralName": "calendar-events",
+    "displayName": "Calendar Event"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "dateStart": {
+      "type": "datetime"
+    },
+    "dateEnd": {
+      "type": "datetime"
+    },
+    "eventType": {
+      "type": "enumeration",
+      "enum": [
+        "meeting",
+        "holiday",
+        "personal",
+        "training"
+      ]
+    },
+    "color": {
+      "type": "string"
+    },
+    "visibility": {
+      "type": "enumeration",
+      "enum": [
+        "public",
+        "private",
+        "team"
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "isRecurring": {
+      "type": "boolean",
+      "default": false
+    },
+    "recurrenceRule": {
+      "type": "text"
+    }
+  }
+}

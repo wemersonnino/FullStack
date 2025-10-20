@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "profile-preferences",
+  "info": {
+    "singularName": "profile-preference",
+    "pluralName": "profile-preferences",
+    "displayName": "Profile Preference"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "theme": {
+      "type": "enumeration",
+      "enum": [
+        "light",
+        "dark",
+        "system"
+      ]
+    },
+    "language": {
+      "type": "enumeration",
+      "default": "pt-BR",
+      "enum": [
+        "pt-BR",
+        "en",
+        "es"
+      ]
+    },
+    "timezone": {
+      "type": "string"
+    },
+    "notifications": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

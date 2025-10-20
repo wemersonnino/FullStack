@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "swaps",
+  "info": {
+    "singularName": "swap",
+    "pluralName": "swaps",
+    "displayName": "Swap"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "requester": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "requestedSwaps"
+    },
+    "receiver": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "receivedSwaps"
+    },
+    "compensationRequired": {
+      "type": "boolean"
+    },
+    "compensationDate": {
+      "type": "date"
+    }
+  }
+}

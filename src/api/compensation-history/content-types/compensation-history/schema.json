@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "compensation-histories",
+  "info": {
+    "singularName": "compensation-history",
+    "pluralName": "compensation-histories",
+    "displayName": "Compensation History"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "compensationType": {
+      "type": "enumeration",
+      "enum": [
+        "day",
+        "money",
+        "overtime"
+      ]
+    },
+    "value": {
+      "type": "decimal"
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}

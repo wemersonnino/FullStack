@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "learning-progresses",
+  "info": {
+    "singularName": "learning-progress",
+    "pluralName": "learning-progresses",
+    "displayName": "Learning Progress"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "module": {
+      "type": "enumeration",
+      "enum": [
+        "frontend",
+        "backend",
+        "auth",
+        "i18n",
+        "devops"
+      ]
+    },
+    "topic": {
+      "type": "string"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "completionDate": {
+      "type": "datetime"
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}

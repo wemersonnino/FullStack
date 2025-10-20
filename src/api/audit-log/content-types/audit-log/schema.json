@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit-logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "action": {
+      "type": "enumeration",
+      "enum": [
+        "login",
+        "update",
+        "create",
+        "delete",
+        "swap_shift",
+        "change_theme",
+        "change_language"
+      ]
+    },
+    "entity": {
+      "type": "string"
+    },
+    "details": {
+      "type": "json"
+    }
+  }
+}

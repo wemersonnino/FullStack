@@ -1,0 +1,55 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user-accounts",
+  "info": {
+    "singularName": "user-account",
+    "pluralName": "user-accounts",
+    "displayName": "User Account"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "username": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
+    "password": {
+      "type": "password",
+      "required": true
+    },
+    "theme": {
+      "type": "enumeration",
+      "default": "system",
+      "enum": [
+        "light",
+        "dark",
+        "system"
+      ]
+    },
+    "roles": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::user-role.user-role",
+      "mappedBy": "user_accounts"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_login": {
+      "type": "datetime"
+    }
+  }
+}

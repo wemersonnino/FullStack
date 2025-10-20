@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "work-schedules",
+  "info": {
+    "singularName": "work-schedule",
+    "pluralName": "work-schedules",
+    "displayName": "Work Schedule"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "fixedDays": {
+      "type": "text"
+    },
+    "alternatingDay": {
+      "type": "enumeration",
+      "enum": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday"
+      ]
+    },
+    "frequency": {
+      "type": "enumeration",
+      "default": "every_two_weeks",
+      "enum": [
+        "every_week",
+        "every_two_weeks",
+        "monthly"
+      ]
+    },
+    "minimumWeeklyShifts": {
+      "type": "integer",
+      "default": 3
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
