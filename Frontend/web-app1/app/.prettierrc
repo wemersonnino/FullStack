@@ -1,0 +1,30 @@
+{
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindFunctions": ["clsx", "cva"],
+  "singleQuote": true,
+  "semi": true,
+  "printWidth": 100,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "arrowParens": "always",
+    "bracketSpacing": true,
+    "endOfLine": "lf",
+    "htmlWhitespaceSensitivity": "css",
+    "jsxSingleQuote": false,
+    "quoteProps": "as-needed",
+    "useTabs": false,
+    "vueIndentScriptAndStyle": false,
+    "proseWrap": "preserve",
+    "embeddedLanguageFormatting": "auto",
+    "overrides": [
+      {
+        "files": "*.json",
+        "options": {
+          "tabWidth": 2
+        }
+      }
+    ],
+    "ignorePath": ".prettierignore",
+    "requirePragma": false,
+    "insertPragma": false
+}

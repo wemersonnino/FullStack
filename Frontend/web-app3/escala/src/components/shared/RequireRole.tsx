@@ -1,0 +1,3 @@
+export const RequireRole = () => {
+  return <></>;
+};

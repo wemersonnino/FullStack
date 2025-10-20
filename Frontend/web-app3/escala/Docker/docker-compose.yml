@@ -1,0 +1,35 @@
+services:
+  ###########################################################################
+  # 🧩 NEXT.JS (Frontend - Escala)
+  ###########################################################################
+  nextapp:
+    container_name: escala-nextapp
+    build:
+      context: ..
+      dockerfile: ./Docker/Dockerfile
+      target: dev
+      #target: build Compilação do Next.js
+      #target: production se for buildar uma imagem pronta para deploy (sem bind mount): docker compose build --build-arg target=production
+      #docker run -p 3000:3000 escala-nextapp
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../.env.local
+    environment:
+      - WATCHPACK_POLLING=true     # hot-reload estável no Docker
+      - CHOKIDAR_USEPOLLING=1
+      - PORT=3000
+      - NODE_ENV=development
+    volumes:
+      - ../:/app                 # seu código monta a raiz do projeto /escala
+      - //app/node_modules       # evita conflito com node_modules do host
+    working_dir: /app
+    command: npm run dev
+    networks:
+      nino-network:
+       ipv4_address: 172.28.0.4
+
+networks:
+  nino-network:
+    external: true
