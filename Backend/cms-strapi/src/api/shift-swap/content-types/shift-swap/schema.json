@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "shift-swaps",
+  "info": {
+    "singularName": "shift-swap",
+    "pluralName": "shift-swaps",
+    "displayName": "Shift Swap"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "compensationRequired": {
+      "type": "boolean"
+    },
+    "compensationDate": {
+      "type": "date"
+    },
+    "comments": {
+      "type": "text"
+    }
+  }
+}

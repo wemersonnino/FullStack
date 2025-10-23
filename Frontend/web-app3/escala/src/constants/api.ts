@@ -8,4 +8,5 @@ export const API_ROUTES = {
   BANNERS: `${baseUrl}/api/banners?populate=*`,
   ARTICLES: `${baseUrl}/api/articles?populate=*`,
   FOOTER: `${baseUrl}/api/footer?populate=*`,
+  MENU: `${baseUrl}/api/menus?populate=*`,
 };

@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "translation-entries",
+  "info": {
+    "singularName": "translation-entry",
+    "pluralName": "translation-entries",
+    "displayName": "Translation Entry"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "key": {
+      "type": "string",
+      "required": true
+    },
+    "value": {
+      "type": "text"
+    },
+    "context": {
+      "type": "enumeration",
+      "enum": [
+        "frontend",
+        "backend",
+        "portal",
+        "intranet"
+      ]
+    }
+  }
+}

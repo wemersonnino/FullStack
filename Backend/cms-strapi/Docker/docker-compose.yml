@@ -1,0 +1,35 @@
+services:
+  strapi:
+    container_name: cms-strapi
+    build:
+      context: ..
+      dockerfile: ./Docker/Dockerfile
+    image: cms-strapi:latest
+    restart: unless-stopped
+    ports:
+      - "1337:1337"
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: web-app-postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: strapi_cms
+      DATABASE_USERNAME: strapi_user
+      DATABASE_PASSWORD: strapi1234567890
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 1337
+      ADMIN_PATH: /admin
+      PUBLIC_URL: http://localhost:1337
+    volumes:
+      - ../config:/opt/app/config
+      - ../src:/opt/app/src
+      - ../public/uploads:/opt/app/public/uploads
+    networks:
+      nino-network:
+        ipv4_address: 172.28.0.3
+
+networks:
+  nino-network:
+    external: true

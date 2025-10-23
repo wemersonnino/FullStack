@@ -1,4 +1,34 @@
 import { ENV } from "@/constants";
+import axios from "axios"
+import { signOut } from "next-auth/react"
+
+
+
+/**
+ * Instância do Axios configurada para comunicação com a API do Strapi.
+ * Utiliza a URL pública definida nas variáveis de ambiente.
+ * Timeout de 15 segundos para requisições.
+ * Cabeçalhos padrão para JSON.
+ * @returns Instância do Axios configurada
+ */
+export const api = axios.create({
+    baseURL:ENV.STRAPI_PUBLIC_URL,
+    timeout: 15000,
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
+
+api.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    //se a resposta for 401, o JWT expirou ou é inválido
+    if (error.response?.status === 401) {
+     signOut({ callbackUrl: "/(PUBLIC)/auth/login" })
+    }
+    return Promise.reject(error)
+  },
+)
 
 /**
  * Normaliza URLs internas do Strapi (como http://cms-strapi:1337)
@@ -49,3 +79,5 @@ export function normalizeImageUrlStrapi(url?: string): string {
   // Se já for uma URL pública válida
   return url;
 }
+
+export default api
