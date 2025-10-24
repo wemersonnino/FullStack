@@ -15,8 +15,6 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       nino-network:
-        ipv4_address: 172.28.0.2
-
 volumes:
   web_app_pg_data:
 

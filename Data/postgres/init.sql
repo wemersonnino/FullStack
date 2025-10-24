@@ -1,51 +1,49 @@
--- Banco do Strapi (T-SQL / SQL Server)
+-- Banco do Strapi
 CREATE DATABASE strapi_cms;
-GO
 
--- Create server login and database user, then grant db_owner role
-CREATE LOGIN strapi_user WITH PASSWORD = 'strapi1234567890';
-GO
+\connect strapi_cms;
 
-USE strapi_cms;
-GO
+CREATE USER strapi_user WITH ENCRYPTED PASSWORD 'strapi1234567890';
+GRANT ALL PRIVILEGES ON DATABASE strapi_cms TO strapi_user;
 
-CREATE USER strapi_user FOR LOGIN strapi_user;
-GO
-
--- Grant full database privileges by adding to db_owner
-ALTER ROLE db_owner ADD MEMBER [strapi_user];
-GO
+-- 🧩 Permissões adicionais para Strapi
+GRANT ALL ON SCHEMA public TO strapi_user;
+ALTER SCHEMA public OWNER TO strapi_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO strapi_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO strapi_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO strapi_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO strapi_user;
 
 
--- Banco para API Java (T-SQL / SQL Server)
+-- Banco para API Java
 CREATE DATABASE web_app_api;
-GO
 
-CREATE LOGIN api_user WITH PASSWORD = 'webappapi1234567890';
-GO
+\connect web_app_api;
 
-USE web_app_api;
-GO
+CREATE USER api_user WITH ENCRYPTED PASSWORD 'webappapi1234567890';
+GRANT ALL PRIVILEGES ON DATABASE web_app_api TO api_user;
 
-CREATE USER api_user FOR LOGIN api_user;
-GO
+-- 🧩 Permissões adicionais para a API Java
+GRANT ALL ON SCHEMA public TO api_user;
+ALTER SCHEMA public OWNER TO api_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO api_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO api_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO api_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO api_user;
 
-ALTER ROLE db_owner ADD MEMBER [api_user];
-GO
 
-
--- Banco para API .NET (T-SQL / SQL Server)
+-- Banco para API .NET
 CREATE DATABASE intranet_api;
-GO
 
-CREATE LOGIN dotnet_user WITH PASSWORD = 'dotnet1234567890';
-GO
+\connect intranet_api;
 
-USE intranet_api;
-GO
+CREATE USER dotnet_user WITH ENCRYPTED PASSWORD 'dotnet1234567890';
+GRANT ALL PRIVILEGES ON DATABASE intranet_api TO dotnet_user;
 
-CREATE USER dotnet_user FOR LOGIN dotnet_user;
-GO
-
-ALTER ROLE db_owner ADD MEMBER [dotnet_user];
-GO
+-- 🧩 Permissões adicionais para a API .NET
+GRANT ALL ON SCHEMA public TO dotnet_user;
+ALTER SCHEMA public OWNER TO dotnet_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO dotnet_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO dotnet_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO dotnet_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO dotnet_user;
