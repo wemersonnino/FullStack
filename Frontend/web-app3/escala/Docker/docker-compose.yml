@@ -28,8 +28,6 @@ services:
     command: npm run dev
     networks:
       nino-network:
-       ipv4_address: 172.28.0.4
-
 networks:
   nino-network:
     external: true
