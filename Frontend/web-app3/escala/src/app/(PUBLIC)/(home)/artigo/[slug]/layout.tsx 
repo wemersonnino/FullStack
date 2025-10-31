@@ -1,0 +1,12 @@
+import { HeaderPublic } from "@/components/shared/HeaderPublic";
+import { Footer } from "@/components/shared/Footer";
+
+export default function ArticleLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <HeaderPublic />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
+  );
+}

@@ -1,5 +1,5 @@
 import { API_ROUTES } from "@/constants";
-import { httpGet } from "@/lib/request"
+import { httpGet } from "@/lib/http/request"
 import { MenuItem } from "@/interfaces/menu/menu.interface"
 import { MenuLocationEnum } from "@/interfaces/enums/menuLocation.enum"
 import { MenuLinkTypeEnum } from "@/interfaces/enums/menuLinkType.enum"

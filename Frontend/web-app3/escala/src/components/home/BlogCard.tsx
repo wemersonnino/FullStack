@@ -1,30 +1,25 @@
-import { Article } from "@/interfaces/article/article.interface";
-import Image from "next/image";
+import { Article } from '@/interfaces/article/article.interface';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export const BlogCard = ({ article }: { article: Article }) => {
   return (
-    <article
-      className="bg-white border rounded-lg overflow-hidden
-    hover:shadow-md transition-all"
-    >
+    <article className="overflow-hidden rounded-lg border bg-white transition-all hover:shadow-md">
       {article.cover_image.url && (
         <Image
           src={article.cover_image.url}
           alt={article.cover_image.alternativeText || article.title}
           width={400}
           height={220}
-          className="w-full h-48 object-cover"
+          className="h-48 w-full object-cover"
         />
       )}
       <div className="p-4">
-        <h2 className="text-xl font-bold mb-2">{article.title}</h2>
-        <p className="text-gray-600 mb-4">{article.description}</p>
-        <a
-          href={`/blog/${article.slug}`}
-          className="text-blue-500 hover:underline"
-        >
+        <h2 className="mb-2 text-xl font-bold">{article.title}</h2>
+        <p className="mb-4 text-gray-600">{article.description}</p>
+        <Link href={`/artigo/${article.slug}`} className="text-blue-500 hover:underline">
           Ler mais
-        </a>
+        </Link>
       </div>
     </article>
   );
