@@ -1,6 +1,6 @@
-import { MenuLocationEnum } from "../enums/menu-location.enum"
-import { MenuLinkTypeEnum } from "../enums/menu-link-type.enum"
-import { IconPositionEnum } from "../enums/icon-position.enum"
+import { MenuLocationEnum } from "../enums/menuLocation.enum"
+import { MenuLinkTypeEnum } from "../enums/menuLinkType.enum"
+import { IconPositionEnum } from "../enums/iconPosition.enum"
 
 export interface MenuIcon {
   id: number

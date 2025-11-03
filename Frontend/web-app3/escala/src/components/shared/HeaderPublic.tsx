@@ -1,30 +1,23 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react"
-import { getMenu } from "@/services/menu.service"
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { Menu } from "./Menu"
+import { useEffect, useState } from 'react';
+import { getMenu } from '@/services/menu.service';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { Menu } from './Menu';
+import { MenuItem } from '@/interfaces/menu/menu.interface';
+import { MenuLocationEnum } from '@/interfaces/enums/menuLocation.enum';
 
 export const HeaderPublic = () => {
-  const [menu, setMenu] = useState<any[]>([])
+  const [menu, setMenu] = useState<MenuItem[]>([]);
 
   useEffect(() => {
-    getMenu("header").then(setMenu)
-  }, [])
+    getMenu(MenuLocationEnum.HEADER).then(setMenu);
+  }, []);
 
   return (
-    <header
-      className="flex items-center justify-between p-4 bg-white w-full
-     dark:bg-gray-800 shadow-md"
-    >
+    <header className="flex w-full items-center justify-between bg-white p-4 shadow-md dark:bg-gray-800">
       <h1 className="text-2xl font-bold">Plataforma Escala</h1>
-      <nav className="flex gap-6">
-          {menu.map((item) => (
-            <a key={item.id} href={item.destination ?? "#"}>
-              {item.title}
-            </a>
-          ))}
-      </nav>
+      <Menu items={menu} />
       <ThemeToggle />
     </header>
   );

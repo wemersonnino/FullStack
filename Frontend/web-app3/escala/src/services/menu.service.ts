@@ -1,32 +1,23 @@
-import { API_ROUTES } from "@/constants";
-import { httpGet } from "@/lib/http/request"
-import { MenuItem } from "@/interfaces/menu/menu.interface"
-import { MenuLocationEnum } from "@/interfaces/enums/menuLocation.enum"
-import { MenuLinkTypeEnum } from "@/interfaces/enums/menuLinkType.enum"
-import { IconPositionEnum } from "@/interfaces/enums/iconPosition.enum"
+import { API_ROUTES } from '@/constants';
+import { httpGet } from '@/lib/http/request';
+import { MenuItem } from '@/interfaces/menu/menu.interface';
+import { mapMenus } from '@/dto/menu.dto';
+import { MenuLocationEnum } from '@/interfaces/enums/menuLocation.enum';
 
-export async function getMenu(location: MenuLocationEnum): Promise<MenuItem[]> {
-  const data = await httpGet<{ data: any[] }>(API_ROUTES.MENU, { cache: "no-store" })
+/**
+ * Busca menus por localização (header, footer, sidebar).
+ */
+export async function getMenu(
+  location: MenuLocationEnum = MenuLocationEnum.HEADER
+): Promise<MenuItem[]> {
+  try {
+    const url = `${API_ROUTES.MENU}&filters[location][$eq]=${location}`;
+    const json = await httpGet<{ data: any[] }>(url);
 
-  if (!data?.data) return []
-
-  return data.data.map((item) => ({
-    id: item.id,
-    title: item.title,
-    description: item.description,
-    order: item.order,
-    active: item.active,
-    destination: item.destination,
-    location: item.location as MenuLocationEnum,
-    linkType: item.linkType as MenuLinkTypeEnum,
-    iconPosition: (item.iconPosition as IconPositionEnum) ?? IconPositionEnum.LEFT,
-    icon: item.icon
-      ? {
-          id: item.icon.id,
-          url: item.icon.url,
-          alternativeText: item.icon.alternativeText,
-        }
-      : undefined,
-    childItems: item.childItems || [],
-  }))
+    if (!json?.data) return [];
+    return mapMenus(json.data);
+  } catch (error) {
+    console.error('Erro ao buscar menus:', error);
+    return [];
+  }
 }

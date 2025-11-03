@@ -2,9 +2,23 @@ import { getArticleBySlug } from '@/services/article.service';
 import { normalizeImageUrlStrapi } from '@/lib/utils';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { createMetadata } from '@/lib/seo';
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
+}
+
+/**
+ * 🧠 SEO dinâmico: usa dados do artigo + dados globais do site
+ */
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
+  return createMetadata({
+    title: article?.title,
+    description: article?.description,
+    image: article?.cover_image?.url,
+  });
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
