@@ -10,4 +10,7 @@ export const API_ROUTES = {
   ARTICLES: `${baseUrl}/api/articles?populate=*`,
   FOOTER: `${baseUrl}/api/footer?populate=*`,
   MENU: `${baseUrl}/api/menus?populate=*`,
+  CALENDAR: `${baseUrl}/api/calendar?populate=*`,
+  ANNOUNCEMENTS: `${baseUrl}/api/announcements?populate=*`,
+  GLOBAL: `${baseUrl}/api/global?populate=*`,
 };
