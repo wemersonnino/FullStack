@@ -1,6 +1,9 @@
-import { normalizeImageUrlStrapi } from "@/lib/utils";
-import { Article } from "@/interfaces/article/article.interface";
+import { normalizeImageUrlStrapi } from '@/lib/utils';
+import { Article } from '@/interfaces/article/article.interface';
 
+/**
+ * Adapta a estrutura retornada pela API Strapi para o modelo Article
+ */
 export function mapArticle(item: any): Article {
   return {
     id: item.id,
@@ -10,7 +13,7 @@ export function mapArticle(item: any): Article {
     published_at: item.publishedAt,
     cover_image: {
       url: normalizeImageUrlStrapi(item.cover?.url),
-      alternativeText: item.cover?.alternativeText || "Capa do artigo",
+      alternativeText: item.cover?.alternativeText || 'Capa do artigo',
     },
     author: item.author
       ? {
@@ -19,7 +22,7 @@ export function mapArticle(item: any): Article {
           avatar: item.author.avatar
             ? {
                 url: normalizeImageUrlStrapi(item.author.avatar.url),
-                alternativeText: item.author.avatar.alternativeText || "",
+                alternativeText: item.author.avatar.alternativeText || '',
               }
             : undefined,
         }
@@ -31,10 +34,7 @@ export function mapArticle(item: any): Article {
           slug: item.category.slug,
         }
       : undefined,
-    content:
-      item.blocks?.[0]?.body ||
-      item.content ||
-      "Conteúdo ainda não disponível para este artigo.",
+    content: item.blocks?.[0]?.body || 'Conteúdo ainda não disponível para este artigo.',
   };
 }
 
