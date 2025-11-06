@@ -1,9 +1,6 @@
 import { ENV } from './env';
 
-export const baseUrl = ENV.IS_SERVER
-  ? ENV.STRAPI_INTERNAL_URL
-  : ENV.STRAPI_PUBLIC_URL;
-
+export const baseUrl = ENV.IS_SERVER ? ENV.STRAPI_INTERNAL_URL : ENV.STRAPI_PUBLIC_URL;
 
 export const API_ROUTES = {
   BANNERS: `${baseUrl}/api/Banners?populate=*`,
@@ -13,4 +10,6 @@ export const API_ROUTES = {
   CALENDAR: `${baseUrl}/api/calendar?populate=*`,
   ANNOUNCEMENTS: `${baseUrl}/api/announcements?populate=*`,
   GLOBAL: `${baseUrl}/api/global?populate=*`,
+  AUTHENTICATOR: `${baseUrl}/api/auth/local`,
+  UPDATE_USER_THEME: `${baseUrl}/api/users/theme`,
 };

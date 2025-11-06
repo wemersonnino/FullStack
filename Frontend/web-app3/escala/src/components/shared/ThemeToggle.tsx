@@ -1,25 +1,65 @@
-"use client";
+'use client';
 
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
+import { useAppStore } from '@/stores/app.store';
+import { useSession } from 'next-auth/react';
+import { updateUserTheme } from '@/services/profile.service';
+import { ThemeEnum } from '@/interfaces/enums/theme.enum';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Sun, Moon } from 'lucide-react';
 
 export const ThemeToggle = () => {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { data: session, update } = useSession();
+  const { setTheme: setAppTheme } = useAppStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
-  const current = theme === "system" ? resolvedTheme : theme;
-  const toggle = () => setTheme(current === "dark" ? "light" : "dark");
+  const current = theme === 'system' ? resolvedTheme : theme;
+
+  const toggleTheme = async () => {
+    const newTheme = current === 'dark' ? ThemeEnum.LIGHT : ThemeEnum.DARK;
+    setTheme(newTheme);
+    setAppTheme(newTheme);
+
+    if (session?.user?.token) {
+      toast.promise(
+        (async () => {
+          await updateUserTheme(newTheme);
+          await update({ user: { ...session.user, theme: newTheme } });
+        })(),
+        {
+          loading: 'Atualizando preferência de tema...',
+          success:
+            newTheme === ThemeEnum.DARK
+              ? '🌙 Tema escuro ativado com sucesso!'
+              : '☀️ Tema claro ativado com sucesso!',
+          error: 'Erro ao salvar preferência de tema no Strapi.',
+        }
+      );
+    } else {
+      toast.info(
+        newTheme === ThemeEnum.DARK
+          ? '🌙 Tema escuro ativado localmente.'
+          : '☀️ Tema claro ativado localmente.'
+      );
+    }
+  };
 
   return (
-    <button
-      onClick={toggle}
-      aria-label="toggle theme"
-      className="p-2 rounded-full border border-gray-300 dark:border-gray-600 cursor-pointer"
+    <Button
+      variant="outline"
+      size="icon"
+      onClick={toggleTheme}
+      aria-label="Alternar tema"
+      className="transition-colors"
+      aria-pressed={current === 'light'}
     >
-      {current === "dark" ? "🌙" : "☀️"}
-    </button>
+      {current === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+    </Button>
   );
 };

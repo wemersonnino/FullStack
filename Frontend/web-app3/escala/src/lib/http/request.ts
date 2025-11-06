@@ -1,10 +1,12 @@
-import { api } from "./axios";
-import { getSession } from "next-auth/react";
+import { api } from './axios';
+import { getSession } from 'next-auth/react';
 
 /**
  * Retorna cabeçalhos de autenticação caso o usuário esteja logado.
  */
 async function getAuthHeaders() {
+  if (globalThis.window === undefined) return {};
+
   const session = await getSession();
   const token = (session?.user as any)?.token;
   const headers: Record<string, string> = {};
@@ -30,10 +32,7 @@ export async function httpGet<T = any>(
   }
 }
 
-export async function httpPost<T = any>(
-  url: string,
-  body: any
-): Promise<T | null> {
+export async function httpPost<T = any>(url: string, body: any): Promise<T | null> {
   try {
     const headers = await getAuthHeaders();
     const res = await api.post<T>(url, body, { headers });
@@ -44,10 +43,7 @@ export async function httpPost<T = any>(
   }
 }
 
-export async function httpPut<T = any>(
-  url: string,
-  body: any
-): Promise<T | null> {
+export async function httpPut<T = any>(url: string, body: any): Promise<T | null> {
   try {
     const headers = await getAuthHeaders();
     const res = await api.put<T>(url, body, { headers });

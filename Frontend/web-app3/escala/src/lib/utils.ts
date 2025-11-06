@@ -1,4 +1,10 @@
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { ENV } from '@/constants';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 /**
  * Normaliza URLs internas do Strapi (ex: http://cms-strapi:1337)
