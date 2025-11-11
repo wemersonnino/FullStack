@@ -28,7 +28,7 @@ export const RegisterForm = () => {
     const res = await httpPost('/api/auth/local/register', data);
     if (res) {
       toast.success('Conta criada! Faça login.');
-      router.push('/(PUBLIC)/auth/login');
+      router.push('/login');
     } else toast.error('Erro ao registrar usuário.');
   };
 
@@ -47,7 +47,7 @@ export const RegisterForm = () => {
             <FormItem>
               <FormLabel>Nome de usuário</FormLabel>
               <FormControl>
-                <Input placeholder="Seu nome" {...field} />
+                <Input type={'text'} placeholder="Seu nome" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -60,7 +60,7 @@ export const RegisterForm = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="seu@email.com" {...field} />
+                <Input type={'email'} placeholder="seu@email.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -84,7 +84,7 @@ export const RegisterForm = () => {
         </Button>
         <p className="text-muted-foreground text-center text-sm">
           Já possui conta?{' '}
-          <a href="/(PUBLIC)/auth/login" className="underline">
+          <a href="/login" className="underline">
             Entrar
           </a>
         </p>

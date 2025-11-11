@@ -45,7 +45,7 @@ export const ForgotPasswordForm = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="seu@email.com" {...field} />
+                <Input type={'email'} placeholder="seu@email.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

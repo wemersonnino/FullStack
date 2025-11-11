@@ -38,7 +38,7 @@ export const ResetPasswordForm = () => {
     const res = await httpPost('/api/auth/reset-password', data);
     if (res) {
       toast.success('Senha redefinida com sucesso! Faça login novamente.');
-      router.push('/(PUBLIC)/auth/login');
+      router.push('/login');
     } else {
       toast.error('Erro ao redefinir senha. Verifique o código ou tente novamente.');
     }

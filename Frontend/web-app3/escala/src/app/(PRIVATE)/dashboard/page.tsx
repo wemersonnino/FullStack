@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   // se não estiver logado, redireciona para login
   if (!session) {
-    redirect('/(PUBLIC)/auth/login');
+    redirect('/login');
   }
 
   return (

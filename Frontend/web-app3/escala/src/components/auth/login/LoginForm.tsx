@@ -42,7 +42,7 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="seu@email.com" {...field} />
+                <Input type={'email'} placeholder="seu@email.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -68,7 +68,7 @@ export const LoginForm = () => {
         </Button>
 
         <p className="text-muted-foreground text-center text-sm">
-          <a href="/(PUBLIC)/auth/forgot-password" className="underline">
+          <a href="/(PUBLIC)/(auth)/forgot-password" className="underline">
             Esqueci minha senha
           </a>
         </p>
