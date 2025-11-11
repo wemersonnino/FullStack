@@ -6,7 +6,7 @@ export default async function PrivateLayout({ children }: { children: React.Reac
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect('/(PUBLIC)/auth/login');
+    redirect('/login');
   }
 
   return <main className="bg-background text-foreground min-h-screen">{children}</main>;

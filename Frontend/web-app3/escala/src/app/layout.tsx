@@ -4,6 +4,7 @@ import './globals.css';
 import { routing } from '@/i18n/routing';
 import { getGlobal } from '@/services/global.service';
 import { normalizeImageUrlStrapi } from '@/lib/utils';
+import { AppProviders } from '@/components/shared/providers/AppProviders';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -54,7 +55,9 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }
