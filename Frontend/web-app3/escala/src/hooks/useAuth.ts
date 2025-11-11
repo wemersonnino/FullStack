@@ -39,7 +39,7 @@ export function useAuth() {
 
       if (res?.ok) {
         toast.success("Login realizado com sucesso")
-        router.push("/(PRIVATE)/dashboard")
+        router.push("/dashboard")
       } else {
         toast.error("Credenciais inválidas")
       }
@@ -58,7 +58,7 @@ export function useAuth() {
       const res = await httpPost("/api/auth/local/register", data)
       if (res) {
         toast.success("Conta criada com sucesso! Faça login.")
-        router.push("/(PUBLIC)/auth/login")
+        router.push("/login")
       } else {
         toast.error("Erro ao registrar. Tente novamente.")
       }
@@ -95,7 +95,7 @@ export function useAuth() {
       const res = await httpPost("/api/auth/reset-password", data)
       if (res) {
         toast.success("Senha redefinida! Faça login.")
-        router.push("/(PUBLIC)/auth/login")
+        router.push("/login")
       } else {
         toast.error("Erro ao redefinir senha. Código inválido?")
       }
@@ -111,7 +111,7 @@ export function useAuth() {
   async function logout() {
     setLoading(true)
     try {
-      await signOut({ callbackUrl: "/(PUBLIC)/auth/login" })
+      await signOut({ callbackUrl: "/login" })
       toast.success("Sessão encerrada.")
     } catch (err) {
       console.error("Erro no logout:", err)

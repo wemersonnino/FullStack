@@ -10,14 +10,17 @@ import {
   type ControllerProps,
   type FieldPath,
   type FieldValues,
+  type UseFormReturn,
 } from 'react-hook-form';
 
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 
-const Form = ({ children, ...formProps }: React.ComponentProps<typeof FormProvider>) => {
+const Form = <TFieldValues extends FieldValues>({
+  children,
+  ...formProps
+}: UseFormReturn<TFieldValues> & { children: React.ReactNode }) => {
   const memoizedValue = React.useMemo(() => formProps, [formProps]);
-
   return <FormProvider {...memoizedValue}>{children}</FormProvider>;
 };
 
