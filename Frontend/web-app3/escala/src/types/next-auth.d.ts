@@ -1,30 +1,35 @@
 import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
-
-// importa sua interface se quiser reaproveitar
-import type { User as AppUser } from "@/interfaces/user/user.interface";
+import { ThemeEnum } from "@/interfaces/enums/theme.enum"
 
 declare module "next-auth" {
   interface Session {
-    user: AppUser & {
-      token?: string;
-    };
+    user: {
+      id: string;
+      username: string;
+      email: string;
+      roles: string[];
+      theme: ThemeEnum;
+      token: string;
+    } & DefaultSession["user"];
   }
 
-  interface User extends DefaultUser {
-    id: string | number;
+  interface User {
+    id: string;
+    username: string;
+    email: string;
     roles: string[];
-    theme?: "light" | "dark" | "system";
-    token?: string;
+    theme: ThemeEnum;
+    token: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    id?: string | number;
-    name?: string;
-    email?: string;
-    roles?: string[];
-    theme?: string;
-    accessToken?: string;
+    id: string;
+    username: string;
+    email: string;
+    roles: string[];
+    theme: ThemeEnum;
+    accessToken: string;
   }
 }
