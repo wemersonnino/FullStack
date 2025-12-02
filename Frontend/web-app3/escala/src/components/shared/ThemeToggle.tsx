@@ -9,12 +9,14 @@ import { ThemeEnum } from '@/interfaces/enums/theme.enum';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 export const ThemeToggle = () => {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { data: session, update } = useSession();
   const { setTheme: setAppTheme } = useAppStore();
   const [mounted, setMounted] = useState(false);
+  const { updateTheme } = useAuth();
 
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
@@ -23,19 +25,20 @@ export const ThemeToggle = () => {
 
   const toggleTheme = async () => {
     const newTheme = current === 'dark' ? ThemeEnum.LIGHT : ThemeEnum.DARK;
+
     setTheme(newTheme);
     setAppTheme(newTheme);
 
     if (session?.user?.token) {
       toast.promise(
         (async () => {
-          await updateUserTheme(newTheme);
-          await update({ user: { ...session.user, theme: newTheme } });
+          await updateUserTheme(newTheme); // PATCH CORRETO
+          await update({ user: { ...session.user, theme: newTheme } }); // Atualiza sessão
         })(),
         {
           loading: 'Atualizando preferência de tema...',
           success:
-            newTheme === ThemeEnum.DARK
+            newTheme === 'dark'
               ? '🌙 Tema escuro ativado com sucesso!'
               : '☀️ Tema claro ativado com sucesso!',
           error: 'Erro ao salvar preferência de tema no Strapi.',

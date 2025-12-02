@@ -54,6 +54,18 @@ export async function httpPut<T = any>(url: string, body: any): Promise<T | null
   }
 }
 
+export async function httpPatch<T = any>(url: string, body: any): Promise<T | null> {
+  try {
+    const headers = await getAuthHeaders();
+    const res = await api.patch<T>(url, body, { headers });
+    return res.data;
+  } catch (err) {
+    console.error(`[PATCH] ${url}`, err);
+    return null;
+  }
+}
+
+
 export async function httpDelete<T = any>(url: string): Promise<T | null> {
   try {
     const headers = await getAuthHeaders();

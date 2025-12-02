@@ -23,7 +23,7 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      signOut({ callbackUrl: '/(PUBLIC)/auth/login' });
+      signOut({ callbackUrl: '/login' });
     }
 
     const wrappedError = new Error(error.message, { cause: error });
