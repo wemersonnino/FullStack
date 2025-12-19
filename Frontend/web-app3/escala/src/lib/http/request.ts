@@ -65,11 +65,13 @@ export async function httpPatch<T = any>(url: string, body: any): Promise<T | nu
   }
 }
 
-
-export async function httpDelete<T = any>(url: string): Promise<T | null> {
+export async function httpDelete<T = any>(
+  url: string,
+  options?: { params?: Record<string, any>; data?: any }
+): Promise<T | null> {
   try {
     const headers = await getAuthHeaders();
-    const res = await api.delete<T>(url, { headers });
+    const res = await api.delete<T>(url, { headers, params: options?.params, data: options?.data });
     return res.data;
   } catch (err) {
     console.error(`[DELETE] ${url}`, err);

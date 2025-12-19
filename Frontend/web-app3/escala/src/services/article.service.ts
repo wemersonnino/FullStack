@@ -2,7 +2,7 @@ import { API_ROUTES } from '@/constants';
 import { httpGet } from '@/lib/http/request';
 import { Article } from '@/interfaces/article/article.interface';
 import { StrapiResponse } from '@/interfaces/strapi/strapi-response.interface';
-import { mapArticle, mapArticles } from '@/dto/article.dto';
+import { mapArticle, mapArticles } from '@/dto';
 
 export async function getArticles(limit = 6): Promise<Article[]> {
   try {
