@@ -54,11 +54,13 @@ const fallbackItems: MenuItem[] = [
 function fallbackIcon(item: MenuItem) {
   const key = `${item.slug || ''} ${item.title || ''} ${item.destination || ''}`.toLowerCase();
 
-  if (key.includes('perfil') || key.includes('profile')) return User;
-  if (key.includes('funcionario') || key.includes('employee')) return Users;
-  if (key.includes('escala') || key.includes('calendar') || key.includes('schedule')) return CalendarDays;
-  if (key.includes('config') || key.includes('setting')) return Settings;
-  return LayoutDashboard;
+  if (key.includes('perfil') || key.includes('profile')) return <User className="size-5" />;
+  if (key.includes('funcionario') || key.includes('employee')) return <Users className="size-5" />;
+  if (key.includes('escala') || key.includes('calendar') || key.includes('schedule')) {
+    return <CalendarDays className="size-5" />;
+  }
+  if (key.includes('config') || key.includes('setting')) return <Settings className="size-5" />;
+  return <LayoutDashboard className="size-5" />;
 }
 
 function SidebarIcon({ item }: { item: MenuItem }) {
@@ -74,8 +76,7 @@ function SidebarIcon({ item }: { item: MenuItem }) {
     );
   }
 
-  const Icon = fallbackIcon(item);
-  return <Icon className="size-5" />;
+  return fallbackIcon(item);
 }
 
 function normalizeHref(destination?: string | null) {

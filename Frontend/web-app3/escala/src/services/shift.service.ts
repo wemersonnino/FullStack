@@ -16,6 +16,7 @@ type BackendShift = {
   shiftDate: string;
   startTime: string;
   endTime: string;
+  workMode?: 'PRESENCIAL' | 'REMOTO';
   status: string;
   notes?: string;
 };
@@ -27,7 +28,7 @@ type BackendShiftSwap = {
   compensationDate?: string;
   comments?: string;
   adminComments?: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'PENDING' | 'COLLEAGUE_APPROVED' | 'APPROVED' | 'EFFECTIVE' | 'REJECTED' | 'CANCELLED';
   createdAt?: string;
   decidedAt?: string;
 };
@@ -37,6 +38,7 @@ function mapBackendShift(shift: BackendShift): Shift {
     id: shift.id,
     documentId: String(shift.id),
     date: shift.shiftDate,
+    workMode: shift.workMode?.toLowerCase() as Shift['workMode'],
     notes: shift.notes,
     createdAt: '',
     updatedAt: '',
@@ -86,7 +88,8 @@ export async function getShiftSwaps(authToken?: string): Promise<ShiftSwap[]> {
   }
 }
 
-export async function getWorkSchedules(_authToken?: string): Promise<WorkSchedule[]> {
+export async function getWorkSchedules(authToken?: string): Promise<WorkSchedule[]> {
+  void authToken;
   try {
     return [];
   } catch (error) {

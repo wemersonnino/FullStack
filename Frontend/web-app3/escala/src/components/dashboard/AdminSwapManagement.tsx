@@ -27,7 +27,7 @@ export const AdminSwapManagement = ({ swaps }: AdminSwapManagementProps) => {
   const [adminComments, setAdminComments] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const pendingSwaps = swaps.filter((s) => s.status === 'pending');
+  const pendingSwaps = swaps.filter((s) => s.status === 'pending' || s.status === 'colleague_approved');
 
   const handleAction = async (status: 'approved' | 'rejected') => {
     if (!selectedSwap) return;
@@ -44,7 +44,7 @@ export const AdminSwapManagement = ({ swaps }: AdminSwapManagementProps) => {
       } else {
         toast.error('Erro ao processar solicitação.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro inesperado.');
     } finally {
       setIsProcessing(false);
@@ -77,6 +77,11 @@ export const AdminSwapManagement = ({ swaps }: AdminSwapManagementProps) => {
                   </div>
                   <span className="font-semibold">{swap.requester?.username || 'Funcionário'}</span>
                   <span className="text-muted-foreground text-sm">solicitou troca de:</span>
+                  {swap.status === 'colleague_approved' && (
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      Aceita pelo colega
+                    </span>
+                  )}
                 </div>
                 
                 <div className="flex flex-wrap gap-4 text-sm">

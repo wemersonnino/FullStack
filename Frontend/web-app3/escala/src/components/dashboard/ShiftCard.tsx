@@ -33,8 +33,8 @@ export const ShiftCard = ({ shift }: ShiftCardProps) => {
       </div>
       
       <div className="flex flex-col items-end gap-2">
-        <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full px-3 py-1 text-xs font-medium">
-          Confirmado
+        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+          {shift.workMode === 'remoto' ? 'Remoto' : 'Presencial'}
         </span>
       </div>
     </div>

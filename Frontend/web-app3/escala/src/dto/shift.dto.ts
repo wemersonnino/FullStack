@@ -7,6 +7,7 @@ export function mapShift(item: any): Shift {
     id: item.id,
     documentId: item.documentId,
     date: item.date,
+    workMode: item.workMode,
     notes: item.notes,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,

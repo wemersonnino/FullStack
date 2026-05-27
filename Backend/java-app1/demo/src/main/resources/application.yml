@@ -1,0 +1,68 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: escala-backend
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:escala_core}
+    username: ${DB_USER:escala_api_user}
+    password: ${DB_PASS:escala_api_password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      expiration: ${JWT_EXPIRATION_MS:86400000}
+      refresh-token:
+        expiration: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+    recaptcha:
+      secret: ${RECAPTCHA_SECRET:}
+  integrations:
+    strapi:
+      base-url: ${STRAPI_BASE_URL:http://localhost:1337}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+---
+spring:
+  config:
+    activate:
+      on-profile: development
+  jpa:
+    show-sql: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: homolog
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+---
+spring:
+  config:
+    activate:
+      on-profile: production
+  jpa:
+    hibernate:
+      ddl-auto: validate

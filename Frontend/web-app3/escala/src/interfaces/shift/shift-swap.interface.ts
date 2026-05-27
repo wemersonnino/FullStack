@@ -7,7 +7,7 @@ export interface ShiftSwap {
   compensationRequired: boolean;
   compensationDate?: string;
   comments?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'colleague_approved' | 'approved' | 'effective' | 'rejected' | 'cancelled';
   adminComments?: string;
   requester?: User;
   receiver?: User;

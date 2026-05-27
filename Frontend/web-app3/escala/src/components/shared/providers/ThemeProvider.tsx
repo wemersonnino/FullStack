@@ -45,31 +45,23 @@ function applyTheme(theme: ThemeValue, resolvedTheme: ThemeEnum.LIGHT | ThemeEnu
 export const AppThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const { data: session } = useSession();
   const { setTheme: setAppTheme } = useAppStore();
-  const [theme, setThemeState] = useState<ThemeValue>(ThemeEnum.SYSTEM);
-  const [systemTheme, setSystemTheme] = useState<ThemeEnum.LIGHT | ThemeEnum.DARK>(ThemeEnum.LIGHT);
+  const [theme, setThemeState] = useState<ThemeValue>(() => readStoredTheme());
+  const [systemTheme, setSystemTheme] = useState<ThemeEnum.LIGHT | ThemeEnum.DARK>(() => getSystemTheme());
 
   useEffect(() => {
-    setThemeState(readStoredTheme());
-    setSystemTheme(getSystemTheme());
-
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const onChange = () => setSystemTheme(getSystemTheme());
     media.addEventListener('change', onChange);
     return () => media.removeEventListener('change', onChange);
   }, []);
 
-  useEffect(() => {
-    if (session?.user?.theme) {
-      setThemeState(session.user.theme as ThemeValue);
-    }
-  }, [session?.user?.theme]);
-
-  const resolvedTheme = theme === ThemeEnum.SYSTEM ? systemTheme : theme;
+  const activeTheme = (session?.user?.theme as ThemeValue | undefined) ?? theme;
+  const resolvedTheme = activeTheme === ThemeEnum.SYSTEM ? systemTheme : activeTheme;
 
   useEffect(() => {
-    setAppTheme(theme);
-    applyTheme(theme, resolvedTheme);
-  }, [resolvedTheme, setAppTheme, theme]);
+    setAppTheme(activeTheme);
+    applyTheme(activeTheme, resolvedTheme);
+  }, [activeTheme, resolvedTheme, setAppTheme]);
 
   const setTheme = useCallback((nextTheme: ThemeValue) => {
     setThemeState(nextTheme);
@@ -77,11 +69,11 @@ export const AppThemeProvider = ({ children }: { children: React.ReactNode }) =>
 
   const value = useMemo(
     () => ({
-      theme,
+      theme: activeTheme,
       resolvedTheme,
       setTheme,
     }),
-    [resolvedTheme, setTheme, theme]
+    [activeTheme, resolvedTheme, setTheme]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
