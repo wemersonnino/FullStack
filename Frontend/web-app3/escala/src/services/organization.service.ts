@@ -5,6 +5,7 @@ export type Sector = {
   id: number;
   name: string;
   description?: string;
+  maxSeats?: number | null;
 };
 
 export type Project = {
@@ -17,6 +18,7 @@ export type Project = {
 export type OrganizationPayload = {
   name: string;
   description?: string;
+  maxSeats?: number | null;
 };
 
 export async function getSectors(authToken?: string) {

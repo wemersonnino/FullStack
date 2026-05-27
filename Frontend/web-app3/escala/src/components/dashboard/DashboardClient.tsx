@@ -11,6 +11,14 @@ import { ShiftList } from './ShiftList';
 import { ShiftSwapForm } from './ShiftSwapForm';
 import { WorkScheduleModal } from './WorkScheduleModal';
 import { AdminSwapManagement } from './AdminSwapManagement';
+import { 
+  PlusCircle, 
+  Users, 
+  Briefcase, 
+  BarChart3, 
+  Building2 
+} from 'lucide-react';
+import Link from 'next/link';
 
 interface DashboardClientProps {
   user: {
@@ -71,6 +79,63 @@ export const DashboardClient = ({ user, shifts, workSchedules, shiftSwaps }: Das
             <h3 className="text-lg font-semibold text-primary">Ações Rápidas</h3>
             <ShiftSwapForm shifts={shifts} />
             <WorkScheduleModal schedules={workSchedules} />
+          </div>
+
+          {isAdmin && (
+            <div className="bg-card space-y-4 rounded-xl border p-6">
+              <h3 className="text-lg font-semibold">Gerenciamento</h3>
+              <div className="grid grid-cols-1 gap-2">
+                <Button variant="outline" className="justify-start gap-2" asChild>
+                  <Link href="/dashboard/empresas">
+                    <Building2 className="h-4 w-4" />
+                    Gerenciar Empresas
+                  </Link>
+                </Button>
+                <Button variant="outline" className="justify-start gap-2" asChild>
+                  <Link href="/dashboard/colaboradores/novo">
+                    <Users className="h-4 w-4" />
+                    Cadastrar Colaborador
+                  </Link>
+                </Button>
+                <Button variant="outline" className="justify-start gap-2" asChild>
+                  <Link href="/dashboard/projetos/novo">
+                    <Briefcase className="h-4 w-4" />
+                    Cadastrar Projeto
+                  </Link>
+                </Button>
+                <Button variant="outline" className="justify-start gap-2" asChild>
+                  <Link href="/dashboard/relatorios">
+                    <BarChart3 className="h-4 w-4" />
+                    Visualizar Relatórios
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground">Projetos Ativos</h3>
+            <ul role="list" className="grid grid-cols-1 gap-4">
+              {[
+                { name: 'Core Banking', initials: 'CB', bgColor: 'bg-pink-600' },
+                { name: 'Plataforma Escala', initials: 'PE', bgColor: 'bg-purple-600' },
+              ].map((project) => (
+                <li key={project.name} className="flex rounded-md shadow-sm">
+                  <div className={cn(
+                    project.bgColor,
+                    "flex w-12 shrink-0 items-center justify-center rounded-l-md text-xs font-bold text-white"
+                  )}>
+                    {project.initials}
+                  </div>
+                  <div className="flex flex-1 items-center justify-between truncate rounded-r-md border-b border-r border-t bg-card px-4 py-2">
+                    <div className="flex-1 truncate">
+                      <p className="font-medium text-sm">{project.name}</p>
+                      <p className="text-xs text-muted-foreground">Ativo</p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

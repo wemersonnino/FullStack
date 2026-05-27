@@ -26,6 +26,7 @@ public class OrganizationService {
         return sectorRepository.save(Sector.builder()
                 .name(request.getName())
                 .description(request.getDescription())
+                .maxSeats(request.getMaxSeats())
                 .company(companyService.resolve(null))
                 .build());
     }

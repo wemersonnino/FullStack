@@ -22,6 +22,8 @@ public class Sector {
 
     private String description;
 
+    private Integer maxSeats;
+
     @ManyToOne
     private Company company;
 }

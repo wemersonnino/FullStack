@@ -8,6 +8,10 @@ export type UpdateMyProfilePayload = {
   username: string;
   email: string;
   theme?: ThemeEnum;
+  address?: string;
+  position?: string;
+  function?: string;
+  avatar?: string | number | null;
 };
 
 export type ChangeMyPasswordPayload = {
@@ -21,6 +25,19 @@ export async function getMyProfile(): Promise<User | null> {
 
 export async function updateMyProfile(payload: UpdateMyProfilePayload): Promise<User | null> {
   return await httpPatch<User>(`${API_ROUTES.USERS}/me`, payload);
+}
+
+export async function uploadFile(file: File): Promise<any> {
+  const formData = new FormData();
+  formData.append('files', file);
+  
+  const response = await fetch('/api/bff/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  
+  if (!response.ok) return null;
+  return await response.json();
 }
 
 export async function changeMyPassword(payload: ChangeMyPasswordPayload): Promise<{ message: string } | null> {

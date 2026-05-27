@@ -16,8 +16,8 @@ COPY package.json pnpm-lock.yaml ./
 # Instala dependências
 RUN corepack enable && corepack prepare pnpm@10.33.3 --activate && pnpm install --frozen-lockfile
 
-# Copia o restante do código do projeto
-COPY . .
+# Copia o restante do código do projeto já com ownership correto.
+COPY --chown=node:node . .
 
 # Define variáveis padrão
 ENV NODE_ENV=development

@@ -8,6 +8,9 @@ import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByActiveTrueOrderByFullNameAsc();
+    List<Employee> findByActiveTrueAndProjectIdOrderByFullNameAsc(Long projectId);
+    List<Employee> findByActiveTrueAndSectorIdOrderByFullNameAsc(Long sectorId);
+    List<Employee> findByActiveTrueAndCompanyIdOrderByFullNameAsc(Long companyId);
     long countByActiveTrue();
     Optional<Employee> findByEmail(String email);
     Optional<Employee> findByUserEmail(String email);

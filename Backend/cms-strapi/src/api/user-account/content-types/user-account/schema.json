@@ -50,6 +50,28 @@
     },
     "last_login": {
       "type": "datetime"
+    },
+    "avatar": {
+      "type": "media",
+      "allowedTypes": [
+        "images"
+      ],
+      "multiple": false
+    },
+    "address": {
+      "type": "string"
+    },
+    "position": {
+      "type": "string"
+    },
+    "function": {
+      "type": "string"
+    },
+    "companies": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::company.company",
+      "mappedBy": "user_accounts"
     }
   }
 }

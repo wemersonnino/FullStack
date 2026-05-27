@@ -6,4 +6,9 @@ export interface User {
   email: string
   roles: string[]
   theme?: ThemeEnum
+  avatar?: string | { url: string }
+  address?: string
+  position?: string
+  function?: string
+  companies?: any[]
 }

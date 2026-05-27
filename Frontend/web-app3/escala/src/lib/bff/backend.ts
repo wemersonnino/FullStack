@@ -21,7 +21,9 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     Accept: 'application/json',
   };
 
-  if (options.body !== undefined) {
+  const isFormData = options.body instanceof FormData;
+
+  if (options.body !== undefined && !isFormData) {
     headers['Content-Type'] = 'application/json';
   }
 
@@ -41,7 +43,11 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
   const response = await fetch(url, {
     method: options.method ?? 'GET',
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body: options.body === undefined 
+      ? undefined 
+      : isFormData 
+        ? options.body 
+        : JSON.stringify(options.body),
     cache: 'no-store',
   });
 

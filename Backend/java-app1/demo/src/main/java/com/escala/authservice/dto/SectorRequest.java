@@ -6,4 +6,5 @@ import lombok.Data;
 public class SectorRequest {
     private String name;
     private String description;
+    private Integer maxSeats;
 }

@@ -2,10 +2,6 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
-  compiler: {
-    // Suporte ao styled-components
-    styledComponents: true,
-  },
   images: {
     remotePatterns: [
       {
@@ -27,11 +23,8 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60,
   },
-  // 🚀 otimiza imports do next-intl (menor bundle)
-  modularizeImports: {
-    "next-intl": {
-      transform: "next-intl/{{member}}",
-    },
+  experimental: {
+    optimizePackageImports: ["next-intl", "lucide-react", "date-fns", "framer-motion"],
   },
   typedRoutes: true,
   reactStrictMode: true,
