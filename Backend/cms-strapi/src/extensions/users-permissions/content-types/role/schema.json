@@ -1,0 +1,40 @@
+{
+  "collectionName": "up_roles",
+  "info": {
+    "singularName": "role",
+    "pluralName": "roles",
+    "displayName": "Role"
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "options": {
+    "timestamps": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "users": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "mappedBy": "roles"
+    },
+    "permissions": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.permission",
+      "mappedBy": "roles"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+import { DefaultSession } from "next-auth";
 import { ThemeEnum } from "@/interfaces/enums/theme.enum"
 
 declare module "next-auth" {
@@ -10,6 +10,8 @@ declare module "next-auth" {
       roles: string[];
       theme: ThemeEnum;
       token: string;
+      companySlug?: string;
+      companyTheme?: string;
     } & DefaultSession["user"];
   }
 
@@ -20,6 +22,8 @@ declare module "next-auth" {
     roles: string[];
     theme: ThemeEnum;
     token: string;
+    companySlug?: string;
+    companyTheme?: string;
   }
 }
 
@@ -31,5 +35,7 @@ declare module "next-auth/jwt" {
     roles: string[];
     theme: ThemeEnum;
     accessToken: string;
+    companySlug?: string;
+    companyTheme?: string;
   }
 }

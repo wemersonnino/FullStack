@@ -5,6 +5,6 @@ export interface StrapiLoginResponse {
     username: string;
     email: string;
     theme?: string;
-    roles?: { name: string }[];
+    role?: { name: string };
   };
 }

@@ -1,6 +1,10 @@
 import { FooterInterface } from "@/interfaces/footer/footer.interface";
 import Image from "next/image";
 
+function hasHref(url?: string | null) {
+  return Boolean(url?.trim());
+}
+
 export const Footer = ({ data }: { data: FooterInterface | null }) => {
   if (!data) return null;
 
@@ -24,29 +28,45 @@ export const Footer = ({ data }: { data: FooterInterface | null }) => {
 
         <div className="flex gap-12">
           <ul>
-            {data.links?.map((l) => (
-              <li key={l.url}>
-                <a href={l.url} className="hover:underline">
-                  {l.label}
-                </a>
-              </li>
-            ))}
+            {data.links?.map((l) => {
+              const url = l.url?.trim();
+
+              return (
+                <li key={`${l.label}-${url || "text"}`}>
+                  {hasHref(url) ? (
+                    <a href={url} className="hover:underline">
+                      {l.label}
+                    </a>
+                  ) : (
+                    <span>{l.label}</span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
 
           {data.social_links && (
             <ul>
-              {data.social_links.map((s) => (
-                <li key={s.platform}>
-                  <a
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline"
-                  >
-                    {s.platform}
-                  </a>
-                </li>
-              ))}
+              {data.social_links.map((s) => {
+                const url = s.url?.trim();
+
+                return (
+                  <li key={`${s.platform}-${url || "text"}`}>
+                    {hasHref(url) ? (
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {s.platform}
+                      </a>
+                    ) : (
+                      <span>{s.platform}</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

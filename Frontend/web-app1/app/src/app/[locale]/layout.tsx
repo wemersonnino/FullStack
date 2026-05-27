@@ -1,5 +1,9 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { hasLocale } from 'next-intl'
+import { NextIntlClientProvider } from 'next-intl'
+import { notFound } from 'next/navigation'
+import { routing } from '@/i18n/routing'
 import '@/styles/globals.css'
 
 const geistSans = Geist({
@@ -16,16 +20,32 @@ export const metadata: Metadata = {
   description: 'Estudo Full-Stack com Next.js 15 + Java + PostgreSQL',
 }
 
-export default function RootLayout({
-                                     children,
-                                   }: {
+export default async function RootLayout({
+  children,
+  params,
+}: {
   children: React.ReactNode
+  params: Promise<{ locale: string }>
 }) {
+  const { locale } = await params
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound()
+  }
+
+  const messages = (await import(`../../../messages/${locale}.json`)).default
+
   return (
-    <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable}`}>
-    <body className="antialiased bg-background text-foreground">
-    {children}
-    </body>
+    <html
+      lang={locale}
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="antialiased bg-background text-foreground">
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
     </html>
   )
 }

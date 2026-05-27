@@ -1,0 +1,119 @@
+services:
+  postgres:
+    container_name: escala-postgres
+    build:
+      context: ./Data/postgres
+      dockerfile: Dockerfile
+    image: escala-postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - ./Data/postgres/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - escala_pg_data:/var/lib/postgresql/data/
+      - ./Data/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - escala-network
+
+  backend:
+    container_name: escala-backend
+    build:
+      context: ./Backend/java-app1/demo
+      dockerfile: Dockerfile
+    image: escala-backend:latest
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-development}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: escala_core
+      DB_USER: escala_api_user
+      DB_PASS: escala_api_password
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      STRAPI_BASE_URL: http://strapi:1337
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      RECAPTCHA_SECRET: ${RECAPTCHA_SECRET:-}
+    ports:
+      - "8080:8080"
+    networks:
+      - escala-network
+
+  strapi:
+    container_name: cms-strapi
+    build:
+      context: ./Backend/cms-strapi
+      dockerfile: ./Docker/Dockerfile
+    image: cms-strapi:latest
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    env_file:
+      - ./Backend/cms-strapi/.env
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: strapi_cms
+      DATABASE_USERNAME: strapi_user
+      DATABASE_PASSWORD: strapi1234567890
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 1337
+      ADMIN_PATH: /admin
+      PUBLIC_URL: http://localhost:1337
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./Backend/cms-strapi/config:/opt/app/config
+      - ./Backend/cms-strapi/src:/opt/app/src
+      - ./Backend/cms-strapi/public/uploads:/opt/app/public/uploads
+    networks:
+      - escala-network
+
+  frontend:
+    container_name: escala-nextapp
+    build:
+      context: ./Frontend/web-app3/escala
+      dockerfile: ./Docker/Dockerfile
+      target: dev
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - strapi
+    env_file:
+      - ./Frontend/web-app3/escala/.env.local
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+      NEXT_INTERNAL_API_BASE_URL: http://backend:8080
+      NEXT_PUBLIC_STRAPI_PUBLIC_URL: http://localhost:1337
+      NEXT_INTERNAL_STRAPI_URL: http://strapi:1337
+      NEXT_PUBLIC_COMPANY_SLUG: ${NEXT_PUBLIC_COMPANY_SLUG:-escala-demo}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:-}
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "1"
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./Frontend/web-app3/escala:/app
+      - /app/node_modules
+      - /app/.next
+    working_dir: /app
+    command: pnpm dev
+    networks:
+      - escala-network
+
+volumes:
+  escala_pg_data:
+
+networks:
+  escala-network:
+    name: escala-network
+    driver: bridge

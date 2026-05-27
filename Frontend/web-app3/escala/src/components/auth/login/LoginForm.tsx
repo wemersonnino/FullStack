@@ -14,9 +14,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth } from '@/hooks/useAuth';
+import { Chrome } from 'lucide-react';
+import { ENV } from '@/constants/env';
 
 export const LoginForm = () => {
-  const { login } = useAuth();
+  const { login, loginGoogle } = useAuth();
 
   const form = useForm<LoginSchemaType>({
     resolver: zodResolver(LoginSchema),
@@ -67,8 +69,15 @@ export const LoginForm = () => {
           Entrar
         </Button>
 
+        {ENV.GOOGLE_CLIENT_ID ? (
+          <Button type="button" variant="outline" className="w-full" onClick={loginGoogle}>
+            <Chrome className="mr-2 size-4" />
+            Entrar com Google
+          </Button>
+        ) : null}
+
         <p className="text-muted-foreground text-center text-sm">
-          <a href="/(PUBLIC)/(auth)/forgot-password" className="underline">
+          <a href="/forgot-password" className="underline">
             Esqueci minha senha
           </a>
         </p>

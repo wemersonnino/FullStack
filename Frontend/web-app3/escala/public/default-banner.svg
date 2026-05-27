@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Banner padrao</title>
+  <desc id="desc">Fundo abstrato para artigos sem imagem de capa.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f766e"/>
+      <stop offset="0.52" stop-color="#1d4ed8"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <g opacity="0.38">
+    <path d="M-80 636C180 500 278 721 506 594c178-99 276-312 531-238 215 63 299 224 643 70" fill="none" stroke="url(#line)" stroke-width="56"/>
+    <path d="M-120 332C117 202 309 317 486 249c190-73 304-201 550-90 193 87 327 112 686-66" fill="none" stroke="url(#line)" stroke-width="38"/>
+  </g>
+  <g fill="#fff" opacity="0.1">
+    <circle cx="252" cy="236" r="82"/>
+    <circle cx="1320" cy="664" r="126"/>
+    <circle cx="1128" cy="186" r="48"/>
+  </g>
+</svg>

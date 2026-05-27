@@ -5,6 +5,8 @@ import { routing } from '@/i18n/routing';
 import { getGlobal } from '@/services/global.service';
 import { normalizeImageUrlStrapi } from '@/lib/utils';
 import { AppProviders } from '@/components/shared/providers/AppProviders';
+import { RecaptchaScript } from '@/components/shared/RecaptchaScript';
+import { ENV } from '@/constants/env';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -34,6 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
     : '/favicon.ico';
 
   return {
+    metadataBase: new URL(ENV.APP_URL),
     title,
     description,
     icons: { icon: favicon },
@@ -56,6 +59,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <RecaptchaScript />
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
