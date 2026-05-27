@@ -4,9 +4,14 @@ import { FooterInterface } from '@/interfaces/footer/footer.interface';
 import { mapFooter } from '@/dto';
 
 export async function getFooter(): Promise<FooterInterface | null> {
-  const json = await httpGet<{ data: any }>(API_ROUTES.FOOTER);
-  const data = json?.data;
-  if (!data) return null;
+  try {
+    const json = await httpGet<{ data: any }>(API_ROUTES.FOOTER);
+    const data = json?.data;
+    if (!data) return null;
 
-  return mapFooter(data);
+    return mapFooter(data);
+  } catch (error) {
+    console.error('Erro ao buscar footer:', error);
+    return null;
+  }
 }

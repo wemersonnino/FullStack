@@ -14,22 +14,23 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form';
-import { httpPost } from '@/lib/http/request';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { Chrome } from 'lucide-react';
+import { ENV } from '@/constants/env';
 
 export const RegisterForm = () => {
-  const router = useRouter();
+  const { register, loginGoogle } = useAuth();
   const form = useForm<RegisterSchemaType>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: { username: '', email: '', password: '' },
   });
 
   const onSubmit = async (data: RegisterSchemaType) => {
-    const res = await httpPost('/api/auth/local/register', data);
-    if (res) {
-      toast.success('Conta criada! Faça login.');
-      router.push('/login');
-    } else toast.error('Erro ao registrar usuário.');
+    try {
+      await register(data);
+    } catch {
+      toast.error('Erro ao registrar usuário.');
+    }
   };
 
   return (
@@ -82,6 +83,12 @@ export const RegisterForm = () => {
         <Button type="submit" className="w-full">
           Registrar
         </Button>
+        {ENV.GOOGLE_CLIENT_ID ? (
+          <Button type="button" variant="outline" className="w-full" onClick={loginGoogle}>
+            <Chrome className="mr-2 size-4" />
+            Cadastrar com Google
+          </Button>
+        ) : null}
         <p className="text-muted-foreground text-center text-sm">
           Já possui conta?{' '}
           <a href="/login" className="underline">

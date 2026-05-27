@@ -1,4 +1,4 @@
--- Banco do Strapi
+-- Banco do Strapi (CMS: conteudo, SEO, menus, URLs editoriais)
 CREATE DATABASE strapi_cms;
 
 \connect strapi_cms;
@@ -15,21 +15,21 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO strapi_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO strapi_user;
 
 
--- Banco para API Java
-CREATE DATABASE web_app_api;
+-- Banco principal da aplicacao Escala (Spring Boot)
+CREATE DATABASE escala_core;
 
-\connect web_app_api;
+\connect escala_core;
 
-CREATE USER api_user WITH ENCRYPTED PASSWORD 'webappapi1234567890';
-GRANT ALL PRIVILEGES ON DATABASE web_app_api TO api_user;
+CREATE USER escala_api_user WITH ENCRYPTED PASSWORD 'escala_api_password';
+GRANT ALL PRIVILEGES ON DATABASE escala_core TO escala_api_user;
 
 -- 🧩 Permissões adicionais para a API Java
-GRANT ALL ON SCHEMA public TO api_user;
-ALTER SCHEMA public OWNER TO api_user;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO api_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO api_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO api_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO api_user;
+GRANT ALL ON SCHEMA public TO escala_api_user;
+ALTER SCHEMA public OWNER TO escala_api_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO escala_api_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO escala_api_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO escala_api_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO escala_api_user;
 
 
 -- Banco para API .NET

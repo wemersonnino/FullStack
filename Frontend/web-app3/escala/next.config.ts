@@ -35,9 +35,6 @@ const nextConfig: NextConfig = {
   },
   typedRoutes: true,
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 const withNextIntl = createNextIntlPlugin();

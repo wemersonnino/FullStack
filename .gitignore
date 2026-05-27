@@ -1,6 +1,7 @@
 /Frontend/web-app1/
 /Frontend/web-app3/.env
 /Frontend/web-app3/escala/.env.local
+/Frontend/web-app3/escala/core
 /Data/postgres/.env
 /Data/postgres/init.sql
 /.idea/copilot.data.migration.agent.xml

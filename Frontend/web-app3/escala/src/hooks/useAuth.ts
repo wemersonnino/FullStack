@@ -4,22 +4,31 @@ import { useRouter } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { toast } from "sonner"
 import { useAppStore } from "@/stores/app.store"
-import { httpPost } from "@/lib/http/request"
 import { ThemeEnum } from "@/interfaces/enums/theme.enum"
+import { registerAccount } from "@/services/auth.service"
+import { httpPost } from "@/lib/http/request"
+import { API_ROUTES } from "@/constants/api"
+import { ENV } from "@/constants/env"
+import { getRecaptchaToken } from "@/lib/recaptcha"
 
 // Tipos básicos (opcionalmente usar DTOs se já existirem)
 interface RegisterPayload {
   username: string
   email: string
   password: string
+  companySlug?: string
+  recaptchaToken?: string
 }
 interface ForgotPayload {
   email: string
+  companySlug?: string
+  recaptchaToken?: string
 }
 interface ResetPayload {
   code: string
   password: string
   passwordConfirmation: string
+  recaptchaToken?: string
 }
 
 export function useAuth() {
@@ -27,13 +36,16 @@ export function useAuth() {
   const { data: session, update } = useSession()
   const { setLoading } = useAppStore()
 
-  // 🔐 Login com NextAuth + Strapi
+  // Login com NextAuth via BFF/Spring Boot
   async function login(email: string, password: string) {
     setLoading(true)
     try {
+      const recaptchaToken = await getRecaptchaToken("login")
       const res = await signIn("credentials", {
         email,
         password,
+        companySlug: ENV.COMPANY_SLUG,
+        recaptchaToken,
         redirect: false,
       })
 
@@ -55,7 +67,12 @@ export function useAuth() {
   async function register(data: RegisterPayload) {
     setLoading(true)
     try {
-      const res = await httpPost("/api/auth/local/register", data)
+      const recaptchaToken = await getRecaptchaToken("register")
+      const res = await registerAccount({
+        ...data,
+        companySlug: data.companySlug || ENV.COMPANY_SLUG,
+        recaptchaToken,
+      })
       if (res) {
         toast.success("Conta criada com sucesso! Faça login.")
         router.push("/login")
@@ -74,7 +91,12 @@ export function useAuth() {
   async function forgotPassword(data: ForgotPayload) {
     setLoading(true)
     try {
-      const res = await httpPost("/api/auth/forgot-password", data)
+      const recaptchaToken = await getRecaptchaToken("forgot_password")
+      const res = await httpPost("/api/bff/auth/forgot-password", {
+        ...data,
+        companySlug: data.companySlug || ENV.COMPANY_SLUG,
+        recaptchaToken,
+      })
       if (res) {
         toast.success("Email de recuperação enviado com sucesso!")
       } else {
@@ -92,7 +114,11 @@ export function useAuth() {
   async function resetPassword(data: ResetPayload) {
     setLoading(true)
     try {
-      const res = await httpPost("/api/auth/reset-password", data)
+      const recaptchaToken = await getRecaptchaToken("reset_password")
+      const res = await httpPost("/api/bff/auth/reset-password", {
+        ...data,
+        recaptchaToken,
+      })
       if (res) {
         toast.success("Senha redefinida! Faça login.")
         router.push("/login")
@@ -120,12 +146,20 @@ export function useAuth() {
     }
   }
 
+  async function loginGoogle() {
+    if (!ENV.GOOGLE_CLIENT_ID) {
+      toast.error("Login Google nao configurado.")
+      return
+    }
+    await signIn("google", { callbackUrl: "/dashboard" })
+  }
+
   // 🎨 Atualizar tema do usuário logado
   async function updateTheme(theme: ThemeEnum) {
     if (!session?.user?.token) return
     try {
       setLoading(true)
-      const res = await httpPost("/api/users/theme", { theme })
+      const res = await httpPost(`${API_ROUTES.UPDATE_USER_THEME}/${session.user.id}/theme`, { theme })
       if (res) {
         await update({ user: { ...session.user, theme } })
         toast.success(`Tema alterado para ${theme}`)
@@ -144,6 +178,7 @@ export function useAuth() {
     forgotPassword,
     resetPassword,
     logout,
+    loginGoogle,
     updateTheme,
     session,
   }

@@ -17,18 +17,21 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form';
-import { httpPost } from '@/lib/http/request';
+import { useAuth } from '@/hooks/useAuth';
 
 export const ForgotPasswordForm = () => {
+  const { forgotPassword } = useAuth();
   const form = useForm<ForgotPasswordSchemaType>({
     resolver: zodResolver(ForgotPasswordSchema),
     defaultValues: { email: '' },
   });
 
   const onSubmit = async (data: ForgotPasswordSchemaType) => {
-    const res = await httpPost('/api/auth/forgot-password', data);
-    if (res) toast.success('Email de recuperação enviado!');
-    else toast.error('Erro ao enviar email.');
+    try {
+      await forgotPassword(data);
+    } catch {
+      toast.error('Erro ao enviar email.');
+    }
   };
 
   return (

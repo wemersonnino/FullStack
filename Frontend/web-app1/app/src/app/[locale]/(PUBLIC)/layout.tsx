@@ -1,5 +1,5 @@
-import AppProviders from '@/components/shared/AppProviders'
-import HeaderPublic from '@/components/shared/HeaderPublic'
+import AppProviders from '@/components/shareds/AppProviders'
+import HeaderPublic from '@/components/shareds/HeaderPublic'
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (

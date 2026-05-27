@@ -1,0 +1,13 @@
+.git
+.idea
+.next
+node_modules
+coverage
+dist
+build
+*.log
+tsconfig.tsbuildinfo
+.env.local
+.env
+Dockerfile
+docker-compose*.yml

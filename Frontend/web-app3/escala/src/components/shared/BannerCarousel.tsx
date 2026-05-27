@@ -34,7 +34,8 @@ export const BannerCarousel = ({
   }
 
   const currentBanner = banners[current];
-  const imageUrl = currentBanner.image?.url || "/default-banner.jpg";
+  const imageUrl = currentBanner.image?.url || "/default-banner.svg";
+  const buttonLink = currentBanner.button_link?.trim();
 
   return (
     <section className="relative h-[70vh] w-full overflow-hidden">
@@ -61,9 +62,9 @@ export const BannerCarousel = ({
             {currentBanner.subtitle && (
               <p className="text-lg drop-shadow">{currentBanner.subtitle}</p>
             )}
-            {currentBanner.button_link && (
+            {buttonLink && (
               <a
-                href={currentBanner.button_link}
+                href={buttonLink}
                 className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
               >
                 {currentBanner.button_text || "Saiba mais"}
