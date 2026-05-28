@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Building2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,13 +26,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { 
-  getCompanies, 
-  createCompany, 
-  updateCompany, 
-  deleteCompany,
   Company 
 } from '@/services/company.service';
 import { uploadFile } from '@/services/profile.service';
+import { useCompanyStore } from '@/store/useCompanyStore';
 
 const CompanySchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
@@ -42,8 +40,7 @@ const CompanySchema = z.object({
 type CompanyFormValues = z.infer<typeof CompanySchema>;
 
 export function CompanyManagement() {
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { companies, isLoading, fetchCompanies, editCompany, removeCompany } = useCompanyStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -61,19 +58,7 @@ export function CompanyManagement() {
 
   useEffect(() => {
     fetchCompanies();
-  }, []);
-
-  async function fetchCompanies() {
-    setIsLoading(true);
-    try {
-      const data = await getCompanies();
-      setCompanies(data);
-    } catch (error) {
-      toast.error('Erro ao carregar empresas.');
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  }, [fetchCompanies]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -85,18 +70,6 @@ export function CompanyManagement() {
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const onOpenAddDialog = () => {
-    setEditingCompany(null);
-    setLogoPreview(null);
-    setLogoFile(null);
-    form.reset({
-      name: '',
-      cnpj: '',
-      address: '',
-    });
-    setIsDialogOpen(true);
   };
 
   const onOpenEditDialog = (company: Company) => {
@@ -127,15 +100,10 @@ export function CompanyManagement() {
       };
 
       if (editingCompany) {
-        await updateCompany(editingCompany.id, payload);
-        toast.success('Empresa atualizada com sucesso.');
-      } else {
-        await createCompany(payload);
-        toast.success('Empresa criada com sucesso.');
+        await editCompany(editingCompany.id, payload);
       }
 
       setIsDialogOpen(false);
-      fetchCompanies();
     } catch (error) {
       toast.error('Erro ao salvar empresa.');
     }
@@ -143,13 +111,7 @@ export function CompanyManagement() {
 
   async function onDelete(id: number) {
     if (confirm('Tem certeza que deseja excluir esta empresa?')) {
-      try {
-        await deleteCompany(id);
-        toast.success('Empresa excluída.');
-        fetchCompanies();
-      } catch (error) {
-        toast.error('Erro ao excluir empresa.');
-      }
+      await removeCompany(id);
     }
   }
 
@@ -162,8 +124,10 @@ export function CompanyManagement() {
             Gerencie as empresas cadastradas no sistema.
           </p>
         </div>
-        <Button onClick={onOpenAddDialog} className="gap-2">
-          <Plus className="h-4 w-4" /> Nova Empresa
+        <Button asChild className="gap-2">
+          <Link href="/dashboard/empresas/novo">
+            <Plus className="h-4 w-4" /> Nova Empresa
+          </Link>
         </Button>
       </div>
 

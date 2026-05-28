@@ -67,6 +67,27 @@
     "function": {
       "type": "string"
     },
+    "cep": {
+      "type": "string"
+    },
+    "street": {
+      "type": "string"
+    },
+    "number": {
+      "type": "string"
+    },
+    "complement": {
+      "type": "string"
+    },
+    "neighborhood": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
     "companies": {
       "type": "relation",
       "relation": "manyToMany",

@@ -9,6 +9,13 @@ export type UpdateMyProfilePayload = {
   email: string;
   theme?: ThemeEnum;
   address?: string;
+  cep?: string;
+  street?: string;
+  number?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
   position?: string;
   function?: string;
   avatarUrl?: string | null;

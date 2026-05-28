@@ -31,6 +31,18 @@ public class OrganizationService {
                 .build());
     }
 
+    public Sector updateSector(Long id, SectorRequest request) {
+        Sector sector = sectorRepository.findById(id).orElseThrow();
+        sector.setName(request.getName());
+        sector.setDescription(request.getDescription());
+        sector.setMaxSeats(request.getMaxSeats());
+        return sectorRepository.save(sector);
+    }
+
+    public void deleteSector(Long id) {
+        sectorRepository.deleteById(id);
+    }
+
     public List<Project> projects() {
         return projectRepository.findAll();
     }
@@ -42,5 +54,19 @@ public class OrganizationService {
                 .active(request.getActive() == null || request.getActive())
                 .company(companyService.resolve(null))
                 .build());
+    }
+
+    public Project updateProject(Long id, ProjectRequest request) {
+        Project project = projectRepository.findById(id).orElseThrow();
+        project.setName(request.getName());
+        project.setDescription(request.getDescription());
+        if (request.getActive() != null) {
+            project.setActive(request.getActive());
+        }
+        return projectRepository.save(project);
+    }
+
+    public void deleteProject(Long id) {
+        projectRepository.deleteById(id);
     }
 }

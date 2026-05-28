@@ -17,6 +17,16 @@ public class UserResponse {
     private Set<String> roles;
     private String theme;
     private String avatarUrl;
+    private String address;
+    private String cep;
+    private String street;
+    private String number;
+    private String complement;
+    private String neighborhood;
+    private String city;
+    private String state;
+    private String position;
+    private String function;
     private boolean active;
 
     public static UserResponse from(User user) {
@@ -27,6 +37,16 @@ public class UserResponse {
                 .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
                 .theme(user.getTheme() == null ? "system" : user.getTheme())
                 .avatarUrl(user.getAvatarUrl())
+                .address(user.getAddress())
+                .cep(user.getCep())
+                .street(user.getStreet())
+                .number(user.getNumber())
+                .complement(user.getComplement())
+                .neighborhood(user.getNeighborhood())
+                .city(user.getCity())
+                .state(user.getState())
+                .position(user.getPosition())
+                .function(user.getFunction())
                 .active(user.isActive())
                 .build();
     }

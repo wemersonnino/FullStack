@@ -1,11 +1,13 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { MapPin, Search } from 'lucide-react';
+import { formatCep } from '@brazilian-utils/brazilian-utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,6 +39,13 @@ type ProfileUser = {
   avatar?: any;
   avatarUrl?: string | null;
   address?: string;
+  cep?: string;
+  street?: string;
+  number?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
   position?: string;
   function?: string;
 };
@@ -50,6 +59,13 @@ const ProfileSchema = z.object({
   email: z.string().trim().email('Informe um email valido.'),
   theme: z.enum([ThemeEnum.SYSTEM, ThemeEnum.LIGHT, ThemeEnum.DARK]),
   address: z.string().optional(),
+  cep: z.string().optional(),
+  street: z.string().optional(),
+  number: z.string().optional(),
+  complement: z.string().optional(),
+  neighborhood: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
   position: z.string().optional(),
   function: z.string().optional(),
 });
@@ -88,10 +104,51 @@ export function ProfileForm({ user }: ProfileFormProps) {
       email: user.email || '',
       theme: user.theme || ThemeEnum.SYSTEM,
       address: user.address || '',
+      cep: user.cep || '',
+      street: user.street || '',
+      number: user.number || '',
+      complement: user.complement || '',
+      neighborhood: user.neighborhood || '',
+      city: user.city || '',
+      state: user.state || '',
       position: user.position || '',
       function: user.function || '',
     },
   });
+
+  const [isFetchingCep, setIsFetchingCep] = useState(false);
+
+  const fetchAddress = async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) return;
+
+    setIsFetchingCep(true);
+    try {
+      const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cleanCep}`);
+      if (!response.ok) throw new Error('CEP nao encontrado');
+      
+      const data = await response.json();
+      
+      profileForm.setValue('street', data.street || '');
+      profileForm.setValue('neighborhood', data.neighborhood || '');
+      profileForm.setValue('city', data.city || '');
+      profileForm.setValue('state', data.state || '');
+      
+      toast.success('Endereço preenchido automaticamente.');
+    } catch (error) {
+      toast.error('Nao foi possivel buscar o CEP.');
+    } finally {
+      setIsFetchingCep(false);
+    }
+  };
+
+  const watchCep = profileForm.watch('cep');
+  useEffect(() => {
+    const cleanCep = watchCep?.replace(/\D/g, '') || '';
+    if (cleanCep.length === 8) {
+      fetchAddress(cleanCep);
+    }
+  }, [watchCep]);
 
   const passwordForm = useForm<PasswordSchemaType>({
     resolver: zodResolver(PasswordSchema),
@@ -285,14 +342,138 @@ export function ProfileForm({ user }: ProfileFormProps) {
               />
             </div>
 
+            <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+              <div className="flex items-center gap-2 font-medium">
+                <MapPin className="h-4 w-4 text-primary" />
+                Endereço
+              </div>
+              
+              <div className="grid gap-4 sm:grid-cols-3">
+                <FormField
+                  control={profileForm.control}
+                  name="cep"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CEP</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input 
+                            placeholder="00000-000" 
+                            {...field} 
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '');
+                              field.onChange(value.length <= 8 ? formatCep(value) : field.value);
+                            }}
+                          />
+                          {isFetchingCep && (
+                            <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-pulse text-muted-foreground" />
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="sm:col-span-2">
+                  <FormField
+                    control={profileForm.control}
+                    name="street"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Rua / Logradouro</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nome da rua" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <FormField
+                  control={profileForm.control}
+                  name="number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número</FormLabel>
+                      <FormControl>
+                        <Input placeholder="123" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="sm:col-span-2">
+                  <FormField
+                    control={profileForm.control}
+                    name="complement"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Complemento</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Apt, Bloco, etc." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <FormField
+                  control={profileForm.control}
+                  name="neighborhood"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bairro</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Seu bairro" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={profileForm.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cidade</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Sua cidade" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={profileForm.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado / UF</FormLabel>
+                      <FormControl>
+                        <Input placeholder="SP" maxLength={2} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
             <FormField
               control={profileForm.control}
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Endereço</FormLabel>
+                  <FormLabel>Informações Adicionais de Endereço</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Seu endereço completo" className="resize-none" {...field} />
+                    <Textarea placeholder="Ponto de referencia, etc." className="resize-none" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

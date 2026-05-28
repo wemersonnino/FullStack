@@ -11,9 +11,9 @@ import {
   isToday,
   parseISO
 } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Escala } from '@/interfaces/escala/escala.interface';
+import { Holiday } from '@/interfaces/holiday.interface';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -23,9 +23,10 @@ interface EscalaMonthViewProps {
   currentDate: Date;
   escalas: Escala[];
   isAdmin?: boolean;
+  holidays?: Holiday[];
 }
 
-export function EscalaMonthView({ currentDate, escalas, isAdmin }: EscalaMonthViewProps) {
+export function EscalaMonthView({ currentDate, escalas, isAdmin, holidays = [] }: EscalaMonthViewProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -37,7 +38,24 @@ export function EscalaMonthView({ currentDate, escalas, isAdmin }: EscalaMonthVi
   }, [currentDate]);
 
   const getEscalasForDay = (day: Date) => {
-    return escalas.filter(escala => isSameDay(parseISO(escala.data), day));
+    return escalas.filter(escala => {
+      if (!escala.data) return false;
+      try {
+        return isSameDay(parseISO(escala.data), day);
+      } catch {
+        return false;
+      }
+    });
+  };
+
+  const getHolidayForDay = (day: Date) => {
+    return holidays.find(holiday => {
+      try {
+        return isSameDay(parseISO(holiday.date), day);
+      } catch {
+        return false;
+      }
+    });
   };
 
   const handleDayClick = (day: Date) => {
@@ -59,6 +77,7 @@ export function EscalaMonthView({ currentDate, escalas, isAdmin }: EscalaMonthVi
       <div className="flex-1 grid grid-cols-7 grid-rows-6 auto-rows-fr isolate">
         {days.map((day, idx) => {
           const dayEscalas = getEscalasForDay(day);
+          const holiday = getHolidayForDay(day);
           const isCurrentMonth = isSameMonth(day, currentDate);
           
           return (
@@ -68,21 +87,38 @@ export function EscalaMonthView({ currentDate, escalas, isAdmin }: EscalaMonthVi
               className={cn(
                 "relative min-h-[120px] p-2 border-r border-b group transition-colors hover:bg-muted/5 cursor-pointer",
                 !isCurrentMonth && "bg-muted/20 text-muted-foreground/50",
+                holiday && "bg-red-50/30 dark:bg-red-950/10",
                 idx % 7 === 6 && "border-r-0"
               )}
             >
-              <time
-                dateTime={format(day, 'yyyy-MM-dd')}
-                className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-full text-sm font-medium ml-auto transition-colors",
-                  isToday(day) && "bg-primary text-primary-foreground",
-                  !isToday(day) && isCurrentMonth && "text-foreground",
-                  !isCurrentMonth && "text-muted-foreground/30",
-                  "group-hover:ring-2 group-hover:ring-primary/20"
+              <div className="flex items-start justify-between">
+                {holiday && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-red-500 max-w-[70%] truncate">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                          <span className="truncate uppercase">{holiday.name}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>{holiday.name}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
-              >
-                {format(day, 'd')}
-              </time>
+                <time
+                  dateTime={format(day, 'yyyy-MM-dd')}
+                  className={cn(
+                    "flex h-7 w-7 items-center justify-center rounded-full text-sm font-medium ml-auto transition-colors",
+                    isToday(day) && "bg-primary text-primary-foreground",
+                    !isToday(day) && isCurrentMonth && "text-foreground",
+                    !isCurrentMonth && "text-muted-foreground/30",
+                    holiday && !isToday(day) && "text-red-600 dark:text-red-400 font-bold",
+                    "group-hover:ring-2 group-hover:ring-primary/20"
+                  )}
+                >
+                  {format(day, 'd')}
+                </time>
+              </div>
 
               <div className="mt-2 space-y-1">
                 {dayEscalas.slice(0, 3).map(escala => (

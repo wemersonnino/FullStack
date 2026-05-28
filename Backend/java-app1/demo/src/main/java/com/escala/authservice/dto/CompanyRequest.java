@@ -3,11 +3,10 @@ package com.escala.authservice.dto;
 import lombok.Data;
 
 @Data
-public class UpdateCurrentUserRequest {
-    private String username;
-    private String email;
-    private String theme;
-    private String avatarUrl;
+public class CompanyRequest {
+    private String name;
+    private String cnpj;
+    private String logoUrl;
     private String address;
     private String cep;
     private String street;
@@ -16,6 +15,5 @@ public class UpdateCurrentUserRequest {
     private String neighborhood;
     private String city;
     private String state;
-    private String position;
-    private String function;
+    private Boolean active;
 }

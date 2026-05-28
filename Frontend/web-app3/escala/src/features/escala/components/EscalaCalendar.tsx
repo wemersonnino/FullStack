@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -20,6 +20,8 @@ import { EscalaMonthView } from './EscalaMonthView';
 import { EscalaWeekView } from './EscalaWeekView';
 import { EscalaYearView } from './EscalaYearView';
 import { Escala } from '@/interfaces/escala/escala.interface';
+import { Holiday } from '@/interfaces/holiday.interface';
+import { getHolidays } from '@/services/holiday.service';
 import { 
   format, 
   addMonths, 
@@ -47,6 +49,17 @@ interface EscalaCalendarProps {
 export function EscalaCalendar({ escalas, isAdmin, onDateChange, onAddEvent }: EscalaCalendarProps) {
   const [view, setView] = useState<ViewType>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+
+  const currentYear = currentDate.getFullYear();
+
+  useEffect(() => {
+    const fetchHolidays = async () => {
+      const data = await getHolidays(currentYear);
+      setHolidays(data);
+    };
+    fetchHolidays();
+  }, [currentYear]);
 
   const viewLabel = useMemo(() => {
     if (view === 'month') return format(currentDate, 'MMMM yyyy', { locale: ptBR });
@@ -142,9 +155,9 @@ export function EscalaCalendar({ escalas, isAdmin, onDateChange, onAddEvent }: E
       </header>
 
       <div className="flex-1 overflow-auto">
-        {view === 'month' && <EscalaMonthView currentDate={currentDate} escalas={escalas} isAdmin={isAdmin} />}
-        {view === 'week' && <EscalaWeekView currentDate={currentDate} escalas={escalas} isAdmin={isAdmin} />}
-        {view === 'year' && <EscalaYearView currentDate={currentDate} escalas={escalas} isAdmin={isAdmin} />}
+        {view === 'month' && <EscalaMonthView currentDate={currentDate} escalas={escalas} isAdmin={isAdmin} holidays={holidays} />}
+        {view === 'week' && <EscalaWeekView currentDate={currentDate} escalas={escalas} isAdmin={isAdmin} holidays={holidays} />}
+        {view === 'year' && <EscalaYearView currentDate={currentDate} escalas={escalas} isAdmin={isAdmin} holidays={holidays} />}
       </div>
     </div>
   );

@@ -18,14 +18,16 @@ import {
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Escala } from '@/interfaces/escala/escala.interface';
+import { Holiday } from '@/interfaces/holiday.interface';
 
 interface EscalaYearViewProps {
   currentDate: Date;
   escalas: Escala[];
   isAdmin?: boolean;
+  holidays?: Holiday[];
 }
 
-export function EscalaYearView({ currentDate, escalas }: EscalaYearViewProps) {
+export function EscalaYearView({ currentDate, escalas, holidays = [] }: EscalaYearViewProps) {
   const months = useMemo(() => {
     const yearStart = startOfYear(currentDate);
     const yearEnd = new Date(currentDate.getFullYear(), 11, 31);
@@ -33,7 +35,24 @@ export function EscalaYearView({ currentDate, escalas }: EscalaYearViewProps) {
   }, [currentDate]);
 
   const getEscalasForDay = (day: Date) => {
-    return escalas.filter(escala => isSameDay(parseISO(escala.data), day));
+    return escalas.filter(escala => {
+      if (!escala.data) return false;
+      try {
+        return isSameDay(parseISO(escala.data), day);
+      } catch {
+        return false;
+      }
+    });
+  };
+
+  const getHolidayForDay = (day: Date) => {
+    return holidays.find(holiday => {
+      try {
+        return isSameDay(parseISO(holiday.date), day);
+      } catch {
+        return false;
+      }
+    });
   };
 
   const dayNames = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
@@ -61,6 +80,7 @@ export function EscalaYearView({ currentDate, escalas }: EscalaYearViewProps) {
               <div className="isolate grid grid-cols-7 gap-px rounded-lg bg-muted/20 border overflow-hidden">
                 {days.map((day) => {
                   const dayEscalas = getEscalasForDay(day);
+                  const holiday = getHolidayForDay(day);
                   const isCurrentMonth = isSameMonth(day, month);
                   const hasEscala = dayEscalas.length > 0;
 
@@ -70,6 +90,7 @@ export function EscalaYearView({ currentDate, escalas }: EscalaYearViewProps) {
                       className={cn(
                         "relative py-1.5 focus:z-10 text-xs",
                         isCurrentMonth ? "bg-card text-foreground" : "bg-muted/50 text-muted-foreground/30",
+                        holiday && isCurrentMonth && "bg-red-500/5"
                       )}
                     >
                       <time
@@ -78,8 +99,10 @@ export function EscalaYearView({ currentDate, escalas }: EscalaYearViewProps) {
                           "mx-auto flex h-6 w-6 items-center justify-center rounded-full transition-colors",
                           isToday(day) && "bg-primary text-primary-foreground font-bold",
                           !isToday(day) && hasEscala && "bg-primary/20 text-primary font-semibold ring-1 ring-primary/30",
+                          !isToday(day) && holiday && isCurrentMonth && "text-red-500 font-bold",
                           !isToday(day) && !hasEscala && !isCurrentMonth && "opacity-50"
                         )}
+                        title={holiday?.name}
                       >
                         {format(day, 'd')}
                       </time>

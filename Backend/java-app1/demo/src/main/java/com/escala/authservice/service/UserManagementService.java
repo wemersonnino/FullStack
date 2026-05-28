@@ -53,6 +53,17 @@ public class UserManagementService {
             user.setAvatarUrl(avatarUrl.isBlank() ? null : avatarUrl);
         }
 
+        user.setAddress(request.getAddress());
+        user.setCep(request.getCep());
+        user.setStreet(request.getStreet());
+        user.setNumber(request.getNumber());
+        user.setComplement(request.getComplement());
+        user.setNeighborhood(request.getNeighborhood());
+        user.setCity(request.getCity());
+        user.setState(request.getState());
+        user.setPosition(request.getPosition());
+        user.setFunction(request.getFunction());
+
         return userRepository.save(user);
     }
 

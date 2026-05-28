@@ -10,7 +10,8 @@ import {
   Calendar as CalendarIcon, 
   Clock, 
   AlertCircle,
-  Save
+  Save,
+  Plus
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -91,6 +92,7 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [newSectorName, setNewSectorName] = useState('');
   const [isCreatingSector, setIsCreatingSector] = useState(false);
+  const [showNewSectorInput, setShowNewSectorInput] = useState(false);
 
   const form = useForm<EscalaFormValues>({
     resolver: zodResolver(EscalaSchema),
@@ -361,24 +363,36 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Setor</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione um setor" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {sectors.map((sector) => (
-                            <SelectItem key={sector.id} value={String(sector.id)}>
-                              {sector.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {sectors.length === 0 && (
-                        <div className="space-y-2 rounded-md border border-dashed p-3">
+                      <div className="flex gap-2">
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="flex-1">
+                              <SelectValue placeholder="Selecione um setor" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {sectors.map((sector) => (
+                              <SelectItem key={sector.id} value={String(sector.id)}>
+                                {sector.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="icon"
+                          onClick={() => setShowNewSectorInput(!showNewSectorInput)}
+                          title="Novo setor"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      {showNewSectorInput && (
+                        <div className="mt-2 space-y-2 rounded-md border border-dashed p-3">
                           <p className="text-xs text-muted-foreground">
-                            Nenhum setor cadastrado. Cadastre um setor para escalar colaboradores sem projeto.
+                            Cadastre um novo setor.
                           </p>
                           <div className="flex gap-2">
                             <Input
@@ -389,13 +403,22 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
                             <Button
                               type="button"
                               variant="outline"
-                              onClick={handleCreateSector}
+                              onClick={async () => {
+                                await handleCreateSector();
+                                setShowNewSectorInput(false);
+                              }}
                               disabled={isCreatingSector}
                             >
                               {isCreatingSector ? 'Salvando...' : 'Cadastrar'}
                             </Button>
                           </div>
                         </div>
+                      )}
+                      
+                      {sectors.length === 0 && !showNewSectorInput && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">
+                          Nenhum setor cadastrado. Clique no botão + para cadastrar.
+                        </p>
                       )}
                       <FormMessage />
                     </FormItem>

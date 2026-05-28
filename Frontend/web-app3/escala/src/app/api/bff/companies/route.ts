@@ -2,11 +2,11 @@ import { proxyBackend, readJson } from '@/lib/bff/backend';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  return proxyBackend('/api/companies', { request, searchParams });
+  return proxyBackend('/api/v1/companies', { request, searchParams });
 }
 
 export async function POST(request: Request) {
-  return proxyBackend('/api/companies', {
+  return proxyBackend('/api/v1/companies', {
     method: 'POST',
     body: await readJson(request),
     request,

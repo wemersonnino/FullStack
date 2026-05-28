@@ -11,10 +11,10 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat
 
 # Copia apenas os manifests de dependências
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml* ./
 
 # Instala dependências
-RUN corepack enable && corepack prepare pnpm@10.33.3 --activate && pnpm install --frozen-lockfile
+RUN corepack enable && corepack prepare pnpm@10.33.3 --activate && pnpm install
 
 # Copia o restante do código do projeto já com ownership correto.
 COPY --chown=node:node . .

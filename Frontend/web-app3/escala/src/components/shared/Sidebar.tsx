@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import {
+  Briefcase,
+  Building2,
   CalendarDays,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Layers,
   LayoutDashboard,
   LogOut,
   Menu as MenuIcon,
@@ -52,6 +55,30 @@ const fallbackItems: MenuItem[] = [
     location: 'sidebar' as MenuItem['location'],
   },
   {
+    id: -6,
+    title: 'Empresas',
+    order: 6,
+    active: true,
+    destination: '/dashboard/empresas',
+    location: 'sidebar' as MenuItem['location'],
+  },
+  {
+    id: -7,
+    title: 'Projetos',
+    order: 7,
+    active: true,
+    destination: '/dashboard/projetos',
+    location: 'sidebar' as MenuItem['location'],
+  },
+  {
+    id: -8,
+    title: 'Setores',
+    order: 8,
+    active: true,
+    destination: '/dashboard/setores',
+    location: 'sidebar' as MenuItem['location'],
+  },
+  {
     id: -3,
     title: 'Escalas',
     order: 3,
@@ -81,7 +108,10 @@ function fallbackIcon(item: MenuItem) {
   const key = `${item.slug || ''} ${item.title || ''} ${item.destination || ''}`.toLowerCase();
 
   if (key.includes('perfil') || key.includes('profile')) return <User className="size-5" />;
-  if (key.includes('funcionario') || key.includes('employee')) return <Users className="size-5" />;
+  if (key.includes('funcionario') || key.includes('employee') || key.includes('team')) return <Users className="size-5" />;
+  if (key.includes('empresa') || key.includes('company') || key.includes('building')) return <Building2 className="size-5" />;
+  if (key.includes('projeto') || key.includes('project')) return <Briefcase className="size-5" />;
+  if (key.includes('setor') || key.includes('sector') || key.includes('layer')) return <Layers className="size-5" />;
   if (key.includes('escala') || key.includes('calendar') || key.includes('schedule')) {
     return <CalendarDays className="size-5" />;
   }

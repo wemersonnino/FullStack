@@ -6,29 +6,30 @@ export interface Company {
   cnpj: string;
   logo?: any;
   address?: string;
+  cep?: string;
+  street?: string;
+  number?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
 }
 
 export async function getCompanies(): Promise<Company[]> {
-  const response = await httpGet<{ data: any[] }>('/api/bff/companies');
-  return response?.data?.map(item => ({ id: item.id, ...item.attributes })) || [];
+  const response = await httpGet<Company[]>('/api/bff/companies');
+  return response || [];
 }
 
 export async function getCompany(id: number | string): Promise<Company | null> {
-  const response = await httpGet<{ data: any }>(`/api/bff/companies/${id}`);
-  if (!response?.data) return null;
-  return { id: response.data.id, ...response.data.attributes };
+  return await httpGet<Company>(`/api/bff/companies/${id}`);
 }
 
 export async function createCompany(data: Partial<Company>): Promise<Company | null> {
-  const response = await httpPost<{ data: any }>('/api/bff/companies', { data });
-  if (!response?.data) return null;
-  return { id: response.data.id, ...response.data.attributes };
+  return await httpPost<Company>('/api/bff/companies', data);
 }
 
 export async function updateCompany(id: number | string, data: Partial<Company>): Promise<Company | null> {
-  const response = await httpPut<{ data: any }>(`/api/bff/companies/${id}`, { data });
-  if (!response?.data) return null;
-  return { id: response.data.id, ...response.data.attributes };
+  return await httpPut<Company>(`/api/bff/companies/${id}`, data);
 }
 
 export async function deleteCompany(id: number | string): Promise<boolean> {

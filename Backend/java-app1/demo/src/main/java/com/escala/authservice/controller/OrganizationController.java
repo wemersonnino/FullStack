@@ -27,6 +27,17 @@ public class OrganizationController {
         return ResponseEntity.ok(organizationService.createSector(request));
     }
 
+    @PutMapping("/sectors/{id}")
+    public ResponseEntity<Sector> updateSector(@PathVariable Long id, @RequestBody SectorRequest request) {
+        return ResponseEntity.ok(organizationService.updateSector(id, request));
+    }
+
+    @DeleteMapping("/sectors/{id}")
+    public ResponseEntity<Void> deleteSector(@PathVariable Long id) {
+        organizationService.deleteSector(id);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/projects")
     public List<Project> projects() {
         return organizationService.projects();
@@ -35,5 +46,16 @@ public class OrganizationController {
     @PostMapping("/projects")
     public ResponseEntity<Project> createProject(@RequestBody ProjectRequest request) {
         return ResponseEntity.ok(organizationService.createProject(request));
+    }
+
+    @PutMapping("/projects/{id}")
+    public ResponseEntity<Project> updateProject(@PathVariable Long id, @RequestBody ProjectRequest request) {
+        return ResponseEntity.ok(organizationService.updateProject(id, request));
+    }
+
+    @DeleteMapping("/projects/{id}")
+    public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
+        organizationService.deleteProject(id);
+        return ResponseEntity.ok().build();
     }
 }
