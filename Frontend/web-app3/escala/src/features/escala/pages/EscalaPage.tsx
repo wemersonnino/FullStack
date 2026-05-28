@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Escala, SessionLikeUser, UsuarioEscala } from '@/core/domain/escala/escala.types';
+import { Escala as LegacyEscala } from '@/interfaces/escala/escala.interface';
 import { useEscalaPermissions } from '../hooks/useEscalaPermissions';
 import { EscalaCalendar } from '../components/EscalaCalendar';
 
 export function EscalaPage({ user, escalas, usuarios }: { user: SessionLikeUser; escalas: Escala[]; usuarios?: UsuarioEscala[] }) {
   const permissions = useEscalaPermissions(user);
+  const calendarEscalas = escalas.map(mapToCalendarEscala);
 
   return (
     <section className="mx-auto max-w-7xl space-y-6">
@@ -27,7 +29,31 @@ export function EscalaPage({ user, escalas, usuarios }: { user: SessionLikeUser;
           </Button>
         )}
       </div>
-      <EscalaCalendar user={user} initialEscalas={escalas} usuarios={usuarios} />
+      <EscalaCalendar escalas={calendarEscalas} isAdmin={permissions.canViewAllEscalas} />
     </section>
   );
+}
+
+function mapToCalendarEscala(escala: Escala): LegacyEscala {
+  const remoto = escala.remoto ?? false;
+
+  return {
+    id: Number(escala.id),
+    usuarioId: Number(escala.usuarioId),
+    nomeUsuario: escala.nomeUsuario,
+    avatarUrl: escala.avatarUrl ?? undefined,
+    cargo: escala.cargo ?? undefined,
+    email: escala.email ?? undefined,
+    role: escala.role ?? undefined,
+    data: escala.dataInicio,
+    horarioInicio: escala.horarioInicio ?? '08:00',
+    horarioFim: escala.horarioFim ?? '17:00',
+    setor: escala.setorNome ?? escala.setor ?? undefined,
+    projeto: escala.projetoNome ?? escala.projeto ?? undefined,
+    local: escala.local ?? undefined,
+    remoto,
+    status: escala.status ?? 'AGENDADA',
+    workMode: remoto ? 'REMOTO' : 'PRESENCIAL',
+    observacao: escala.observacao ?? undefined,
+  };
 }

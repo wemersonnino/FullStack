@@ -28,15 +28,29 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { UsuarioEscala } from '@/interfaces/escala/escala.interface';
 
-interface EscalaUserTableProps {
-  users: UsuarioEscala[];
-  onEditEscala: (user: UsuarioEscala) => void;
-  onViewDetails: (user: UsuarioEscala) => void;
+type EscalaUserTableUser = {
+  id: string | number;
+  nome: string;
+  username?: string | null;
+  email: string;
+  avatarUrl?: string | null;
+  cargo?: string | null;
+  departamento?: string | null;
+  tipoVinculo?: string | null;
+};
+
+interface EscalaUserTableProps<TUser extends EscalaUserTableUser> {
+  users: TUser[];
+  onEditEscala: (user: TUser) => void;
+  onViewDetails: (user: TUser) => void;
 }
 
-export function EscalaUserTable({ users, onEditEscala, onViewDetails }: EscalaUserTableProps) {
+export function EscalaUserTable<TUser extends EscalaUserTableUser>({
+  users,
+  onEditEscala,
+  onViewDetails,
+}: EscalaUserTableProps<TUser>) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const normalizedSearchTerm = searchTerm.toLowerCase();
@@ -88,7 +102,7 @@ export function EscalaUserTable({ users, onEditEscala, onViewDetails }: EscalaUs
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
-                      <AvatarImage src={user.avatarUrl} />
+                      <AvatarImage src={user.avatarUrl ?? undefined} />
                       <AvatarFallback>{nome.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col min-w-0">

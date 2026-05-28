@@ -21,6 +21,7 @@ import { MenuItem } from '@/interfaces/menu/menu.interface';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 
 interface SidebarProps {
@@ -29,6 +30,7 @@ interface SidebarProps {
     username?: string | null;
     email?: string | null;
     roles?: string[];
+    avatarUrl?: string | null;
   };
 }
 
@@ -110,7 +112,8 @@ function normalizeHref(destination?: string | null) {
 
 export const Sidebar = ({ items, user }: SidebarProps) => {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { session, logout } = useAuth();
+  const currentUser = session?.user ?? user;
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<number, boolean>>({});
@@ -155,7 +158,7 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
         {!collapsed && (
           <Link href="/dashboard" className="min-w-0">
             <span className="block truncate text-sm font-semibold">Plataforma Escala</span>
-            <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
+            <span className="block truncate text-xs text-muted-foreground">{currentUser.email}</span>
           </Link>
         )}
         <Button
@@ -257,13 +260,16 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
 
       <div className="border-t p-3">
         <div className={cn('mb-3 flex items-center gap-3 px-2', collapsed && 'justify-center px-0')}>
-          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-            {user.username?.slice(0, 1).toUpperCase() || 'U'}
-          </div>
+          <Avatar className="size-9 shrink-0">
+            <AvatarImage src={currentUser.avatarUrl ?? undefined} alt={currentUser.username || 'Usuario'} />
+            <AvatarFallback className="bg-primary text-sm font-semibold text-primary-foreground">
+              {currentUser.username?.slice(0, 1).toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
           {!collapsed && (
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{user.username}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.roles?.join(', ')}</p>
+              <p className="truncate text-sm font-medium">{currentUser.username}</p>
+              <p className="truncate text-xs text-muted-foreground">{currentUser.roles?.join(', ')}</p>
             </div>
           )}
         </div>

@@ -40,14 +40,17 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     headers.Authorization = authorization;
   }
 
+  let body: BodyInit | undefined;
+  if (options.body instanceof FormData) {
+    body = options.body;
+  } else if (options.body !== undefined) {
+    body = JSON.stringify(options.body);
+  }
+
   const response = await fetch(url, {
     method: options.method ?? 'GET',
     headers,
-    body: options.body === undefined 
-      ? undefined 
-      : isFormData 
-        ? options.body 
-        : JSON.stringify(options.body),
+    body,
     cache: 'no-store',
   });
 

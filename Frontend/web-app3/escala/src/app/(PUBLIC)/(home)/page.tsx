@@ -3,17 +3,19 @@ import { getBanners } from '@/services/banner.service';
 import { getArticles } from '@/services/article.service';
 import { BannerCarousel } from '@/components/shared/BannerCarousel';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default async function HomePage() {
   const [banners, articles] = await Promise.all([getBanners(), getArticles(6)]);
+  const bannersWithImages = banners.filter((banner) => banner.image?.url);
 
   return (
-    <div className="bg-gray-900">
+    <div className="bg-background text-foreground">
       {/* Hero Section */}
-      <div className="relative isolate px-6 pt-14 lg:px-8">
+      <div className="relative isolate bg-gray-900 px-6 pt-14 lg:px-8">
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
+          className="pointer-events-none absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
         >
           <div
             style={{
@@ -32,28 +34,22 @@ export default async function HomePage() {
               Organize turnos, gerencie equipes e otimize a produtividade da sua empresa com a plataforma Escala.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link
-                href="/login"
-                className="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-              >
-                Começar agora
-              </Link>
-              <Link href="#saiba-mais" className="text-sm/6 font-semibold text-white">
-                Saiba mais <span aria-hidden="true">→</span>
-              </Link>
+              <Button asChild>
+                <Link href="/login">Começar agora</Link>
+              </Button>
+              <Button asChild variant="ghost" className="text-white hover:bg-white/10 hover:text-white">
+                <Link href="#saiba-mais">
+                  Saiba mais <span aria-hidden="true">→</span>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Existing Dynamic Content */}
       <div id="saiba-mais" className="py-12">
-        {banners && banners.length > 0 ? (
-          <BannerCarousel banners={banners} interval={5000} />
-        ) : (
-          <BannerCarousel banners={[]} />
-        )}
-        <div className="container mx-auto px-6 mt-12">
+        {bannersWithImages.length > 0 && <BannerCarousel banners={bannersWithImages} interval={5000} />}
+        <div className="container mx-auto mt-12 px-6">
           <BlogList articles={articles} />
         </div>
       </div>

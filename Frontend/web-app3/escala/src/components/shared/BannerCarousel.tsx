@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Banner as BannerType } from "@/interfaces/banner/banner.interface";
+import { Button } from "@/components/ui/button";
 
 interface BannerCarouselProps {
   banners: BannerType[];
@@ -15,30 +16,28 @@ export const BannerCarousel = ({
   interval = 5000,
 }: BannerCarouselProps) => {
   const [current, setCurrent] = useState(0);
+  const bannersWithImages = banners.filter((banner) => banner.image?.url);
 
-  // Troca automática a cada X segundos
   useEffect(() => {
-    if (banners.length <= 1) return; // não roda se houver 1 só
+    setCurrent(0);
+  }, [bannersWithImages.length]);
+
+  useEffect(() => {
+    if (bannersWithImages.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % banners.length);
+      setCurrent((prev) => (prev + 1) % bannersWithImages.length);
     }, interval);
     return () => clearInterval(timer);
-  }, [banners, interval]);
+  }, [bannersWithImages.length, interval]);
 
-  if (!banners || banners.length === 0) {
-    return (
-      <section className="relative flex items-center justify-center h-[60vh] bg-gray-200 text-gray-700">
-        <h2 className="text-3xl font-bold">Nenhum banner disponível</h2>
-      </section>
-    );
-  }
+  if (bannersWithImages.length === 0) return null;
 
-  const currentBanner = banners[current];
-  const imageUrl = currentBanner.image?.url || "/default-banner.svg";
+  const currentBanner = bannersWithImages[current] ?? bannersWithImages[0];
+  const imageUrl = currentBanner.image.url;
   const buttonLink = currentBanner.button_link?.trim();
 
   return (
-    <section className="relative h-[70vh] w-full overflow-hidden">
+    <section className="relative h-[70vh] w-full overflow-hidden bg-background">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentBanner.id}
@@ -52,10 +51,11 @@ export const BannerCarousel = ({
             src={imageUrl}
             alt={currentBanner.image?.alternativeText || "Banner"}
             fill
-            className="object-cover -z-10 opacity-70"
+            className="z-0 object-cover"
             priority
           />
-          <div className="z-10 max-w-3xl space-y-4 px-6">
+          <div className="absolute inset-0 z-10 bg-black/45" />
+          <div className="relative z-20 max-w-3xl space-y-4 px-6">
             <h2 className="text-4xl font-bold drop-shadow-md">
               {currentBanner.title}
             </h2>
@@ -63,23 +63,21 @@ export const BannerCarousel = ({
               <p className="text-lg drop-shadow">{currentBanner.subtitle}</p>
             )}
             {buttonLink && (
-              <a
-                href={buttonLink}
-                className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
-              >
-                {currentBanner.button_text || "Saiba mais"}
-              </a>
+              <Button asChild className="mt-4">
+                <a href={buttonLink}>{currentBanner.button_text || "Saiba mais"}</a>
+              </Button>
             )}
           </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Indicadores */}
-      {banners.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-          {banners.map((_, idx) => (
+      {bannersWithImages.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 gap-2">
+          {bannersWithImages.map((banner, idx) => (
             <button
-              key={idx}
+              key={banner.id}
+              type="button"
+              aria-label={`Exibir banner ${idx + 1}`}
               onClick={() => setCurrent(idx)}
               className={`w-3 h-3 rounded-full transition ${
                 idx === current ? "bg-white" : "bg-white/50"

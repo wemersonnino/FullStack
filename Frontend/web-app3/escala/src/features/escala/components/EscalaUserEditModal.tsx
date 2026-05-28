@@ -41,7 +41,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { UsuarioEscala, EscalaRequest } from '@/interfaces/escala/escala.interface';
+import { UsuarioEscala as LegacyUsuarioEscala, EscalaRequest } from '@/interfaces/escala/escala.interface';
+import {
+  CriarEscalaPayload,
+  Escala as DomainEscala,
+  UsuarioEscala as DomainUsuarioEscala,
+} from '@/core/domain/escala/escala.types';
 import { createEscalas } from '@/services/escala.service';
 import { createSector, getProjects, getSectors, Project, Sector } from '@/services/organization.service';
 
@@ -57,14 +62,30 @@ const EscalaSchema = z.object({
 
 type EscalaFormValues = z.infer<typeof EscalaSchema>;
 
-interface EscalaUserEditModalProps {
-  user: UsuarioEscala | null;
+type ModalUsuarioEscala = LegacyUsuarioEscala | DomainUsuarioEscala;
+
+type LegacyEscalaUserEditModalProps = {
+  user: LegacyUsuarioEscala | null;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-}
+};
 
-export function EscalaUserEditModal({ user, isOpen, onClose, onSuccess }: EscalaUserEditModalProps) {
+type ManagedEscalaUserEditModalProps = {
+  open: boolean;
+  usuario: DomainUsuarioEscala | null;
+  usuarios: DomainUsuarioEscala[];
+  escala: DomainEscala | null;
+  onOpenChange: (open: boolean) => void;
+  onSave: (payload: CriarEscalaPayload, escalaId?: string) => Promise<void>;
+};
+
+type EscalaUserEditModalProps = LegacyEscalaUserEditModalProps | ManagedEscalaUserEditModalProps;
+
+export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
+  const isManaged = 'open' in props;
+  const user: ModalUsuarioEscala | null = isManaged ? props.usuario : props.user;
+  const isOpen = isManaged ? props.open : props.isOpen;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [sectors, setSectors] = useState<Sector[]>([]);
@@ -81,6 +102,15 @@ export function EscalaUserEditModal({ user, isOpen, onClose, onSuccess }: Escala
       notes: '',
     },
   });
+
+  function closeModal() {
+    if (isManaged) {
+      props.onOpenChange(false);
+      return;
+    }
+
+    props.onClose();
+  }
 
   useEffect(() => {
     if (!isOpen) return;
@@ -115,8 +145,8 @@ export function EscalaUserEditModal({ user, isOpen, onClose, onSuccess }: Escala
   async function onSubmit(values: EscalaFormValues) {
     if (!user) return;
 
-    const selectedProjectId = values.projectId ? parseInt(values.projectId) : user.projetoId;
-    const selectedSectorId = values.sectorId ? parseInt(values.sectorId) : user.setorId;
+    const selectedProjectId = values.projectId ?? (user.projetoId ? String(user.projetoId) : undefined);
+    const selectedSectorId = values.sectorId ?? (user.setorId ? String(user.setorId) : undefined);
 
     if (!selectedProjectId && !selectedSectorId) {
       toast.error('Informe um setor para este colaborador antes de criar a escala.');
@@ -126,21 +156,37 @@ export function EscalaUserEditModal({ user, isOpen, onClose, onSuccess }: Escala
     setIsSubmitting(true);
 
     try {
-      const payload: EscalaRequest = {
-        employeeId: user.id,
-        dates: values.dates.map(d => format(d, 'yyyy-MM-dd')),
-        startTime: values.startTime,
-        endTime: values.endTime,
-        workMode: values.workMode,
-        notes: values.notes,
-        projectId: selectedProjectId,
-        sectorId: selectedSectorId,
-      };
+      if (isManaged) {
+        const payload: CriarEscalaPayload = {
+          usuarioId: String(user.id),
+          datas: values.dates.map((date) => format(date, 'yyyy-MM-dd')),
+          horarioInicio: values.startTime,
+          horarioFim: values.endTime,
+          remoto: values.workMode === 'REMOTO',
+          observacao: values.notes,
+          projetoId: selectedProjectId,
+          setorId: selectedSectorId,
+        };
 
-      await createEscalas(payload);
+        await props.onSave(payload, props.escala?.id);
+      } else {
+        const payload: EscalaRequest = {
+          employeeId: Number(user.id),
+          dates: values.dates.map((date) => format(date, 'yyyy-MM-dd')),
+          startTime: values.startTime,
+          endTime: values.endTime,
+          workMode: values.workMode,
+          notes: values.notes,
+          projectId: selectedProjectId ? Number(selectedProjectId) : undefined,
+          sectorId: selectedSectorId ? Number(selectedSectorId) : undefined,
+        };
+
+        await createEscalas(payload);
+        props.onSuccess();
+      }
+
       toast.success('Escala(s) criada(s) com sucesso.');
-      onSuccess();
-      onClose();
+      closeModal();
       form.reset();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao criar escala.');
@@ -173,7 +219,7 @@ export function EscalaUserEditModal({ user, isOpen, onClose, onSuccess }: Escala
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -377,7 +423,7 @@ export function EscalaUserEditModal({ user, isOpen, onClose, onSuccess }: Escala
             />
 
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
+              <Button type="button" variant="ghost" onClick={closeModal}>Cancelar</Button>
               <Button type="submit" disabled={isSubmitting} className="gap-2">
                 <Save className="h-4 w-4" />
                 {isSubmitting ? 'Salvando...' : 'Salvar Escala'}

@@ -20,7 +20,7 @@ export const HeaderPublic = () => {
   }, []);
 
   return (
-    <header className="flex w-full items-center justify-between gap-4 bg-white p-4 shadow-md dark:bg-gray-800">
+    <header className="relative z-50 flex w-full items-center justify-between gap-4 bg-white p-4 shadow-md dark:bg-gray-800">
       <Link href="/" className="text-xl font-bold md:text-2xl">
         Plataforma Escala
       </Link>

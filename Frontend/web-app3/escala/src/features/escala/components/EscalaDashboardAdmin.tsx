@@ -34,6 +34,10 @@ export function EscalaDashboardAdmin({ initialEscalas, usuarios }: Props) {
     setModalOpen(true);
   }
 
+  function viewDetails(usuario: UsuarioEscala) {
+    setSelectedUsuario(usuario);
+  }
+
   async function save(payload: CriarEscalaPayload, escalaId?: string) {
     try {
       if (escalaId) {
@@ -79,7 +83,7 @@ export function EscalaDashboardAdmin({ initialEscalas, usuarios }: Props) {
 
       {usuarios[0] && <EscalaEmployeeCard usuario={usuarios[0]} />}
 
-      <EscalaUserTable usuarios={usuarios} onEdit={openCreate} />
+      <EscalaUserTable users={usuarios} onEditEscala={openCreate} onViewDetails={viewDetails} />
 
       <EscalaUserEditModal
         open={modalOpen}
