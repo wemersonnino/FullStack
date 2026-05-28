@@ -39,10 +39,16 @@ interface EscalaUserTableProps {
 export function EscalaUserTable({ users, onEditEscala, onViewDetails }: EscalaUserTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredUsers = users.filter(user => 
-    user.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const normalizedSearchTerm = searchTerm.toLowerCase();
+  const filteredUsers = users.filter((user) => {
+    const nome = user.nome ?? user.username ?? 'Funcionário';
+    const email = user.email ?? '';
+
+    return (
+      nome.toLowerCase().includes(normalizedSearchTerm) ||
+      email.toLowerCase().includes(normalizedSearchTerm)
+    );
+  });
 
   return (
     <div className="space-y-4">
@@ -73,18 +79,22 @@ export function EscalaUserTable({ users, onEditEscala, onViewDetails }: EscalaUs
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers.map((user) => (
+            {filteredUsers.map((user) => {
+              const nome = user.nome ?? user.username ?? 'Funcionário';
+              const email = user.email ?? 'E-mail não informado';
+
+              return (
               <TableRow key={user.id} className="group hover:bg-muted/5 transition-colors">
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                       <AvatarImage src={user.avatarUrl} />
-                      <AvatarFallback>{user.nome?.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{nome.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-semibold text-sm truncate">{user.nome}</span>
+                      <span className="font-semibold text-sm truncate">{nome}</span>
                       <span className="text-xs text-muted-foreground truncate flex items-center gap-1">
-                        <Mail className="h-3 w-3" /> {user.email}
+                        <Mail className="h-3 w-3" /> {email}
                       </span>
                     </div>
                   </div>
@@ -134,7 +144,8 @@ export function EscalaUserTable({ users, onEditEscala, onViewDetails }: EscalaUs
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
         {filteredUsers.length === 0 && (

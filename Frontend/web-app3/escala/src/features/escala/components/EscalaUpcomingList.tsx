@@ -4,27 +4,33 @@ import {
   Calendar as CalendarIcon, 
   Clock, 
   MapPin, 
-  ChevronRight,
-  MoreHorizontal
+  Pencil
 } from 'lucide-react';
-import { Escala } from '@/interfaces/escala/escala.interface';
 import { format, parseISO, isAfter, startOfToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Escala } from '@/core/domain/escala/escala.types';
 import { cn } from '@/lib/utils';
 
 interface EscalaUpcomingListProps {
   escalas: Escala[];
   title?: string;
   limit?: number;
+  canManage?: boolean;
+  onEdit?: (escala: Escala) => void;
 }
 
-export function EscalaUpcomingList({ escalas, title = "Próximas Escalas", limit = 5 }: EscalaUpcomingListProps) {
+export function EscalaUpcomingList({
+  escalas,
+  title = "Proximas Escalas",
+  limit = 5,
+  canManage = false,
+  onEdit,
+}: EscalaUpcomingListProps) {
   const today = startOfToday();
   const upcoming = escalas
-    .filter(e => !isAfter(today, parseISO(e.data)))
-    .sort((a, b) => a.data.localeCompare(b.data))
+    .filter((escala) => !isAfter(today, parseISO(escala.dataInicio)))
+    .sort((a, b) => a.dataInicio.localeCompare(b.dataInicio))
     .slice(0, limit);
 
   return (
@@ -42,13 +48,13 @@ export function EscalaUpcomingList({ escalas, title = "Próximas Escalas", limit
           >
             <div className={cn(
               "flex flex-col items-center justify-center h-12 w-12 rounded-lg border",
-              escala.workMode === 'PRESENCIAL' ? "bg-blue-500/5 border-blue-500/20" : "bg-emerald-500/5 border-emerald-500/20"
+              escala.remoto ? "bg-emerald-500/5 border-emerald-500/20" : "bg-blue-500/5 border-blue-500/20"
             )}>
               <span className="text-[10px] font-bold uppercase text-muted-foreground">
-                {format(parseISO(escala.data), 'MMM', { locale: ptBR })}
+                {format(parseISO(escala.dataInicio), 'MMM', { locale: ptBR })}
               </span>
               <span className="text-lg font-bold leading-none">
-                {format(parseISO(escala.data), 'dd')}
+                {format(parseISO(escala.dataInicio), 'dd')}
               </span>
             </div>
 
@@ -56,25 +62,36 @@ export function EscalaUpcomingList({ escalas, title = "Próximas Escalas", limit
               <div className="flex items-center gap-2">
                 <h4 className="font-semibold text-sm truncate">{escala.nomeUsuario}</h4>
                 <span className="size-1 rounded-full bg-muted-foreground/30" />
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">{escala.workMode}</span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase">
+                  {escala.remoto ? 'REMOTO' : 'PRESENCIAL'}
+                </span>
               </div>
               <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
-                  {escala.horarioInicio} - {escala.horarioFim}
+                  {escala.horarioInicio || '--:--'} - {escala.horarioFim || '--:--'}
                 </span>
-                {escala.setor && (
+                {(escala.setorNome || escala.setor) && (
                   <span className="flex items-center gap-1 truncate">
                     <MapPin className="h-3.5 w-3.5" />
-                    {escala.setor}
+                    {escala.setorNome || escala.setor}
                   </span>
                 )}
               </div>
             </div>
 
-            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            {canManage && onEdit && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label={`Editar escala de ${escala.nomeUsuario}`}
+                onClick={() => onEdit(escala)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         ))}
 

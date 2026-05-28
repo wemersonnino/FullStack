@@ -19,6 +19,7 @@ export type OrganizationPayload = {
   name: string;
   description?: string;
   maxSeats?: number | null;
+  active?: boolean;
 };
 
 export async function getSectors(authToken?: string) {

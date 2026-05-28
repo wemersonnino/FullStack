@@ -14,7 +14,7 @@ export interface Escala {
   local?: string;
   remoto: boolean;
   status: string;
-  workMode: 'PRESENCIAL' | 'REMOTO' | 'HIBRIDO';
+  workMode: 'PRESENCIAL' | 'REMOTO';
   observacao?: string;
 }
 
@@ -23,7 +23,7 @@ export interface EscalaRequest {
   dates: string[];
   startTime: string;
   endTime: string;
-  workMode: 'PRESENCIAL' | 'REMOTO' | 'HIBRIDO';
+  workMode: 'PRESENCIAL' | 'REMOTO';
   notes?: string;
   companyId?: number;
   sectorId?: number;

@@ -1,7 +1,7 @@
 // src/services/profile.service.ts
 import { httpGet, httpPatch } from '@/lib/http/request';
 import { ThemeEnum } from '@/interfaces/enums/theme.enum';
-import { API_ROUTES } from '@/constants';
+import { API_ROUTES, ENV } from '@/constants';
 import { User } from 'next-auth';
 
 export type UpdateMyProfilePayload = {
@@ -11,7 +11,7 @@ export type UpdateMyProfilePayload = {
   address?: string;
   position?: string;
   function?: string;
-  avatar?: string | number | null;
+  avatarUrl?: string | null;
 };
 
 export type ChangeMyPasswordPayload = {
@@ -27,7 +27,26 @@ export async function updateMyProfile(payload: UpdateMyProfilePayload): Promise<
   return await httpPatch<User>(`${API_ROUTES.USERS}/me`, payload);
 }
 
-export async function uploadFile(file: File): Promise<any> {
+export type UploadedFile = {
+  id?: number;
+  url?: string;
+};
+
+export async function uploadAvatar(file: File): Promise<UploadedFile | null> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('/api/bff/avatar/upload', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) return null;
+  const data = await response.json();
+  return data?.url ? { url: data.url } : null;
+}
+
+export async function uploadFile(file: File): Promise<UploadedFile[] | null> {
   const formData = new FormData();
   formData.append('files', file);
   
@@ -37,7 +56,13 @@ export async function uploadFile(file: File): Promise<any> {
   });
   
   if (!response.ok) return null;
-  return await response.json();
+  const data = await response.json();
+  if (!Array.isArray(data)) return null;
+
+  return data.map((item) => ({
+    ...item,
+    url: item.url?.startsWith('/') ? `${ENV.STRAPI_PUBLIC_URL}${item.url}` : item.url,
+  }));
 }
 
 export async function changeMyPassword(payload: ChangeMyPasswordPayload): Promise<{ message: string } | null> {

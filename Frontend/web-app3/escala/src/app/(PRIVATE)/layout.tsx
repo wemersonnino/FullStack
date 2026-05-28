@@ -19,7 +19,7 @@ export default async function PrivateLayout({ children }: { children: React.Reac
     <div className="bg-background text-foreground min-h-screen">
       <div className="flex min-h-screen">
         <Sidebar items={sidebarItems} user={session.user} />
-        <main className="min-w-0 flex-1 px-4 pb-8 pt-20 md:pl-80 md:pr-8 md:pt-0">
+        <main className="min-w-0 flex-1 px-4 pb-8 pt-10 md:pl-10 md:pr-8 md:pt-0">
           <HeaderPrivate />
           {children}
         </main>

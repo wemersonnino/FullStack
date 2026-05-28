@@ -12,6 +12,7 @@ type SpringAuthResponse = {
     email: string;
     roles?: string[];
     theme?: string;
+    avatarUrl?: string | null;
     companySlug?: string;
     companyTheme?: string;
   };
@@ -42,6 +43,7 @@ async function loginSpringBoot(
       email: data.user.email,
       roles: data.user.roles || [],
       theme: (data.user.theme as ThemeEnum) ?? ThemeEnum.SYSTEM,
+      avatarUrl: data.user.avatarUrl,
       companySlug: data.user.companySlug,
       companyTheme: data.user.companyTheme,
     },
@@ -68,6 +70,7 @@ async function loginGoogleSpringBoot(idToken: string, companySlug = ENV.COMPANY_
       email: data.user.email,
       roles: data.user.roles || [],
       theme: (data.user.theme as ThemeEnum) ?? ThemeEnum.SYSTEM,
+      avatarUrl: data.user.avatarUrl,
       companySlug: data.user.companySlug,
       companyTheme: data.user.companyTheme,
     },
@@ -100,6 +103,7 @@ const providers: AuthOptions['providers'] = [
         email: authUser.user.email,
         roles: authUser.user.roles,
         theme: authUser.user.theme,
+        avatarUrl: authUser.user.avatarUrl,
         token: authUser.token,
         companySlug: authUser.user.companySlug,
         companyTheme: authUser.user.companyTheme,
@@ -134,7 +138,7 @@ export const authOptions: AuthOptions = {
   providers,
 
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, session, trigger }) {
       if (account?.provider === 'google' && account.id_token) {
         const authUser = await loginGoogleSpringBoot(account.id_token);
         if (authUser) {
@@ -143,6 +147,7 @@ export const authOptions: AuthOptions = {
           token.email = authUser.user.email;
           token.roles = authUser.user.roles;
           token.theme = authUser.user.theme;
+          token.avatarUrl = authUser.user.avatarUrl;
           token.accessToken = authUser.token;
           token.companySlug = authUser.user.companySlug;
           token.companyTheme = authUser.user.companyTheme;
@@ -155,9 +160,16 @@ export const authOptions: AuthOptions = {
         token.email = user.email;
         token.roles = user.roles;
         token.theme = user.theme;
+        token.avatarUrl = user.avatarUrl;
         token.accessToken = user.token;
         token.companySlug = user.companySlug;
         token.companyTheme = user.companyTheme;
+      }
+      if (trigger === 'update' && session?.user) {
+        token.username = session.user.username ?? token.username;
+        token.email = session.user.email ?? token.email;
+        token.theme = session.user.theme ?? token.theme;
+        token.avatarUrl = session.user.avatarUrl ?? token.avatarUrl;
       }
       return token;
     },
@@ -168,6 +180,7 @@ export const authOptions: AuthOptions = {
         email: token.email as string,
         roles: (token.roles as string[]) ?? [],
         theme: (token.theme as ThemeEnum) ?? ThemeEnum.SYSTEM,
+        avatarUrl: (token.avatarUrl as string | null) ?? null,
         token: (token.accessToken as string) ?? '',
         companySlug: (token.companySlug as string) ?? ENV.COMPANY_SLUG,
         companyTheme: (token.companyTheme as string) ?? 'system',

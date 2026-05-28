@@ -46,7 +46,7 @@ const fallbackItems: MenuItem[] = [
     title: 'Team',
     order: 2,
     active: true,
-    destination: '/dashboard/perfil',
+    destination: '/dashboard/team',
     location: 'sidebar' as MenuItem['location'],
   },
   {
@@ -117,8 +117,28 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
 
   const menuItems = useMemo(() => {
     const activeItems = items.filter((item) => item.active);
-    return activeItems.length ? activeItems : fallbackItems;
+    const sourceItems = activeItems.length ? activeItems : fallbackItems;
+
+    return sourceItems.map((item) => {
+      const key = `${item.slug || ''} ${item.title || ''}`.toLowerCase();
+      if (key.includes('team') || key.includes('equipe')) {
+        return { ...item, destination: '/dashboard/team' };
+      }
+      return item;
+    });
   }, [items]);
+
+  const activeHref = useMemo(() => {
+    const hrefs = menuItems
+      .flatMap((item) => [
+        normalizeHref(item.destination),
+        ...(item.childItems?.filter((child) => child.active).map((child) => normalizeHref(child.destination)) || []),
+      ])
+      .filter((href): href is string => Boolean(href))
+      .sort((a, b) => b.length - a.length);
+
+    return hrefs.find((href) => pathname === href || pathname.startsWith(`${href}/`)) || null;
+  }, [menuItems, pathname]);
 
   function toggleGroup(id: number) {
     setOpenGroups((current) => ({ ...current, [id]: !current[id] }));
@@ -167,7 +187,7 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
             const children = item.childItems?.filter((child) => child.active) || [];
             const isGroup = children.length > 0;
             const isOpen = openGroups[item.id] ?? true;
-            const isActive = href ? pathname === href || pathname.startsWith(`${href}/`) : false;
+            const isActive = href ? activeHref === href : false;
 
             return (
               <li key={item.id}>
@@ -211,7 +231,7 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
                       const childHref = normalizeHref(child.destination);
                       if (!childHref) return null;
 
-                      const childActive = pathname === childHref || pathname.startsWith(`${childHref}/`);
+                      const childActive = activeHref === childHref;
                       return (
                         <li key={child.id}>
                           <Link

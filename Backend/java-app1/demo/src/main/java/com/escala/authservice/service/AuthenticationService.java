@@ -184,6 +184,7 @@ public class AuthenticationService {
                 .email(user.getEmail())
                 .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
                 .theme(user.getTheme() == null ? "system" : user.getTheme())
+                .avatarUrl(user.getAvatarUrl())
                 .companyId(company == null ? null : company.getId())
                 .companySlug(company == null ? null : company.getSlug())
                 .companyName(company == null ? null : company.getName())

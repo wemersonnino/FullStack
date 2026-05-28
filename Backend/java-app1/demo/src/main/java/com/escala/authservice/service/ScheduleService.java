@@ -75,6 +75,7 @@ public class ScheduleService {
     @Transactional
     public List<EscalaResponse> createEscalas(EscalaRequest request, String userEmail) {
         Employee employee = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
+        applyEmployeeAllocation(employee, request);
         validateEmployeeSelection(employee, request);
         if (request.getDates() == null || request.getDates().isEmpty()) {
             throw new IllegalArgumentException("Selecione ao menos uma data");
@@ -118,6 +119,7 @@ public class ScheduleService {
         if (request.getEmployeeId() != null && !Objects.equals(request.getEmployeeId(), shift.getEmployee().getId())) {
             shift.setEmployee(employeeRepository.findById(request.getEmployeeId()).orElseThrow());
         }
+        applyEmployeeAllocation(shift.getEmployee(), request);
         validateEmployeeSelection(shift.getEmployee(), request);
         if (request.getDates() != null && !request.getDates().isEmpty()) {
             LocalDate newDate = request.getDates().get(0);
@@ -365,6 +367,26 @@ public class ScheduleService {
                 : workShiftRepository.countByShiftDateAndWorkModeAndEmployeeSectorIdAndIdNot(date, WorkMode.PRESENCIAL, sector.getId(), ignoredShiftId);
         if (scheduled >= sector.getMaxSeats()) {
             throw new IllegalStateException("Lotacao do setor " + sector.getName() + " excedida para " + date);
+        }
+    }
+
+    private void applyEmployeeAllocation(Employee employee, EscalaRequest request) {
+        boolean changed = false;
+
+        if (request.getSectorId() != null
+                && (employee.getSector() == null || !Objects.equals(employee.getSector().getId(), request.getSectorId()))) {
+            employee.setSector(sectorRepository.findById(request.getSectorId()).orElseThrow());
+            changed = true;
+        }
+
+        if (request.getProjectId() != null
+                && (employee.getProject() == null || !Objects.equals(employee.getProject().getId(), request.getProjectId()))) {
+            employee.setProject(projectRepository.findById(request.getProjectId()).orElseThrow());
+            changed = true;
+        }
+
+        if (changed) {
+            employeeRepository.save(employee);
         }
     }
 

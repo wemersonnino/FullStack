@@ -24,6 +24,7 @@ public class AuthenticationResponse {
         private String email;
         private Set<String> roles;
         private String theme;
+        private String avatarUrl;
         private Long companyId;
         private String companySlug;
         private String companyName;

@@ -7,6 +7,7 @@ export interface User {
   roles: string[]
   theme?: ThemeEnum
   avatar?: string | { url: string }
+  avatarUrl?: string | null
   address?: string
   position?: string
   function?: string

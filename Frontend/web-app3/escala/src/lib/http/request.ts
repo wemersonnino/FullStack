@@ -3,6 +3,7 @@ import { getSession } from 'next-auth/react';
 
 type RequestOptions = {
   authToken?: string;
+  throwOnError?: boolean;
 };
 
 function resolveUrl(url: string) {
@@ -20,6 +21,30 @@ async function getAuthHeaders(options?: RequestOptions) {
 
   if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
+}
+
+function getHttpErrorMessage(err: unknown, fallback: string) {
+  const error = err as {
+    message?: string;
+    cause?: {
+      response?: {
+        data?: unknown;
+      };
+    };
+    response?: {
+      data?: unknown;
+    };
+  };
+  const data = error.response?.data ?? error.cause?.response?.data;
+
+  if (typeof data === 'string' && data.trim()) return data;
+  if (data && typeof data === 'object') {
+    const record = data as Record<string, unknown>;
+    const message = record.message ?? record.error ?? record.detail;
+    if (typeof message === 'string' && message.trim()) return message;
+  }
+
+  return error.message || fallback;
 }
 
 /**
@@ -46,7 +71,9 @@ export async function httpPost<T = any>(url: string, body: any, options?: Reques
     const res = await api.post<T>(resolveUrl(url), body, { headers });
     return res.data;
   } catch (err) {
-    console.error(`[POST] ${url}`, err);
+    const message = getHttpErrorMessage(err, `Erro ao enviar dados para ${url}`);
+    if (options?.throwOnError) throw new Error(message, { cause: err });
+    console.warn(`[POST] ${url}: ${message}`);
     return null;
   }
 }

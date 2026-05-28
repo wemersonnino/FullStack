@@ -16,6 +16,7 @@ public class UserResponse {
     private String email;
     private Set<String> roles;
     private String theme;
+    private String avatarUrl;
     private boolean active;
 
     public static UserResponse from(User user) {
@@ -25,6 +26,7 @@ public class UserResponse {
                 .email(user.getEmail())
                 .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
                 .theme(user.getTheme() == null ? "system" : user.getTheme())
+                .avatarUrl(user.getAvatarUrl())
                 .active(user.isActive())
                 .build();
     }

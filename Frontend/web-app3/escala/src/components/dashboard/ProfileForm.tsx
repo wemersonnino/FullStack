@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ThemeEnum } from '@/interfaces/enums/theme.enum';
-import { changeMyPassword, updateMyProfile, uploadFile } from '@/services/profile.service';
+import { changeMyPassword, updateMyProfile, uploadAvatar } from '@/services/profile.service';
 
 type ProfileUser = {
   id: string | number;
@@ -35,6 +35,7 @@ type ProfileUser = {
   roles?: string[];
   theme?: ThemeEnum;
   avatar?: any;
+  avatarUrl?: string | null;
   address?: string;
   position?: string;
   function?: string;
@@ -67,12 +68,15 @@ const PasswordSchema = z
 type ProfileSchemaType = z.infer<typeof ProfileSchema>;
 type PasswordSchemaType = z.infer<typeof PasswordSchema>;
 
+const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+
 export function ProfileForm({ user }: ProfileFormProps) {
   const { update } = useSession();
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    user.avatar?.url || (typeof user.avatar === 'string' ? user.avatar : null)
+    user.avatarUrl || user.avatar?.url || (typeof user.avatar === 'string' ? user.avatar : null)
   );
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -101,6 +105,18 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+        toast.error('Use uma imagem JPG, PNG, GIF ou WebP.');
+        e.target.value = '';
+        return;
+      }
+
+      if (file.size > MAX_AVATAR_SIZE) {
+        toast.error('A imagem deve ter no maximo 2MB.');
+        e.target.value = '';
+        return;
+      }
+
       setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -114,17 +130,20 @@ export function ProfileForm({ user }: ProfileFormProps) {
     setSavingProfile(true);
 
     try {
-      let avatarId = undefined;
+      let avatarUrl: string | undefined;
       if (avatarFile) {
-        const uploadResult = await uploadFile(avatarFile);
-        if (uploadResult && uploadResult[0]) {
-          avatarId = uploadResult[0].id;
+        const uploadResult = await uploadAvatar(avatarFile);
+        avatarUrl = uploadResult?.url;
+
+        if (!avatarUrl) {
+          toast.error('Nao foi possivel enviar a imagem do avatar.');
+          return;
         }
       }
 
       const updated = await updateMyProfile({
         ...data,
-        avatar: avatarId,
+        avatarUrl,
       });
 
       if (!updated) {
@@ -133,6 +152,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
       }
 
       await update({ user: { ...user, ...updated } });
+      setAvatarPreview(updated.avatarUrl || null);
+      setAvatarFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       toast.success('Perfil atualizado.');
     } finally {
       setSavingProfile(false);

@@ -46,6 +46,8 @@ public class User {
     @Builder.Default
     private String theme = "system";
 
+    private String avatarUrl;
+
     @Builder.Default
     private boolean active = true;
 

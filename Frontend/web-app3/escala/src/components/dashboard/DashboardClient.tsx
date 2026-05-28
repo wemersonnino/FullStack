@@ -11,6 +11,7 @@ import { ShiftList } from './ShiftList';
 import { ShiftSwapForm } from './ShiftSwapForm';
 import { WorkScheduleModal } from './WorkScheduleModal';
 import { AdminSwapManagement } from './AdminSwapManagement';
+import { cn } from '@/lib/utils';
 import { 
   PlusCircle, 
   Users, 

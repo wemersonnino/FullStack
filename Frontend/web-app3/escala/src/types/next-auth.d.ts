@@ -9,6 +9,7 @@ declare module "next-auth" {
       email: string;
       roles: string[];
       theme: ThemeEnum;
+      avatarUrl?: string | null;
       token: string;
       companySlug?: string;
       companyTheme?: string;
@@ -21,6 +22,7 @@ declare module "next-auth" {
     email: string;
     roles: string[];
     theme: ThemeEnum;
+    avatarUrl?: string | null;
     token: string;
     companySlug?: string;
     companyTheme?: string;
@@ -34,6 +36,7 @@ declare module "next-auth/jwt" {
     email: string;
     roles: string[];
     theme: ThemeEnum;
+    avatarUrl?: string | null;
     accessToken: string;
     companySlug?: string;
     companyTheme?: string;

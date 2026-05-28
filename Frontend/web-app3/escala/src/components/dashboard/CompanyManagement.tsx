@@ -113,7 +113,7 @@ export function CompanyManagement() {
 
   async function onSubmit(values: CompanyFormValues) {
     try {
-      let logoId = undefined;
+      let logoId: number | undefined;
       if (logoFile) {
         const uploadResult = await uploadFile(logoFile);
         if (uploadResult && uploadResult[0]) {
@@ -123,7 +123,7 @@ export function CompanyManagement() {
 
       const payload = {
         ...values,
-        ...(logoId && { logo: logoId }),
+        ...(logoId ? { logo: logoId } : {}),
       };
 
       if (editingCompany) {

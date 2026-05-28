@@ -7,4 +7,5 @@ public class UpdateCurrentUserRequest {
     private String username;
     private String email;
     private String theme;
+    private String avatarUrl;
 }

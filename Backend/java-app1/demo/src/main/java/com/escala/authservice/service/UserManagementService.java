@@ -48,6 +48,11 @@ public class UserManagementService {
             user.setTheme(theme);
         }
 
+        if (request.getAvatarUrl() != null) {
+            String avatarUrl = request.getAvatarUrl().trim();
+            user.setAvatarUrl(avatarUrl.isBlank() ? null : avatarUrl);
+        }
+
         return userRepository.save(user);
     }
 
