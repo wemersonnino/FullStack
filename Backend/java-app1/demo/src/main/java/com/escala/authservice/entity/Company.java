@@ -23,8 +23,16 @@ public class Company {
     @Column(nullable = false, unique = true)
     private String slug;
 
-    private String cnpj;
+    private String cnpj; // Suporta Alfanumérico
     private String logoUrl;
+
+    // Geofencing Fields
+    private Double latitude;
+    private Double longitude;
+
+    @Builder.Default
+    private Integer allowedRadius = 200; // Raio padrão de 200 metros
+
     private String address;
     private String cep;
     private String street;

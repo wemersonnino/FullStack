@@ -30,8 +30,10 @@ export async function getMyProfile(): Promise<User | null> {
   return await httpGet<User>(`${API_ROUTES.USERS}/me`);
 }
 
-export async function updateMyProfile(payload: UpdateMyProfilePayload): Promise<User | null> {
-  return await httpPatch<User>(`${API_ROUTES.USERS}/me`, payload);
+import { UserProfile } from '@/core/domain/models/user.model';
+
+export async function updateMyProfile(payload: Partial<UserProfile>): Promise<UserProfile | null> {
+  return await httpPatch<UserProfile>(`${API_ROUTES.USERS}/me`, payload);
 }
 
 export type UploadedFile = {

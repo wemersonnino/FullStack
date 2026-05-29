@@ -31,13 +31,28 @@ public class AuthenticationService {
 
     public AuthenticationResponse register(RegisterRequest request) {
         recaptchaService.verifyIfProduction(request.getRecaptchaToken());
-        Company company = companyService.resolve(request.getCompanySlug());
+        
+        // Se companyName for fornecido, cria uma nova empresa (Fluxo SaaS Self-Service)
+        // Caso contrário, tenta resolver pelo slug (Fluxo de Convite/Empresa Existente)
+        Company company;
+        if (request.getCompanyName() != null && !request.getCompanyName().isBlank()) {
+            company = companyService.create(com.escala.authservice.dto.CompanyRequest.builder()
+                    .name(request.getCompanyName())
+                    .active(true)
+                    .build());
+        } else {
+            company = companyService.resolve(request.getCompanySlug());
+        }
+
         repository.findByEmailAndCompanySlug(request.getEmail(), company.getSlug())
                 .ifPresent(existing -> {
                     throw new IllegalArgumentException("Email ja cadastrado para esta empresa");
                 });
-        Role userRole = roleRepository.findByName("USER")
-                .orElseGet(() -> roleRepository.save(Role.builder().name("USER").build()));
+        
+        // Se criou uma empresa, o primeiro usuário é OWNER, senão é USER
+        String roleName = (request.getCompanyName() != null && !request.getCompanyName().isBlank()) ? "OWNER" : "USER";
+        Role userRole = roleRepository.findByName(roleName)
+                .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
 
         var user = User.builder()
                 .username(request.getUsername())
@@ -185,6 +200,16 @@ public class AuthenticationService {
                 .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
                 .theme(user.getTheme() == null ? "system" : user.getTheme())
                 .avatarUrl(user.getAvatarUrl())
+                .address(user.getAddress())
+                .cep(user.getCep())
+                .street(user.getStreet())
+                .number(user.getNumber())
+                .complement(user.getComplement())
+                .neighborhood(user.getNeighborhood())
+                .city(user.getCity())
+                .state(user.getState())
+                .position(user.getPosition())
+                .function(user.getFunction())
                 .companyId(company == null ? null : company.getId())
                 .companySlug(company == null ? null : company.getSlug())
                 .companyName(company == null ? null : company.getName())

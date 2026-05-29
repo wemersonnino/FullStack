@@ -198,9 +198,24 @@ export function ProfileForm({ user }: ProfileFormProps) {
         }
       }
 
+      // Converte o schema plano do form para o objeto aninhado da Model
       const updated = await updateMyProfile({
-        ...data,
+        username: data.username,
+        email: data.email,
+        theme: data.theme,
+        position: data.position,
+        function: data.function,
         avatarUrl,
+        address: {
+          cep: data.cep,
+          street: data.street,
+          number: data.number,
+          complement: data.complement,
+          neighborhood: data.neighborhood,
+          city: data.city,
+          state: data.state,
+          additionalInfo: data.address,
+        }
       });
 
       if (!updated) {

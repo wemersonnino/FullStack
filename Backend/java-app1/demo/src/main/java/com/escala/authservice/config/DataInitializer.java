@@ -30,7 +30,7 @@ public class DataInitializer {
     @Bean
     CommandLineRunner seedDevelopmentData() {
         return args -> {
-            for (String roleName : List.of("ADMIN", "MANAGER", "USER")) {
+            for (String roleName : List.of("ADMIN", "MANAGER", "USER", "OWNER")) {
                 roleRepository.findByName(roleName)
                         .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
             }

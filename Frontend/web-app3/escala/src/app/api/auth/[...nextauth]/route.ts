@@ -13,6 +13,16 @@ type SpringAuthResponse = {
     roles?: string[];
     theme?: string;
     avatarUrl?: string | null;
+    address?: string;
+    cep?: string;
+    street?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    position?: string;
+    function?: string;
     companySlug?: string;
     companyTheme?: string;
   };
@@ -44,6 +54,16 @@ async function loginSpringBoot(
       roles: data.user.roles || [],
       theme: (data.user.theme as ThemeEnum) ?? ThemeEnum.SYSTEM,
       avatarUrl: data.user.avatarUrl,
+      address: data.user.address,
+      cep: data.user.cep,
+      street: data.user.street,
+      number: data.user.number,
+      complement: data.user.complement,
+      neighborhood: data.user.neighborhood,
+      city: data.user.city,
+      state: data.user.state,
+      position: data.user.position,
+      function: data.user.function,
       companySlug: data.user.companySlug,
       companyTheme: data.user.companyTheme,
     },
@@ -71,6 +91,16 @@ async function loginGoogleSpringBoot(idToken: string, companySlug = ENV.COMPANY_
       roles: data.user.roles || [],
       theme: (data.user.theme as ThemeEnum) ?? ThemeEnum.SYSTEM,
       avatarUrl: data.user.avatarUrl,
+      address: data.user.address,
+      cep: data.user.cep,
+      street: data.user.street,
+      number: data.user.number,
+      complement: data.user.complement,
+      neighborhood: data.user.neighborhood,
+      city: data.user.city,
+      state: data.user.state,
+      position: data.user.position,
+      function: data.user.function,
       companySlug: data.user.companySlug,
       companyTheme: data.user.companyTheme,
     },
@@ -104,6 +134,16 @@ const providers: AuthOptions['providers'] = [
         roles: authUser.user.roles,
         theme: authUser.user.theme,
         avatarUrl: authUser.user.avatarUrl,
+        address: authUser.user.address,
+        cep: authUser.user.cep,
+        street: authUser.user.street,
+        number: authUser.user.number,
+        complement: authUser.user.complement,
+        neighborhood: authUser.user.neighborhood,
+        city: authUser.user.city,
+        state: authUser.user.state,
+        position: authUser.user.position,
+        function: authUser.user.function,
         token: authUser.token,
         companySlug: authUser.user.companySlug,
         companyTheme: authUser.user.companyTheme,
@@ -148,6 +188,16 @@ export const authOptions: AuthOptions = {
           token.roles = authUser.user.roles;
           token.theme = authUser.user.theme;
           token.avatarUrl = authUser.user.avatarUrl;
+          token.address = authUser.user.address;
+          token.cep = authUser.user.cep;
+          token.street = authUser.user.street;
+          token.number = authUser.user.number;
+          token.complement = authUser.user.complement;
+          token.neighborhood = authUser.user.neighborhood;
+          token.city = authUser.user.city;
+          token.state = authUser.user.state;
+          token.position = authUser.user.position;
+          token.function = authUser.user.function;
           token.accessToken = authUser.token;
           token.companySlug = authUser.user.companySlug;
           token.companyTheme = authUser.user.companyTheme;
@@ -161,6 +211,16 @@ export const authOptions: AuthOptions = {
         token.roles = user.roles;
         token.theme = user.theme;
         token.avatarUrl = user.avatarUrl;
+        token.address = user.address;
+        token.cep = user.cep;
+        token.street = user.street;
+        token.number = user.number;
+        token.complement = user.complement;
+        token.neighborhood = user.neighborhood;
+        token.city = user.city;
+        token.state = user.state;
+        token.position = user.position;
+        token.function = user.function;
         token.accessToken = user.token;
         token.companySlug = user.companySlug;
         token.companyTheme = user.companyTheme;
@@ -170,6 +230,16 @@ export const authOptions: AuthOptions = {
         token.email = session.user.email ?? token.email;
         token.theme = session.user.theme ?? token.theme;
         token.avatarUrl = session.user.avatarUrl ?? token.avatarUrl;
+        token.address = session.user.address ?? token.address;
+        token.cep = session.user.cep ?? token.cep;
+        token.street = session.user.street ?? token.street;
+        token.number = session.user.number ?? token.number;
+        token.complement = session.user.complement ?? token.complement;
+        token.neighborhood = session.user.neighborhood ?? token.neighborhood;
+        token.city = session.user.city ?? token.city;
+        token.state = session.user.state ?? token.state;
+        token.position = session.user.position ?? token.position;
+        token.function = session.user.function ?? token.function;
       }
       return token;
     },
@@ -181,6 +251,16 @@ export const authOptions: AuthOptions = {
         roles: (token.roles as string[]) ?? [],
         theme: (token.theme as ThemeEnum) ?? ThemeEnum.SYSTEM,
         avatarUrl: (token.avatarUrl as string | null) ?? null,
+        address: (token.address as string) ?? '',
+        cep: (token.cep as string) ?? '',
+        street: (token.street as string) ?? '',
+        number: (token.number as string) ?? '',
+        complement: (token.complement as string) ?? '',
+        neighborhood: (token.neighborhood as string) ?? '',
+        city: (token.city as string) ?? '',
+        state: (token.state as string) ?? '',
+        position: (token.position as string) ?? '',
+        function: (token.function as string) ?? '',
         token: (token.accessToken as string) ?? '',
         companySlug: (token.companySlug as string) ?? ENV.COMPANY_SLUG,
         companyTheme: (token.companyTheme as string) ?? 'system',

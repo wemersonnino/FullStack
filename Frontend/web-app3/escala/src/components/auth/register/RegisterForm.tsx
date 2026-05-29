@@ -22,7 +22,7 @@ export const RegisterForm = () => {
   const { register, loginGoogle } = useAuth();
   const form = useForm<RegisterSchemaType>({
     resolver: zodResolver(RegisterSchema),
-    defaultValues: { username: '', email: '', password: '' },
+    defaultValues: { username: '', email: '', password: '', companyName: '' },
   });
 
   const onSubmit = async (data: RegisterSchemaType) => {
@@ -41,6 +41,19 @@ export const RegisterForm = () => {
       >
         <h1 className="text-center text-xl font-semibold">Criar conta</h1>
 
+        <FormField
+          control={form.control}
+          name="companyName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome da Empresa / Clínica</FormLabel>
+              <FormControl>
+                <Input type={'text'} placeholder="Ex: Clínica Sorriso" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="username"

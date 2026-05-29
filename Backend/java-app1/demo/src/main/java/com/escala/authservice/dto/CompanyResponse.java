@@ -12,6 +12,9 @@ public class CompanyResponse {
     private String slug;
     private String cnpj;
     private String logoUrl;
+    private Double latitude;
+    private Double longitude;
+    private Integer allowedRadius;
     private String address;
     private String cep;
     private String street;

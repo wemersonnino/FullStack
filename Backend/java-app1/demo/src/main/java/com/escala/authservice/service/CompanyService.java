@@ -36,6 +36,9 @@ public class CompanyService {
                 .slug(slug)
                 .cnpj(request.getCnpj())
                 .logoUrl(request.getLogoUrl())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .allowedRadius(request.getAllowedRadius() != null ? request.getAllowedRadius() : 200)
                 .address(request.getAddress())
                 .cep(request.getCep())
                 .street(request.getStreet())
@@ -53,6 +56,11 @@ public class CompanyService {
         company.setName(request.getName());
         company.setCnpj(request.getCnpj());
         company.setLogoUrl(request.getLogoUrl());
+        company.setLatitude(request.getLatitude());
+        company.setLongitude(request.getLongitude());
+        if (request.getAllowedRadius() != null) {
+            company.setAllowedRadius(request.getAllowedRadius());
+        }
         company.setAddress(request.getAddress());
         company.setCep(request.getCep());
         company.setStreet(request.getStreet());
