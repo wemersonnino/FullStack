@@ -8,10 +8,12 @@ import {
   MapPin, 
   Users, 
   Zap,
-  ArrowRight
+  ArrowRight,
+  ClipboardList
 } from 'lucide-react';
 import { getArticles } from '@/services/article.service';
 import { BlogList } from '@/components/home/BlogList';
+import { cn } from '@/lib/utils';
 
 export default async function HomePage() {
   const articles = await getArticles(3);
@@ -187,8 +189,4 @@ export default async function HomePage() {
       </footer>
     </div>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }

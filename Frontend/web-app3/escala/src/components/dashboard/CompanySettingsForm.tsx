@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 import { Map } from '@/components/shared/Map';
+import { cn } from '@/lib/utils';
 import { ExternalDataService } from '@/core/application/services/external.service';
 import { Company } from '@/core/domain/models/company.model';
 import { 
@@ -43,16 +44,16 @@ type CompanySettingsType = z.infer<typeof CompanySettingsSchema>;
 
 export function CompanySettingsForm({ company, onSave }: { company: Company, onSave: (data: any) => Promise<void> }) {
   const [isSearching, setIsSearching] = useState(false);
-  const [mapCenter, setMapCenter] = useState({ lat: Number(company.address?.latitude || -23.5505), lng: Number(company.address?.longitude || -46.6333) });
+  const [mapCenter, setMapCenter] = useState({ lat: Number(company.latitude || company.address?.latitude || -23.5505), lng: Number(company.longitude || company.address?.longitude || -46.6333) });
 
   const form = useForm<CompanySettingsType>({
     resolver: zodResolver(CompanySettingsSchema),
     defaultValues: {
       name: company.name,
       cnpj: company.cnpj || '',
-      latitude: Number(company.address?.latitude || -23.5505),
-      longitude: Number(company.address?.longitude || -46.6333),
-      allowedRadius: company.active ? 200 : 200, // Placeholder radius logic
+      latitude: Number(company.latitude || company.address?.latitude || -23.5505),
+      longitude: Number(company.longitude || company.address?.longitude || -46.6333),
+      allowedRadius: 200, 
       address: company.address?.additionalInfo || '',
     },
   });
@@ -195,8 +196,4 @@ export function CompanySettingsForm({ company, onSave }: { company: Company, onS
       </section>
     </div>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }
