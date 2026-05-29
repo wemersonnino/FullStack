@@ -38,7 +38,7 @@ import { TeamInvitation } from '@/core/domain/models/invitation.model';
 const InviteSchema = z.object({
   email: z.string().email('Email inválido'),
   roleName: z.enum(['MANAGER', 'USER', 'OWNER'], {
-    required_error: 'Selecione um cargo',
+    message: 'Selecione um cargo',
   }),
 });
 

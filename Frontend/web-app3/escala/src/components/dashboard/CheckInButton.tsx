@@ -24,7 +24,7 @@ export function CheckInButton({ companyLocation }: CheckInButtonProps) {
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => setUserPos({ lat: position.coords.latitude, lng: position.coords.longitude }),
+        (pos) => setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
         () => {},
         { enableHighAccuracy: true }
       );
@@ -100,7 +100,7 @@ export function CheckInButton({ companyLocation }: CheckInButtonProps) {
       {/* Visual Map Feedback */}
       <div className="relative overflow-hidden rounded-2xl border bg-muted/20">
         <Map 
-          center={userPos || companyLocation || { lat: -23.5505, lng: -46.6333 }}
+          center={userPos || (companyLocation ? { lat: companyLocation.latitude, lng: companyLocation.longitude } : { lat: -23.5505, lng: -46.6333 })}
           zoom={16}
           className="h-[180px] w-full"
           interactive={false}
