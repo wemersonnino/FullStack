@@ -50,6 +50,49 @@
     },
     "last_login": {
       "type": "datetime"
+    },
+    "avatar": {
+      "type": "media",
+      "allowedTypes": [
+        "images"
+      ],
+      "multiple": false
+    },
+    "address": {
+      "type": "string"
+    },
+    "position": {
+      "type": "string"
+    },
+    "function": {
+      "type": "string"
+    },
+    "cep": {
+      "type": "string"
+    },
+    "street": {
+      "type": "string"
+    },
+    "number": {
+      "type": "string"
+    },
+    "complement": {
+      "type": "string"
+    },
+    "neighborhood": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "companies": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::company.company",
+      "mappedBy": "user_accounts"
     }
   }
 }

@@ -25,7 +25,7 @@ export default ({ env }) => {
     postgres: {
       connection: {
         connectionString: env('DATABASE_URL'),
-        host: env('DATABASE_HOST', 'web-app-postgres'),
+        host: env('DATABASE_HOST', 'escala-postgres'),
         port: env.int('DATABASE_PORT', 5432),
         database: env('DATABASE_NAME', 'strapi_cms'),
         user: env('DATABASE_USERNAME', 'strapi_user'),

@@ -50,8 +50,9 @@ const reducer = (state: LoaderState, action: LoaderAction): LoaderState => {
       };
     case 'reset':
       if (!action.key) return {};
-      const { [action.key]: _removed, ...rest } = state;
-      return rest;
+      const nextState = { ...state };
+      delete nextState[action.key];
+      return nextState;
     default:
       return state;
   }

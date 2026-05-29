@@ -4,4 +4,5 @@ export * from "./calendar.dto";
 export * from "./footer.dto";
 export * from "./menu.dto";
 export * from "./strapiLogin.dto"
+export * from "./shift.dto"
 

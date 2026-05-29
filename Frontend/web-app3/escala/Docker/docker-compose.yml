@@ -18,14 +18,19 @@ services:
       - CHOKIDAR_USEPOLLING=1
       - PORT=3000
       - NODE_ENV=development
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+      - NEXT_INTERNAL_API_BASE_URL=http://escala-backend:8080
+      - NEXT_PUBLIC_STRAPI_PUBLIC_URL=http://localhost:1337
+      - NEXT_INTERNAL_STRAPI_URL=http://cms-strapi:1337
     volumes:
       - ../:/app                    # monta o código-fonte do projeto
       - /app/node_modules           # ignora node_modules do host
     working_dir: /app
     command: npm run dev
     networks:
-      nino-network:
+      escala-network:
 
 networks:
-  nino-network:
+  escala-network:
     external: true

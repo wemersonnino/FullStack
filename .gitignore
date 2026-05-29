@@ -1,6 +1,8 @@
 /Frontend/web-app1/
 /Frontend/web-app3/.env
 /Frontend/web-app3/escala/.env.local
+/Frontend/web-app3/escala/core
+/Backend/java-app1/**/target/
 /Data/postgres/.env
 /Data/postgres/init.sql
 /.idea/copilot.data.migration.agent.xml
@@ -15,7 +17,6 @@
 /.idea/git_toolbox_prj.xml
 /.idea/sqldialects.xml
 /Data/postgres/.idea/workspace.xml
-Backend/java-app1/
 /.idea/GitLink.xml
 /.idea/material_theme_project_new.xml
 /.idea/modules.xml

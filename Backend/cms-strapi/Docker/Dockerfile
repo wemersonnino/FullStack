@@ -37,13 +37,11 @@ ENV PATH=/opt/node_modules/.bin:$PATH
 # 📁 Copia o código da aplicação
 # =============================
 WORKDIR /opt/app
-COPY . .
+COPY --chown=node:node . .
 
 # Copia o arquivo .env (muito importante)
-COPY .env .env
-
-# Ajusta permissões
-RUN chown -R node:node /opt/app
+COPY --chown=node:node .env .env
+RUN chown node:node /opt/app
 USER node
 
 # Porta exposta

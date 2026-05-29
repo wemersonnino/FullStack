@@ -3,6 +3,7 @@ import { normalizeImageUrlStrapi } from '@/lib/utils';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { createMetadata } from '@/lib/seo';
+import { ArticleBlocksRenderer } from '@/components/article/ArticleBlocksRenderer';
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -29,7 +30,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const cover = article.cover_image?.url
     ? normalizeImageUrlStrapi(article.cover_image.url)
-    : '/default-banner.jpg';
+    : '/default-banner.svg';
 
   const author = article.author?.name || 'Autor desconhecido';
   const publishedAt = new Date(article.published_at).toLocaleDateString('pt-BR');
@@ -43,6 +44,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           alt={article.cover_image?.alternativeText || article.title}
           fill
           className="rounded-xl object-cover"
+          priority
         />
       </div>
 
@@ -51,12 +53,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <span>{author}</span> • <span>{publishedAt}</span>
       </div>
 
-      <div
-        className="prose prose-lg dark:prose-invert"
-        dangerouslySetInnerHTML={{
-          __html: article.content || '',
-        }}
-      />
+      <ArticleBlocksRenderer blocks={article.blocks} fallbackContent={article.content} />
 
       {article.category && (
         <p className="mt-8 text-sm text-gray-400">

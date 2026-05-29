@@ -1,0 +1,104 @@
+@baseUrl = http://localhost:8080
+@token =
+
+### OpenAPI JSON
+GET {{baseUrl}}/v3/api-docs
+
+### Swagger UI
+GET {{baseUrl}}/swagger-ui.html
+
+### Register user
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "username": "apiadmin",
+  "email": "apiadmin@example.com",
+  "password": "Passw0rd!"
+}
+
+### Login
+POST {{baseUrl}}/api/v1/auth/authenticate
+Content-Type: application/json
+
+{
+  "email": "apiadmin@example.com",
+  "password": "Passw0rd!"
+}
+
+### Dashboard summary
+GET {{baseUrl}}/api/v1/schedules/dashboard-summary?year=2026&month=5
+Authorization: Bearer {{token}}
+
+### Generate presential schedule with capacity limit
+POST {{baseUrl}}/api/v1/schedules/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "year": 2026,
+  "month": 5,
+  "workMode": "PRESENCIAL",
+  "maxPresentialPerDay": 20,
+  "startTime": "08:00:00",
+  "endTime": "17:00:00"
+}
+
+### Generate remote schedule
+POST {{baseUrl}}/api/v1/schedules/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "year": 2026,
+  "month": 5,
+  "workMode": "REMOTO",
+  "startTime": "08:00:00",
+  "endTime": "17:00:00"
+}
+
+### Request shift swap
+POST {{baseUrl}}/api/v1/schedules/swap-requests
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "originalShiftId": 1,
+  "compensationDate": "2026-05-29",
+  "comments": "Preciso trocar por compromisso medico."
+}
+
+### Approve shift swap by colleague
+PATCH {{baseUrl}}/api/v1/schedules/swap-requests/1/colleague-approval
+Authorization: Bearer {{token}}
+
+### Decide shift swap by manager
+PATCH {{baseUrl}}/api/v1/schedules/swap-requests/1/decision
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "approved": true,
+  "effective": true,
+  "adminComments": "Aprovada com cobertura minima mantida."
+}
+
+### Create sector
+POST {{baseUrl}}/api/v1/organization/sectors
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Operacoes",
+  "description": "Setor de operacoes"
+}
+
+### Create project
+POST {{baseUrl}}/api/v1/organization/projects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Escala Principal",
+  "description": "Projeto principal de escalas"
+}

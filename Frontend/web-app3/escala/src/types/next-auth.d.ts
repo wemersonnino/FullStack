@@ -1,4 +1,4 @@
-import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+import { DefaultSession } from "next-auth";
 import { ThemeEnum } from "@/interfaces/enums/theme.enum"
 
 declare module "next-auth" {
@@ -9,7 +9,20 @@ declare module "next-auth" {
       email: string;
       roles: string[];
       theme: ThemeEnum;
+      avatarUrl?: string | null;
+      address?: string;
+      cep?: string;
+      street?: string;
+      number?: string;
+      complement?: string;
+      neighborhood?: string;
+      city?: string;
+      state?: string;
+      position?: string;
+      function?: string;
       token: string;
+      companySlug?: string;
+      companyTheme?: string;
     } & DefaultSession["user"];
   }
 
@@ -19,7 +32,20 @@ declare module "next-auth" {
     email: string;
     roles: string[];
     theme: ThemeEnum;
+    avatarUrl?: string | null;
+    address?: string;
+    cep?: string;
+    street?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    position?: string;
+    function?: string;
     token: string;
+    companySlug?: string;
+    companyTheme?: string;
   }
 }
 
@@ -30,6 +56,19 @@ declare module "next-auth/jwt" {
     email: string;
     roles: string[];
     theme: ThemeEnum;
+    avatarUrl?: string | null;
+    address?: string;
+    cep?: string;
+    street?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    position?: string;
+    function?: string;
     accessToken: string;
+    companySlug?: string;
+    companyTheme?: string;
   }
 }

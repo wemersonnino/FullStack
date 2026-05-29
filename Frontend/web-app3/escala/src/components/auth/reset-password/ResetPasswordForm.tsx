@@ -18,12 +18,13 @@ import {
   ResetPasswordSchema,
   ResetPasswordSchemaType,
 } from '@/lib/schemas/auth/reset-password.schema';
-import { httpPost } from '@/lib/http/request';
+import { useAuth } from '@/hooks/useAuth';
 
 export const ResetPasswordForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const code = searchParams.get('code'); // token enviado no email do Strapi
+  const { resetPassword } = useAuth();
+  const code = searchParams.get('code');
 
   const form = useForm<ResetPasswordSchemaType>({
     resolver: zodResolver(ResetPasswordSchema),
@@ -35,11 +36,10 @@ export const ResetPasswordForm = () => {
   });
 
   const onSubmit = async (data: ResetPasswordSchemaType) => {
-    const res = await httpPost('/api/auth/reset-password', data);
-    if (res) {
-      toast.success('Senha redefinida com sucesso! Faça login novamente.');
+    try {
+      await resetPassword(data);
       router.push('/login');
-    } else {
+    } catch {
       toast.error('Erro ao redefinir senha. Verifique o código ou tente novamente.');
     }
   };

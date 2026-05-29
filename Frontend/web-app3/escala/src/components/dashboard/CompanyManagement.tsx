@@ -1,0 +1,287 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { Plus, Pencil, Trash2, Building2, Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { 
+  Company 
+} from '@/services/company.service';
+import { uploadFile } from '@/services/profile.service';
+import { useCompanyStore } from '@/store/useCompanyStore';
+
+const CompanySchema = z.object({
+  name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
+  cnpj: z.string().min(14, 'CNPJ inválido.'),
+  address: z.string().optional(),
+});
+
+type CompanyFormValues = z.infer<typeof CompanySchema>;
+
+export function CompanyManagement() {
+  const { companies, isLoading, fetchCompanies, editCompany, removeCompany } = useCompanyStore();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingCompany, setEditingCompany] = useState<Company | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const form = useForm<CompanyFormValues>({
+    resolver: zodResolver(CompanySchema),
+    defaultValues: {
+      name: '',
+      cnpj: '',
+      address: '',
+    },
+  });
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [fetchCompanies]);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const onOpenEditDialog = (company: Company) => {
+    setEditingCompany(company);
+    setLogoPreview(company.logo?.url || null);
+    setLogoFile(null);
+    form.reset({
+      name: company.name,
+      cnpj: company.cnpj,
+      address: company.address || '',
+    });
+    setIsDialogOpen(true);
+  };
+
+  async function onSubmit(values: CompanyFormValues) {
+    try {
+      let logoId: number | undefined;
+      if (logoFile) {
+        const uploadResult = await uploadFile(logoFile);
+        if (uploadResult && uploadResult[0]) {
+          logoId = uploadResult[0].id;
+        }
+      }
+
+      const payload = {
+        ...values,
+        ...(logoId ? { logo: logoId } : {}),
+      };
+
+      if (editingCompany) {
+        await editCompany(editingCompany.id, payload);
+      }
+
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast.error('Erro ao salvar empresa.');
+    }
+  }
+
+  async function onDelete(id: number) {
+    if (confirm('Tem certeza que deseja excluir esta empresa?')) {
+      await removeCompany(id);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Empresas</h2>
+          <p className="text-muted-foreground">
+            Gerencie as empresas cadastradas no sistema.
+          </p>
+        </div>
+        <Button asChild className="gap-2">
+          <Link href="/dashboard/empresas/novo">
+            <Plus className="h-4 w-4" /> Nova Empresa
+          </Link>
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex h-40 items-center justify-center">
+          <p>Carregando empresas...</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {companies.map((company) => (
+            <div
+              key={company.id}
+              className="group relative rounded-xl border bg-card p-6 transition-all hover:shadow-md"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border bg-muted">
+                    {company.logo?.url ? (
+                      <img
+                        src={company.logo.url}
+                        alt={company.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <Building2 className="h-6 w-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{company.name}</h3>
+                    <p className="text-xs text-muted-foreground">CNPJ: {company.cnpj}</p>
+                  </div>
+                </div>
+                <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => onOpenEditDialog(company)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive"
+                    onClick={() => onDelete(company.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {company.address && (
+                <p className="mt-4 text-sm text-muted-foreground line-clamp-2">
+                  {company.address}
+                </p>
+              )}
+            </div>
+          ))}
+          {companies.length === 0 && (
+            <div className="col-span-full flex h-40 flex-col items-center justify-center rounded-xl border border-dashed text-muted-foreground">
+              <Building2 className="mb-2 h-8 w-8 opacity-20" />
+              <p>Nenhuma empresa cadastrada.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingCompany ? 'Editar Empresa' : 'Nova Empresa'}
+            </DialogTitle>
+            <DialogDescription>
+              Preencha os dados da empresa abaixo.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mb-4 flex flex-col items-center gap-4">
+            <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed bg-muted">
+              {logoPreview ? (
+                <img src={logoPreview} alt="Preview" className="h-full w-full object-cover" />
+              ) : (
+                <Building2 className="h-8 w-8 text-muted-foreground/40" />
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="h-3 w-3" /> {logoPreview ? 'Trocar Logo' : 'Adicionar Logo'}
+            </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleLogoChange}
+            />
+          </div>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome Fantasia</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Minha Empresa LTDA" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cnpj"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CNPJ</FormLabel>
+                    <FormControl>
+                      <Input placeholder="00.000.000/0000-00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Endereço</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Rua, Número, Bairro, Cidade - UF" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter className="pt-4">
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? 'Salvando...' : 'Salvar'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

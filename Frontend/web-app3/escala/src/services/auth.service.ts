@@ -1,25 +1,40 @@
-import { StrapiLoginResponse } from "@/interfaces/strapi/strapiLogin.interface";
+import { API_ROUTES } from '@/constants/api';
+import { httpPost } from '@/lib/http/request';
+import { ThemeEnum } from '@/interfaces/enums/theme.enum';
 
-export async function strapiLogin(
-  email: string,
-  password: string,
-): Promise<StrapiLoginResponse | null> {
-  const response = await fetch(`${process.env.STRAPI_API_URL}/api/auth/local`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      identifier: email,
-      password,
-    }),
-    next: { revalidate: 0 },
-    cache: "no-store",
-  });
-  if (!response.ok) return null;
-  const data = await response.json();
-  const rolesStrapi = (data?.user?.roles || []).map(
-    (role: any) => role.name ?? role,
-  );
-  return { jwt: data.jwt, user: { ...data.user, roles: rolesStrapi } };
+export type BackendAuthUser = {
+  id: number;
+  username: string;
+  email: string;
+  roles: string[];
+  theme: ThemeEnum;
+  companyId?: number;
+  companySlug?: string;
+  companyName?: string;
+  companyTheme?: string;
+};
+
+export type BackendAuthResponse = {
+  token: string;
+  user: BackendAuthUser;
+};
+
+export type RegisterAccountPayload = {
+  username: string;
+  email: string;
+  password: string;
+  companySlug?: string;
+  recaptchaToken?: string;
+};
+
+export async function registerAccount(payload: RegisterAccountPayload) {
+  return httpPost<BackendAuthResponse>(`${API_ROUTES.AUTH_SERVICE}/register`, payload);
+}
+
+export async function loginWithGoogle(payload: {
+  idToken: string;
+  companySlug?: string;
+  recaptchaToken?: string;
+}) {
+  return httpPost<BackendAuthResponse>(`${API_ROUTES.AUTH_SERVICE}/google`, payload);
 }

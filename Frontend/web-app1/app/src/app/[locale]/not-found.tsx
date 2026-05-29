@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function NotFound() {
@@ -10,8 +9,11 @@ export default function NotFound() {
       <p className="mb-6 text-gray-600">
         O recurso que você está tentando acessar não existe ou foi movido.
       </p>
-      <Link href="/">
-        <Button>Voltar à página inicial</Button>
+      <Link
+        href="/home"
+        className="rounded-md bg-fundep-blue px-4 py-2 font-medium text-white transition-colors hover:bg-blue-900"
+      >
+        Voltar à página inicial
       </Link>
     </main>
   );
