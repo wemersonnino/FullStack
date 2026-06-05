@@ -25,6 +25,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { isValidCnpj, formatCnpj } from '@/lib/cnpj';
 import { 
   Company 
 } from '@/services/company.service';
@@ -33,11 +34,34 @@ import { useCompanyStore } from '@/store/useCompanyStore';
 
 const CompanySchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
-  cnpj: z.string().min(14, 'CNPJ inválido.'),
+  cnpj: z.string().refine((val) => isValidCnpj(val), 'CNPJ inválido.'),
   address: z.string().optional(),
 });
 
 type CompanyFormValues = z.infer<typeof CompanySchema>;
+
+function getCompanyAddressLabel(address: Company['address']) {
+  if (!address) return '';
+  if (typeof address === 'string') return address;
+
+  const parts = [
+    address.street,
+    address.number,
+    address.complement,
+    address.neighborhood,
+    address.city,
+    address.state,
+  ].filter(Boolean);
+
+  const main = parts.join(', ');
+  const extra = address.additionalInfo?.trim();
+  const cep = address.cep ? `CEP ${address.cep}` : '';
+  return [main, extra, cep].filter(Boolean).join(' • ');
+}
+
+function getCompanyLogoUrl(company: Company) {
+  return company.logoUrl || company.logo?.url || undefined;
+}
 
 export function CompanyManagement() {
   const { companies, isLoading, fetchCompanies, editCompany, removeCompany } = useCompanyStore();
@@ -74,29 +98,84 @@ export function CompanyManagement() {
 
   const onOpenEditDialog = (company: Company) => {
     setEditingCompany(company);
-    setLogoPreview(company.logo?.url || null);
+    setLogoPreview(getCompanyLogoUrl(company) || null);
     setLogoFile(null);
     form.reset({
-      name: company.name,
-      cnpj: company.cnpj,
-      address: company.address || '',
+      name: company.name || '',
+      cnpj: company.cnpj || '',
+      address: typeof company.address === 'string' ? company.address : company.address?.additionalInfo || '',
     });
     setIsDialogOpen(true);
   };
 
   async function onSubmit(values: CompanyFormValues) {
     try {
-      let logoId: number | undefined;
+      let logoUrl: string | undefined;
       if (logoFile) {
         const uploadResult = await uploadFile(logoFile);
         if (uploadResult && uploadResult[0]) {
-          logoId = uploadResult[0].id;
+          logoUrl = uploadResult[0].url;
         }
       }
 
+      const currentAddress = editingCompany
+        ? {
+            cep:
+              typeof editingCompany.address === 'object'
+                ? editingCompany.address?.cep ?? editingCompany.cep
+                : editingCompany.cep,
+            street:
+              typeof editingCompany.address === 'object'
+                ? editingCompany.address?.street ?? editingCompany.street
+                : editingCompany.street,
+            number:
+              typeof editingCompany.address === 'object'
+                ? editingCompany.address?.number ?? editingCompany.number
+                : editingCompany.number,
+            complement:
+              typeof editingCompany.address === 'object'
+                ? editingCompany.address?.complement ?? editingCompany.complement
+                : editingCompany.complement,
+            neighborhood:
+              typeof editingCompany.address === 'object'
+                ? editingCompany.address?.neighborhood ?? editingCompany.neighborhood
+                : editingCompany.neighborhood,
+            city:
+              typeof editingCompany.address === 'object'
+                ? editingCompany.address?.city ?? editingCompany.city
+                : editingCompany.city,
+            state:
+              typeof editingCompany.address === 'object'
+                ? editingCompany.address?.state ?? editingCompany.state
+                : editingCompany.state,
+            additionalInfo:
+              typeof editingCompany.address === 'string'
+                ? editingCompany.address
+                : editingCompany.address?.additionalInfo,
+          }
+        : undefined;
+
       const payload = {
-        ...values,
-        ...(logoId ? { logo: logoId } : {}),
+        name: values.name,
+        cnpj: values.cnpj,
+        logoUrl: logoUrl ?? editingCompany?.logoUrl ?? editingCompany?.logo?.url,
+        address: {
+          cep: currentAddress?.cep,
+          street: currentAddress?.street,
+          number: currentAddress?.number,
+          complement: currentAddress?.complement,
+          neighborhood: currentAddress?.neighborhood,
+          city: currentAddress?.city,
+          state: currentAddress?.state,
+          additionalInfo: values.address || currentAddress?.additionalInfo,
+        },
+        cep: currentAddress?.cep,
+        street: currentAddress?.street,
+        number: currentAddress?.number,
+        complement: currentAddress?.complement,
+        neighborhood: currentAddress?.neighborhood,
+        city: currentAddress?.city,
+        state: currentAddress?.state,
       };
 
       if (editingCompany) {
@@ -143,11 +222,11 @@ export function CompanyManagement() {
               className="group relative rounded-xl border bg-card p-6 transition-all hover:shadow-md"
             >
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border bg-muted">
-                    {company.logo?.url ? (
+                    {getCompanyLogoUrl(company) ? (
                       <img
-                        src={company.logo.url}
+                        src={getCompanyLogoUrl(company)}
                         alt={company.name}
                         className="h-full w-full object-cover"
                       />
@@ -179,9 +258,9 @@ export function CompanyManagement() {
                   </Button>
                 </div>
               </div>
-              {company.address && (
+              {getCompanyAddressLabel(company.address) && (
                 <p className="mt-4 text-sm text-muted-foreground line-clamp-2">
-                  {company.address}
+                  {getCompanyAddressLabel(company.address)}
                 </p>
               )}
             </div>
@@ -254,7 +333,14 @@ export function CompanyManagement() {
                   <FormItem>
                     <FormLabel>CNPJ</FormLabel>
                     <FormControl>
-                      <Input placeholder="00.000.000/0000-00" {...field} />
+                      <Input 
+                        placeholder="00.000.000/0000-00" 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^\w]/g, '');
+                          field.onChange(formatCnpj(value));
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

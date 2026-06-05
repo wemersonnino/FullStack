@@ -1,4 +1,4 @@
-import { normalizeImageUrlStrapi } from '@/lib/utils';
+import { normalizeStrapiUrl } from '@/lib/utils';
 import {
   LandingCtaButton,
   LandingFaq,
@@ -29,7 +29,7 @@ function mapMedia(media: AnyRecord | null | undefined): LandingMedia | undefined
   if (!file?.url) return undefined;
 
   return {
-    url: normalizeImageUrlStrapi(file.url),
+    url: normalizeStrapiUrl(file.url),
     alternativeText: file.alternativeText || file.name || 'Tela da plataforma Escala',
   };
 }

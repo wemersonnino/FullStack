@@ -54,13 +54,14 @@ public class GoogleIdentityService {
             return new GoogleProfile(
                     json.path("email").asText(),
                     json.path("name").asText(json.path("email").asText()),
-                    json.path("sub").asText()
+                    json.path("sub").asText(),
+                    json.path("picture").asText(null)
             );
         } catch (Exception exception) {
             throw new IllegalArgumentException("Falha ao validar Google idToken", exception);
         }
     }
 
-    public record GoogleProfile(String email, String name, String subject) {
+    public record GoogleProfile(String email, String name, String subject, String picture) {
     }
 }

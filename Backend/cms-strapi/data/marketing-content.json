@@ -1,0 +1,117 @@
+{
+  "landingPage": {
+    "eyebrow": "A nova era da gestão operacional",
+    "heroTitle": "Gestão inteligente de escalas para empresas que não podem parar.",
+    "heroDescription": "Elimine planilhas e o caos do WhatsApp. Garanta postos sempre cobertos com inteligência artificial, geolocalização e total segurança jurídica.",
+    "primaryCtaLabel": "Começar teste de 3 meses",
+    "primaryCtaUrl": "/register",
+    "secondaryCtaLabel": "Solicitar demonstração",
+    "secondaryCtaUrl": "#contato",
+    "trialDescription": "Experimente a plataforma completa por 3 meses sem custo.",
+    "aiTrialDescription": "Teste nosso Assistente de Escala por 14 dias e veja a IA organizar seu time.",
+    "securityStatement": "Dados protegidos por criptografia de ponta a ponta e total conformidade com a LGPD e Portaria 671."
+  },
+  "features": [
+    {
+      "title": "Escalas com regras trabalhistas",
+      "description": "Valide jornada diária, semanal, mensal, intervalos, DSR, 5x2, 6x1 e 12x36 antes da publicação.",
+      "category": "scheduling",
+      "iconKey": "calendar"
+    },
+    {
+      "title": "Trocas com aprovação",
+      "description": "Organize solicitações, aceite do colega e aprovação final do gestor com trilha auditável.",
+      "category": "scheduling",
+      "iconKey": "shuffle"
+    },
+    {
+      "title": "Ponto digital preparado",
+      "description": "Base para ponto online/offline, geolocalização, inconsistências e fechamento de folha.",
+      "category": "time_clock",
+      "iconKey": "clock"
+    },
+    {
+      "title": "IA assistiva com governança",
+      "description": "Sugestões de escala e explicação de conflitos com cotas por tenant e minimização de dados sensíveis.",
+      "category": "ai",
+      "iconKey": "sparkles"
+    }
+  ],
+  "industries": [
+    {
+      "title": "Saúde (Hospitais e Clínicas)",
+      "valueProposition": "Plantões sem furos. Gerencie escalas médicas e assistenciais com precisão cirúrgica e compliance financeiro.",
+      "description": "Cobertura de plantões críticos com menos risco de multa e menos substituições de última hora.",
+      "highlightMetric": "Plantão 100% coberto",
+      "segment": "healthcare"
+    },
+    {
+      "title": "Segurança e Facilities",
+      "valueProposition": "Evidência de presença em tempo real. Prove para seu cliente que o posto está coberto via geofencing avançado.",
+      "description": "Controle por posto, contrato e turno para reduzir perda de receita por medição incorreta.",
+      "highlightMetric": "Posto sem lacunas",
+      "segment": "security"
+    },
+    {
+      "title": "Terceirização e Logística",
+      "valueProposition": "Gestão distribuída simplificada. Controle equipes em campo sem perder o rastro da produtividade.",
+      "description": "Planejamento de capacidade por projeto, disponibilidade e modalidade presencial/remota/híbrida.",
+      "highlightMetric": "Produtividade Visível",
+      "segment": "other"
+    }
+  ],
+  "faqs": [
+    {
+      "question": "O teste gratuito da aplicação dura quanto tempo?",
+      "answer": "O modelo comercial previsto é de 3 meses para a aplicação principal, permitindo validar todos os fluxos operacionais.",
+      "category": "trial"
+    },
+    {
+      "question": "A IA também fica liberada por 3 meses?",
+      "answer": "Não necessariamente. O módulo de IA possui um período de teste de 14 dias ou limite por créditos/tokens para controle de custo operacional.",
+      "category": "ai"
+    },
+    {
+      "question": "O Strapi autentica usuários finais?",
+      "answer": "Não. O Strapi fica restrito à gestão de conteúdo (CMS). Usuários finais autenticam de forma segura contra o backend Spring Boot.",
+      "category": "lgpd"
+    },
+    {
+      "question": "O sistema aceita o novo CNPJ Alfanumérico?",
+      "answer": "Sim. O Escala é pioneiro na adaptação ao padrão 2026 da Receita Federal, garantindo que sua empresa esteja sempre em conformidade.",
+      "category": "product"
+    },
+    {
+      "question": "Posso usar em locais sem sinal de internet?",
+      "answer": "Sim. Nosso registro de ponto offline sincroniza automaticamente com o servidor assim que o dispositivo recuperar a conexão.",
+      "category": "product"
+    }
+  ],
+  "pricingPlans": [
+    {
+      "name": "Plano Trial Operacional",
+      "description": "Base B2B para validar escalas, trocas, relatórios e governança.",
+      "priceLabel": "Gratuito",
+      "trialDescription": "3 meses de teste pleno",
+      "aiLimitDescription": "IA inclusa por 14 dias",
+      "features": ["Multi-tenant", "Escalas mensais e anuais", "Trocas de escala", "Auditoria", "Relatórios operacionais"],
+      "recommended": true,
+      "ctaLabel": "Iniciar meu teste",
+      "ctaUrl": "/register"
+    }
+  ],
+  "articles": [
+    {
+      "title": "O Futuro da Gestão de Escalas com IA",
+      "slug": "futuro-gestao-escalas-ia",
+      "description": "Como a IA transforma a organização de turnos em hospitais e segurança.",
+      "imageName": "a-bug-is-becoming-a-meme-on-the-internet.jpg"
+    },
+    {
+      "title": "Conformidade Legal: CNPJ Alfanumérico",
+      "slug": "cnpj-alfanumerico-compliance",
+      "description": "Entenda as mudanças e como preparar seu DP para o novo padrão de CNPJ.",
+      "imageName": "beautiful-picture.jpg"
+    }
+  ]
+}

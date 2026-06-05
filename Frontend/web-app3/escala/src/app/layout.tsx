@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { routing } from '@/i18n/routing';
 import { getGlobal } from '@/services/global.service';
-import { normalizeImageUrlStrapi } from '@/lib/utils';
+import { normalizeStrapiUrl } from '@/lib/utils';
 import { AppProviders } from '@/components/shared/providers/AppProviders';
 import { RecaptchaScript } from '@/components/shared/RecaptchaScript';
 import { ENV } from '@/constants/env';
@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description =
     global?.defaultSeo?.metaDescription || global?.siteDescription || 'Aplicação Escala Web App';
   const favicon = global?.favicon?.url
-    ? normalizeImageUrlStrapi(global.favicon.url)
+    ? normalizeStrapiUrl(global.favicon.url)
     : '/favicon.ico';
 
   return {

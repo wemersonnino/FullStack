@@ -1,6 +1,6 @@
 // src/lib/seo.ts
 import { getGlobal } from "@/services/global.service";
-import { normalizeImageUrlStrapi } from "@/lib/utils";
+import { normalizeStrapiUrl } from "@/lib/utils";
 
 interface MetaOptions {
   title?: string;
@@ -25,7 +25,7 @@ export async function createMetadata(options: MetaOptions = {}) {
     "";
 
   const favicon = global?.favicon?.url
-    ? normalizeImageUrlStrapi(global.favicon.url)
+    ? normalizeStrapiUrl(global.favicon.url)
     : "/favicon.ico";
 
   const image = options.image || favicon || "/default-banner.svg";

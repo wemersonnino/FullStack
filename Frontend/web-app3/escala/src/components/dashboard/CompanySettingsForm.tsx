@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { 
   Building2, 
-  MapPin, 
   Search, 
   Save, 
   LocateFixed, 
@@ -21,6 +20,7 @@ import { Map } from '@/components/shared/Map';
 import { cn } from '@/lib/utils';
 import { ExternalDataService } from '@/core/application/services/external.service';
 import { Company } from '@/core/domain/models/company.model';
+import { isValidCnpj, formatCnpj } from '@/lib/cnpj';
 import { 
   Form, 
   FormControl, 
@@ -33,7 +33,7 @@ import {
 
 const CompanySettingsSchema = z.object({
   name: z.string().min(3, 'Nome obrigatório'),
-  cnpj: z.string().min(14, 'CNPJ Inválido'),
+  cnpj: z.string().refine((val) => isValidCnpj(val), 'CNPJ Inválido'),
   latitude: z.number(),
   longitude: z.number(),
   allowedRadius: z.number().min(50).max(1000),
@@ -98,7 +98,15 @@ export function CompanySettingsForm({ company, onSave }: { company: Company, onS
                   <FormLabel className="font-bold">CNPJ (Alfanumérico)</FormLabel>
                   <div className="flex gap-2">
                     <FormControl>
-                      <Input placeholder="00.000.000/0000-00" className="rounded-xl" {...field} />
+                      <Input 
+                        placeholder="00.000.000/0000-00" 
+                        className="rounded-xl" 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^\w]/g, '');
+                          field.onChange(formatCnpj(value));
+                        }}
+                      />
                     </FormControl>
                     <Button type="button" variant="outline" size="icon" onClick={handleCnpjLookup} disabled={isSearching}>
                       <Search className={cn("h-4 w-4", isSearching && "animate-spin")} />

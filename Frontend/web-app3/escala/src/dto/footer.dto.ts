@@ -1,11 +1,11 @@
-import { normalizeImageUrlStrapi } from "@/lib/utils";
+import { normalizeStrapiUrl } from "@/lib/utils";
 import { FooterInterface } from "@/interfaces/footer/footer.interface";
 
 export function mapFooter(item: any): FooterInterface {
   return {
     id: item.id,
     logo: {
-      url: normalizeImageUrlStrapi(item.logo?.url),
+      url: normalizeStrapiUrl(item.logo?.url),
       alternativeText: item.logo?.alternativeText || "Logo padrão",
     },
     description: item.description,

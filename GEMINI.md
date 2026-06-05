@@ -23,7 +23,7 @@ Este projeto segue rigorosamente a **Arquitetura Hexagonal (Ports and Adapters)*
 
 ## Stack Tecnológica
 - **Frontend/BFF:** Next.js 16+ (TypeScript), Next-Auth, Tailwind CSS, Radix UI.
-  - **Middleware (Next.js 16+):** Seguindo o novo padrão, o middleware é definido no arquivo `proxy.ts` na raiz do projeto, atuando como fronteira de rede e interceptor de requisições.
+  - **Middleware (Next.js 16+):** Seguindo o novo padrão, o middleware é definido obrigatoriamente no arquivo `proxy.ts` na raiz do projeto, atuando como fronteira de rede e interceptor de requisições. NUNCA utilize `middleware.ts` nesta versão.
 - **Backend CMS:** Strapi v5 (Gestão de Conteúdo: Artigos, Banners, Menus, Footers).
 - **Backend Core (Principal):** Java Spring Boot (Gestão de Usuários, Roles, Permissões, Escalas, Batida de Ponto).
 

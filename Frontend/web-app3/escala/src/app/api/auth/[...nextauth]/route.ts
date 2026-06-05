@@ -28,6 +28,8 @@ type SpringAuthResponse = {
   };
 };
 
+type AuthProvider = 'credentials' | 'google' | 'unknown';
+
 async function loginSpringBoot(
   email: string,
   password: string,
@@ -168,26 +170,23 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   );
 }
 
-/**
- * 🔐 Exportamos o objeto de configuração para usar também no getServerSession()
- */
 export const authOptions: AuthOptions = {
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
-
   providers,
-
   callbacks: {
-    async jwt({ token, user, account, session, trigger }) {
+    async jwt({ token, user, account, session, trigger, profile }) {
       if (account?.provider === 'google' && account.id_token) {
         const authUser = await loginGoogleSpringBoot(account.id_token);
         if (authUser) {
           token.id = authUser.user.id;
-          token.username = authUser.user.username;
+          token.username = (authUser.user.username && authUser.user.username !== authUser.user.email) 
+            ? authUser.user.username 
+            : ((profile as any)?.name || (profile as any)?.given_name || "");
           token.email = authUser.user.email;
           token.roles = authUser.user.roles;
           token.theme = authUser.user.theme;
-          token.avatarUrl = authUser.user.avatarUrl;
+          token.avatarUrl = authUser.user.avatarUrl || (profile as any)?.picture || (profile as any)?.image || null;
           token.address = authUser.user.address;
           token.cep = authUser.user.cep;
           token.street = authUser.user.street;
@@ -201,16 +200,18 @@ export const authOptions: AuthOptions = {
           token.accessToken = authUser.token;
           token.companySlug = authUser.user.companySlug;
           token.companyTheme = authUser.user.companyTheme;
+          token.provider = 'google';
           return token;
         }
       }
+
       if (user) {
         token.id = user.id;
-        token.username = user.username;
+        token.username = user.username || (user as any).name || "";
         token.email = user.email;
         token.roles = user.roles;
         token.theme = user.theme;
-        token.avatarUrl = user.avatarUrl;
+        token.avatarUrl = user.avatarUrl || (user as any).image || null;
         token.address = user.address;
         token.cep = user.cep;
         token.street = user.street;
@@ -221,10 +222,12 @@ export const authOptions: AuthOptions = {
         token.state = user.state;
         token.position = user.position;
         token.function = user.function;
-        token.accessToken = user.token;
-        token.companySlug = user.companySlug;
-        token.companyTheme = user.companyTheme;
+        token.accessToken = (user as any).token;
+        token.companySlug = (user as any).companySlug;
+        token.companyTheme = (user as any).companyTheme;
+        token.provider = (user as any).provider || 'credentials';
       }
+
       if (trigger === 'update' && session?.user) {
         token.username = session.user.username ?? token.username;
         token.email = session.user.email ?? token.email;
@@ -240,6 +243,7 @@ export const authOptions: AuthOptions = {
         token.state = session.user.state ?? token.state;
         token.position = session.user.position ?? token.position;
         token.function = session.user.function ?? token.function;
+        token.provider = (session.user as any).provider ?? token.provider;
       }
       return token;
     },
@@ -264,18 +268,14 @@ export const authOptions: AuthOptions = {
         token: (token.accessToken as string) ?? '',
         companySlug: (token.companySlug as string) ?? ENV.COMPANY_SLUG,
         companyTheme: (token.companyTheme as string) ?? 'system',
+        provider: (token.provider as AuthProvider) ?? 'credentials',
       };
       return session;
     },
   },
-
   pages: { signIn: '/login' },
   debug: process.env.NODE_ENV === 'development',
 };
 
-/**
- * 🔄 Usa o objeto exportado acima para criar o handler
- */
 const authHandler = NextAuth(authOptions);
-
 export { authHandler as GET, authHandler as POST };

@@ -144,30 +144,123 @@ public class AuthenticationService {
 
     @Transactional
     public AuthenticationResponse authenticateGoogle(GoogleLoginRequest request) {
-        recaptchaService.verifyIfProduction(request.getRecaptchaToken());
-        Company company = companyService.resolve(request.getCompanySlug());
-        GoogleIdentityService.GoogleProfile profile = googleIdentityService.verify(request.getIdToken());
-        Role userRole = roleRepository.findByName("USER")
-                .orElseGet(() -> roleRepository.save(Role.builder().name("USER").build()));
+        if (request.getRecaptchaToken() != null && !request.getRecaptchaToken().isBlank()) {
+            recaptchaService.verifyIfProduction(request.getRecaptchaToken());
+        }
 
-        User user = repository.findByEmailAndCompanySlug(profile.email(), company.getSlug())
-                .orElseGet(() -> repository.save(User.builder()
-                        .username(uniqueUsername(profile.email()))
-                        .email(profile.email())
-                        .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                        .roles(Set.of(userRole))
-                        .theme(company.getTheme() == null ? "system" : company.getTheme())
+        GoogleIdentityService.GoogleProfile profile = googleIdentityService.verify(request.getIdToken());
+        String email = profile.email();
+        String companySlug = request.getCompanySlug();
+
+        // 🏢 Lógica de Resolução de Empresa
+        Company company;
+        boolean isLead = false;
+
+        if (companySlug == null || companySlug.isBlank() || companySlug.equalsIgnoreCase("undefined")) {
+            // Verifica se o usuário já existe em alguma empresa
+            var existingUser = repository.findByEmail(email).stream().findFirst();
+            if (existingUser.isPresent()) {
+                company = existingUser.get().getCompany();
+            } else {
+                // 🚀 Fluxo PLG: Criar Workspace Temporário (Lead)
+                String uuid = UUID.randomUUID().toString().substring(0, 8);
+                company = companyService.create(com.escala.authservice.dto.CompanyRequest.builder()
+                        .name("Workspace Demo " + uuid.toUpperCase())
                         .active(true)
-                        .company(company)
-                        .build()));
+                        .build());
+                isLead = true;
+            }
+        } else {
+            company = companyService.resolve(companySlug);
+        }
+
+        final boolean finalizedIsLead = isLead;
+        User user = repository.findByEmailAndCompanySlug(email, company.getSlug())
+                .orElseGet(() -> {
+                    String roleName = finalizedIsLead ? "LEAD" : "USER";
+                    Role role = roleRepository.findByName(roleName)
+                            .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
+
+                    return repository.save(User.builder()
+                            .username(profile.name() == null || profile.name().isBlank()
+                                    ? uniqueUsername(profile.email())
+                                    : profile.name())
+                            .email(profile.email())
+                            .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                            .roles(new java.util.HashSet<>(Set.of(role)))
+                            .theme(company.getTheme() == null ? "system" : company.getTheme())
+                            .avatarUrl(profile.picture())
+                            .active(true)
+                            .company(company)
+                            .build());
+                });
 
         if (!user.isActive()) {
             throw new IllegalArgumentException("Usuario inativo");
         }
 
+        if ((user.getAvatarUrl() == null || user.getAvatarUrl().isBlank()) && profile.picture() != null && !profile.picture().isBlank()) {
+            user.setAvatarUrl(profile.picture());
+        }
+
+        if ((user.getUsername() == null || user.getUsername().isBlank() || user.getUsername().equalsIgnoreCase(user.getEmail()))
+                && profile.name() != null && !profile.name().isBlank()) {
+            user.setUsername(profile.name());
+        }
+
+        repository.save(user);
+
         var jwtToken = jwtService.generateToken(jwtClaims(user), userDetails(user));
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .user(toUserDto(user))
+                .build();
+    }
+
+    @Transactional
+    public AuthenticationResponse completeRegistration(String email, CompleteRegistrationRequest request) {
+        User user = repository.findByEmail(email)
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+
+        boolean isLead = user.getRoles().stream().anyMatch(r -> r.getName().equals("LEAD"));
+        if (!isLead) {
+            throw new IllegalArgumentException("Usuario ja possui registro completo");
+        }
+
+        // 1. Atualizar Empresa
+        Company company = user.getCompany();
+        company.setName(request.getCompanyName());
+        // Gera novo slug baseado no nome real
+        String newSlug = request.getCompanyName().toLowerCase().replaceAll("[^a-z0-9]", "-");
+        // Verifica se o slug já existe para outra empresa
+        if (companyService.list().stream().anyMatch(c -> c.getSlug().equals(newSlug) && !c.getId().equals(company.getId()))) {
+             company.setSlug(newSlug + "-" + UUID.randomUUID().toString().substring(0, 4));
+        } else {
+             company.setSlug(newSlug);
+        }
+        company.setCnpj(request.getCnpj());
+        companyService.update(company.getId(), com.escala.authservice.dto.CompanyRequest.builder()
+                .name(company.getName())
+                .cnpj(company.getCnpj())
+                .active(true)
+                .build());
+
+        // 2. Promover Usuário para OWNER
+        Role ownerRole = roleRepository.findByName("OWNER")
+                .orElseGet(() -> roleRepository.save(Role.builder().name("OWNER").build()));
+        
+        user.getRoles().clear();
+        user.getRoles().add(ownerRole);
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        repository.save(user);
+
+        return AuthenticationResponse.builder()
+                .token(jwtService.generateToken(jwtClaims(user), userDetails(user)))
                 .user(toUserDto(user))
                 .build();
     }

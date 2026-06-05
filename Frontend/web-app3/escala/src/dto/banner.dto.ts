@@ -1,4 +1,4 @@
-import { normalizeImageUrlStrapi } from "@/lib/utils";
+import { normalizeStrapiUrl } from "@/lib/utils";
 import { Banner } from "@/interfaces/banner/banner.interface";
 
 export function mapBanner(item: any): Banner {
@@ -9,7 +9,7 @@ export function mapBanner(item: any): Banner {
     description: item.description || "",
     slug: item.slug || "",
     image: {
-      url: normalizeImageUrlStrapi(item.image?.url),
+      url: normalizeStrapiUrl(item.image?.url),
       alternativeText: item.image?.alternativeText || "Banner padrão",
     },
     button_text: item.button_text || "Saiba mais",
