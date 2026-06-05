@@ -22,11 +22,16 @@ Este projeto segue rigorosamente a **Arquitetura Hexagonal (Ports and Adapters)*
 - **Desacoplamento:** O frontend consome o BFF, que orquestra a comunicação entre o **Java Spring Boot (Backend Principal)** e o **Strapi (CMS: Apenas Conteúdo UI)**.
 
 ## Stack Tecnológica
-- **Frontend/BFF:** Next.js 15+ (TypeScript), Next-Auth, Tailwind CSS, Radix UI.
+- **Frontend/BFF:** Next.js 16+ (TypeScript), Next-Auth, Tailwind CSS, Radix UI.
+  - **Middleware (Next.js 16+):** Seguindo o novo padrão, o middleware é definido no arquivo `proxy.ts` na raiz do projeto, atuando como fronteira de rede e interceptor de requisições.
 - **Backend CMS:** Strapi v5 (Gestão de Conteúdo: Artigos, Banners, Menus, Footers).
 - **Backend Core (Principal):** Java Spring Boot (Gestão de Usuários, Roles, Permissões, Escalas, Batida de Ponto).
 
-## Fluxo de Dados (Exemplo)
+## Internacionalização (i18n)
+O sistema utiliza `next-intl` com suporte a múltiplos idiomas.
+- **Idiomas Suportados:** `pt-BR` (Padrão), `en` (Inglês), `es` (Espanhol).
+- **Estrutura:** Todas as rotas de interface residem dentro do segmento `[locale]` em `src/app/`.
+- **Middleware:** O `proxy.ts` orquestra a detecção de idioma e a proteção de rotas privadas.
 `UI (Component) -> BFF (Route) -> Service (Application) -> Adapter (Infrastructure) -> Spring Boot (API)`
 
 ## Gestão de Escalas e Regras de Negócio

@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, XCircle } from 'lucide-react';
 
-export default async function InvitePage({ params }: { params: { token: string } }) {
+export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   try {
-    const invitation = await InvitationService.getInvitationByToken(params.token);
+    const { token } = await params;
+    const invitation = await InvitationService.getInvitationByToken(token);
 
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">

@@ -4,10 +4,12 @@ import { routing } from '@/i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
-export default withAuth(
-  function proxy(req) {
+export function proxy(req: any) {
     return intlMiddleware(req);
-  },
+}
+
+export default withAuth(
+  proxy,
   {
     callbacks: {
       authorized: ({ req, token }) => {
@@ -21,7 +23,16 @@ export default withAuth(
           '/acesso-negado',
         ];
 
-        if (PUBLIC_ROUTES.some((path) => req.nextUrl.pathname.startsWith(path))) {
+        const pathname = req.nextUrl.pathname;
+        
+        // Remove locale prefix if exists (e.g., /pt-BR/login -> /login)
+        const pathnameWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?(\/|$)/, '/');
+
+        if (PUBLIC_ROUTES.some((path) => 
+          pathnameWithoutLocale === path || 
+          pathnameWithoutLocale.startsWith(path + '/') ||
+          pathname.startsWith(path) // keep original check for non-locale routes like /api/auth
+        )) {
           return true;
         }
 
