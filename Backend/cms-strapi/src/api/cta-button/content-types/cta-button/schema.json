@@ -1,0 +1,57 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cta_buttons",
+  "info": {
+    "singularName": "cta-button",
+    "pluralName": "cta-buttons",
+    "displayName": "CTA Button",
+    "description": "Botoes editoriais reutilizaveis para marketing e onboarding."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "variant": {
+      "type": "enumeration",
+      "enum": [
+        "primary",
+        "secondary",
+        "outline",
+        "link"
+      ],
+      "default": "primary"
+    },
+    "location": {
+      "type": "enumeration",
+      "enum": [
+        "hero",
+        "pricing",
+        "demo",
+        "footer",
+        "onboarding"
+      ],
+      "default": "hero"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

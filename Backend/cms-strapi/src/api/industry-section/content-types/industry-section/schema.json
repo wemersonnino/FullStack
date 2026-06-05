@@ -1,0 +1,56 @@
+{
+  "kind": "collectionType",
+  "collectionName": "industry_sections",
+  "info": {
+    "singularName": "industry-section",
+    "pluralName": "industry-sections",
+    "displayName": "Industry Section",
+    "description": "Propostas de valor por setor atendido."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "segment": {
+      "type": "enumeration",
+      "enum": [
+        "healthcare",
+        "security",
+        "technology",
+        "outsourcing",
+        "logistics",
+        "marketing",
+        "home_office",
+        "other"
+      ],
+      "default": "healthcare"
+    },
+    "valueProposition": {
+      "type": "text",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "highlightMetric": {
+      "type": "string"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
