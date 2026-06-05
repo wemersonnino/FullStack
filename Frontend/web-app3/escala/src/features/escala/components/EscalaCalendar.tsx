@@ -10,6 +10,7 @@ import {
   CalendarDays
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -111,24 +112,24 @@ export function EscalaCalendar({ escalas, isAdmin, onDateChange, onAddEvent }: E
   };
 
   return (
-    <div className="flex flex-col h-full bg-card rounded-xl border shadow-sm overflow-hidden">
-      <header className="flex items-center justify-between px-6 py-4 border-b bg-muted/30">
-        <div className="flex items-center gap-4">
+    <div className="flex h-full flex-col overflow-hidden">
+      <header className="flex flex-col gap-4 border-b bg-background px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <h2 className="text-lg font-semibold capitalize">{viewLabel}</h2>
-          <div className="flex items-center bg-background rounded-md border p-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevious}>
+          <div className="flex w-fit items-center rounded-md border bg-muted/20 p-1">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrevious} aria-label="Periodo anterior">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" className="h-8 px-3 text-xs" onClick={handleToday}>
               Hoje
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNext}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleNext} aria-label="Proximo periodo">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2">
@@ -153,6 +154,14 @@ export function EscalaCalendar({ escalas, isAdmin, onDateChange, onAddEvent }: E
           )}
         </div>
       </header>
+
+      <div className="flex flex-wrap gap-2 border-b bg-muted/10 px-4 py-3 text-xs sm:px-6">
+        <Badge variant="outline" className="border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300">Presencial</Badge>
+        <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">Remoto</Badge>
+        <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300">Pendente</Badge>
+        <Badge variant="outline" className="border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300">Conflito/feriado</Badge>
+        <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300">Troca solicitada</Badge>
+      </div>
 
       <div className="flex-1 overflow-auto">
         {view === 'month' && <EscalaMonthView currentDate={currentDate} escalas={escalas} isAdmin={isAdmin} holidays={holidays} />}

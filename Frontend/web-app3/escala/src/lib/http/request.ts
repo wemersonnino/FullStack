@@ -84,7 +84,9 @@ export async function httpPut<T = any>(url: string, body: any, options?: Request
     const res = await api.put<T>(resolveUrl(url), body, { headers });
     return res.data;
   } catch (err) {
-    console.error(`[PUT] ${url}`, err);
+    const message = getHttpErrorMessage(err, `Erro ao atualizar dados em ${url}`);
+    if (options?.throwOnError) throw new Error(message, { cause: err });
+    console.warn(`[PUT] ${url}: ${message}`);
     return null;
   }
 }
@@ -95,21 +97,25 @@ export async function httpPatch<T = any>(url: string, body: any, options?: Reque
     const res = await api.patch<T>(resolveUrl(url), body, { headers });
     return res.data;
   } catch (err) {
-    console.error(`[PATCH] ${url}`, err);
+    const message = getHttpErrorMessage(err, `Erro ao atualizar dados em ${url}`);
+    if (options?.throwOnError) throw new Error(message, { cause: err });
+    console.warn(`[PATCH] ${url}: ${message}`);
     return null;
   }
 }
 
 export async function httpDelete<T = any>(
   url: string,
-  options?: { params?: Record<string, any>; data?: any; authToken?: string }
+  options?: { params?: Record<string, any>; data?: any; authToken?: string; throwOnError?: boolean }
 ): Promise<T | null> {
   try {
     const headers = await getAuthHeaders(options);
     const res = await api.delete<T>(resolveUrl(url), { headers, params: options?.params, data: options?.data });
     return res.data;
   } catch (err) {
-    console.error(`[DELETE] ${url}`, err);
+    const message = getHttpErrorMessage(err, `Erro ao remover dados em ${url}`);
+    if (options?.throwOnError) throw new Error(message, { cause: err });
+    console.warn(`[DELETE] ${url}: ${message}`);
     return null;
   }
 }

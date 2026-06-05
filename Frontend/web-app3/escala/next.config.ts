@@ -11,6 +11,24 @@ const nextConfig: NextConfig = {
         pathname: "/u/**",
       },
       {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "strapi",
+        port: "1337",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "http",
+        hostname: "cms-strapi",
+        port: "1337",
+        pathname: "/uploads/**",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "1337",
@@ -19,7 +37,6 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: true,
     dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60,
   },

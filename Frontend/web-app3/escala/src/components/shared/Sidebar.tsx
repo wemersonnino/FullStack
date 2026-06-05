@@ -1,14 +1,13 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import {
   Briefcase,
   Building2,
   CalendarDays,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Layers,
@@ -18,7 +17,6 @@ import {
   Settings,
   User,
   Users,
-  X,
   ArrowLeftRight,
   ClipboardList,
   UserPlus,
@@ -26,10 +24,10 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { MenuItem } from '@/interfaces/menu/menu.interface';
-import { cn } from '@/lib/utils';
+import { cn, normalizeAvatarUrl } from '@/lib/utils';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 
 interface SidebarProps {
@@ -86,14 +84,13 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const userRoles = user.roles || [];
-
   const filteredGroups = useMemo(() => {
+    const userRoles = user.roles || [];
     return navigationGroups.filter(group => {
       if (!group.roles) return true;
       return group.roles.some(role => userRoles.includes(role));
     });
-  }, [userRoles]);
+  }, [user.roles]);
 
   const sidebarContent = (
     <aside
@@ -171,11 +168,21 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
             "flex items-center gap-3 rounded-2xl bg-card p-3 shadow-sm border transition-all",
             collapsed ? "justify-center p-2" : "px-4"
         )}>
-          <Avatar className="h-10 w-10 border-2 border-primary/10 transition-transform hover:scale-105">
-            <AvatarImage src={user.avatarUrl ?? undefined} alt={user.username || 'Usuario'} />
-            <AvatarFallback className="bg-primary/10 text-primary font-bold">
-              {user.username?.slice(0, 2).toUpperCase() || 'US'}
-            </AvatarFallback>
+          <Avatar className="h-10 w-10 border-2 border-primary/10 transition-transform hover:scale-105 overflow-hidden relative">
+            {normalizeAvatarUrl(user.avatarUrl || (user as any)?.image) ? (
+              <Image 
+                src={normalizeAvatarUrl(user.avatarUrl || (user as any)?.image)} 
+                alt={user.username || 'Usuario'} 
+                fill
+                sizes="40px"
+                className="object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                {user.username?.slice(0, 2).toUpperCase() || 'US'}
+              </AvatarFallback>
+            )}
           </Avatar>
           {!collapsed && (
             <div className="min-w-0 flex-1">

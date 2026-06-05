@@ -3,6 +3,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/shared/Sidebar';
 import { HeaderPrivate } from '@/components/shared/HeaderPrivate';
+import { LeadBanner } from '@/components/dashboard/LeadBanner';
 import { getMenu } from '@/services/menu.service';
 import { MenuLocationEnum } from '@/interfaces/enums/menuLocation.enum';
 
@@ -21,6 +22,7 @@ export default async function PrivateLayout({ children }: { children: React.Reac
         <Sidebar items={sidebarItems} user={session.user} />
         <main className="min-w-0 flex-1 px-4 pb-8 pt-10 md:pl-10 md:pr-8 md:pt-0">
           <HeaderPrivate />
+          <LeadBanner />
           {children}
         </main>
       </div>

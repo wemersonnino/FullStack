@@ -32,21 +32,29 @@ export class UserMapper {
   }
 
   static toUpdateDto(domain: Partial<UserProfile>) {
-    return {
+    const dto: any = {
       username: domain.username,
       email: domain.email,
       theme: domain.theme,
       avatarUrl: domain.avatarUrl,
       position: domain.position,
       function: domain.function,
-      cep: domain.address?.cep,
-      street: domain.address?.street,
-      number: domain.address?.number,
-      complement: domain.address?.complement,
-      neighborhood: domain.address?.neighborhood,
-      city: domain.address?.city,
-      state: domain.address?.state,
-      address: domain.address?.additionalInfo, // Mapping back to 'address' for the backend
     };
+
+    if (domain.address) {
+      dto.cep = domain.address.cep;
+      dto.street = domain.address.street;
+      dto.number = domain.address.number;
+      dto.complement = domain.address.complement;
+      dto.neighborhood = domain.address.neighborhood;
+      dto.city = domain.address.city;
+      dto.state = domain.address.state;
+      dto.address = domain.address.additionalInfo;
+    }
+
+    // Remove undefined/null fields to avoid sending them to the backend
+    return Object.fromEntries(
+      Object.entries(dto).filter(([_, v]) => v !== undefined && v !== null)
+    );
   }
 }

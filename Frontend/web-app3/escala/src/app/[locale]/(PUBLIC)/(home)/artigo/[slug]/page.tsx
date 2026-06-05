@@ -1,5 +1,5 @@
 import { getArticleBySlug } from '@/services/article.service';
-import { normalizeImageUrlStrapi } from '@/lib/utils';
+import { normalizeStrapiUrl } from '@/lib/utils';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { createMetadata } from '@/lib/seo';
@@ -29,7 +29,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   if (!article) return notFound();
 
   const cover = article.cover_image?.url
-    ? normalizeImageUrlStrapi(article.cover_image.url)
+    ? normalizeStrapiUrl(article.cover_image.url)
     : '/default-banner.svg';
 
   const author = article.author?.name || 'Autor desconhecido';

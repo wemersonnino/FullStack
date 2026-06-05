@@ -99,28 +99,26 @@ export async function getWorkSchedules(authToken?: string): Promise<WorkSchedule
 }
 
 export async function createShiftSwap(data: Partial<ShiftSwap>): Promise<ShiftSwap | null> {
-    try {
-        const response = await httpPost<BackendShiftSwap>(API_ROUTES.SHIFT_SWAPS, {
-            originalShiftId: data.originalShift?.id,
-            compensationDate: data.compensationDate,
-            comments: data.comments,
-        });
-        return response ? mapBackendShiftSwap(response) : null;
-    } catch (error) {
-        console.error('Erro ao criar troca de escala:', error);
-        return null;
-    }
+  const response = await httpPost<BackendShiftSwap>(
+    API_ROUTES.SHIFT_SWAPS,
+    {
+      originalShiftId: data.originalShift?.id,
+      compensationDate: data.compensationDate,
+      comments: data.comments,
+    },
+    { throwOnError: true }
+  );
+  return response ? mapBackendShiftSwap(response) : null;
 }
 
 export async function updateShiftSwapStatus(id: number, status: 'approved' | 'rejected', adminComments?: string): Promise<ShiftSwap | null> {
-    try {
-        const response = await httpPatch<BackendShiftSwap>(`${API_ROUTES.SHIFT_SWAPS}/${id}/decision`, {
-            approved: status === 'approved',
-            adminComments,
-        });
-        return response ? mapBackendShiftSwap(response) : null;
-    } catch (error) {
-        console.error(`Erro ao ${status === 'approved' ? 'aprovar' : 'rejeitar'} troca de escala:`, error);
-        return null;
-    }
+  const response = await httpPatch<BackendShiftSwap>(
+    `${API_ROUTES.SHIFT_SWAPS}/${id}/decision`,
+    {
+      approved: status === 'approved',
+      adminComments,
+    },
+    { throwOnError: true }
+  );
+  return response ? mapBackendShiftSwap(response) : null;
 }

@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
 import { Building2, Upload, MapPin, Search, ArrowLeft, Save } from 'lucide-react';
-import { formatCep, formatCnpj } from '@brazilian-utils/brazilian-utils';
+import { formatCep } from '@brazilian-utils/brazilian-utils';
+import { isValidCnpj, formatCnpj as formatCnpjAlpha } from '@/lib/cnpj';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,11 +22,12 @@ import {
 } from '@/components/ui/form';
 import { useCompanyStore } from '@/store/useCompanyStore';
 import { uploadFile } from '@/services/profile.service';
+import { Company } from '@/services/company.service';
 import Link from 'next/link';
 
 const CompanySchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
-  cnpj: z.string().min(14, 'CNPJ inválido.'),
+  cnpj: z.string().refine((val) => isValidCnpj(val), 'CNPJ inválido.'),
   address: z.string().optional(),
   cep: z.string().optional(),
   street: z.string().optional(),
@@ -37,6 +39,33 @@ const CompanySchema = z.object({
 });
 
 type CompanyFormValues = z.infer<typeof CompanySchema>;
+
+function getCompanyAddress(company?: Company | null) {
+  if (!company) return null;
+  if (typeof company.address === 'string') {
+    return {
+      additionalInfo: company.address,
+      cep: company.cep || '',
+      street: company.street || '',
+      number: company.number || '',
+      complement: company.complement || '',
+      neighborhood: company.neighborhood || '',
+      city: company.city || '',
+      state: company.state || '',
+    };
+  }
+
+  return {
+    additionalInfo: company.address?.additionalInfo || '',
+    cep: company.address?.cep || company.cep || '',
+    street: company.address?.street || company.street || '',
+    number: company.address?.number || company.number || '',
+    complement: company.address?.complement || company.complement || '',
+    neighborhood: company.address?.neighborhood || company.neighborhood || '',
+    city: company.address?.city || company.city || '',
+    state: company.address?.state || company.state || '',
+  };
+}
 
 export function CompanyForm({ companyId }: { companyId?: number }) {
   const router = useRouter();
@@ -66,19 +95,20 @@ export function CompanyForm({ companyId }: { companyId?: number }) {
 
   useEffect(() => {
     if (editingCompany) {
+      const address = getCompanyAddress(editingCompany);
       form.reset({
-        name: editingCompany.name,
-        cnpj: editingCompany.cnpj,
-        address: editingCompany.address || '',
-        cep: editingCompany.cep || '',
-        street: editingCompany.street || '',
-        number: editingCompany.number || '',
-        complement: editingCompany.complement || '',
-        neighborhood: editingCompany.neighborhood || '',
-        city: editingCompany.city || '',
-        state: editingCompany.state || '',
+        name: editingCompany.name || '',
+        cnpj: editingCompany.cnpj || '',
+        address: address?.additionalInfo || '',
+        cep: address?.cep || '',
+        street: address?.street || '',
+        number: address?.number || '',
+        complement: address?.complement || '',
+        neighborhood: address?.neighborhood || '',
+        city: address?.city || '',
+        state: address?.state || '',
       });
-      setLogoPreview(editingCompany.logo?.url || null);
+      setLogoPreview(editingCompany.logoUrl || editingCompany.logo?.url || null);
     }
   }, [editingCompany, form]);
 
@@ -128,17 +158,37 @@ export function CompanyForm({ companyId }: { companyId?: number }) {
 
   async function onSubmit(values: CompanyFormValues) {
     try {
-      let logoId: number | undefined;
+      let logoUrl: string | undefined;
       if (logoFile) {
         const uploadResult = await uploadFile(logoFile);
         if (uploadResult && uploadResult[0]) {
-          logoId = uploadResult[0].id;
+          logoUrl = uploadResult[0].url;
         }
       }
 
+      const address = {
+        cep: values.cep,
+        street: values.street,
+        number: values.number,
+        complement: values.complement,
+        neighborhood: values.neighborhood,
+        city: values.city,
+        state: values.state,
+        additionalInfo: values.address,
+      };
+
       const payload = {
-        ...values,
-        ...(logoId ? { logo: logoId } : {}),
+        name: values.name,
+        cnpj: values.cnpj,
+        logoUrl: logoUrl ?? editingCompany?.logoUrl ?? editingCompany?.logo?.url,
+        address,
+        cep: values.cep,
+        street: values.street,
+        number: values.number,
+        complement: values.complement,
+        neighborhood: values.neighborhood,
+        city: values.city,
+        state: values.state,
       };
 
       let success = false;
@@ -224,12 +274,12 @@ export function CompanyForm({ companyId }: { companyId?: number }) {
                     <FormItem>
                       <FormLabel>CNPJ</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           placeholder="00.000.000/0000-00" 
                           {...field} 
                           onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, '');
-                            field.onChange(value.length <= 14 ? formatCnpj(value) : field.value);
+                            const value = e.target.value.replace(/[^\w]/g, '');
+                            field.onChange(formatCnpjAlpha(value));
                           }}
                         />
                       </FormControl>
@@ -283,7 +333,7 @@ export function CompanyForm({ companyId }: { companyId?: number }) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Rua / Logradouro</FormLabel>
-                          <FormControl>
+                <FormControl>
                             <Input placeholder="Nome da rua" {...field} />
                           </FormControl>
                           <FormMessage />
@@ -315,7 +365,7 @@ export function CompanyForm({ companyId }: { companyId?: number }) {
                         <FormItem>
                           <FormLabel>Complemento</FormLabel>
                           <FormControl>
-                            <Input placeholder="Apt, Bloco, etc." {...field} />
+                          <Input placeholder="Apt, Bloco, etc." {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

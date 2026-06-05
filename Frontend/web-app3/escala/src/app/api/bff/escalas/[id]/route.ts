@@ -1,15 +1,17 @@
 import { proxyBackend, readJson } from '@/lib/bff/backend';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  return proxyBackend(`/api/v1/escala/${params.id}`, {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return proxyBackend(`/api/v1/escala/${id}`, {
     method: 'PUT',
     body: await readJson(request),
     request,
   });
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  return proxyBackend(`/api/v1/escala/${params.id}`, {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return proxyBackend(`/api/v1/escala/${id}`, {
     method: 'DELETE',
     request,
   });
