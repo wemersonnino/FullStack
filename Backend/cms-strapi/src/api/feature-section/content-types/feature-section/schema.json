@@ -1,0 +1,62 @@
+{
+  "kind": "collectionType",
+  "collectionName": "feature_sections",
+  "info": {
+    "singularName": "feature-section",
+    "pluralName": "feature-sections",
+    "displayName": "Feature Section",
+    "description": "Blocos editoriais de funcionalidades do produto."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "scheduling",
+        "time_clock",
+        "time_bank",
+        "reports",
+        "ai",
+        "security"
+      ],
+      "default": "scheduling"
+    },
+    "iconKey": {
+      "type": "enumeration",
+      "enum": [
+        "calendar",
+        "clock",
+        "map-pin",
+        "bar-chart",
+        "shield",
+        "sparkles",
+        "users",
+        "shuffle"
+      ],
+      "default": "calendar"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
