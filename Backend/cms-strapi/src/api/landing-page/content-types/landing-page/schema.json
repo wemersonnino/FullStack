@@ -1,0 +1,92 @@
+{
+  "kind": "singleType",
+  "collectionName": "landing_pages",
+  "info": {
+    "singularName": "landing-page",
+    "pluralName": "landing-pages",
+    "displayName": "Landing Page",
+    "description": "Conteudo editorial da home/landing publica do produto."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "eyebrow": {
+      "type": "string"
+    },
+    "heroTitle": {
+      "type": "string",
+      "required": true
+    },
+    "heroDescription": {
+      "type": "text",
+      "required": true
+    },
+    "heroImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "primaryCtaLabel": {
+      "type": "string",
+      "default": "Comecar teste gratis"
+    },
+    "primaryCtaUrl": {
+      "type": "string",
+      "default": "/register"
+    },
+    "secondaryCtaLabel": {
+      "type": "string",
+      "default": "Solicitar demonstracao"
+    },
+    "secondaryCtaUrl": {
+      "type": "string",
+      "default": "#contato"
+    },
+    "trialDescription": {
+      "type": "string",
+      "default": "3 meses de teste gratuito da aplicacao."
+    },
+    "aiTrialDescription": {
+      "type": "string",
+      "default": "IA assistiva com periodo menor ou limite de creditos para controle de custo."
+    },
+    "securityStatement": {
+      "type": "text"
+    },
+    "features": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::feature-section.feature-section"
+    },
+    "industries": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::industry-section.industry-section"
+    },
+    "pricingPlans": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::pricing-plan-content.pricing-plan-content"
+    },
+    "faqs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::faq.faq"
+    },
+    "ctaButtons": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::cta-button.cta-button"
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.seo"
+    }
+  }
+}

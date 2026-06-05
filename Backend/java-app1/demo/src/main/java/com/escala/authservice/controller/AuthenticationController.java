@@ -44,6 +44,14 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.resetPassword(request));
     }
 
+    @PostMapping("/complete-registration")
+    public ResponseEntity<AuthenticationResponse> completeRegistration(
+            @RequestBody CompleteRegistrationRequest request,
+            org.springframework.security.core.Authentication authentication
+    ) {
+        return ResponseEntity.ok(service.completeRegistration(authentication.getName(), request));
+    }
+
     @PostMapping("/google")
     public ResponseEntity<AuthenticationResponse> google(
             @RequestBody GoogleLoginRequest request

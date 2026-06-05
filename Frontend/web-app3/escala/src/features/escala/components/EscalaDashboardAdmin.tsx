@@ -2,7 +2,6 @@
 
 import { CalendarPlus } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { CriarEscalaPayload, Escala, SessionLikeUser, UsuarioEscala } from '@/core/domain/escala/escala.types';
 import { atualizarEscala, criarEscala } from '@/core/services/escala.service';
@@ -47,9 +46,8 @@ export function EscalaDashboardAdmin({ initialEscalas, usuarios }: Props) {
         const created = await criarEscala(payload);
         setEscalas((current) => [...current, ...created]);
       }
-      toast.success('Escala salva');
-    } catch {
-      toast.error('Nao foi possivel salvar a escala');
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Nao foi possivel salvar a escala');
     }
   }
 

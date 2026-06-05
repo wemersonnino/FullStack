@@ -15,9 +15,20 @@ const PUBLIC_READ_ACTIONS = [
   'api::category.category.find',
   'api::category.category.findOne',
   'api::footer.footer.find',
+  'api::cta-button.cta-button.find',
+  'api::cta-button.cta-button.findOne',
+  'api::faq.faq.find',
+  'api::faq.faq.findOne',
+  'api::feature-section.feature-section.find',
+  'api::feature-section.feature-section.findOne',
   'api::global.global.find',
+  'api::industry-section.industry-section.find',
+  'api::industry-section.industry-section.findOne',
+  'api::landing-page.landing-page.find',
   'api::menu.menu.find',
   'api::menu.menu.findOne',
+  'api::pricing-plan-content.pricing-plan-content.find',
+  'api::pricing-plan-content.pricing-plan-content.findOne',
 ];
 
 function setActionEnabled(permissions: any, action: string, enabled: boolean) {
@@ -78,6 +89,26 @@ async function seedCmsContent(strapi: Core.Strapi) {
       data: {
         description: 'Plataforma para organizar escalas de trabalho com seguranca.',
         copyright: `(c) ${now.getFullYear()} Plataforma Escala`,
+        publishedAt: now,
+      },
+    });
+  }
+
+  const landingPage = await strapi.db.query('api::landing-page.landing-page').findOne({ where: {} });
+  if (!landingPage) {
+    await strapi.db.query('api::landing-page.landing-page').create({
+      data: {
+        eyebrow: 'Gestao inteligente de escalas',
+        heroTitle: 'Gestao Inteligente de Escalas',
+        heroDescription:
+          'Organize jornadas, equipes, trocas, banco de horas e operacao diaria com regras configuraveis e base preparada para IA assistiva.',
+        primaryCtaLabel: 'Comecar teste gratis',
+        primaryCtaUrl: '/register',
+        secondaryCtaLabel: 'Solicitar demonstracao',
+        secondaryCtaUrl: '#contato',
+        trialDescription: '3 meses de teste gratuito da aplicacao.',
+        aiTrialDescription: 'IA assistiva com periodo menor ou limite de creditos para controle de custo.',
+        securityStatement: 'Conteudo editorial gerenciado no Strapi; regras criticas permanecem no backend Spring Boot.',
         publishedAt: now,
       },
     });

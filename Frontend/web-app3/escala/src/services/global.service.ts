@@ -1,6 +1,6 @@
 import { API_ROUTES } from "@/constants";
 import { httpGet } from "@/lib/http/request";
-import { normalizeImageUrlStrapi } from "@/lib/utils";
+import { normalizeStrapiUrl } from "@/lib/utils";
 import { GlobalInterface } from "@/interfaces/global/global.interface";
 
 /**
@@ -18,7 +18,7 @@ export async function getGlobal(): Promise<GlobalInterface | null> {
       siteDescription: data.siteDescription,
       favicon: {
         id: data.favicon?.id,
-        url: normalizeImageUrlStrapi(data.favicon?.url),
+        url: normalizeStrapiUrl(data.favicon?.url),
         alternativeText: data.favicon?.alternativeText || null,
       },
       defaultSeo: {

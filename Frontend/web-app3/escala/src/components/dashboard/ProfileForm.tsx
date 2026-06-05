@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { MapPin, Search } from 'lucide-react';
+import Image from 'next/image';
 import { formatCep } from '@brazilian-utils/brazilian-utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,6 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { ThemeEnum } from '@/interfaces/enums/theme.enum';
 import { changeMyPassword, updateMyProfile, uploadAvatar } from '@/services/profile.service';
+import { normalizeAvatarUrl } from '@/lib/utils';
 
 type ProfileUser = {
   id: string | number;
@@ -48,6 +49,7 @@ type ProfileUser = {
   state?: string;
   position?: string;
   function?: string;
+  provider?: string;
 };
 
 interface ProfileFormProps {
@@ -89,10 +91,11 @@ const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'i
 
 export function ProfileForm({ user }: ProfileFormProps) {
   const { update } = useSession();
+  const isGoogleUser = user.provider === 'google';
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    user.avatarUrl || user.avatar?.url || (typeof user.avatar === 'string' ? user.avatar : null)
+    normalizeAvatarUrl(user.avatarUrl || user.avatar?.url || (typeof user.avatar === 'string' ? user.avatar : null))
   );
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -224,7 +227,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
       }
 
       await update({ user: { ...user, ...updated } });
-      setAvatarPreview(updated.avatarUrl || null);
+      setAvatarPreview(normalizeAvatarUrl(updated.avatarUrl) || null);
       setAvatarFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       toast.success('Perfil atualizado.');
@@ -263,10 +266,24 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </p>
         </div>
 
+        {isGoogleUser && (
+          <div className="mb-6 rounded-lg border border-blue-500/20 bg-blue-500/5 p-4 text-sm text-blue-700 dark:text-blue-300">
+            Esta conta está vinculada ao Google. Seu nome e e-mail são gerenciados pelo provedor, 
+            mas você pode completar seus dados profissionais e de endereço abaixo.
+          </div>
+        )}
+
         <div className="mb-8 flex flex-col items-center gap-4 sm:flex-row">
           <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-primary/20 bg-muted">
             {avatarPreview ? (
-              <img src={avatarPreview} alt="Avatar" className="h-full w-full object-cover" />
+              <Image 
+                src={avatarPreview} 
+                alt="Avatar" 
+                fill 
+                sizes="96px"
+                className="h-full w-full object-cover" 
+                referrerPolicy="no-referrer"
+              />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-muted-foreground">
                 {user.username?.charAt(0).toUpperCase()}
@@ -274,23 +291,29 @@ export function ProfileForm({ user }: ProfileFormProps) {
             )}
           </div>
           <div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Alterar foto
-            </Button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              onChange={handleAvatarChange}
-            />
+            {!isGoogleUser ? (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Alterar foto
+                </Button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                />
+              </>
+            ) : null}
             <p className="mt-1 text-xs text-muted-foreground">
-              JPG, PNG ou GIF. Tamanho maximo de 2MB.
+              {isGoogleUser
+                ? 'A foto do perfil é sincronizada com sua conta Google.'
+                : 'JPG, PNG ou GIF. Tamanho maximo de 2MB.'}
             </p>
           </div>
         </div>
@@ -303,9 +326,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nome de usuario</FormLabel>
-                    <FormControl>
-                      <Input autoComplete="username" placeholder="Seu nome" {...field} />
+                      <FormLabel>Nome de usuario</FormLabel>
+                      <FormControl>
+                      <Input autoComplete="username" placeholder="Seu nome" disabled={isGoogleUser} {...field} title={isGoogleUser ? "Gerenciado pelo Google" : ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -317,9 +340,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email de login</FormLabel>
-                    <FormControl>
-                      <Input type="email" autoComplete="email" placeholder="seu@email.com" {...field} />
+                      <FormLabel>Email de login</FormLabel>
+                      <FormControl>
+                      <Input type="email" autoComplete="email" placeholder="seu@email.com" disabled={isGoogleUser} {...field} title={isGoogleUser ? "Gerenciado pelo Google" : ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -333,8 +356,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 name="position"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cargo</FormLabel>
-                    <FormControl>
+                      <FormLabel>Cargo</FormLabel>
+                      <FormControl>
                       <Input placeholder="Ex: Desenvolvedor Senior" {...field} />
                     </FormControl>
                     <FormMessage />
@@ -347,8 +370,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 name="function"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Função</FormLabel>
-                    <FormControl>
+                      <FormLabel>Função</FormLabel>
+                      <FormControl>
                       <Input placeholder="Ex: Backend" {...field} />
                     </FormControl>
                     <FormMessage />
@@ -415,7 +438,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>Número</FormLabel>
                       <FormControl>
-                        <Input placeholder="123" {...field} />
+                          <Input placeholder="123" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -446,7 +469,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>Bairro</FormLabel>
                       <FormControl>
-                        <Input placeholder="Seu bairro" {...field} />
+                          <Input placeholder="Seu bairro" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -459,7 +482,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>Cidade</FormLabel>
                       <FormControl>
-                        <Input placeholder="Sua cidade" {...field} />
+                          <Input placeholder="Sua cidade" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -472,7 +495,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>Estado / UF</FormLabel>
                       <FormControl>
-                        <Input placeholder="SP" maxLength={2} {...field} />
+                          <Input placeholder="SP" maxLength={2} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -519,15 +542,16 @@ export function ProfileForm({ user }: ProfileFormProps) {
             />
 
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={savingProfile}>
-                {savingProfile ? 'Salvando...' : 'Salvar perfil'}
-              </Button>
+                <Button type="submit" disabled={savingProfile}>
+                  {savingProfile ? 'Salvando...' : 'Salvar perfil'}
+                </Button>
             </div>
           </form>
         </Form>
       </section>
 
       <div className="space-y-6">
+        {!isGoogleUser ? (
         <section className="rounded-lg border bg-card p-6">
           <div className="mb-6">
             <h2 className="text-xl font-semibold">Seguranca</h2>
@@ -588,6 +612,14 @@ export function ProfileForm({ user }: ProfileFormProps) {
             </form>
           </Form>
         </section>
+        ) : (
+          <section className="rounded-lg border bg-card p-6">
+            <h2 className="text-xl font-semibold">Seguranca</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              A senha dessa conta é gerenciada pelo Google. Não há alteração local disponível.
+            </p>
+          </section>
+        )}
       </div>
     </div>
   );

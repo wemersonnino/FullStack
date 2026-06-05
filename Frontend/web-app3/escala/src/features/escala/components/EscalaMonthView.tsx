@@ -63,10 +63,35 @@ export function EscalaMonthView({ currentDate, escalas, isAdmin, holidays = [] }
     setIsDetailsOpen(true);
   };
 
+  function getEscalaBadgeClass(escala: Escala) {
+    const status = escala.status?.toUpperCase();
+    if (status?.includes('CONFLITO') || status === 'CANCELLED' || status === 'CANCELADA') {
+      return 'bg-red-500/10 text-red-700 border-red-500/30 dark:text-red-300';
+    }
+    if (status?.includes('PEND') || status === 'PENDING') {
+      return 'bg-amber-500/10 text-amber-700 border-amber-500/30 dark:text-amber-300';
+    }
+    if (status?.includes('TROCA') || status?.includes('SWAP')) {
+      return 'bg-violet-500/10 text-violet-700 border-violet-500/30 dark:text-violet-300';
+    }
+    if (escala.workMode === 'REMOTO') {
+      return 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30 dark:text-emerald-300';
+    }
+    return 'bg-blue-500/10 text-blue-700 border-blue-500/30 dark:text-blue-300';
+  }
+
+  function getEscalaBadgeLabel(escala: Escala) {
+    const status = escala.status?.toUpperCase();
+    if (status?.includes('CONFLITO')) return 'Conflito';
+    if (status?.includes('PEND') || status === 'PENDING') return 'Pendente';
+    if (status?.includes('TROCA') || status?.includes('SWAP')) return 'Troca';
+    return isAdmin ? escala.nomeUsuario : escala.workMode === 'REMOTO' ? 'Remoto' : 'Presencial';
+  }
+
   const dayNames = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
   return (
-    <div className="flex flex-col h-full min-w-[800px]">
+    <div className="flex h-full min-w-[820px] flex-col">
       <div className="grid grid-cols-7 border-b bg-muted/20">
         {dayNames.map(day => (
           <div key={day} className="py-2 text-center text-xs font-medium text-muted-foreground uppercase">
@@ -85,7 +110,7 @@ export function EscalaMonthView({ currentDate, escalas, isAdmin, holidays = [] }
               key={day.toString()}
               onClick={() => handleDayClick(day)}
               className={cn(
-                "relative min-h-[120px] p-2 border-r border-b group transition-colors hover:bg-muted/5 cursor-pointer",
+                "group relative min-h-[120px] cursor-pointer border-r border-b p-2 transition-colors hover:bg-muted/5 focus-within:bg-muted/5",
                 !isCurrentMonth && "bg-muted/20 text-muted-foreground/50",
                 holiday && "bg-red-50/30 dark:bg-red-950/10",
                 idx % 7 === 6 && "border-r-0"
@@ -126,13 +151,11 @@ export function EscalaMonthView({ currentDate, escalas, isAdmin, holidays = [] }
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className={cn(
-                          "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium truncate cursor-default",
-                          escala.workMode === 'PRESENCIAL' ? "bg-blue-500/10 text-blue-500 border border-blue-500/20" :
-                          escala.workMode === 'REMOTO' ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" :
-                          "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                          "flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium cursor-default",
+                          getEscalaBadgeClass(escala)
                         )}>
                           <span className="w-1 h-1 rounded-full bg-current shrink-0" />
-                          <span className="truncate">{isAdmin ? escala.nomeUsuario : escala.workMode}</span>
+                          <span className="truncate">{getEscalaBadgeLabel(escala)}</span>
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="right" className="max-w-xs p-3">

@@ -1,5 +1,5 @@
 import { MenuItem } from "@/interfaces/menu/menu.interface";
-import { normalizeImageUrlStrapi } from "@/lib/utils";
+import { normalizeStrapiUrl } from "@/lib/utils";
 
 /**
  * Converte um item cru do Strapi em um MenuItem tipado.
@@ -20,7 +20,7 @@ export function mapMenu(item: any): MenuItem {
     icon: item.icon
       ? {
           id: item.icon.id,
-          url: normalizeImageUrlStrapi(item.icon.url),
+          url: normalizeStrapiUrl(item.icon.url),
           alternativeText: item.icon.alternativeText || undefined,
         }
       : undefined,

@@ -9,9 +9,12 @@ import com.escala.authservice.dto.escala.EscalaResponse;
 import com.escala.authservice.dto.escala.UsuarioEscalaResponse;
 import com.escala.authservice.entity.*;
 import com.escala.authservice.repository.*;
+import com.escala.authservice.scheduling.domain.enums.PadraoEscala;
 import com.escala.authservice.scheduling.domain.enums.StatusTroca;
 import com.escala.authservice.scheduling.domain.model.FluxoTrocaEscala;
 import com.escala.authservice.scheduling.domain.model.SolicitacaoTrocaEscala;
+import com.escala.authservice.scheduling.domain.policy.JornadaPlanejada;
+import com.escala.authservice.scheduling.domain.policy.LaborRuleEngine;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +35,7 @@ public class ScheduleService {
     private final ProjectRepository projectRepository;
     private final SectorRepository sectorRepository;
     private final AuditLogService auditLogService;
+    private final LaborRuleEngine laborRuleEngine = new LaborRuleEngine();
 
     public List<WorkShift> listMonth(int year, int month) {
         YearMonth yearMonth = YearMonth.of(year, month);
@@ -90,6 +94,7 @@ public class ScheduleService {
                 throw new IllegalStateException("Funcionario ja possui escala em " + date);
             }
             WorkMode workMode = request.getWorkMode() == null ? WorkMode.PRESENCIAL : request.getWorkMode();
+            validateLaborRules(employee, date, request.getStartTime(), request.getEndTime(), null, List.of());
             validateSectorCapacity(employee, request, date, workMode, null);
             WorkShift shift = WorkShift.builder()
                     .employee(employee)
@@ -133,6 +138,7 @@ public class ScheduleService {
         if (request.getEndTime() != null) shift.setEndTime(request.getEndTime());
         if (request.getWorkMode() != null) shift.setWorkMode(request.getWorkMode());
         if (request.getNotes() != null) shift.setNotes(request.getNotes());
+        validateLaborRules(shift.getEmployee(), shift.getShiftDate(), shift.getStartTime(), shift.getEndTime(), shift.getId(), List.of());
         validateSectorCapacity(shift.getEmployee(), request, shift.getShiftDate(), shift.getWorkMode(), shift.getId());
 
         WorkShift saved = workShiftRepository.save(shift);
@@ -181,6 +187,7 @@ public class ScheduleService {
             Employee selected = selectEmployee(employees, allocationCount, previousEmployeeId);
 
             if (!workShiftRepository.existsByEmployeeIdAndShiftDate(selected.getId(), date)) {
+                validateLaborRules(selected, date, request.getStartTime(), request.getEndTime(), null, generated);
                 WorkShift shift = WorkShift.builder()
                         .employee(selected)
                         .shiftDate(date)
@@ -421,6 +428,52 @@ public class ScheduleService {
                         .comparing((Employee employee) -> allocationCount.getOrDefault(employee.getId(), 0))
                         .thenComparing(Employee::getFullName))
                 .orElse(employees.get(0));
+    }
+
+    private void validateLaborRules(
+            Employee employee,
+            LocalDate date,
+            java.time.LocalTime startTime,
+            java.time.LocalTime endTime,
+            Long ignoredShiftId,
+            List<WorkShift> inMemoryShifts
+    ) {
+        JornadaPlanejada jornada = new JornadaPlanejada(
+                employee.getId(),
+                date,
+                startTime,
+                endTime,
+                PadraoEscala.COMUM
+        );
+        List<JornadaPlanejada> relacionadas = new ArrayList<>(workShiftRepository
+                .findByEmployeeIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(
+                        employee.getId(),
+                        date.minusDays(7),
+                        date.plusDays(7)
+                )
+                .stream()
+                .filter(shift -> ignoredShiftId == null || !Objects.equals(shift.getId(), ignoredShiftId))
+                .filter(shift -> shift.getStatus() != ShiftStatus.CANCELLED)
+                .map(this::toJornadaPlanejada)
+                .toList());
+
+        relacionadas.addAll(inMemoryShifts.stream()
+                .filter(shift -> shift.getEmployee() != null && Objects.equals(shift.getEmployee().getId(), employee.getId()))
+                .filter(shift -> shift.getStatus() != ShiftStatus.CANCELLED)
+                .map(this::toJornadaPlanejada)
+                .toList());
+
+        laborRuleEngine.validar(jornada, relacionadas).exigirAprovacao();
+    }
+
+    private JornadaPlanejada toJornadaPlanejada(WorkShift shift) {
+        return new JornadaPlanejada(
+                shift.getEmployee().getId(),
+                shift.getShiftDate(),
+                shift.getStartTime(),
+                shift.getEndTime(),
+                PadraoEscala.COMUM
+        );
     }
 
     private StatusTroca toDomainStatus(SwapStatus status) {

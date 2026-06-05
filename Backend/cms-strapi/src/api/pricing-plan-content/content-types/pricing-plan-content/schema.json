@@ -1,0 +1,62 @@
+{
+  "kind": "collectionType",
+  "collectionName": "pricing_plan_contents",
+  "info": {
+    "singularName": "pricing-plan-content",
+    "pluralName": "pricing-plan-contents",
+    "displayName": "Pricing Plan Content",
+    "description": "Conteudo editorial dos planos e trials comerciais."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "priceLabel": {
+      "type": "string",
+      "default": "R$ 0"
+    },
+    "trialDescription": {
+      "type": "string",
+      "default": "3 meses de teste gratuito"
+    },
+    "aiLimitDescription": {
+      "type": "string",
+      "default": "IA com limite de creditos ou periodo menor"
+    },
+    "features": {
+      "type": "json"
+    },
+    "recommended": {
+      "type": "boolean",
+      "default": false
+    },
+    "ctaLabel": {
+      "type": "string",
+      "default": "Comecar agora"
+    },
+    "ctaUrl": {
+      "type": "string",
+      "default": "/register"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

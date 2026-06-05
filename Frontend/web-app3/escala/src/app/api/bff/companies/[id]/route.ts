@@ -6,7 +6,7 @@ import { Company } from '@/core/domain/models/company.model';
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.token) {
@@ -14,7 +14,8 @@ export async function GET(
   }
 
   try {
-    const company = await CompanyService.getCompany(params.id, session.user.token);
+    const { id } = await params;
+    const company = await CompanyService.getCompany(id, session.user.token);
     return NextResponse.json(company);
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
@@ -23,7 +24,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.token) {
@@ -31,8 +32,9 @@ export async function PUT(
   }
 
   try {
+    const { id } = await params;
     const body = await request.json();
-    const updatedCompany = await CompanyService.updateCompany(params.id, body as Partial<Company>, session.user.token);
+    const updatedCompany = await CompanyService.updateCompany(id, body as Partial<Company>, session.user.token);
     return NextResponse.json(updatedCompany);
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
@@ -41,7 +43,7 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.token) {
@@ -49,7 +51,8 @@ export async function DELETE(
   }
 
   try {
-    await CompanyService.deleteCompany(params.id, session.user.token);
+    const { id } = await params;
+    await CompanyService.deleteCompany(id, session.user.token);
     return new Response(null, { status: 204 });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });

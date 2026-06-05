@@ -1,4 +1,4 @@
-import { normalizeImageUrlStrapi } from '@/lib/utils';
+import { normalizeStrapiUrl } from '@/lib/utils';
 import { Article, ArticleBlock, ArticleMedia } from '@/interfaces/article/article.interface';
 
 function mapMedia(file: any): ArticleMedia | undefined {
@@ -6,7 +6,7 @@ function mapMedia(file: any): ArticleMedia | undefined {
 
   return {
     id: file.id,
-    url: normalizeImageUrlStrapi(file.url),
+    url: normalizeStrapiUrl(file.url),
     alternativeText: file.alternativeText || file.name || '',
     caption: file.caption || '',
     name: file.name || '',
@@ -62,7 +62,7 @@ export function mapArticle(item: any): Article {
     slug: item.slug,
     published_at: item.publishedAt,
     cover_image: {
-      url: normalizeImageUrlStrapi(item.cover?.url),
+      url: normalizeStrapiUrl(item.cover?.url),
       alternativeText: item.cover?.alternativeText || 'Capa do artigo',
     },
     author: item.author
@@ -71,7 +71,7 @@ export function mapArticle(item: any): Article {
           name: item.author.name,
           avatar: item.author.avatar
             ? {
-                url: normalizeImageUrlStrapi(item.author.avatar.url),
+                url: normalizeStrapiUrl(item.author.avatar.url),
                 alternativeText: item.author.avatar.alternativeText || '',
               }
             : undefined,

@@ -23,6 +23,7 @@ declare module "next-auth" {
       token: string;
       companySlug?: string;
       companyTheme?: string;
+      provider?: string;
     } & DefaultSession["user"];
   }
 
@@ -46,6 +47,7 @@ declare module "next-auth" {
     token: string;
     companySlug?: string;
     companyTheme?: string;
+    provider?: string;
   }
 }
 
@@ -70,5 +72,6 @@ declare module "next-auth/jwt" {
     accessToken: string;
     companySlug?: string;
     companyTheme?: string;
+    provider?: string;
   }
 }

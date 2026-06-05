@@ -4,8 +4,20 @@ export interface Company {
   id: number;
   name: string;
   cnpj: string;
-  logo?: any;
-  address?: string;
+  logo?: { url?: string } | null;
+  logoUrl?: string;
+  address?:
+    | {
+        cep?: string;
+        street?: string;
+        number?: string;
+        complement?: string;
+        neighborhood?: string;
+        city?: string;
+        state?: string;
+        additionalInfo?: string;
+      }
+    | string;
   cep?: string;
   street?: string;
   number?: string;

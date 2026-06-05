@@ -51,17 +51,17 @@ export async function getEscalasDoDia(data: string, options?: ServiceOptions): P
 }
 
 export async function criarEscala(payload: CriarEscalaPayload, options?: ServiceOptions): Promise<Escala[]> {
-  const json = await httpPost<unknown[]>(BASE, adaptCriarEscalaPayloadToDto(payload), options);
+  const json = await httpPost<unknown[]>(BASE, adaptCriarEscalaPayloadToDto(payload), { ...options, throwOnError: true });
   return Array.isArray(json) ? json.map((item) => adaptEscalaDtoToEscala(item as Record<string, any>)) : [];
 }
 
 export async function atualizarEscala(payload: AtualizarEscalaPayload, options?: ServiceOptions): Promise<Escala | null> {
-  const json = await httpPut<unknown>(`${BASE}/${payload.id}`, adaptAtualizarEscalaPayloadToDto(payload), options);
+  const json = await httpPut<unknown>(`${BASE}/${payload.id}`, adaptAtualizarEscalaPayloadToDto(payload), { ...options, throwOnError: true });
   return json ? adaptEscalaDtoToEscala(json as Record<string, any>) : null;
 }
 
 export async function removerEscala(id: string, options?: ServiceOptions): Promise<boolean> {
-  const json = await httpDelete<{ deleted?: boolean }>(`${BASE}/${id}`, options);
+  const json = await httpDelete<{ deleted?: boolean }>(`${BASE}/${id}`, { ...options, throwOnError: true });
   return Boolean(json?.deleted ?? true);
 }
 
