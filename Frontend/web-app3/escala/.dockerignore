@@ -6,6 +6,8 @@ coverage
 dist
 build
 *.log
+core
+core.*
 tsconfig.tsbuildinfo
 .env.local
 .env
