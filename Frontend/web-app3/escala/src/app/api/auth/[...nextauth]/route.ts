@@ -30,6 +30,12 @@ type SpringAuthResponse = {
 
 type AuthProvider = 'credentials' | 'google' | 'unknown';
 
+const isGoogleAvatarUrl = (url?: unknown) =>
+  typeof url === 'string' && url.includes('googleusercontent.com');
+
+const isGoogleManagedIdentity = (provider?: unknown, avatarUrl?: unknown) =>
+  provider === 'google' || isGoogleAvatarUrl(avatarUrl);
+
 async function loginSpringBoot(
   email: string,
   password: string,
@@ -229,10 +235,15 @@ export const authOptions: AuthOptions = {
       }
 
       if (trigger === 'update' && session?.user) {
-        token.username = session.user.username ?? token.username;
-        token.email = session.user.email ?? token.email;
+        const isGoogleManaged = isGoogleManagedIdentity(token.provider, token.avatarUrl);
+
+        if (!isGoogleManaged) {
+          token.username = session.user.username ?? token.username;
+          token.email = session.user.email ?? token.email;
+          token.avatarUrl = session.user.avatarUrl ?? token.avatarUrl;
+        }
+
         token.theme = session.user.theme ?? token.theme;
-        token.avatarUrl = session.user.avatarUrl ?? token.avatarUrl;
         token.address = session.user.address ?? token.address;
         token.cep = session.user.cep ?? token.cep;
         token.street = session.user.street ?? token.street;
@@ -243,11 +254,15 @@ export const authOptions: AuthOptions = {
         token.state = session.user.state ?? token.state;
         token.position = session.user.position ?? token.position;
         token.function = session.user.function ?? token.function;
-        token.provider = (session.user as any).provider ?? token.provider;
+        token.provider = isGoogleManaged ? 'google' : ((session.user as any).provider ?? token.provider);
       }
       return token;
     },
     async session({ session, token }) {
+      const provider = isGoogleManagedIdentity(token.provider, token.avatarUrl)
+        ? 'google'
+        : ((token.provider as AuthProvider) ?? 'credentials');
+
       session.user = {
         id: token.id as string,
         username: token.username as string,
@@ -268,7 +283,7 @@ export const authOptions: AuthOptions = {
         token: (token.accessToken as string) ?? '',
         companySlug: (token.companySlug as string) ?? ENV.COMPANY_SLUG,
         companyTheme: (token.companyTheme as string) ?? 'system',
-        provider: (token.provider as AuthProvider) ?? 'credentials',
+        provider,
       };
       return session;
     },

@@ -88,14 +88,16 @@ type PasswordSchemaType = z.infer<typeof PasswordSchema>;
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+const isGoogleAvatarUrl = (url?: string | null) => Boolean(url?.includes('googleusercontent.com'));
 
 export function ProfileForm({ user }: ProfileFormProps) {
   const { update } = useSession();
-  const isGoogleUser = user.provider === 'google';
+  const rawAvatarUrl = user.avatarUrl || user.avatar?.url || (typeof user.avatar === 'string' ? user.avatar : null);
+  const isGoogleUser = user.provider?.toLowerCase() === 'google' || isGoogleAvatarUrl(rawAvatarUrl);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    normalizeAvatarUrl(user.avatarUrl || user.avatar?.url || (typeof user.avatar === 'string' ? user.avatar : null))
+    normalizeAvatarUrl(rawAvatarUrl)
   );
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -163,6 +165,13 @@ export function ProfileForm({ user }: ProfileFormProps) {
   });
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isGoogleUser) {
+      e.target.value = '';
+      setAvatarFile(null);
+      toast.error('A foto do perfil é sincronizada com sua conta Google.');
+      return;
+    }
+
     const file = e.target.files?.[0];
     if (file) {
       if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
@@ -191,7 +200,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     try {
       let avatarUrl: string | undefined;
-      if (avatarFile) {
+      if (!isGoogleUser && avatarFile) {
         const uploadResult = await uploadAvatar(avatarFile);
         avatarUrl = uploadResult?.url;
 
@@ -201,14 +210,17 @@ export function ProfileForm({ user }: ProfileFormProps) {
         }
       }
 
-      // Converte o schema plano do form para o objeto aninhado da Model
-      const updated = await updateMyProfile({
-        username: data.username,
-        email: data.email,
+      const payload = {
+        ...(!isGoogleUser
+          ? {
+              username: data.username,
+              email: data.email,
+              avatarUrl,
+            }
+          : {}),
         theme: data.theme,
         position: data.position,
         function: data.function,
-        avatarUrl,
         address: {
           cep: data.cep,
           street: data.street,
@@ -219,15 +231,30 @@ export function ProfileForm({ user }: ProfileFormProps) {
           state: data.state,
           additionalInfo: data.address,
         }
-      });
+      };
+
+      const updated = await updateMyProfile(payload);
 
       if (!updated) {
         toast.error('Nao foi possivel atualizar seu perfil.');
         return;
       }
 
-      await update({ user: { ...user, ...updated } });
-      setAvatarPreview(normalizeAvatarUrl(updated.avatarUrl) || null);
+      const sessionUser = isGoogleUser
+        ? {
+            ...user,
+            ...updated,
+            username: user.username,
+            email: user.email,
+            avatarUrl: user.avatarUrl,
+            provider: user.provider,
+          }
+        : { ...user, ...updated };
+
+      await update({ user: sessionUser });
+      setAvatarPreview(
+        normalizeAvatarUrl(isGoogleUser ? user.avatarUrl : updated.avatarUrl) || null
+      );
       setAvatarFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       toast.success('Perfil atualizado.');
