@@ -27,7 +27,7 @@ services:
       - ../:/app                    # monta o código-fonte do projeto
       - /app/node_modules           # ignora node_modules do host
     working_dir: /app
-    command: npm run dev
+    command: pnpm dev
     networks:
       escala-network:
 
