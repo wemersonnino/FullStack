@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ShiftSwapRequestRepository extends JpaRepository<ShiftSwapRequest, Long> {
     long countByStatus(SwapStatus status);
+    long countByStatusAndRequesterCompanyId(SwapStatus status, Long companyId);
 }

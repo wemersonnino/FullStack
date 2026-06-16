@@ -9,11 +9,7 @@
   "options": {
     "draftAndPublish": false
   },
-  "pluginOptions": {
-    "i18n": {
-      "localized": false
-    }
-  },
+  "pluginOptions": {},
   "attributes": {
     "username": {
       "type": "string",
@@ -38,12 +34,6 @@
         "system"
       ]
     },
-    "roles": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::user-role.user-role",
-      "mappedBy": "user_accounts"
-    },
     "is_active": {
       "type": "boolean",
       "default": true
@@ -53,10 +43,10 @@
     },
     "avatar": {
       "type": "media",
+      "multiple": false,
       "allowedTypes": [
         "images"
-      ],
-      "multiple": false
+      ]
     },
     "address": {
       "type": "string"

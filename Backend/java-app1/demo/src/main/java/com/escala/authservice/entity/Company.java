@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "companies")
@@ -47,4 +48,10 @@ public class Company {
 
     @Builder.Default
     private boolean active = true;
+
+    // SaaS Provisioning Fields
+    @Builder.Default
+    private String planType = "FREE";
+
+    private OffsetDateTime trialExpiresAt;
 }

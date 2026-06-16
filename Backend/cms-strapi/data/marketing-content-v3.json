@@ -1,0 +1,181 @@
+{
+  "landingPages": [
+    {
+      "slug": "home",
+      "eyebrow": "SaaS B2B de Gestão Inteligente",
+      "heroTitle": "Elimine o Caos das Escalas de Trabalho com Inteligência Artificial",
+      "heroDescription": "Controle escalas, jornada, ponto e geolocalização em uma única plataforma. Projetado para operações que não podem parar.",
+      "heroBackgroundImageName": "beautiful-picture.jpg",
+      "sectionBackgroundImageName": "coffee-shadow.jpg",
+      "primaryCtaLabel": "Começar Teste Grátis (14 dias)",
+      "primaryCtaUrl": "/register",
+      "secondaryCtaLabel": "Solicitar Demonstração",
+      "secondaryCtaUrl": "/demo",
+      "trialDescription": "14 dias de acesso total para você e seu time.",
+      "aiTrialDescription": "IA Assistente: 7 dias ou 20 consultas gratuitas.",
+      "securityStatement": "Conformidade total com LGPD, Portaria 671 e suporte ao novo CNPJ Alfanumérico."
+    },
+    {
+      "slug": "seguranca-e-facilities",
+      "eyebrow": "Setor de Segurança",
+      "heroTitle": "Garanta a Cobertura de Postos em Tempo Real",
+      "heroDescription": "Validação por Geofencing e IP. Saiba exatamente quando e onde seu colaborador bateu o ponto.",
+      "heroBackgroundImageName": "what-s-inside-a-black-hole.jpg",
+      "primaryCtaLabel": "Falar com Consultor",
+      "primaryCtaUrl": "/contact?segment=security",
+      "secondaryCtaLabel": "Ver Planos",
+      "secondaryCtaUrl": "#pricing",
+      "trialDescription": "Piloto assistido de 60 a 90 dias disponível para empresas estratégicas.",
+      "aiTrialDescription": "Analise riscos de escala automaticamente.",
+      "securityStatement": "Segurança de dados e auditoria completa de acessos."
+    }
+  ],
+  "features": [
+    {
+      "title": "Escalas 12x36 e 6x1",
+      "description": "Configuração automática de jornadas complexas com validação de descansos e DSR.",
+      "category": "scheduling",
+      "iconKey": "calendar"
+    },
+    {
+      "title": "Geofencing Avançado",
+      "description": "Registro de ponto validado por GPS e IP. Crie cercas digitais para seus postos de trabalho.",
+      "category": "security",
+      "iconKey": "map-pin"
+    },
+    {
+      "title": "IA Assistente",
+      "description": "Sugestão de substitutos para faltas e análise preditiva de riscos de escala.",
+      "category": "ai",
+      "iconKey": "sparkles"
+    },
+    {
+      "title": "Novo CNPJ Alfanumérico",
+      "description": "Primeiro SaaS do Brasil preparado para o novo padrão de identificação da Receita Federal.",
+      "category": "security",
+      "iconKey": "shield"
+    }
+  ],
+  "pricingPlans": [
+    {
+      "name": "Essencial",
+      "slug": "essencial",
+      "description": "Ideal para pequenos times que precisam organizar a casa.",
+      "priceLabel": "R$ 9,90",
+      "unitLabel": "por colaborador/mês",
+      "minPriceLabel": "Mínimo R$ 99/mês",
+      "trialDescription": "14 dias de teste grátis",
+      "features": [
+        "Escalas 5x2 e 6x1",
+        "Ponto Web simples",
+        "Relatórios básicos",
+        "Google SSO"
+      ],
+      "recommended": false,
+      "ctaLabel": "Começar Agora",
+      "ctaUrl": "/register?plan=essencial"
+    },
+    {
+      "name": "Profissional",
+      "slug": "profissional",
+      "description": "O poder da geolocalização e automação para sua empresa.",
+      "priceLabel": "R$ 16,90",
+      "unitLabel": "por colaborador/mês",
+      "minPriceLabel": "Mínimo R$ 249/mês",
+      "trialDescription": "30 dias de teste qualificado",
+      "features": [
+        "Tudo do Essencial",
+        "Ponto com Geofencing",
+        "Gestão de Trocas",
+        "IA Trial (20 consultas)",
+        "Dashboards de Gestão"
+      ],
+      "recommended": true,
+      "ctaLabel": "Teste Profissional",
+      "ctaUrl": "/register?plan=profissional"
+    },
+    {
+      "name": "Operação Crítica",
+      "slug": "operacao-critica",
+      "description": "Controle total para grandes volumes e postos 24/7.",
+      "priceLabel": "R$ 29,90",
+      "unitLabel": "por colaborador/mês",
+      "minPriceLabel": "Mínimo R$ 499/mês",
+      "trialDescription": "Piloto de 60 dias",
+      "features": [
+        "Tudo do Profissional",
+        "Gestão de Postos e Alocação",
+        "Escalas 12x36 ilimitadas",
+        "IA Full (Créditos inclusos)",
+        "Audit Log avançado",
+        "Suporte Prioritário"
+      ],
+      "recommended": false,
+      "ctaLabel": "Agendar Piloto",
+      "ctaUrl": "/demo?plan=critica"
+    },
+    {
+      "name": "Enterprise",
+      "slug": "enterprise",
+      "description": "Soluções customizadas para multinacionais e grandes grupos.",
+      "priceLabel": "Sob Consulta",
+      "unitLabel": "proposta personalizada",
+      "features": [
+        "Contrato sob medida",
+        "Integração com ERP",
+        "SLA de 99.9%",
+        "Gestor de conta dedicado"
+      ],
+      "recommended": false,
+      "ctaLabel": "Falar com Vendas",
+      "ctaUrl": "/contact?plan=enterprise"
+    }
+  ],
+  "articles": [
+    {
+      "title": "Como reduzir 30% das horas extras com escalas inteligentes",
+      "slug": "reduzir-horas-extras-escalas",
+      "description": "Dicas práticas para otimizar sua jornada de trabalho usando dados.",
+      "imageName": "coffee-art.jpg"
+    },
+    {
+      "title": "Geofencing: A prova de presença definitiva no B2B",
+      "slug": "geofencing-prova-presenca",
+      "description": "Por que hospitais e empresas de segurança estão abandonando o ponto físico.",
+      "imageName": "what-s-inside-a-black-hole.jpg"
+    }
+  ],
+  "marketSegments": [
+    {
+      "title": "Varejo e Escala 6x1",
+      "slug": "varejo",
+      "description": "Gerencie folgas rotativas e domingos trabalhados sem erro de cálculo."
+    },
+    {
+      "title": "Saúde e Plantões",
+      "slug": "saude",
+      "description": "Escalas 12x36 com visualização clara de cobertura por setor."
+    }
+  ],
+  "footer": {
+    "sections": [
+      {
+        "title": "Produto",
+        "links": [
+          { "label": "Funcionalidades", "url": "/features" },
+          { "label": "Planos", "url": "/pricing" },
+          { "label": "IA Assistente", "url": "/ai" }
+        ]
+      },
+      {
+        "title": "Legal",
+        "links": [
+          { "label": "Termos de Uso", "url": "/legal/terms" },
+          { "label": "Privacidade (LGPD)", "url": "/legal/privacy" },
+          { "label": "Segurança", "url": "/security" }
+        ]
+      }
+    ],
+    "copyright": "© 2026 Escala SaaS. Todos os direitos reservados. Preparado para CNPJ Alfanumérico."
+  }
+}

@@ -11,4 +11,6 @@ public class DashboardSummaryResponse {
     private long shiftsInMonth;
     private long pendingSwapRequests;
     private long absencesInMonth;
+    private int attendanceRate;
+    private int openShifts;
 }

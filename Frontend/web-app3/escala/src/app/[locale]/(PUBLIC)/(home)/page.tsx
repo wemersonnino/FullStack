@@ -40,17 +40,26 @@ function FeatureIcon({ feature }: { feature: LandingFeature }) {
   );
 }
 
-export default async function HomePage() {
-  const [landing, articles] = await Promise.all([getLandingPage(), getArticles(3)]);
-  const heroImageUrl = landing.heroImage?.url || '/default-banner.svg';
-  const heroImageAlt = landing.heroImage?.alternativeText || 'Visao operacional da plataforma Escala SaaS';
+interface HomePageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function HomePage({ params }: HomePageProps) {
+  const { locale } = await params;
+  const [landing, articles] = await Promise.all([
+    getLandingPage(locale), 
+    getArticles(3, locale)
+  ]);
+  
+  const heroBgUrl = landing.heroBackgroundImage?.url || '/default-banner.svg';
+  const sectionBgUrl = landing.sectionBackgroundImage?.url;
 
   return (
     <div className="flex flex-col bg-background">
       <section className="relative min-h-[calc(100vh-4rem)] overflow-hidden border-b bg-slate-950 text-white">
         <Image
-          src={heroImageUrl}
-          alt={heroImageAlt}
+          src={heroBgUrl}
+          alt={landing.heroTitle}
           fill
           priority
           sizes="100vw"
@@ -103,8 +112,16 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="modulos" className="border-b py-20">
-        <div className="container mx-auto px-6">
+      <section id="modulos" className="border-b py-20 relative">
+        {sectionBgUrl && (
+          <Image
+            src={sectionBgUrl}
+            alt="Fundo decorativo"
+            fill
+            className="absolute inset-0 object-cover opacity-5 pointer-events-none"
+          />
+        )}
+        <div className="container relative z-10 mx-auto px-6">
           <div className="mb-10 max-w-2xl">
             <Badge variant="outline" className="mb-4 rounded-md">Modulos</Badge>
             <h2 className="text-3xl font-black tracking-tight sm:text-4xl">Operacao, regras e auditoria no mesmo fluxo.</h2>

@@ -12,6 +12,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByActiveTrueAndSectorIdOrderByFullNameAsc(Long sectorId);
     List<Employee> findByActiveTrueAndCompanyIdOrderByFullNameAsc(Long companyId);
     long countByActiveTrue();
+    long countByActiveTrueAndCompanyId(Long companyId);
     Optional<Employee> findByEmail(String email);
     Optional<Employee> findByUserEmail(String email);
     Optional<Employee> findByEmailAndCompanySlug(String email, String companySlug);

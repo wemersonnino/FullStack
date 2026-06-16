@@ -24,6 +24,8 @@ declare module "next-auth" {
       companySlug?: string;
       companyTheme?: string;
       provider?: string;
+      planType?: string;
+      trialExpiresAt?: string;
     } & DefaultSession["user"];
   }
 
@@ -48,6 +50,8 @@ declare module "next-auth" {
     companySlug?: string;
     companyTheme?: string;
     provider?: string;
+    planType?: string;
+    trialExpiresAt?: string;
   }
 }
 
@@ -73,5 +77,7 @@ declare module "next-auth/jwt" {
     companySlug?: string;
     companyTheme?: string;
     provider?: string;
+    planType?: string;
+    trialExpiresAt?: string;
   }
 }

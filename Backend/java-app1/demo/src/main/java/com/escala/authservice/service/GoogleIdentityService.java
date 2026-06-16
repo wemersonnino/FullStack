@@ -1,9 +1,9 @@
 package com.escala.authservice.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -45,17 +45,17 @@ public class GoogleIdentityService {
                 throw new IllegalArgumentException("Google idToken invalido");
             }
             JsonNode json = objectMapper.readTree(response.body());
-            if (!clientId.equals(json.path("aud").asText())) {
+            if (!clientId.equals(json.path("aud").asString())) {
                 throw new IllegalArgumentException("Google audience invalida");
             }
-            if (!"true".equals(json.path("email_verified").asText())) {
+            if (!"true".equals(json.path("email_verified").asString())) {
                 throw new IllegalArgumentException("Email Google nao verificado");
             }
             return new GoogleProfile(
-                    json.path("email").asText(),
-                    json.path("name").asText(json.path("email").asText()),
-                    json.path("sub").asText(),
-                    json.path("picture").asText(null)
+                    json.path("email").asString(),
+                    json.path("name").asString(json.path("email").asString()),
+                    json.path("sub").asString(),
+                    json.path("picture").asString(null)
             );
         } catch (Exception exception) {
             throw new IllegalArgumentException("Falha ao validar Google idToken", exception);

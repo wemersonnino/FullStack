@@ -1,5 +1,5 @@
 {
-  "kind": "singleType",
+  "kind": "collectionType",
   "collectionName": "landing_pages",
   "info": {
     "singularName": "landing-page",
@@ -10,8 +10,17 @@
   "options": {
     "draftAndPublish": true
   },
-  "pluginOptions": {},
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
+    "slug": {
+      "type": "uid",
+      "targetField": "heroTitle",
+      "required": true
+    },
     "eyebrow": {
       "type": "string"
     },
@@ -24,6 +33,22 @@
       "required": true
     },
     "heroImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "heroBackgroundImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "sectionBackgroundImage": {
       "type": "media",
       "multiple": false,
       "required": false,
@@ -62,6 +87,11 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::feature-section.feature-section"
+    },
+    "segment": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::market-segment.market-segment"
     },
     "industries": {
       "type": "relation",

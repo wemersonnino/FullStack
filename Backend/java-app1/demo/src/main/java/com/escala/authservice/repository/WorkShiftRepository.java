@@ -8,13 +8,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface WorkShiftRepository extends JpaRepository<WorkShift, Long> {
-    List<WorkShift> findByShiftDateBetweenOrderByShiftDateAscStartTimeAsc(LocalDate start, LocalDate end);
-    List<WorkShift> findByEmployeeIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(Long employeeId, LocalDate start, LocalDate end);
-    List<WorkShift> findByShiftDateOrderByStartTimeAsc(LocalDate shiftDate);
-    List<WorkShift> findByEmployeeIdAndShiftDateOrderByStartTimeAsc(Long employeeId, LocalDate shiftDate);
+    List<WorkShift> findByEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(Long companyId, LocalDate start, LocalDate end);
+    List<WorkShift> findByEmployeeIdAndEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(Long employeeId, Long companyId, LocalDate start, LocalDate end);
+    List<WorkShift> findByEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(Long companyId, LocalDate shiftDate);
+    List<WorkShift> findByEmployeeIdAndEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(Long employeeId, Long companyId, LocalDate shiftDate);
     boolean existsByEmployeeIdAndShiftDate(Long employeeId, LocalDate shiftDate);
-    long countByShiftDateBetween(LocalDate start, LocalDate end);
-    long countByShiftDateAndWorkMode(LocalDate shiftDate, WorkMode workMode);
-    long countByShiftDateAndWorkModeAndEmployeeSectorId(LocalDate shiftDate, WorkMode workMode, Long sectorId);
-    long countByShiftDateAndWorkModeAndEmployeeSectorIdAndIdNot(LocalDate shiftDate, WorkMode workMode, Long sectorId, Long id);
+    long countByEmployeeCompanyIdAndShiftDateBetween(Long companyId, LocalDate start, LocalDate end);
+    long countByEmployeeCompanyIdAndShiftDateAndWorkMode(Long companyId, LocalDate shiftDate, WorkMode workMode);
+    long countByEmployeeCompanyIdAndShiftDateAndWorkModeAndEmployeeSectorId(Long companyId, LocalDate shiftDate, WorkMode workMode, Long sectorId);
+    long countByEmployeeCompanyIdAndShiftDateAndWorkModeAndEmployeeSectorIdAndIdNot(Long companyId, LocalDate shiftDate, WorkMode workMode, Long sectorId, Long id);
 }

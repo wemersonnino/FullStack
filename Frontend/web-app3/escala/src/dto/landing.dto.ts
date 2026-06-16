@@ -201,27 +201,34 @@ export const fallbackLandingPage: LandingPageContent = {
 export function mapLandingPage(data?: AnyRecord | null): LandingPageContent {
   if (!data) return fallbackLandingPage;
 
-  const content: LandingPageContent = {
-    eyebrow: data.eyebrow || fallbackLandingPage.eyebrow,
-    heroTitle: data.heroTitle || fallbackLandingPage.heroTitle,
-    heroDescription: data.heroDescription || fallbackLandingPage.heroDescription,
-    heroImage: mapMedia(data.heroImage),
-    primaryCtaLabel: data.primaryCtaLabel || fallbackLandingPage.primaryCtaLabel,
-    primaryCtaUrl: data.primaryCtaUrl || fallbackLandingPage.primaryCtaUrl,
-    secondaryCtaLabel: data.secondaryCtaLabel || fallbackLandingPage.secondaryCtaLabel,
-    secondaryCtaUrl: data.secondaryCtaUrl || fallbackLandingPage.secondaryCtaUrl,
-    trialDescription: data.trialDescription || fallbackLandingPage.trialDescription,
-    aiTrialDescription: data.aiTrialDescription || fallbackLandingPage.aiTrialDescription,
-    securityStatement: data.securityStatement || fallbackLandingPage.securityStatement,
-    features: pickArray(data.features).map(asFeature).filter((item) => item.title && item.description),
-    industries: pickArray(data.industries).map(asIndustry).filter((item) => item.title && item.valueProposition),
-    pricingPlans: pickArray(data.pricingPlans).map(asPricingPlan),
-    faqs: pickArray(data.faqs).map(asFaq).filter((item) => item.question && item.answer),
-    ctaButtons: pickArray(data.ctaButtons).map(asCtaButton).filter((item) => item.label && item.url),
-  };
+  // Handle Strapi response which might be { data: [...] } or just the array [...]
+  const items = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : [data]);
+  const entry = items[0];
 
-  const validated = LandingPageSchema.safeParse(content);
-  if (!validated.success) return fallbackLandingPage;
+  if (!entry) {
+    return fallbackLandingPage;
+  }
+
+  const content: LandingPageContent = {
+    eyebrow: entry.eyebrow || fallbackLandingPage.eyebrow,
+    heroTitle: entry.heroTitle || fallbackLandingPage.heroTitle,
+    heroDescription: entry.heroDescription || fallbackLandingPage.heroDescription,
+    heroImage: mapMedia(entry.heroImage),
+    heroBackgroundImage: mapMedia(entry.heroBackgroundImage),
+    sectionBackgroundImage: mapMedia(entry.sectionBackgroundImage),
+    primaryCtaLabel: entry.primaryCtaLabel || fallbackLandingPage.primaryCtaLabel,
+    primaryCtaUrl: entry.primaryCtaUrl || fallbackLandingPage.primaryCtaUrl,
+    secondaryCtaLabel: entry.secondaryCtaLabel || fallbackLandingPage.secondaryCtaLabel,
+    secondaryCtaUrl: entry.secondaryCtaUrl || fallbackLandingPage.secondaryCtaUrl,
+    trialDescription: entry.trialDescription || fallbackLandingPage.trialDescription,
+    aiTrialDescription: entry.aiTrialDescription || fallbackLandingPage.aiTrialDescription,
+    securityStatement: entry.securityStatement || fallbackLandingPage.securityStatement,
+    features: pickArray(entry.features).map(asFeature).filter((item) => item.title && item.description),
+    industries: pickArray(entry.industries).map(asIndustry).filter((item) => item.title && item.valueProposition),
+    pricingPlans: pickArray(entry.pricingPlans).map(asPricingPlan),
+    faqs: pickArray(entry.faqs).map(asFaq).filter((item) => item.question && item.answer),
+    ctaButtons: pickArray(entry.ctaButtons).map(asCtaButton).filter((item) => item.label && item.url),
+  };
 
   return {
     ...content,
