@@ -79,7 +79,7 @@ export const BannerCarousel = ({
               type="button"
               aria-label={`Exibir banner ${idx + 1}`}
               onClick={() => setCurrent(idx)}
-              className={`w-3 h-3 rounded-full transition ${
+              className={`w-3 h-3 rounded-full transition cursor-pointer ${
                 idx === current ? "bg-white" : "bg-white/50"
               }`}
             />
