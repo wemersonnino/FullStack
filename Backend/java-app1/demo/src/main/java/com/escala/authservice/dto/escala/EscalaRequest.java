@@ -1,6 +1,7 @@
 package com.escala.authservice.dto.escala;
 
 import com.escala.authservice.entity.WorkMode;
+import com.escala.authservice.scheduling.domain.enums.PadraoEscala;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ public class EscalaRequest {
     private LocalTime startTime;
     private LocalTime endTime;
     private WorkMode workMode;
+    private PadraoEscala padraoEscala;
     private String location;
     private String sector;
     private String project;

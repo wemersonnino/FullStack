@@ -40,7 +40,7 @@ public class EscalaController {
             @RequestParam(required = false) Long projetoId
     ) {
         requireAdmin(authentication);
-        return scheduleService.listEscalas(inicio, fim, usuarioId, setorId, projetoId);
+        return scheduleService.listEscalas(inicio, fim, usuarioId, setorId, projetoId, authentication.getName());
     }
 
     @GetMapping("/dia")
@@ -83,13 +83,13 @@ public class EscalaController {
             @RequestParam(required = false, name = "q") String query
     ) {
         requireAdmin(authentication);
-        return scheduleService.usuariosEscalaveis(projetoId, setorId, empresaId, query);
+        return scheduleService.usuariosEscalaveis(projetoId, setorId, empresaId, query, authentication.getName());
     }
 
     @GetMapping("/usuarios/{id}")
     public UsuarioEscalaResponse usuario(Authentication authentication, @PathVariable Long id) {
         requireAdmin(authentication);
-        return scheduleService.usuarioEscalavel(id);
+        return scheduleService.usuarioEscalavel(id, authentication.getName());
     }
 
     private void requireAdmin(Authentication authentication) {
@@ -101,6 +101,6 @@ public class EscalaController {
     private boolean isAdmin(Authentication authentication) {
         return authentication != null && authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch("ADMIN"::equals);
+                .anyMatch(role -> role.equals("ADMIN") || role.equals("MANAGER") || role.equals("OWNER"));
     }
 }

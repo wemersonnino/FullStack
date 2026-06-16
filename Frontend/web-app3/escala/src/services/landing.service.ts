@@ -7,9 +7,11 @@ type StrapiSingleResponse<T> = {
   data?: T | null;
 };
 
-export async function getLandingPage(): Promise<LandingPageContent> {
+export async function getLandingPage(locale?: string): Promise<LandingPageContent> {
   try {
-    const response = await httpGet<StrapiSingleResponse<Record<string, any>>>(API_ROUTES.LANDING_PAGE);
+    const localeParam = locale ? `&locale=${locale}` : '';
+    const url = `${API_ROUTES.LANDING_PAGE}&filters[slug][$eq]=home${localeParam}`;
+    const response = await httpGet<StrapiSingleResponse<Record<string, any>>>(url);
     return mapLandingPage(response?.data);
   } catch (error) {
     console.error('Erro ao buscar landing page:', error);

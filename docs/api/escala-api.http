@@ -5,6 +5,9 @@
 GET {{baseUrl}}/v3/api-docs
 
 ### Swagger UI
+GET {{baseUrl}}/swagger-ui/index.html
+
+### Swagger UI alias
 GET {{baseUrl}}/swagger-ui.html
 
 ### Register user
@@ -24,6 +27,45 @@ Content-Type: application/json
 {
   "email": "apiadmin@example.com",
   "password": "Passw0rd!"
+}
+
+### Login admin local Docker seed
+POST {{baseUrl}}/api/v1/auth/authenticate
+Content-Type: application/json
+
+{
+  "email": "admin@escala.local",
+  "password": "Admin@123456"
+}
+
+### Current user
+GET {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{token}}
+
+### List companies
+GET {{baseUrl}}/api/v1/companies
+Authorization: Bearer {{token}}
+
+### List employees
+GET {{baseUrl}}/api/v1/employees
+Authorization: Bearer {{token}}
+
+### My operational schedule
+GET {{baseUrl}}/api/v1/escala/me
+Authorization: Bearer {{token}}
+
+### Operational schedule by day
+GET {{baseUrl}}/api/v1/escala/dia?data=2026-05-10
+Authorization: Bearer {{token}}
+
+### Check-in
+POST {{baseUrl}}/api/v1/check-in
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "latitude": -23.55052,
+  "longitude": -46.633308
 }
 
 ### Dashboard summary

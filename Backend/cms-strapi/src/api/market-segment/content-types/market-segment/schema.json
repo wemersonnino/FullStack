@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "market_segments",
+  "info": {
+    "singularName": "market-segment",
+    "pluralName": "market-segments",
+    "displayName": "Market Segment"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}

@@ -23,24 +23,58 @@ export async function proxy(req: NextRequest) {
     (path) => pathnameWithoutLocale === path || pathnameWithoutLocale.startsWith(`${path}/`)
   );
 
+  let response: NextResponse;
+
   if (!isPrivateRoute) {
-    return intlMiddleware(req);
+    response = intlMiddleware(req);
+  } else {
+    const token = await getToken({
+      req,
+      secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
+    });
+
+    if (token) {
+      response = intlMiddleware(req);
+    } else {
+      const loginUrl = req.nextUrl.clone();
+      loginUrl.pathname = `${getLocalePrefix(req.nextUrl.pathname)}/login`;
+      loginUrl.searchParams.set('callbackUrl', `${req.nextUrl.pathname}${req.nextUrl.search}`);
+      response = NextResponse.redirect(loginUrl);
+    }
   }
 
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
-  });
+  // Capture UTM parameters and Referrer
+  const url = req.nextUrl;
+  const utm_source = url.searchParams.get('utm_source');
+  const utm_medium = url.searchParams.get('utm_medium');
+  const utm_campaign = url.searchParams.get('utm_campaign');
+  
+  if (utm_source || utm_medium || utm_campaign) {
+    const attributionData = {
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      utm_content: url.searchParams.get('utm_content'),
+      utm_term: url.searchParams.get('utm_term'),
+      referrer: req.headers.get('referer') || '',
+      capturedAt: new Date().toISOString(),
+    };
 
-  if (token) {
-    return intlMiddleware(req);
+    const cookieName = process.env.CAMPAIGN_COOKIE_NAME || 'escala_marketing_attribution';
+    const ttlDays = parseInt(process.env.MARKETING_ATTRIBUTION_TTL_DAYS || '30', 10);
+    
+    response.cookies.set({
+      name: cookieName,
+      value: JSON.stringify(attributionData),
+      path: '/',
+      maxAge: ttlDays * 24 * 60 * 60,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
   }
 
-  const loginUrl = req.nextUrl.clone();
-  loginUrl.pathname = `${getLocalePrefix(req.nextUrl.pathname)}/login`;
-  loginUrl.searchParams.set('callbackUrl', `${req.nextUrl.pathname}${req.nextUrl.search}`);
-
-  return NextResponse.redirect(loginUrl);
+  return response;
 }
 
 export default proxy;
@@ -51,3 +85,4 @@ export const config = {
     '/([\\w-]+)?/users/(.+)',
   ],
 };
+

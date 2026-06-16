@@ -1,6 +1,7 @@
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
+import { cookies } from 'next/headers';
 import { ThemeEnum } from '@/interfaces/enums/theme.enum';
 import { ENV } from '@/constants/env';
 
@@ -25,6 +26,8 @@ type SpringAuthResponse = {
     function?: string;
     companySlug?: string;
     companyTheme?: string;
+    planType?: string;
+    trialExpiresAt?: string;
   };
 };
 
@@ -36,16 +39,30 @@ const isGoogleAvatarUrl = (url?: unknown) =>
 const isGoogleManagedIdentity = (provider?: unknown, avatarUrl?: unknown) =>
   provider === 'google' || isGoogleAvatarUrl(avatarUrl);
 
+async function getAttributionData() {
+  const cookieStore = await cookies();
+  const attributionStr = cookieStore.get(process.env.CAMPAIGN_COOKIE_NAME || 'escala_marketing_attribution')?.value;
+  if (attributionStr) {
+    try {
+      return JSON.parse(attributionStr);
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
 async function loginSpringBoot(
   email: string,
   password: string,
   companySlug = ENV.COMPANY_SLUG,
   recaptchaToken?: string
 ) {
+  const attribution = await getAttributionData();
   const response = await fetch(`${ENV.API_INTERNAL_URL}/api/v1/auth/authenticate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, companySlug, recaptchaToken }),
+    body: JSON.stringify({ email, password, companySlug, recaptchaToken, attribution }),
     cache: 'no-store',
   });
 
@@ -74,15 +91,18 @@ async function loginSpringBoot(
       function: data.user.function,
       companySlug: data.user.companySlug,
       companyTheme: data.user.companyTheme,
+      planType: data.user.planType,
+      trialExpiresAt: data.user.trialExpiresAt,
     },
   };
 }
 
 async function loginGoogleSpringBoot(idToken: string, companySlug = ENV.COMPANY_SLUG) {
+  const attribution = await getAttributionData();
   const response = await fetch(`${ENV.API_INTERNAL_URL}/api/v1/auth/google`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idToken, companySlug }),
+    body: JSON.stringify({ idToken, companySlug, attribution }),
     cache: 'no-store',
   });
 
@@ -111,6 +131,8 @@ async function loginGoogleSpringBoot(idToken: string, companySlug = ENV.COMPANY_
       function: data.user.function,
       companySlug: data.user.companySlug,
       companyTheme: data.user.companyTheme,
+      planType: data.user.planType,
+      trialExpiresAt: data.user.trialExpiresAt,
     },
   };
 }
@@ -155,6 +177,8 @@ const providers: AuthOptions['providers'] = [
         token: authUser.token,
         companySlug: authUser.user.companySlug,
         companyTheme: authUser.user.companyTheme,
+        planType: authUser.user.planType,
+        trialExpiresAt: authUser.user.trialExpiresAt,
       };
     },
   }),
@@ -206,6 +230,8 @@ export const authOptions: AuthOptions = {
           token.accessToken = authUser.token;
           token.companySlug = authUser.user.companySlug;
           token.companyTheme = authUser.user.companyTheme;
+          token.planType = authUser.user.planType;
+          token.trialExpiresAt = authUser.user.trialExpiresAt;
           token.provider = 'google';
           return token;
         }
@@ -231,6 +257,8 @@ export const authOptions: AuthOptions = {
         token.accessToken = (user as any).token;
         token.companySlug = (user as any).companySlug;
         token.companyTheme = (user as any).companyTheme;
+        token.planType = (user as any).planType;
+        token.trialExpiresAt = (user as any).trialExpiresAt;
         token.provider = (user as any).provider || 'credentials';
       }
 
@@ -283,6 +311,8 @@ export const authOptions: AuthOptions = {
         token: (token.accessToken as string) ?? '',
         companySlug: (token.companySlug as string) ?? ENV.COMPANY_SLUG,
         companyTheme: (token.companyTheme as string) ?? 'system',
+        planType: (token.planType as string) ?? 'FREE',
+        trialExpiresAt: (token.trialExpiresAt as string) ?? '',
         provider,
       };
       return session;

@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "plan_feature_groups",
+  "info": {
+    "singularName": "plan-feature-group",
+    "pluralName": "plan-feature-groups",
+    "displayName": "Plan Feature Group"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    },
+    "features": {
+      "type": "json"
+    }
+  }
+}

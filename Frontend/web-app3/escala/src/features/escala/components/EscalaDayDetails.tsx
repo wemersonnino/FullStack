@@ -30,6 +30,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useShiftSwapRequest } from '@/features/shift-swaps/hooks/useShiftSwapRequest';
+import { WorkScheduleModal } from '@/components/dashboard/WorkScheduleModal';
 
 interface EscalaDayDetailsProps {
   date: Date | null;
@@ -203,22 +204,38 @@ export function EscalaDayDetails({ date, escalas, isOpen, onClose, isAdmin }: Es
           </div>
         )}
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => closeDetails(false)}>Fechar</Button>
-          {selectedSwapEscala && (
-            <Button onClick={handleSubmitSwap} disabled={isSubmitting} className="gap-2">
-              <Repeat2 className="h-4 w-4" />
-              {isSubmitting ? 'Enviando...' : 'Confirmar solicitacao'}
-            </Button>
+        <DialogFooter className="sm:justify-between flex-col sm:flex-row gap-2">
+          {!isAdmin && (
+            <div className="flex-1">
+              <WorkScheduleModal 
+                schedules={[{
+                  id: '1',
+                  userId: 'me',
+                  active: true,
+                  fixedDays: 'Segunda a Sexta',
+                  frequency: 'every_week',
+                  minimumWeeklyShifts: 5,
+                }]} 
+              />
+            </div>
           )}
-          {isAdmin && (
-            <Button className="gap-2" asChild>
-              <Link href="/dashboard/escala/admin">
-              <ExternalLink className="h-4 w-4" />
-              Gerenciar Todos
-              </Link>
-            </Button>
-          )}
+          <div className="flex gap-2 justify-end">
+            <Button variant="ghost" onClick={() => closeDetails(false)}>Fechar</Button>
+            {selectedSwapEscala && (
+              <Button onClick={handleSubmitSwap} disabled={isSubmitting} className="gap-2">
+                <Repeat2 className="h-4 w-4" />
+                {isSubmitting ? 'Enviando...' : 'Confirmar solicitacao'}
+              </Button>
+            )}
+            {isAdmin && (
+              <Button className="gap-2" asChild>
+                <Link href="/dashboard/escala/admin">
+                <ExternalLink className="h-4 w-4" />
+                Gerenciar Todos
+                </Link>
+              </Button>
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
