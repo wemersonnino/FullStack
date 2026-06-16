@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-06-16 - Faturamento SaaS, Integração Stripe e Sincronização Strapi
+
+### Adicionado
+- Integração completa com **Stripe** no backend Java (SDK v33.0.0).
+- Entidades de domínio `Subscription` e `Invoice` para gestão de faturamento.
+- Endpoint de Webhook seguro com validação de assinatura para eventos do Stripe.
+- Novas páginas de Billing no Dashboard: `/plans`, `/success`, `/cancel`.
+- Componente `PricingTable` dinâmico que consome planos da coleção `pricing-plan-contents` do Strapi.
+- Link "Planos e Faturamento" na barra lateral administrativa.
+- Suporte a `NEXT_INTERNAL_API_BASE_URL` no frontend para garantir conectividade em ambientes Docker.
+
+### Alterado
+- O fluxo de autenticação (Login/Registro) agora preserva o plano selecionado na Home pública.
+- Componente `Button` global e botões nativos agora exibem `cursor-pointer`.
+- Páginas de autenticação envoltas em `Suspense` para suportar `useSearchParams` com rendering estático.
+
+### Corrigido
+- Erro 401 Unauthorized no login do BFF ao rodar em containers Docker.
+- Falhas de build no Next.js relacionadas a `useSearchParams` fora de Suspense boundaries.
+
+
 ## 2026-06-15 - PLG com captura publica de leads e pagina de demo
 
 ### Adicionado

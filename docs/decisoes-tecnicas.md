@@ -1,5 +1,23 @@
 # Decisoes Tecnicas
 
+## 2026-06-16 - Faturamento SaaS (Billing) e Integração Stripe
+
+### Contexto
+Para habilitar a comercialização do produto, foi implementada a infraestrutura de faturamento recorrente integrada ao Stripe, seguindo o padrão de arquitetura hexagonal já estabelecido.
+
+### Decisões confirmadas
+- **Domínio de Billing**: Criadas entidades `Subscription` e `Invoice` no backend Java para rastrear o estado comercial dos tenants independentemente do gateway.
+- **Portas e Adaptadores**: Definida a interface `PaymentGatewayPort` para abstrair o provedor de pagamento. O `StripeAdapter` utiliza o SDK oficial v33.0.0.
+- **Webhooks Seguros**: Implementado `StripeWebhookController` para processar eventos assíncronos (pagamento aprovado, renovação, cancelamento) com validação obrigatória de assinatura digital (`Stripe-Signature`).
+- **Sincronização com Strapi**: Os detalhes comerciais (preços, nomes, descrições) são consumidos dinamicamente da coleção `pricing-plan-contents` do Strapi via BFF.
+- **Jornada de Conversão**: Implementada a persistência do contexto do plano escolhido. Se um usuário clica em "Assinar" na Home pública, o plano é passado via query param para o Registro/Login e preservado até a tela de checkout privada no Dashboard.
+- **Segurança UX**: Adicionada a classe `cursor-pointer` globalmente ao componente `Button` e botões nativos para reforçar a interatividade.
+
+### Validação
+- Backend: Compilação Maven OK com a nova dependência do Stripe.
+- Frontend: Build de produção Next.js OK, incluindo o uso de `Suspense` boundaries para lidar com parâmetros de busca em páginas estáticas.
+
+
 ## 2026-06-15 - Captura publica de leads e demo comercial
 
 ### Decisoes confirmadas
