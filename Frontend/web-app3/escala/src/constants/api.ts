@@ -27,4 +27,5 @@ export const API_ROUTES = {
   SHIFT_SWAPS: '/api/server/api/v1/schedules/swap-requests',
   WORK_SCHEDULES: '/api/server/api/v1/schedules',
   DASHBOARD_SUMMARY: '/api/server/api/v1/schedules/dashboard-summary',
+  LEADS: '/api/bff/leads',
 };

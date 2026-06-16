@@ -8,6 +8,26 @@ export interface CampaignAttribution {
   capturedAt: string;
 }
 
+export interface LeadCapturePayload {
+  name: string;
+  email: string;
+  companyName?: string;
+  marketingConsentGranted: boolean;
+  source?: string;
+  landingPageSlug?: string;
+  campaignSlug?: string;
+}
+
+export interface LeadCaptureResponse {
+  id: number;
+  email: string;
+  name: string;
+  createdAt: string;
+  marketingConsentGranted: boolean;
+  converted: boolean;
+  message: string;
+}
+
 export interface CampaignPage {
   id: number;
   slug: string;

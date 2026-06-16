@@ -1,5 +1,11 @@
 # Auditoria Backend Spring Boot 4 e Java 25
 
+## Atualizacao complementar
+
+Branch atual continua sendo `feature/backend-upgrade-springboot-4-java-25` no historico da auditoria original, mas a arvore de trabalho desta sessao tambem recebeu a frente publica de PLG com captura de leads e pagina de demo.
+
+Essa adicao nao invalida a validacao estrutural da migracao Spring Boot 4 / Java 25, mas introduz um novo controller e rotas publicas que ainda precisam ser cobertos por testes especificos antes de qualquer merge final.
+
 ## Resumo
 
 Branch auditada: `feature/backend-upgrade-springboot-4-java-25`.

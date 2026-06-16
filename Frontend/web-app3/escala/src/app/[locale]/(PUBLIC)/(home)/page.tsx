@@ -15,6 +15,7 @@ import {
 import { getArticles } from '@/services/article.service';
 import { getLandingPage } from '@/services/landing.service';
 import { BlogList } from '@/components/home/BlogList';
+import { LeadCaptureForm } from '@/components/shared/LeadCaptureForm';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LandingFeature, LandingIconKey } from '@/interfaces/landing/landing.interface';
@@ -108,6 +109,53 @@ export default async function HomePage({ params }: HomePageProps) {
               <ShieldCheck className="mb-3 h-5 w-5 text-primary" aria-hidden="true" />
               {landing.securityStatement}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="demo" className="border-b bg-muted/25 py-20">
+        <div className="container mx-auto px-6">
+          <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+            <div className="max-w-2xl">
+              <Badge variant="outline" className="mb-4 rounded-md">Demo</Badge>
+              <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
+                Veja a operação antes de conversar com vendas.
+              </h2>
+              <p className="mt-4 text-base leading-7 text-muted-foreground">
+                A demonstração mostra como a plataforma organiza escalas, aponta limites comerciais e
+                captura leads com consentimento explícito.
+              </p>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-lg border bg-background p-4">
+                  <ShieldCheck className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <h3 className="mt-3 font-bold">Fluxo comercial seguro</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    O lead entra pelo BFF público e chega ao backend com UTM, referrer e consentimento.
+                  </p>
+                </div>
+                <div className="rounded-lg border bg-background p-4">
+                  <Users className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <h3 className="mt-3 font-bold">Atendimento orientado ao negócio</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    A equipe comercial recebe contexto suficiente para responder com foco em conversão.
+                  </p>
+                </div>
+              </div>
+
+              <Button variant="link" className="mt-6 w-fit px-0 font-bold" asChild>
+                <Link href={`/${locale}/demo`}>
+                  Abrir página de demo
+                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
+
+            <LeadCaptureForm
+              title="Receba uma proposta guiada"
+              description="Deixe seu contato e a gente responde com uma demonstração focada na sua operação."
+              landingPageSlug="home"
+            />
           </div>
         </div>
       </section>

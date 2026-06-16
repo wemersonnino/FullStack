@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
-import java.util.Map;
 
 @Entity
 @Table(name = "marketing_leads")
@@ -22,13 +21,28 @@ public class MarketingLead {
     private String email;
     private String name;
     private String companyName;
+    private String source;
+
+    @Column(name = "lead_status")
+    private String leadStatus;
+
+    @Column(name = "marketing_consent_granted", nullable = false)
+    @Builder.Default
+    private boolean marketingConsentGranted = false;
 
     @Column(nullable = false)
     private OffsetDateTime createdAt;
 
+    @Column(name = "last_login_at")
+    private OffsetDateTime lastLoginAt;
+
     private String utmSource;
     private String utmMedium;
     private String utmCampaign;
+    private String utmContent;
+    private String utmTerm;
+    private String landingPageSlug;
+    private String campaignSlug;
     private String referrer;
 
     @Builder.Default

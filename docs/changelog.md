@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-06-15 - PLG com captura publica de leads e pagina de demo
+
+### Adicionado
+
+- Endpoint publico `POST /api/v1/leads` no backend para captura de lead com consentimento explicito e metadados de campanha.
+- Rota BFF publica `POST /api/bff/leads` no Next.js para repassar lead ao backend sem expor token.
+- Seccao de captura de lead na home publica.
+- Pagina publica de demo em `/{locale}/demo` para conversao comercial.
+- Atualizacao manual do OpenAPI para incluir o grupo `Marketing`.
+
+### Alterado
+
+- `MarketingLead` passou a registrar origem, status comercial, consentimento, `lastLoginAt` e metadados extras de UTM.
+- Google SSO agora grava os novos campos de lead quando cria workspace trial a partir de acesso PLG.
+
+### Riscos conhecidos
+
+- O fluxo comercial foi introduzido sem uma suite dedicada de testes de integracao ainda.
+- O OpenAPI continua manual e precisa permanecer sincronizado com o novo controller de leads.
+- A captura publica depende do cookie de atribuicao de campanha estar presente para completar os metadados de marketing.
+
 ## 2026-06-16 - Base segura do BFF do frontend
 
 ### Adicionado

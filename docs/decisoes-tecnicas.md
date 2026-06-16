@@ -1,5 +1,21 @@
 # Decisoes Tecnicas
 
+## 2026-06-15 - Captura publica de leads e demo comercial
+
+### Decisoes confirmadas
+
+- O fluxo de lead comercial deve entrar por uma rota publica dedicada no Next.js (`/api/bff/leads`) e ser persistido no backend Java via `POST /api/v1/leads`.
+- O backend continua como fonte da verdade para lead, consentimento, origem da campanha e status comercial.
+- O consentimento explicito para contato comercial e obrigatorio no formulario publico.
+- A home publica e a pagina `/demo` passam a servir como superficies de conversao.
+- O Swagger/OpenAPI manual continua sendo a fonte documental do contrato e agora inclui o grupo `Marketing`.
+
+### Riscos pendentes
+
+- Ainda nao existe suite de testes de integracao para a nova captura de lead.
+- O fluxo depende do cookie de atribuicao de campanha para enriquecer os metadados.
+- O controller de leads precisa continuar sincronizado no `OpenApiController` enquanto a geracao automatica nao for reavaliada.
+
 ## 2026-06-15 - Fechamento da migracao Spring Boot 4 e Java 25
 
 ### Contexto

@@ -46,7 +46,7 @@ http://localhost:8080/v3/api-docs
 
 ## Grupos documentados
 
-O JSON OpenAPI atual documenta `10` grupos:
+O JSON OpenAPI atual documenta `11` grupos:
 
 - `Auth`
 - `Usuarios`
@@ -58,6 +58,7 @@ O JSON OpenAPI atual documenta `10` grupos:
 - `Ponto`
 - `Relatorios`
 - `Convites`
+- `Marketing`
 
 ## Controllers cobertos
 
@@ -71,10 +72,11 @@ O JSON OpenAPI atual documenta `10` grupos:
 - `CheckInController`
 - `ReportController`
 - `TeamInvitationController`
+- `LeadController`
 
 ## Endpoints documentados
 
-O Swagger atual documenta `37` paths:
+O Swagger atual documenta `38` paths:
 
 ```text
 /api/v1/auth/authenticate
@@ -83,6 +85,7 @@ O Swagger atual documenta `37` paths:
 /api/v1/auth/google
 /api/v1/auth/register
 /api/v1/auth/reset-password
+/api/v1/leads
 /api/v1/check-in
 /api/v1/companies
 /api/v1/companies/{id}
@@ -131,8 +134,8 @@ Resultado validado:
 
 - Swagger UI: `200`
 - OpenAPI JSON: `200`
-- Tags: `10`
-- Paths: `37`
+- Tags: `11`
+- Paths: `38`
 - Testes Maven: `24` testes, `0` falhas, `0` erros
 
 ## Regras de manutencao
