@@ -1,7 +1,7 @@
-import { httpDelete, httpGet, httpPatch, httpPost, httpPut } from '@/lib/http/request';
+import { httpDelete, httpGet, httpPost, httpPut } from '@/lib/http/request';
 import { Escala, EscalaRequest, UsuarioEscala } from '@/interfaces/escala/escala.interface';
 
-const BASE_URL = '/api/bff/escalas';
+const BASE_URL = '/api/server/api/v1/escala';
 
 type UsuarioEscalaDto = Partial<UsuarioEscala> & {
   fullName?: string;

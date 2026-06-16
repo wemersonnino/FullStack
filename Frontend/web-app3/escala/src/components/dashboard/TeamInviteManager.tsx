@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,9 +12,7 @@ import {
   Trash2, 
   Clock, 
   CheckCircle2, 
-  XCircle,
   Copy,
-  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +32,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { TeamInvitation } from '@/core/domain/models/invitation.model';
+
+const TEAM_INVITATIONS_URL = '/api/server/api/v1/team/invitations';
 
 const InviteSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -57,29 +57,29 @@ export function TeamInviteManager() {
     },
   });
 
-  const fetchInvitations = async () => {
+  const fetchInvitations = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/bff/team/invitations');
+      const response = await fetch(TEAM_INVITATIONS_URL);
       if (response.ok) {
         const data = await response.json();
         setInvitations(data);
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao carregar convites.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchInvitations();
-  }, []);
+    void Promise.resolve().then(() => fetchInvitations());
+  }, [fetchInvitations]);
 
   const onInvite = async (data: InviteSchemaType) => {
     setSending(true);
     try {
-      const response = await fetch('/api/bff/team/invitations', {
+      const response = await fetch(TEAM_INVITATIONS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -93,16 +93,16 @@ export function TeamInviteManager() {
         const error = await response.json();
         toast.error(error.message || 'Erro ao enviar convite.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao processar convite.');
     } finally {
-      setSending(true);
+      setSending(false);
     }
   };
 
   const onCancel = async (id: string) => {
     try {
-      const response = await fetch(`/api/bff/team/invitations/${id}`, {
+      const response = await fetch(`${TEAM_INVITATIONS_URL}/${id}`, {
         method: 'DELETE',
       });
 
@@ -110,7 +110,7 @@ export function TeamInviteManager() {
         toast.success('Convite cancelado.');
         fetchInvitations();
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao cancelar convite.');
     }
   };

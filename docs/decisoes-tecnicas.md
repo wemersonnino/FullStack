@@ -58,7 +58,8 @@ Resultados:
 - `jjwt-jackson:0.11.5` ainda puxa Jackson 2 em runtime; revisar upgrade do JJWT em uma proxima frente.
 - `OpenApiController` manual precisa ser atualizado sempre que endpoints REST forem alterados.
 - `docker compose config` expande segredos e variaveis sensiveis de arquivos `.env`; evitar registrar essa saida integral em artefatos compartilhados e revisar gestao de secrets.
-- O Compose ainda define variaveis frontend `NEXT_PUBLIC_API_BASE_URL` e `NEXT_INTERNAL_API_BASE_URL`; a frente futura de BFF deve migrar para `API_BASE_URL` server-side e client com `baseURL: "/api/server"`.
+- O Compose foi migrado na branch `feature/frontend-bff-secure-api` para `API_BASE_URL` server-side e cliente usando `/api/server` para chamadas ao backend Java.
+- Ainda falta remover gradualmente usos legados de `session.user.token` em rotas BFF antigas e componentes server-side, mantendo compatibilidade enquanto a migração para `/api/server` avanca.
 
 ### Decisao
 

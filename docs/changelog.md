@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-06-16 - Base segura do BFF do frontend
+
+### Adicionado
+
+- Rota catch-all autenticada `GET|POST|PUT|PATCH|DELETE /api/server/[...endpoint]` no Next.js.
+- Proxy server-side para o backend Java usando `API_BASE_URL`.
+- Injecao de `Authorization: Bearer <accessToken>` exclusivamente no Route Handler server-side.
+
+### Alterado
+
+- Rotas de dominio do frontend migradas para `/api/server/api/v1/...`.
+- Compose e `.env.example` deixam de configurar `NEXT_PUBLIC_API_BASE_URL`.
+- Adapters server-side passam a usar `ENV.API_BASE_URL`.
+
+### Validado
+
+- `pnpm typecheck`: sucesso.
+- `pnpm build`: sucesso, com a rota `/api/server/[...endpoint]` registrada no App Router.
+
+### Riscos conhecidos
+
+- `.env.local` e segredos locais sao ignorados pelo Git e precisam ser limpos/rotacionados fora do commit.
+- Rotas BFF legadas de auth/upload continuam em `/api/bff` por terem fluxos publicos ou multipart especificos.
+- Ainda falta remover gradualmente dependencias antigas de `session.user.token` fora do novo catch-all.
+
 ## 2026-06-15 - Finalizacao da migracao Spring Boot 4 e Java 25
 
 ### Alterado

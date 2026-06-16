@@ -3,7 +3,7 @@ import { OrganizationMapper } from "./mappers/organization.mapper";
 import { Sector, Project } from "@/core/domain/models/organization.model";
 
 export class OrganizationBackendAdapter {
-  private static baseUrl = ENV.API_INTERNAL_URL;
+  private static baseUrl = ENV.API_BASE_URL;
 
   // Sectors
   static async listSectors(token: string): Promise<Sector[]> {

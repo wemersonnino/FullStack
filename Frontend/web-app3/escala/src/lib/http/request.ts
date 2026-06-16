@@ -23,6 +23,11 @@ async function getAuthHeaders(options?: RequestOptions) {
   return headers;
 }
 
+async function getRequestHeaders(url: string, options?: RequestOptions) {
+  if (url.startsWith('/api/server')) return {};
+  return getAuthHeaders(options);
+}
+
 function getHttpErrorMessage(err: unknown, fallback: string) {
   const error = err as {
     message?: string;
@@ -56,7 +61,7 @@ export async function httpGet<T = any>(
   options?: RequestOptions
 ): Promise<T | null> {
   try {
-    const headers = await getAuthHeaders(options);
+    const headers = await getRequestHeaders(url, options);
     const res = await api.get<T>(resolveUrl(url), { params, headers });
     return res.data;
   } catch (err) {
@@ -67,7 +72,7 @@ export async function httpGet<T = any>(
 
 export async function httpPost<T = any>(url: string, body: any, options?: RequestOptions): Promise<T | null> {
   try {
-    const headers = await getAuthHeaders(options);
+    const headers = await getRequestHeaders(url, options);
     const res = await api.post<T>(resolveUrl(url), body, { headers });
     return res.data;
   } catch (err) {
@@ -80,7 +85,7 @@ export async function httpPost<T = any>(url: string, body: any, options?: Reques
 
 export async function httpPut<T = any>(url: string, body: any, options?: RequestOptions): Promise<T | null> {
   try {
-    const headers = await getAuthHeaders(options);
+    const headers = await getRequestHeaders(url, options);
     const res = await api.put<T>(resolveUrl(url), body, { headers });
     return res.data;
   } catch (err) {
@@ -93,7 +98,7 @@ export async function httpPut<T = any>(url: string, body: any, options?: Request
 
 export async function httpPatch<T = any>(url: string, body: any, options?: RequestOptions): Promise<T | null> {
   try {
-    const headers = await getAuthHeaders(options);
+    const headers = await getRequestHeaders(url, options);
     const res = await api.patch<T>(resolveUrl(url), body, { headers });
     return res.data;
   } catch (err) {
@@ -109,7 +114,7 @@ export async function httpDelete<T = any>(
   options?: { params?: Record<string, any>; data?: any; authToken?: string; throwOnError?: boolean }
 ): Promise<T | null> {
   try {
-    const headers = await getAuthHeaders(options);
+    const headers = await getRequestHeaders(url, options);
     const res = await api.delete<T>(resolveUrl(url), { headers, params: options?.params, data: options?.data });
     return res.data;
   } catch (err) {

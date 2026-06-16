@@ -12,7 +12,7 @@ type BackendRequestOptions = {
 };
 
 export async function proxyBackend(path: string, options: BackendRequestOptions = {}) {
-  const url = new URL(path, ENV.API_INTERNAL_URL);
+  const url = new URL(path, ENV.API_BASE_URL);
   if (options.searchParams) {
     options.searchParams.forEach((value, key) => url.searchParams.set(key, value));
   }

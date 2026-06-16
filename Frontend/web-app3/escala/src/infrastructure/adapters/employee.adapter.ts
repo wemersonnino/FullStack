@@ -3,7 +3,7 @@ import { EmployeeMapper } from "./mappers/employee.mapper";
 import { Employee } from "@/core/domain/models/employee.model";
 
 export class EmployeeBackendAdapter {
-  private static baseUrl = ENV.API_INTERNAL_URL;
+  private static baseUrl = ENV.API_BASE_URL;
 
   static async list(token: string): Promise<Employee[]> {
     const response = await fetch(`${this.baseUrl}/api/v1/employees`, {

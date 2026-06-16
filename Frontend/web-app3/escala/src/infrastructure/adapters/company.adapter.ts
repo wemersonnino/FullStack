@@ -3,7 +3,7 @@ import { CompanyMapper } from "./mappers/company.mapper";
 import { Company } from "@/core/domain/models/company.model";
 
 export class CompanyBackendAdapter {
-  private static baseUrl = ENV.API_INTERNAL_URL;
+  private static baseUrl = ENV.API_BASE_URL;
 
   static async list(token: string): Promise<Company[]> {
     const response = await fetch(`${this.baseUrl}/api/v1/companies`, {
