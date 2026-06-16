@@ -228,7 +228,7 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
       {/* Collapse Toggle (Floating) */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-24 hidden h-6 w-6 items-center justify-center rounded-full border bg-card text-muted-foreground shadow-md transition-all hover:text-primary md:flex"
+        className="absolute -right-3 top-24 hidden h-6 w-6 items-center justify-center rounded-full border bg-card text-muted-foreground shadow-md transition-all hover:text-primary md:flex cursor-pointer"
       >
         {collapsed ? <ChevronRight className="size-3" /> : <ChevronLeft className="size-3" />}
       </button>

@@ -63,7 +63,7 @@ export const HeaderPublic = () => {
           )}
 
           {/* Mobile Toggle */}
-          <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+          <button className="md:hidden cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
           </button>
         </div>
