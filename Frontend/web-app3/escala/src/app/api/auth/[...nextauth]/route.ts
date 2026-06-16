@@ -59,7 +59,7 @@ async function loginSpringBoot(
   recaptchaToken?: string
 ) {
   const attribution = await getAttributionData();
-  const response = await fetch(`${ENV.API_INTERNAL_URL}/api/v1/auth/authenticate`, {
+  const response = await fetch(`${ENV.API_BASE_URL}/api/v1/auth/authenticate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, companySlug, recaptchaToken, attribution }),
@@ -99,7 +99,7 @@ async function loginSpringBoot(
 
 async function loginGoogleSpringBoot(idToken: string, companySlug = ENV.COMPANY_SLUG) {
   const attribution = await getAttributionData();
-  const response = await fetch(`${ENV.API_INTERNAL_URL}/api/v1/auth/google`, {
+  const response = await fetch(`${ENV.API_BASE_URL}/api/v1/auth/google`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ idToken, companySlug, attribution }),

@@ -1,5 +1,11 @@
 # Auditoria Backend Spring Boot 4 e Java 25
 
+## Atualizacao complementar
+
+Branch atual continua sendo `feature/backend-upgrade-springboot-4-java-25` no historico da auditoria original, mas a arvore de trabalho desta sessao tambem recebeu a frente publica de PLG com captura de leads e pagina de demo.
+
+Essa adicao nao invalida a validacao estrutural da migracao Spring Boot 4 / Java 25, mas introduz um novo controller e rotas publicas que ainda precisam ser cobertos por testes especificos antes de qualquer merge final.
+
 ## Resumo
 
 Branch auditada: `feature/backend-upgrade-springboot-4-java-25`.
@@ -142,6 +148,14 @@ Correcao aplicada:
 Resultado: `HTTP/1.1 200`, status `UP`.
 
 ## Correcoes aplicadas nesta auditoria
+
+### Conectividade Docker do BFF
+
+Erro: `TypeError: fetch failed` ao tentar logar via Next.js.
+Causa: Next.js acessando `localhost:8080` de dentro do container.
+Correcao: Alterada `API_BASE_URL` para `http://backend:8080`.
+Resultado: Login funcional (200 OK).
+
 
 - `pom.xml`: adicionado `spring-boot-starter-actuator`.
 - `SecurityConfiguration.java`: liberado `GET /actuator/health` sem JWT.

@@ -86,6 +86,7 @@ public class OpenApiController {
                 tag("Ponto", "Registro de ponto com validacao de localizacao e IP."),
                 tag("Relatorios", "Relatorios de folha, horas e exportacao CSV."),
                 tag("Convites", "Convites de equipe para novos usuarios vinculados a uma empresa."),
+                tag("Marketing", "Captura de leads, demo comercial e rastreio de campanha com consentimento."),
                 tag("Operacional", "Endpoints operacionais de saude e suporte a monitoramento.")
         );
     }
@@ -114,6 +115,7 @@ public class OpenApiController {
         paths.put("/api/v1/auth/reset-password", pathPost(postPublic("Auth", "Redefinir senha", "Valida token de recuperacao e troca a senha do usuario.", "ResetPasswordRequest")));
         paths.put("/api/v1/auth/complete-registration", pathPost(post("Auth", "Concluir cadastro convidado", "Completa os dados de um usuario previamente convidado para uma equipe.", "CompleteRegistrationRequest")));
         paths.put("/api/v1/auth/google", pathPost(postPublic("Auth", "Autenticar com Google", "Valida idToken do Google, provisiona ou autentica o usuario e retorna tokens de acesso.", "GoogleLoginRequest")));
+        paths.put("/api/v1/leads", pathPost(postPublic("Marketing", "Capturar lead comercial", "Recebe nome, email, empresa, consentimento e metadados de campanha para o fluxo de demo e relacionamento comercial.", "LeadCaptureRequest")));
 
         paths.put("/api/v1/users", path(
                 get("Usuarios", "Listar usuarios", "Lista usuarios cadastrados para administracao."),

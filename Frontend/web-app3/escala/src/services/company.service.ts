@@ -1,5 +1,7 @@
 import { httpDelete, httpGet, httpPost, httpPut } from '@/lib/http/request';
 
+const BASE_URL = '/api/server/api/v1/companies';
+
 export interface Company {
   id: number;
   name: string;
@@ -28,23 +30,23 @@ export interface Company {
 }
 
 export async function getCompanies(): Promise<Company[]> {
-  const response = await httpGet<Company[]>('/api/bff/companies');
+  const response = await httpGet<Company[]>(BASE_URL);
   return response || [];
 }
 
 export async function getCompany(id: number | string): Promise<Company | null> {
-  return await httpGet<Company>(`/api/bff/companies/${id}`);
+  return await httpGet<Company>(`${BASE_URL}/${id}`);
 }
 
 export async function createCompany(data: Partial<Company>): Promise<Company | null> {
-  return await httpPost<Company>('/api/bff/companies', data);
+  return await httpPost<Company>(BASE_URL, data);
 }
 
 export async function updateCompany(id: number | string, data: Partial<Company>): Promise<Company | null> {
-  return await httpPut<Company>(`/api/bff/companies/${id}`, data);
+  return await httpPut<Company>(`${BASE_URL}/${id}`, data);
 }
 
 export async function deleteCompany(id: number | string): Promise<boolean> {
-  const response = await httpDelete(`/api/bff/companies/${id}`);
+  const response = await httpDelete(`${BASE_URL}/${id}`);
   return !!response;
 }

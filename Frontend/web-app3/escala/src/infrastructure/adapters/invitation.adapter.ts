@@ -3,7 +3,7 @@ import { InvitationMapper } from "./mappers/invitation.mapper";
 import { TeamInvitation, TeamInvitationCreate } from "@/core/domain/models/invitation.model";
 
 export class InvitationBackendAdapter {
-  private static baseUrl = ENV.API_INTERNAL_URL;
+  private static baseUrl = ENV.API_BASE_URL;
 
   static async invite(invitation: TeamInvitationCreate, token: string): Promise<TeamInvitation> {
     const response = await fetch(`${this.baseUrl}/api/v1/team/invitations`, {

@@ -180,10 +180,16 @@ public class AuthenticationService {
                             .email(email)
                             .name(profile.name())
                             .companyName(company.getName())
+                            .source("GOOGLE_SSO")
+                            .leadStatus("WARM")
+                            .marketingConsentGranted(false)
                             .createdAt(OffsetDateTime.now())
+                            .lastLoginAt(OffsetDateTime.now())
                             .utmSource(request.getAttribution().get("utm_source"))
                             .utmMedium(request.getAttribution().get("utm_medium"))
                             .utmCampaign(request.getAttribution().get("utm_campaign"))
+                            .utmContent(request.getAttribution().get("utm_content"))
+                            .utmTerm(request.getAttribution().get("utm_term"))
                             .referrer(request.getAttribution().get("referrer"))
                             .build());
                 }

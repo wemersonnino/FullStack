@@ -2,7 +2,7 @@ import { ENV } from "@/constants/env";
 import { PayrollItem } from "@/core/domain/models/payroll.model";
 
 export class ReportBackendAdapter {
-  private static baseUrl = ENV.API_INTERNAL_URL;
+  private static baseUrl = ENV.API_BASE_URL;
 
   static async getPayroll(token: string, month: string): Promise<PayrollItem[]> {
     const response = await fetch(`${this.baseUrl}/api/v1/reports/payroll?month=${month}`, {

@@ -1,5 +1,35 @@
 # Decisoes Tecnicas
 
+## 2026-06-15 - Captura publica de leads e demo comercial
+
+### Decisoes confirmadas
+
+- O fluxo de lead comercial deve entrar por uma rota publica dedicada no Next.js (`/api/bff/leads`) e ser persistido no backend Java via `POST /api/v1/leads`.
+- O backend continua como fonte da verdade para lead, consentimento, origem da campanha e status comercial.
+- O consentimento explicito para contato comercial e obrigatorio no formulario publico.
+- A home publica e a pagina `/demo` passam a servir como superficies de conversao.
+- O Swagger/OpenAPI manual continua sendo a fonte documental do contrato e agora inclui o grupo `Marketing`.
+
+### Riscos pendentes
+
+- Ainda nao existe suite de testes de integracao para a nova captura de lead.
+- O fluxo depende do cookie de atribuicao de campanha para enriquecer os metadados.
+- O controller de leads precisa continuar sincronizado no `OpenApiController` enquanto a geracao automatica nao for reavaliada.
+
+
+## 2026-06-16 - Conectividade Docker do BFF (Next.js)
+
+### Contexto
+O login retornava 401 Unauthorized mesmo com o backend saudavel. A causa era o Next.js tentando acessar `http://localhost:8080` de dentro do container, o que falhava em alcancar o container `backend`.
+
+### Decisoes confirmadas
+- A `API_BASE_URL` no `.env.local` do frontend deve usar o hostname do servico na rede Docker: `http://backend:8080`.
+- A constante `ENV` em `src/constants/env.ts` foi atualizada para suportar `process.env.NEXT_INTERNAL_API_BASE_URL` ou injecao dinamica de `API_BASE_URL` via ambiente.
+- O BFF (Server-side) agora utiliza a rede interna do Docker para comunicacao com o core Java, evitando problemas de resolucao de loopback.
+
+### Validacao
+- O fluxo de login (Credentials e Google) foi testado via `curl` simulando o BFF e retornou HTTP 200 e o cookie de sessao.
+
 ## 2026-06-15 - Fechamento da migracao Spring Boot 4 e Java 25
 
 ### Contexto
@@ -58,7 +88,8 @@ Resultados:
 - `jjwt-jackson:0.11.5` ainda puxa Jackson 2 em runtime; revisar upgrade do JJWT em uma proxima frente.
 - `OpenApiController` manual precisa ser atualizado sempre que endpoints REST forem alterados.
 - `docker compose config` expande segredos e variaveis sensiveis de arquivos `.env`; evitar registrar essa saida integral em artefatos compartilhados e revisar gestao de secrets.
-- O Compose ainda define variaveis frontend `NEXT_PUBLIC_API_BASE_URL` e `NEXT_INTERNAL_API_BASE_URL`; a frente futura de BFF deve migrar para `API_BASE_URL` server-side e client com `baseURL: "/api/server"`.
+- O Compose foi migrado na branch `feature/frontend-bff-secure-api` para `API_BASE_URL` server-side e cliente usando `/api/server` para chamadas ao backend Java.
+- Ainda falta remover gradualmente usos legados de `session.user.token` em rotas BFF antigas e componentes server-side, mantendo compatibilidade enquanto a migração para `/api/server` avanca.
 
 ### Decisao
 

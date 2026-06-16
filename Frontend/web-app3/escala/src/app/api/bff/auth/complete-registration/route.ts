@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const response = await fetch(`${ENV.API_INTERNAL_URL}/api/v1/auth/complete-registration`, {
+    const response = await fetch(`${ENV.API_BASE_URL}/api/v1/auth/complete-registration`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
