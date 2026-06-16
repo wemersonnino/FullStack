@@ -3,7 +3,7 @@ import { StatsMapper } from "./mappers/stats.mapper";
 import { DashboardStats } from "@/core/domain/models/stats.model";
 
 export class StatsBackendAdapter {
-  private static baseUrl = ENV.API_INTERNAL_URL;
+  private static baseUrl = ENV.API_BASE_URL;
 
   static async getDashboardSummary(token: string): Promise<DashboardStats> {
     const response = await fetch(`${this.baseUrl}/api/v1/dashboard/summary`, {

@@ -12,12 +12,10 @@ export const ENV = {
   // 🌐 URL pública usada no client (navegador)
   STRAPI_PUBLIC_URL: process.env.NEXT_PUBLIC_STRAPI_PUBLIC_URL || 'http://localhost:1337',
 
-  // Backend Spring Boot oficial da aplicacao. No Docker, defina NEXT_INTERNAL_API_BASE_URL.
-  API_INTERNAL_URL:
-    process.env.NEXT_INTERNAL_API_BASE_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
+  // Backend Spring Boot oficial da aplicacao. Server-side only.
+  API_BASE_URL:
+    process.env.API_BASE_URL ||
     'http://localhost:8080',
-  API_PUBLIC_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080',
   APP_URL:
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXTAUTH_URL ||

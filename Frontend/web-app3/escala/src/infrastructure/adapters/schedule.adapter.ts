@@ -3,7 +3,7 @@ import { ScheduleMapper } from "./mappers/schedule.mapper";
 import { Shift, ShiftSwap } from "@/core/domain/models/schedule.model";
 
 export class ScheduleBackendAdapter {
-  private static baseUrl = ENV.API_INTERNAL_URL;
+  private static baseUrl = ENV.API_BASE_URL;
 
   static async listShifts(token: string, params?: URLSearchParams): Promise<Shift[]> {
     const url = new URL(`${this.baseUrl}/api/v1/escala`);

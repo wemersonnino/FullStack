@@ -19,8 +19,7 @@ services:
       - PORT=3000
       - NODE_ENV=development
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
-      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
-      - NEXT_INTERNAL_API_BASE_URL=http://escala-backend:8080
+      - API_BASE_URL=http://escala-backend:8080
       - NEXT_PUBLIC_STRAPI_PUBLIC_URL=http://localhost:1337
       - NEXT_INTERNAL_STRAPI_URL=http://cms-strapi:1337
     volumes:

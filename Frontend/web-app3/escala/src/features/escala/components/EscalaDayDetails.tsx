@@ -12,7 +12,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { Escala } from '@/interfaces/escala/escala.interface';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -207,16 +207,18 @@ export function EscalaDayDetails({ date, escalas, isOpen, onClose, isAdmin }: Es
         <DialogFooter className="sm:justify-between flex-col sm:flex-row gap-2">
           {!isAdmin && (
             <div className="flex-1">
-              <WorkScheduleModal 
-                schedules={[{
-                  id: '1',
-                  userId: 'me',
-                  active: true,
-                  fixedDays: 'Segunda a Sexta',
-                  frequency: 'every_week',
-                  minimumWeeklyShifts: 5,
-                }]} 
-              />
+	              <WorkScheduleModal 
+	                schedules={[{
+	                  id: 1,
+	                  documentId: 'local-default',
+	                  active: true,
+	                  fixedDays: 'Segunda a Sexta',
+	                  frequency: 'every_week',
+	                  minimumWeeklyShifts: 5,
+	                  createdAt: new Date(0).toISOString(),
+	                  updatedAt: new Date(0).toISOString(),
+	                }]} 
+	              />
             </div>
           )}
           <div className="flex gap-2 justify-end">

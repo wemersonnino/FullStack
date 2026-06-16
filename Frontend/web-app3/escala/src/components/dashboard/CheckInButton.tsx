@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, MapPinOff, Loader2, CheckCircle2, ShieldAlert, Navigation } from 'lucide-react';
+import { Loader2, CheckCircle2, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Map } from '@/components/shared/Map';
@@ -46,7 +46,7 @@ export function CheckInButton({ companyLocation }: CheckInButtonProps) {
         setUserPos(currentPos);
 
         try {
-          const response = await fetch('/api/bff/check-in', {
+          const response = await fetch('/api/server/api/v1/check-in', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -64,14 +64,14 @@ export function CheckInButton({ companyLocation }: CheckInButtonProps) {
             toast.error(error.message || 'Você está fora do raio permitido.');
             setStatus('error');
           }
-        } catch (error) {
+        } catch {
           toast.error('Erro ao conectar com o servidor.');
           setStatus('error');
         } finally {
           setLoading(false);
         }
       },
-      (error) => {
+      () => {
         setLoading(false);
         setStatus('error');
         // ... (erros de permissão omitidos para brevidade no replace)

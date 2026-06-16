@@ -3,7 +3,7 @@ import { UserMapper } from "./mappers/user.mapper";
 import { UserProfile } from "@/core/domain/models/user.model";
 
 export class UserBackendAdapter {
-  private static baseUrl = ENV.API_INTERNAL_URL;
+  private static baseUrl = ENV.API_BASE_URL;
 
   static async getMe(token: string): Promise<UserProfile> {
     const response = await fetch(`${this.baseUrl}/api/v1/users/me`, {
