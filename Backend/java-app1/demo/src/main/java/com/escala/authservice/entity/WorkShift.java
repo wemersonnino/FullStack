@@ -1,5 +1,6 @@
 package com.escala.authservice.entity;
 
+import com.escala.authservice.scheduling.domain.enums.PadraoEscala;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,6 +46,10 @@ public class WorkShift {
     @Builder.Default
     @Column(nullable = false)
     private WorkMode workMode = WorkMode.PRESENCIAL;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private PadraoEscala padraoEscala = PadraoEscala.COMUM;
 
     private String notes;
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.Set;
+import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -39,5 +40,7 @@ public class AuthenticationResponse {
         private String companySlug;
         private String companyName;
         private String companyTheme;
+        private String planType;
+        private OffsetDateTime trialExpiresAt;
     }
 }

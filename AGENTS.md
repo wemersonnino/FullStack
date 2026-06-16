@@ -5,15 +5,18 @@
 - O frontend principal do produto e `Frontend/web-app3/escala`.
 - `Frontend/web-app1/app` deve ser preservado para um frontend futuro, sem ser usado como referencia principal de implementacao.
 - O backend oficial da aplicacao e `Backend/java-app1/demo`, em Spring Boot.
+- Estado atual validado do backend na branch `feature/backend-upgrade-springboot-4-java-25`: Spring Boot `4.1.0`, Java `25`, Maven, Docker build com `maven:3.9-eclipse-temurin-25` e runtime `eclipse-temurin:25-jre`.
 - O Strapi em `Backend/cms-strapi` fica restrito a CMS: conteudo, SEO, acessibilidade editorial, URLs e links/nome dos menus.
 - O frontend nunca acessa banco de dados diretamente.
 - O frontend deve se comunicar com o backend Spring Boot/BFF. O backend acessa PostgreSQL e, quando necessario, Strapi.
 - O PostgreSQL roda em Docker e deve ter banco/usuario separados para Strapi e para o backend da aplicacao.
+- O Swagger/OpenAPI atual do backend nao usa Springdoc, pois `springdoc-openapi-starter-webmvc-ui:2.8.17` quebra em runtime com Spring Boot 4/Spring Framework 7. A solucao vigente usa `org.webjars:swagger-ui:5.32.2` e `OpenApiController` manual em `Backend/java-app1/demo/src/main/java/com/escala/authservice/controller/OpenApiController.java`.
+- O Swagger local deve responder em `http://localhost:8080/swagger-ui/index.html` e o JSON OpenAPI em `http://localhost:8080/v3/api-docs`.
 
 ## Arquitetura alvo
 
 - Next.js 16 + TypeScript no frontend principal.
-- Spring Boot + Java LTS no backend. Preferir Java 21 LTS para estabilidade de producao.
+- Spring Boot + Java LTS no backend. Java 25 LTS esta em validacao nesta branch; para producao, a decisao final ainda deve considerar maturidade de dependencias, cobertura de testes e estabilidade operacional.
 - PostgreSQL em Docker para persistencia.
 - Docker Compose com rede comum para frontend, backend, banco e Strapi.
 - Ambientes: development, homolog e production via Spring profiles e variaveis de ambiente.
@@ -43,6 +46,27 @@ No backend, preferir monolito modular com Spring Boot. Spring Modulith pode ser 
 ## Backend: Java + Spring Boot com Arquitetura Hexagonal
 
 O backend oficial continua sendo `Backend/java-app1/demo`. A estrutura abaixo e a referencia arquitetural para evolucao gradual do codigo. O nucleo de dominio nao deve depender do Spring: sem `@Entity`, `@Service`, `@RestController`, `@Repository` ou anotacoes de framework dentro de `domain`.
+
+### Estado operacional atual do backend
+
+- Versao atual testada: Spring Boot `4.1.0`, Spring Framework `7.0.8`, Spring Security `7.1.0`, Hibernate ORM `7.4.1.Final`, Tomcat `11.0.22`.
+- Java atual testado: `25.0.3 LTS`.
+- Maven local validado: `3.8.7`; Maven Docker validado: imagem `maven:3.9-eclipse-temurin-25`.
+- Lombok fixado em `1.18.46`, com `maven-compiler-plugin` configurando `annotationProcessorPaths`.
+- Jackson no codigo da aplicacao deve usar `tools.jackson.databind.*` quando depender dos tipos gerenciados pelo Spring Boot 4/Jackson 3.
+- `ApplicationConfig` deve criar `DaoAuthenticationProvider(userDetailsService())`, conforme Spring Security 7.
+- `application.yml` deve manter `spring.jpa.show-sql: false`; o profile `development` nao deve reativar SQL bruto do Hibernate sem decisao explicita.
+- Nao configurar `hibernate.dialect` explicitamente para PostgreSQL nesta branch; Hibernate 7 seleciona o dialect automaticamente.
+- O warning externo `sun.misc.Unsafe` aparece por Maven/Guava/Lombok em Java 25 e nao e codigo do projeto. Tratar como nao bloqueante enquanto build/testes passam.
+- O backend foi validado com `mvn test`, Docker Maven test e `docker compose up -d --build --force-recreate backend`.
+- Suite atual validada: `24` testes, `0` falhas, concentrados no dominio de escala. Ainda falta ampliar testes de integracao para autenticacao, JPA, JWT e endpoints.
+
+### Documentacao OpenAPI atual
+
+- Springdoc 2.8.17 nao deve ser reintroduzido nesta branch sem nova validacao, porque falhou em runtime procurando `org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties`.
+- A documentacao Swagger atual e manual, servida por `OpenApiController`.
+- O controller documenta os endpoints reais dos controllers atuais em `37` paths e `10` grupos: `Auth`, `Usuarios`, `Empresas`, `Funcionarios`, `Organizacao`, `Escala Operacional`, `Escalas e Trocas`, `Ponto`, `Relatorios` e `Convites`.
+- Ao adicionar ou remover endpoints REST, atualizar tambem o `OpenApiController` enquanto a geracao automatica nao estiver disponivel.
 
 Estrutura alvo por modulo/contexto:
 

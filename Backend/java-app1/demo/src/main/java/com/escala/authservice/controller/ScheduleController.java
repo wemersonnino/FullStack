@@ -7,6 +7,7 @@ import com.escala.authservice.dto.GenerateScheduleRequest;
 import com.escala.authservice.entity.ShiftSwapRequest;
 import com.escala.authservice.entity.WorkShift;
 import com.escala.authservice.service.ScheduleService;
+import com.escala.authservice.service.StatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,20 +20,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScheduleController {
     private final ScheduleService scheduleService;
+    private final StatsService statsService;
 
     @GetMapping
-    public List<WorkShift> listMonth(@RequestParam int year, @RequestParam int month) {
-        return scheduleService.listMonth(year, month);
+    public List<WorkShift> listMonth(@RequestParam int year, @RequestParam int month, Authentication authentication) {
+        return scheduleService.listMonth(year, month, authentication.getName());
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<List<WorkShift>> generateMonth(@RequestBody GenerateScheduleRequest request) {
-        return ResponseEntity.ok(scheduleService.generateMonth(request));
+    public ResponseEntity<List<WorkShift>> generateMonth(@RequestBody GenerateScheduleRequest request, Authentication authentication) {
+        return ResponseEntity.ok(scheduleService.generateMonth(request, authentication.getName()));
     }
 
     @GetMapping("/swap-requests")
-    public List<ShiftSwapRequest> swapRequests() {
-        return scheduleService.swapRequests();
+    public List<ShiftSwapRequest> swapRequests(Authentication authentication) {
+        return scheduleService.swapRequests(authentication.getName());
     }
 
     @PostMapping("/swap-requests")
@@ -44,17 +46,17 @@ public class ScheduleController {
     }
 
     @PatchMapping("/swap-requests/{id}/decision")
-    public ResponseEntity<ShiftSwapRequest> decideSwap(@PathVariable Long id, @RequestBody DecideShiftSwapRequest request) {
-        return ResponseEntity.ok(scheduleService.decideSwap(id, request));
+    public ResponseEntity<ShiftSwapRequest> decideSwap(@PathVariable Long id, @RequestBody DecideShiftSwapRequest request, Authentication authentication) {
+        return ResponseEntity.ok(scheduleService.decideSwap(id, request, authentication.getName()));
     }
 
     @PatchMapping("/swap-requests/{id}/colleague-approval")
-    public ResponseEntity<ShiftSwapRequest> approveByColleague(@PathVariable Long id) {
-        return ResponseEntity.ok(scheduleService.approveByColleague(id));
+    public ResponseEntity<ShiftSwapRequest> approveByColleague(@PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(scheduleService.approveByColleague(id, authentication.getName()));
     }
 
     @GetMapping("/dashboard-summary")
-    public DashboardSummaryResponse dashboardSummary(@RequestParam int year, @RequestParam int month) {
-        return scheduleService.dashboardSummary(year, month);
+    public DashboardSummaryResponse dashboardSummary(@RequestParam int year, @RequestParam int month, Authentication authentication) {
+        return statsService.getSummary(year, month, authentication.getName());
     }
 }

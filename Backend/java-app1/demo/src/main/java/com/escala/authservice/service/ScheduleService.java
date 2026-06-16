@@ -35,20 +35,31 @@ public class ScheduleService {
     private final ProjectRepository projectRepository;
     private final SectorRepository sectorRepository;
     private final AuditLogService auditLogService;
+    private final UserRepository userRepository;
     private final LaborRuleEngine laborRuleEngine = new LaborRuleEngine();
 
-    public List<WorkShift> listMonth(int year, int month) {
+    private Company resolveCompany(String userEmail) {
+        return userRepository.findByEmail(userEmail)
+                .map(User::getCompany)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario ou empresa nao encontrados"));
+    }
+
+    public List<WorkShift> listMonth(int year, int month, String userEmail) {
+        Company company = resolveCompany(userEmail);
         YearMonth yearMonth = YearMonth.of(year, month);
-        return workShiftRepository.findByShiftDateBetweenOrderByShiftDateAscStartTimeAsc(
+        return workShiftRepository.findByEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(
+                company.getId(),
                 yearMonth.atDay(1),
                 yearMonth.atEndOfMonth()
         );
     }
 
-    public List<EscalaResponse> listEscalas(LocalDate inicio, LocalDate fim, Long usuarioId, Long setorId, Long projetoId) {
+    public List<EscalaResponse> listEscalas(LocalDate inicio, LocalDate fim, Long usuarioId, Long setorId, Long projetoId, String userEmail) {
+        Company company = resolveCompany(userEmail);
         LocalDate start = inicio == null ? YearMonth.now().atDay(1) : inicio;
         LocalDate end = fim == null ? YearMonth.from(start).atEndOfMonth() : fim;
-        return workShiftRepository.findByShiftDateBetweenOrderByShiftDateAscStartTimeAsc(start, end).stream()
+        
+        return workShiftRepository.findByEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(company.getId(), start, end).stream()
                 .filter(shift -> usuarioId == null || Objects.equals(shift.getEmployee().getId(), usuarioId))
                 .filter(shift -> setorId == null || shift.getEmployee().getSector() != null && Objects.equals(shift.getEmployee().getSector().getId(), setorId))
                 .filter(shift -> projetoId == null || shift.getEmployee().getProject() != null && Objects.equals(shift.getEmployee().getProject().getId(), projetoId))
@@ -60,7 +71,7 @@ public class ScheduleService {
         Employee employee = resolveRequester(userEmail);
         LocalDate start = inicio == null ? YearMonth.now().atDay(1) : inicio;
         LocalDate end = fim == null ? YearMonth.from(start).atEndOfMonth() : fim;
-        return workShiftRepository.findByEmployeeIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(employee.getId(), start, end)
+        return workShiftRepository.findByEmployeeIdAndEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(employee.getId(), employee.getCompany().getId(), start, end)
                 .stream()
                 .map(EscalaResponse::from)
                 .toList();
@@ -70,15 +81,22 @@ public class ScheduleService {
         if (data == null) {
             throw new IllegalArgumentException("Parametro data e obrigatorio");
         }
+        Company company = resolveCompany(userEmail);
         List<WorkShift> shifts = admin
-                ? workShiftRepository.findByShiftDateOrderByStartTimeAsc(data)
-                : workShiftRepository.findByEmployeeIdAndShiftDateOrderByStartTimeAsc(resolveRequester(userEmail).getId(), data);
+                ? workShiftRepository.findByEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(company.getId(), data)
+                : workShiftRepository.findByEmployeeIdAndEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(resolveRequester(userEmail).getId(), company.getId(), data);
         return shifts.stream().map(EscalaResponse::from).toList();
     }
 
     @Transactional
     public List<EscalaResponse> createEscalas(EscalaRequest request, String userEmail) {
+        Company company = resolveCompany(userEmail);
         Employee employee = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
+        
+        if (!Objects.equals(employee.getCompany().getId(), company.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Funcionario nao pertence a sua empresa");
+        }
+
         applyEmployeeAllocation(employee, request);
         validateEmployeeSelection(employee, request);
         if (request.getDates() == null || request.getDates().isEmpty()) {
@@ -89,13 +107,15 @@ public class ScheduleService {
         }
 
         List<WorkShift> saved = new ArrayList<>();
+        PadraoEscala padraoEscala = request.getPadraoEscala() != null ? request.getPadraoEscala() : PadraoEscala.COMUM;
+        
         for (LocalDate date : request.getDates()) {
             if (workShiftRepository.existsByEmployeeIdAndShiftDate(employee.getId(), date)) {
                 throw new IllegalStateException("Funcionario ja possui escala em " + date);
             }
             WorkMode workMode = request.getWorkMode() == null ? WorkMode.PRESENCIAL : request.getWorkMode();
-            validateLaborRules(employee, date, request.getStartTime(), request.getEndTime(), null, List.of());
-            validateSectorCapacity(employee, request, date, workMode, null);
+            validateLaborRules(employee, date, request.getStartTime(), request.getEndTime(), padraoEscala, null, List.of());
+            validateSectorCapacity(employee, request, date, workMode, null, company.getId());
             WorkShift shift = WorkShift.builder()
                     .employee(employee)
                     .shiftDate(date)
@@ -103,6 +123,7 @@ public class ScheduleService {
                     .endTime(request.getEndTime())
                     .status(ShiftStatus.SCHEDULED)
                     .workMode(workMode)
+                    .padraoEscala(padraoEscala)
                     .notes(request.getNotes())
                     .build();
             saved.add(workShiftRepository.save(shift));
@@ -120,9 +141,19 @@ public class ScheduleService {
 
     @Transactional
     public EscalaResponse updateEscala(Long id, EscalaRequest request, String userEmail) {
+        Company company = resolveCompany(userEmail);
         WorkShift shift = workShiftRepository.findById(id).orElseThrow();
+        
+        if (!Objects.equals(shift.getEmployee().getCompany().getId(), company.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Escala nao pertence a sua empresa");
+        }
+
         if (request.getEmployeeId() != null && !Objects.equals(request.getEmployeeId(), shift.getEmployee().getId())) {
-            shift.setEmployee(employeeRepository.findById(request.getEmployeeId()).orElseThrow());
+            Employee newEmp = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
+            if (!Objects.equals(newEmp.getCompany().getId(), company.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException("Novo funcionario nao pertence a sua empresa");
+            }
+            shift.setEmployee(newEmp);
         }
         applyEmployeeAllocation(shift.getEmployee(), request);
         validateEmployeeSelection(shift.getEmployee(), request);
@@ -137,9 +168,11 @@ public class ScheduleService {
         if (request.getStartTime() != null) shift.setStartTime(request.getStartTime());
         if (request.getEndTime() != null) shift.setEndTime(request.getEndTime());
         if (request.getWorkMode() != null) shift.setWorkMode(request.getWorkMode());
+        if (request.getPadraoEscala() != null) shift.setPadraoEscala(request.getPadraoEscala());
         if (request.getNotes() != null) shift.setNotes(request.getNotes());
-        validateLaborRules(shift.getEmployee(), shift.getShiftDate(), shift.getStartTime(), shift.getEndTime(), shift.getId(), List.of());
-        validateSectorCapacity(shift.getEmployee(), request, shift.getShiftDate(), shift.getWorkMode(), shift.getId());
+        
+        validateLaborRules(shift.getEmployee(), shift.getShiftDate(), shift.getStartTime(), shift.getEndTime(), shift.getPadraoEscala(), shift.getId(), List.of());
+        validateSectorCapacity(shift.getEmployee(), request, shift.getShiftDate(), shift.getWorkMode(), shift.getId(), company.getId());
 
         WorkShift saved = workShiftRepository.save(shift);
         auditLogService.record(userEmail, "SHIFT_UPDATED", "WorkShift", saved.getId(), "Escala atualizada");
@@ -148,30 +181,40 @@ public class ScheduleService {
 
     @Transactional
     public void cancelEscala(Long id, String userEmail) {
+        Company company = resolveCompany(userEmail);
         WorkShift shift = workShiftRepository.findById(id).orElseThrow();
+        if (!Objects.equals(shift.getEmployee().getCompany().getId(), company.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Escala nao pertence a sua empresa");
+        }
         shift.setStatus(ShiftStatus.CANCELLED);
         workShiftRepository.save(shift);
         auditLogService.record(userEmail, "SHIFT_CANCELLED", "WorkShift", id, "Escala cancelada");
     }
 
-    public List<UsuarioEscalaResponse> usuariosEscalaveis(Long projectId, Long sectorId, Long companyId, String query) {
-        return employeeRepository.findByActiveTrueOrderByFullNameAsc().stream()
+    public List<UsuarioEscalaResponse> usuariosEscalaveis(Long projectId, Long sectorId, Long companyId, String query, String userEmail) {
+        Company myCompany = resolveCompany(userEmail);
+        return employeeRepository.findByActiveTrueAndCompanyIdOrderByFullNameAsc(myCompany.getId()).stream()
                 .filter(employee -> projectId == null || employee.getProject() != null && Objects.equals(employee.getProject().getId(), projectId))
                 .filter(employee -> sectorId == null || employee.getSector() != null && Objects.equals(employee.getSector().getId(), sectorId))
-                .filter(employee -> companyId == null || employee.getCompany() != null && Objects.equals(employee.getCompany().getId(), companyId))
                 .filter(employee -> matchesQuery(employee, query))
                 .map(UsuarioEscalaResponse::from)
                 .toList();
     }
 
-    public UsuarioEscalaResponse usuarioEscalavel(Long id) {
-        return UsuarioEscalaResponse.from(employeeRepository.findById(id).orElseThrow());
+    public UsuarioEscalaResponse usuarioEscalavel(Long id, String userEmail) {
+        Company company = resolveCompany(userEmail);
+        Employee employee = employeeRepository.findById(id).orElseThrow();
+        if (!Objects.equals(employee.getCompany().getId(), company.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Funcionario nao pertence a sua empresa");
+        }
+        return UsuarioEscalaResponse.from(employee);
     }
 
     @Transactional
-    public List<WorkShift> generateMonth(GenerateScheduleRequest request) {
+    public List<WorkShift> generateMonth(GenerateScheduleRequest request, String userEmail) {
+        Company company = resolveCompany(userEmail);
         YearMonth yearMonth = YearMonth.of(request.getYear(), request.getMonth());
-        List<Employee> employees = resolveEmployees(request);
+        List<Employee> employees = resolveEmployees(request, company.getId());
         if (employees.isEmpty()) {
             throw new IllegalStateException("Nao ha funcionarios ativos para gerar escala");
         }
@@ -183,11 +226,11 @@ public class ScheduleService {
 
         for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
             LocalDate date = yearMonth.atDay(day);
-            validateDailyCapacity(request, date);
+            validateDailyCapacity(request, date, company.getId());
             Employee selected = selectEmployee(employees, allocationCount, previousEmployeeId);
 
             if (!workShiftRepository.existsByEmployeeIdAndShiftDate(selected.getId(), date)) {
-                validateLaborRules(selected, date, request.getStartTime(), request.getEndTime(), null, generated);
+                validateLaborRules(selected, date, request.getStartTime(), request.getEndTime(), PadraoEscala.COMUM, null, generated);
                 WorkShift shift = WorkShift.builder()
                         .employee(selected)
                         .shiftDate(date)
@@ -195,6 +238,7 @@ public class ScheduleService {
                         .endTime(request.getEndTime())
                         .status(ShiftStatus.SCHEDULED)
                         .workMode(request.getWorkMode())
+                        .padraoEscala(PadraoEscala.COMUM)
                         .notes("Gerada automaticamente")
                         .build();
                 generated.add(workShiftRepository.save(shift));
@@ -205,7 +249,7 @@ public class ScheduleService {
         }
 
         auditLogService.record(
-                "system",
+                userEmail,
                 "SCHEDULE_MONTH_GENERATED",
                 "WorkShift",
                 yearMonth,
@@ -214,20 +258,41 @@ public class ScheduleService {
         return generated;
     }
 
-    public ShiftSwapRequest requestSwap(CreateShiftSwapRequest request) {
-        Employee requester = employeeRepository.findById(request.getRequesterId()).orElseThrow();
-        return requestSwap(request, requester);
+    public DashboardSummaryResponse dashboardSummary(int year, int month, String userEmail) {
+        Company company = resolveCompany(userEmail);
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+        return DashboardSummaryResponse.builder()
+                .activeEmployees(employeeRepository.countByActiveTrueAndCompanyId(company.getId()))
+                .activeProjects(projectRepository.countByActiveTrueAndCompanyId(company.getId()))
+                .shiftsInMonth(workShiftRepository.countByEmployeeCompanyIdAndShiftDateBetween(company.getId(), start, end))
+                .pendingSwapRequests(shiftSwapRequestRepository.countByStatusAndRequesterCompanyId(SwapStatus.PENDING, company.getId()))
+                .absencesInMonth(absenceRepository.countByEmployeeCompanyIdAndAbsenceDateBetween(company.getId(), start, end))
+                .attendanceRate(100) // Placeholder
+                .openShifts(0) // Placeholder
+                .build();
     }
 
     public ShiftSwapRequest requestSwap(CreateShiftSwapRequest request, String userEmail) {
         Employee requester = request.getRequesterId() == null
                 ? resolveRequester(userEmail)
                 : employeeRepository.findById(request.getRequesterId()).orElseThrow();
+        
+        Company company = resolveCompany(userEmail);
+        if (!Objects.equals(requester.getCompany().getId(), company.getId())) {
+             throw new org.springframework.security.access.AccessDeniedException("Nao autorizado");
+        }
+        
         return requestSwap(request, requester);
     }
 
     private ShiftSwapRequest requestSwap(CreateShiftSwapRequest request, Employee requester) {
         WorkShift originalShift = workShiftRepository.findById(request.getOriginalShiftId()).orElseThrow();
+
+        if (!Objects.equals(originalShift.getEmployee().getCompany().getId(), requester.getCompany().getId())) {
+             throw new org.springframework.security.access.AccessDeniedException("Escala nao pertence a sua empresa");
+        }
 
         new SolicitacaoTrocaEscala(
                 requester.getId(),
@@ -253,15 +318,15 @@ public class ScheduleService {
         return saved;
     }
 
-    private Employee resolveRequester(String userEmail) {
-        return employeeRepository.findByUserEmail(userEmail)
-                .or(() -> employeeRepository.findByEmail(userEmail))
-                .orElseThrow();
-    }
-
     @Transactional
-    public ShiftSwapRequest decideSwap(Long id, DecideShiftSwapRequest request) {
+    public ShiftSwapRequest decideSwap(Long id, DecideShiftSwapRequest request, String userEmail) {
+        Company company = resolveCompany(userEmail);
         ShiftSwapRequest swap = shiftSwapRequestRepository.findById(id).orElseThrow();
+        
+        if (!Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
+             throw new org.springframework.security.access.AccessDeniedException("Nao autorizado");
+        }
+
         if (swap.getStatus() != SwapStatus.PENDING && swap.getStatus() != SwapStatus.COLLEAGUE_APPROVED) {
             throw new IllegalStateException("Solicitacao ja decidida");
         }
@@ -297,7 +362,7 @@ public class ScheduleService {
 
         ShiftSwapRequest saved = shiftSwapRequestRepository.save(swap);
         auditLogService.record(
-                "manager",
+                userEmail,
                 request.isApproved() ? "SHIFT_SWAP_APPROVED" : "SHIFT_SWAP_REJECTED",
                 "ShiftSwapRequest",
                 saved.getId(),
@@ -307,13 +372,19 @@ public class ScheduleService {
     }
 
     @Transactional
-    public ShiftSwapRequest approveByColleague(Long id) {
+    public ShiftSwapRequest approveByColleague(Long id, String userEmail) {
+        Company company = resolveCompany(userEmail);
         ShiftSwapRequest swap = shiftSwapRequestRepository.findById(id).orElseThrow();
+        
+        if (!Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
+             throw new org.springframework.security.access.AccessDeniedException("Nao autorizado");
+        }
+
         FluxoTrocaEscala fluxo = new FluxoTrocaEscala(toDomainStatus(swap.getStatus()));
         swap.setStatus(toPersistenceStatus(fluxo.aprovarPeloColega()));
         ShiftSwapRequest saved = shiftSwapRequestRepository.save(swap);
         auditLogService.record(
-                "colleague",
+                userEmail,
                 "SHIFT_SWAP_COLLEAGUE_APPROVED",
                 "ShiftSwapRequest",
                 saved.getId(),
@@ -322,44 +393,42 @@ public class ScheduleService {
         return saved;
     }
 
-    public List<ShiftSwapRequest> swapRequests() {
-        return shiftSwapRequestRepository.findAll();
+    public List<ShiftSwapRequest> swapRequests(String userEmail) {
+        Company company = resolveCompany(userEmail);
+        // Em um app real, filtraríamos por empresa aqui também
+        return shiftSwapRequestRepository.findAll().stream()
+                .filter(s -> Objects.equals(s.getRequester().getCompany().getId(), company.getId()))
+                .toList();
     }
 
-    public DashboardSummaryResponse dashboardSummary(int year, int month) {
-        YearMonth yearMonth = YearMonth.of(year, month);
-        LocalDate start = yearMonth.atDay(1);
-        LocalDate end = yearMonth.atEndOfMonth();
-        return DashboardSummaryResponse.builder()
-                .activeEmployees(employeeRepository.countByActiveTrue())
-                .activeProjects(projectRepository.countByActiveTrue())
-                .shiftsInMonth(workShiftRepository.countByShiftDateBetween(start, end))
-                .pendingSwapRequests(shiftSwapRequestRepository.countByStatus(SwapStatus.PENDING))
-                .absencesInMonth(absenceRepository.countByAbsenceDateBetween(start, end))
-                .build();
+    private Employee resolveRequester(String userEmail) {
+        return employeeRepository.findByUserEmail(userEmail)
+                .or(() -> employeeRepository.findByEmail(userEmail))
+                .orElseThrow();
     }
 
-    private List<Employee> resolveEmployees(GenerateScheduleRequest request) {
+    private List<Employee> resolveEmployees(GenerateScheduleRequest request, Long companyId) {
         if (request.getEmployeeIds() == null || request.getEmployeeIds().isEmpty()) {
-            return employeeRepository.findByActiveTrueOrderByFullNameAsc();
+            return employeeRepository.findByActiveTrueAndCompanyIdOrderByFullNameAsc(companyId);
         }
         return employeeRepository.findAllById(request.getEmployeeIds()).stream()
                 .filter(Employee::isActive)
+                .filter(e -> Objects.equals(e.getCompany().getId(), companyId))
                 .sorted(Comparator.comparing(Employee::getFullName))
                 .toList();
     }
 
-    private void validateDailyCapacity(GenerateScheduleRequest request, LocalDate date) {
+    private void validateDailyCapacity(GenerateScheduleRequest request, LocalDate date, Long companyId) {
         if (request.getWorkMode() != WorkMode.PRESENCIAL || request.getMaxPresentialPerDay() == null) {
             return;
         }
-        long presentialShifts = workShiftRepository.countByShiftDateAndWorkMode(date, WorkMode.PRESENCIAL);
+        long presentialShifts = workShiftRepository.countByEmployeeCompanyIdAndShiftDateAndWorkMode(companyId, date, WorkMode.PRESENCIAL);
         if (presentialShifts >= request.getMaxPresentialPerDay()) {
             throw new IllegalStateException("Lotacao presencial excedida para " + date);
         }
     }
 
-    private void validateSectorCapacity(Employee employee, EscalaRequest request, LocalDate date, WorkMode workMode, Long ignoredShiftId) {
+    private void validateSectorCapacity(Employee employee, EscalaRequest request, LocalDate date, WorkMode workMode, Long ignoredShiftId, Long companyId) {
         if (workMode != WorkMode.PRESENCIAL) {
             return;
         }
@@ -370,8 +439,8 @@ public class ScheduleService {
             return;
         }
         long scheduled = ignoredShiftId == null
-                ? workShiftRepository.countByShiftDateAndWorkModeAndEmployeeSectorId(date, WorkMode.PRESENCIAL, sector.getId())
-                : workShiftRepository.countByShiftDateAndWorkModeAndEmployeeSectorIdAndIdNot(date, WorkMode.PRESENCIAL, sector.getId(), ignoredShiftId);
+                ? workShiftRepository.countByEmployeeCompanyIdAndShiftDateAndWorkModeAndEmployeeSectorId(companyId, date, WorkMode.PRESENCIAL, sector.getId())
+                : workShiftRepository.countByEmployeeCompanyIdAndShiftDateAndWorkModeAndEmployeeSectorIdAndIdNot(companyId, date, WorkMode.PRESENCIAL, sector.getId(), ignoredShiftId);
         if (scheduled >= sector.getMaxSeats()) {
             throw new IllegalStateException("Lotacao do setor " + sector.getName() + " excedida para " + date);
         }
@@ -435,6 +504,7 @@ public class ScheduleService {
             LocalDate date,
             java.time.LocalTime startTime,
             java.time.LocalTime endTime,
+            PadraoEscala padraoEscala,
             Long ignoredShiftId,
             List<WorkShift> inMemoryShifts
     ) {
@@ -443,15 +513,16 @@ public class ScheduleService {
                 date,
                 startTime,
                 endTime,
-                PadraoEscala.COMUM
+                padraoEscala != null ? padraoEscala : PadraoEscala.COMUM
         );
         List<JornadaPlanejada> relacionadas = new ArrayList<>(workShiftRepository
-                .findByEmployeeIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(
-                        employee.getId(),
+                .findByEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(
+                        employee.getCompany().getId(),
                         date.minusDays(7),
                         date.plusDays(7)
                 )
                 .stream()
+                .filter(shift -> Objects.equals(shift.getEmployee().getId(), employee.getId()))
                 .filter(shift -> ignoredShiftId == null || !Objects.equals(shift.getId(), ignoredShiftId))
                 .filter(shift -> shift.getStatus() != ShiftStatus.CANCELLED)
                 .map(this::toJornadaPlanejada)
@@ -472,7 +543,7 @@ public class ScheduleService {
                 shift.getShiftDate(),
                 shift.getStartTime(),
                 shift.getEndTime(),
-                PadraoEscala.COMUM
+                shift.getPadraoEscala() != null ? shift.getPadraoEscala() : PadraoEscala.COMUM
         );
     }
 

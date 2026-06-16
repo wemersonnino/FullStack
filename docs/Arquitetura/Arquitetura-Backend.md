@@ -1,8 +1,66 @@
-# 🧱 Arquitetura do Backend — API Java Spring Boot + PostgreSQL
+# Arquitetura do Backend - API Java Spring Boot + PostgreSQL
+
+## Estado atual validado - 2026-06-14
+
+O backend oficial do produto e `Backend/java-app1/demo`.
+
+Na branch `feature/backend-upgrade-springboot-4-java-25`, o backend foi validado com:
+
+- Spring Boot `4.1.0`.
+- Spring Framework `7.0.8`.
+- Spring Security `7.1.0`.
+- Hibernate ORM `7.4.1.Final`.
+- Tomcat `11.0.22`.
+- Java `25.0.3 LTS`.
+- Maven local `3.8.7`.
+- Docker build `maven:3.9-eclipse-temurin-25`.
+- Docker runtime `eclipse-temurin:25-jre`.
+- PostgreSQL em Docker.
+
+Validacoes realizadas:
+
+- `mvn test`: `24` testes, `0` falhas, `0` erros.
+- `docker compose up -d --build --force-recreate backend`: backend em estado `Up`.
+- Autenticacao via rede Docker: `POST /api/v1/auth/authenticate` retornou `200`.
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html` retornou `200`.
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs` retornou `200`.
+
+Decisoes tecnicas recentes:
+
+- Lombok fixado em `1.18.46` com annotation processor explicito no Maven.
+- Codigo que usa Jackson gerenciado pelo Spring Boot 4 deve importar `tools.jackson.databind.*`.
+- `DaoAuthenticationProvider` deve ser criado com `userDetailsService()` no construtor, conforme Spring Security 7.
+- `spring.jpa.show-sql` deve permanecer `false`, inclusive no profile `development`, para evitar SQL bruto do Hibernate nos logs.
+- O dialect PostgreSQL nao deve ser configurado explicitamente; Hibernate 7 resolve automaticamente.
+- Springdoc `2.8.17` nao e compativel com esta branch Spring Boot 4. A documentacao atual usa Swagger UI via WebJar e `OpenApiController` manual.
+
+## Endpoints reais atuais
+
+Os controllers REST atuais expostos pelo backend sao:
+
+- `AuthenticationController`: `/api/v1/auth/**`
+- `UserManagementController`: `/api/v1/users/**`
+- `CompanyController`: `/api/v1/companies/**`
+- `EmployeeController`: `/api/v1/employees/**`
+- `OrganizationController`: `/api/v1/organization/**`
+- `EscalaController`: `/api/v1/escala/**`
+- `ScheduleController`: `/api/v1/schedules/**`
+- `CheckInController`: `/api/v1/check-in`
+- `ReportController`: `/api/v1/reports/**`
+- `TeamInvitationController`: `/api/v1/team/invitations/**`
+- `OpenApiController`: `/swagger-ui/index.html`, `/swagger-ui.html`, `/v3/api-docs`
+
+O Swagger atual documenta `37` paths e `10` grupos. Mais detalhes em `docs/api/swagger-openapi.md`.
+
+---
+
+## Historico anterior
 
 > **Projeto:** Plataforma Fundep (Estudo Full-Stack)
 > **Tecnologias:** Spring Boot 3.x + Java 21 + PostgreSQL + Docker
 > **Integrações:** NextAuth (Next.js), Strapi, .NET (módulos externos)
+
+O conteudo abaixo e historico/conceitual e pode divergir do backend oficial atual. Ao implementar novas mudancas, priorizar `AGENTS.md`, `docs/decisoes-tecnicas.md`, `docs/api/swagger-openapi.md` e o codigo em `Backend/java-app1/demo`.
 
 ---
 

@@ -3,6 +3,7 @@ package com.escala.authservice.service;
 import com.escala.authservice.dto.AuthenticationResponse;
 import com.escala.authservice.dto.*;
 import com.escala.authservice.entity.*;
+import com.escala.authservice.repository.MarketingLeadRepository;
 import com.escala.authservice.repository.PasswordResetTokenRepository;
 import com.escala.authservice.repository.RoleRepository;
 import com.escala.authservice.repository.UserRepository;
@@ -142,6 +143,8 @@ public class AuthenticationService {
                 .build();
     }
 
+    private final MarketingLeadRepository marketingLeadRepository;
+
     @Transactional
     public AuthenticationResponse authenticateGoogle(GoogleLoginRequest request) {
         if (request.getRecaptchaToken() != null && !request.getRecaptchaToken().isBlank()) {
@@ -157,7 +160,6 @@ public class AuthenticationService {
         boolean isLead = false;
 
         if (companySlug == null || companySlug.isBlank() || companySlug.equalsIgnoreCase("undefined")) {
-            // Verifica se o usuário já existe em alguma empresa
             var existingUser = repository.findByEmail(email).stream().findFirst();
             if (existingUser.isPresent()) {
                 company = existingUser.get().getCompany();
@@ -167,8 +169,24 @@ public class AuthenticationService {
                 company = companyService.create(com.escala.authservice.dto.CompanyRequest.builder()
                         .name("Workspace Demo " + uuid.toUpperCase())
                         .active(true)
+                        .planType("TRIAL")
+                        .trialExpiresAt(OffsetDateTime.now().plusDays(14))
                         .build());
                 isLead = true;
+
+                // Salvar Marketing Lead
+                if (request.getAttribution() != null) {
+                    marketingLeadRepository.save(MarketingLead.builder()
+                            .email(email)
+                            .name(profile.name())
+                            .companyName(company.getName())
+                            .createdAt(OffsetDateTime.now())
+                            .utmSource(request.getAttribution().get("utm_source"))
+                            .utmMedium(request.getAttribution().get("utm_medium"))
+                            .utmCampaign(request.getAttribution().get("utm_campaign"))
+                            .referrer(request.getAttribution().get("referrer"))
+                            .build());
+                }
             }
         } else {
             company = companyService.resolve(companySlug);
@@ -244,6 +262,8 @@ public class AuthenticationService {
                 .name(company.getName())
                 .cnpj(company.getCnpj())
                 .active(true)
+                .planType("TRIAL")
+                .trialExpiresAt(company.getTrialExpiresAt() != null ? company.getTrialExpiresAt() : OffsetDateTime.now().plusDays(14))
                 .build());
 
         // 2. Promover Usuário para OWNER
@@ -256,6 +276,15 @@ public class AuthenticationService {
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
+
+        // 3. Marcar Lead como Convertido
+        marketingLeadRepository.findAll().stream()
+                .filter(l -> l.getEmail().equals(email))
+                .findFirst()
+                .ifPresent(l -> {
+                    l.setConverted(true);
+                    marketingLeadRepository.save(l);
+                });
 
         repository.save(user);
 
@@ -272,7 +301,9 @@ public class AuthenticationService {
                 "roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()),
                 "theme", user.getTheme() == null ? "system" : user.getTheme(),
                 "companyId", company == null ? "" : company.getId(),
-                "companySlug", company == null ? "" : company.getSlug()
+                "companySlug", company == null ? "" : company.getSlug(),
+                "planType", company == null ? "" : (company.getPlanType() == null ? "" : company.getPlanType()),
+                "trialExpiresAt", company == null ? "" : (company.getTrialExpiresAt() == null ? "" : company.getTrialExpiresAt().toString())
         );
     }
 
@@ -307,6 +338,8 @@ public class AuthenticationService {
                 .companySlug(company == null ? null : company.getSlug())
                 .companyName(company == null ? null : company.getName())
                 .companyTheme(company == null ? null : company.getTheme())
+                .planType(company == null ? null : company.getPlanType())
+                .trialExpiresAt(company == null ? null : company.getTrialExpiresAt())
                 .build();
     }
 

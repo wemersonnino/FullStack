@@ -63,6 +63,8 @@ export interface LandingPageContent {
   heroTitle: string;
   heroDescription: string;
   heroImage?: LandingMedia;
+  heroBackgroundImage?: LandingMedia;
+  sectionBackgroundImage?: LandingMedia;
   primaryCtaLabel: string;
   primaryCtaUrl: string;
   secondaryCtaLabel: string;

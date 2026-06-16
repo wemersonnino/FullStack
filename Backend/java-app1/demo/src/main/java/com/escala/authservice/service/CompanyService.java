@@ -6,6 +6,7 @@ import com.escala.authservice.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -31,6 +32,10 @@ public class CompanyService {
 
     public Company create(CompanyRequest request) {
         String slug = request.getName().toLowerCase().replaceAll("[^a-z0-9]", "-");
+        
+        String planType = request.getPlanType() != null ? request.getPlanType() : "TRIAL";
+        OffsetDateTime trialExpiresAt = request.getTrialExpiresAt() != null ? request.getTrialExpiresAt() : OffsetDateTime.now().plusDays(14);
+        
         return companyRepository.save(Company.builder()
                 .name(request.getName())
                 .slug(slug)
@@ -48,6 +53,8 @@ public class CompanyService {
                 .city(request.getCity())
                 .state(request.getState())
                 .active(request.getActive() == null || request.getActive())
+                .planType(planType)
+                .trialExpiresAt(trialExpiresAt)
                 .build());
     }
 
@@ -71,6 +78,12 @@ public class CompanyService {
         company.setState(request.getState());
         if (request.getActive() != null) {
             company.setActive(request.getActive());
+        }
+        if (request.getPlanType() != null) {
+            company.setPlanType(request.getPlanType());
+        }
+        if (request.getTrialExpiresAt() != null) {
+            company.setTrialExpiresAt(request.getTrialExpiresAt());
         }
         return companyRepository.save(company);
     }

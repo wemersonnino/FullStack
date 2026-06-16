@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -25,4 +26,6 @@ public class CompanyRequest {
     private String city;
     private String state;
     private Boolean active;
+    private String planType;
+    private OffsetDateTime trialExpiresAt;
 }

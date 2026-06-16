@@ -10,9 +10,10 @@ const ARTICLE_POPULATE =
   '&populate[category]=true' +
   '&populate[blocks][populate]=*';
 
-export async function getArticles(limit = 6): Promise<Article[]> {
+export async function getArticles(limit = 6, locale?: string): Promise<Article[]> {
   try {
-    const url = `${baseUrl}/api/articles?${ARTICLE_POPULATE}&pagination[limit]=${limit}`;
+    const localeFilter = locale ? `&locale=${locale}` : '';
+    const url = `${baseUrl}/api/articles?${ARTICLE_POPULATE}&pagination[limit]=${limit}${localeFilter}`;
     const json = await httpGet<StrapiResponse<Article>>(url);
     if (!json?.data) return [];
 
@@ -23,9 +24,10 @@ export async function getArticles(limit = 6): Promise<Article[]> {
   }
 }
 
-export async function getArticleBySlug(slug: string): Promise<Article | null> {
+export async function getArticleBySlug(slug: string, locale?: string): Promise<Article | null> {
   try {
-    const url = `${baseUrl}/api/articles?${ARTICLE_POPULATE}&filters[slug][$eq]=${slug}`;
+    const localeFilter = locale ? `&locale=${locale}` : '';
+    const url = `${baseUrl}/api/articles?${ARTICLE_POPULATE}&filters[slug][$eq]=${slug}${localeFilter}`;
     const json = await httpGet<{ data: any[] }>(url);
     const data = json?.data?.[0];
     if (!data) return null;
