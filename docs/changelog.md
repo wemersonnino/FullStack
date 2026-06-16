@@ -21,6 +21,14 @@
 - O OpenAPI continua manual e precisa permanecer sincronizado com o novo controller de leads.
 - A captura publica depende do cookie de atribuicao de campanha estar presente para completar os metadados de marketing.
 
+
+## 2026-06-16 - Correção de Conectividade Docker no BFF
+
+### Corrigido
+- Erro 401 Unauthorized no login causado por falha de resolucao de `localhost` dentro do container Next.js.
+- Atualizada `API_BASE_URL` para `http://backend:8080` no ambiente Docker.
+- Ajustada a constante `ENV` para priorizar URLs internas em chamadas server-side.
+
 ## 2026-06-16 - Base segura do BFF do frontend
 
 ### Adicionado

@@ -14,8 +14,8 @@ export const ENV = {
 
   // Backend Spring Boot oficial da aplicacao. Server-side only.
   API_BASE_URL:
-    process.env.API_BASE_URL ||
-    'http://localhost:8080',
+    process.env.API_BASE_URL || process.env.NEXT_INTERNAL_API_BASE_URL ||
+    'http://localhost:8080', // UPDATED
   APP_URL:
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXTAUTH_URL ||

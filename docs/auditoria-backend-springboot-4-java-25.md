@@ -149,6 +149,14 @@ Resultado: `HTTP/1.1 200`, status `UP`.
 
 ## Correcoes aplicadas nesta auditoria
 
+### Conectividade Docker do BFF
+
+Erro: `TypeError: fetch failed` ao tentar logar via Next.js.
+Causa: Next.js acessando `localhost:8080` de dentro do container.
+Correcao: Alterada `API_BASE_URL` para `http://backend:8080`.
+Resultado: Login funcional (200 OK).
+
+
 - `pom.xml`: adicionado `spring-boot-starter-actuator`.
 - `SecurityConfiguration.java`: liberado `GET /actuator/health` sem JWT.
 - `OpenApiController.java`: adicionada tag `Operacional` e path `/actuator/health`.

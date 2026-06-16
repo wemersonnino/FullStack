@@ -16,6 +16,20 @@
 - O fluxo depende do cookie de atribuicao de campanha para enriquecer os metadados.
 - O controller de leads precisa continuar sincronizado no `OpenApiController` enquanto a geracao automatica nao for reavaliada.
 
+
+## 2026-06-16 - Conectividade Docker do BFF (Next.js)
+
+### Contexto
+O login retornava 401 Unauthorized mesmo com o backend saudavel. A causa era o Next.js tentando acessar `http://localhost:8080` de dentro do container, o que falhava em alcancar o container `backend`.
+
+### Decisoes confirmadas
+- A `API_BASE_URL` no `.env.local` do frontend deve usar o hostname do servico na rede Docker: `http://backend:8080`.
+- A constante `ENV` em `src/constants/env.ts` foi atualizada para suportar `process.env.NEXT_INTERNAL_API_BASE_URL` ou injecao dinamica de `API_BASE_URL` via ambiente.
+- O BFF (Server-side) agora utiliza a rede interna do Docker para comunicacao com o core Java, evitando problemas de resolucao de loopback.
+
+### Validacao
+- O fluxo de login (Credentials e Google) foi testado via `curl` simulando o BFF e retornou HTTP 200 e o cookie de sessao.
+
 ## 2026-06-15 - Fechamento da migracao Spring Boot 4 e Java 25
 
 ### Contexto
