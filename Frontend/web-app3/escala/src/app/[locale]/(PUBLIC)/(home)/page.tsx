@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LandingFeature, LandingIconKey } from '@/interfaces/landing/landing.interface';
 import { cn } from '@/lib/utils';
+import { PricingTable } from '@/components/dashboard/PricingTable';
 
 const iconMap = {
   calendar: CalendarDays,
@@ -216,44 +217,7 @@ export default async function HomePage({ params }: HomePageProps) {
             <h2 className="text-3xl font-black tracking-tight sm:text-4xl">Teste comercial com controle de custo da IA.</h2>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
-            {landing.pricingPlans.map((plan) => (
-              <article
-                key={plan.id}
-                className={cn(
-                  'rounded-lg border bg-card p-6',
-                  plan.recommended && 'border-primary shadow-sm'
-                )}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-2xl font-black">{plan.name}</h3>
-                    {plan.description && <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>}
-                  </div>
-                  {plan.recommended && <Badge className="rounded-md">Recomendado</Badge>}
-                </div>
-
-                <div className="mt-6 flex flex-wrap items-end gap-3">
-                  <span className="text-4xl font-black">{plan.priceLabel}</span>
-                  <span className="pb-1 text-sm text-muted-foreground">{plan.trialDescription}</span>
-                </div>
-                <p className="mt-3 text-sm font-medium text-primary">{plan.aiLimitDescription}</p>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {plan.features.map((feature) => (
-                    <div key={feature} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Button className="mt-8" asChild>
-                  <Link href={plan.ctaUrl}>{plan.ctaLabel}</Link>
-                </Button>
-              </article>
-            ))}
-          </div>
+          <PricingTable plans={landing.pricingPlans} isPublic={true} />
         </div>
       </section>
 

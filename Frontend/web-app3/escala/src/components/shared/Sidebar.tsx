@@ -21,7 +21,8 @@ import {
   ClipboardList,
   UserPlus,
   BarChart4,
-  ShieldCheck
+  ShieldCheck,
+  CreditCard
 } from 'lucide-react';
 import { MenuItem } from '@/interfaces/menu/menu.interface';
 import { cn, normalizeAvatarUrl } from '@/lib/utils';
@@ -66,6 +67,7 @@ const navigationGroups = [
     items: [
       { title: 'Empresas (Tenants)', href: '/dashboard/empresas', icon: Building2 },
       { title: 'Relatórios Avançados', href: '/dashboard/relatorios', icon: BarChart4 },
+      { title: 'Planos e Faturamento', href: '/dashboard/billing/plans', icon: CreditCard },
       { title: 'Auditoria e Logs', href: '/dashboard/auditoria', icon: ShieldCheck },
     ]
   },

@@ -87,6 +87,7 @@ public class OpenApiController {
                 tag("Relatorios", "Relatorios de folha, horas e exportacao CSV."),
                 tag("Convites", "Convites de equipe para novos usuarios vinculados a uma empresa."),
                 tag("Marketing", "Captura de leads, demo comercial e rastreio de campanha com consentimento."),
+                tag("Billing", "Gerenciamento de assinaturas, planos, faturamento e webhooks do Stripe."),
                 tag("Operacional", "Endpoints operacionais de saude e suporte a monitoramento.")
         );
     }
@@ -225,6 +226,12 @@ public class OpenApiController {
         ));
         paths.put("/api/v1/team/invitations/token/{token}", pathGet(getPublic("Convites", "Buscar convite por token", "Consulta convite publico por token para preencher fluxo de cadastro.", pathParam("token", "Token do convite."))));
         paths.put("/api/v1/team/invitations/{id}", pathDelete(delete("Convites", "Cancelar convite", "Cancela convite de equipe da empresa do usuario autenticado.", pathParam("id", "ID do convite."))));
+
+        paths.put("/api/v1/billing/checkout", pathPost(post("Billing", "Criar sessao de checkout", "Gera uma URL do Stripe Checkout para assinatura de plano.", "BillingCheckoutRequest")));
+        paths.put("/api/v1/billing/subscription", pathGet(get("Billing", "Consultar assinatura", "Retorna dados da assinatura ativa da empresa do usuario.")));
+        paths.put("/api/v1/billing/cancel", pathPost(post("Billing", "Cancelar assinatura", "Solicita o cancelamento da assinatura ativa no Stripe.", null)));
+        paths.put("/api/v1/billing/webhook", pathPost(postPublic("Billing", "Webhook do Stripe", "Endpoint assincrono para recebimento de eventos do Stripe (pagamento, atualizacao), protegido por assinatura digital.", null)));
+
         paths.put("/actuator/health", pathGet(getPublic("Operacional", "Health check", "Retorna o estado de saude do backend para validacao local, Docker e monitoramento.")));
 
         return paths;

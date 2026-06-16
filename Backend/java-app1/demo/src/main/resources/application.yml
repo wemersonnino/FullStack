@@ -31,6 +31,12 @@ application:
       client-id: ${GOOGLE_CLIENT_ID:}
     recaptcha:
       secret: ${RECAPTCHA_SECRET:}
+    stripe:
+      secret-key: ${STRIPE_SECRET_KEY:}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+      price-essential: ${STRIPE_PRICE_ESSENTIAL:}
+      price-professional: ${STRIPE_PRICE_PROFESSIONAL:}
+      price-critical: ${STRIPE_PRICE_CRITICAL:}
   integrations:
     strapi:
       base-url: ${STRAPI_BASE_URL:http://localhost:1337}

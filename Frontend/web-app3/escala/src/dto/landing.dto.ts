@@ -56,7 +56,7 @@ function asIndustry(item: AnyRecord): LandingIndustry {
   };
 }
 
-function normalizeFeatures(value: unknown): string[] {
+export function normalizeFeatures(value: unknown): string[] {
   if (Array.isArray(value)) return value.map((item) => String(item)).filter(Boolean);
   if (typeof value === 'string' && value.trim()) return [value.trim()];
   return [];

@@ -16,9 +16,12 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { Chrome } from 'lucide-react';
 import { ENV } from '@/constants/env';
+import { useSearchParams } from 'next/navigation';
 
 export const LoginForm = () => {
   const { login, loginGoogle } = useAuth();
+  const searchParams = useSearchParams();
+  const selectedPlan = searchParams.get('plan');
 
   const form = useForm<LoginSchemaType>({
     resolver: zodResolver(LoginSchema),
@@ -36,6 +39,12 @@ export const LoginForm = () => {
         className="bg-background/60 mx-auto mt-16 max-w-md space-y-4 rounded-lg border p-6"
       >
         <h1 className="text-center text-xl font-semibold">Acessar conta</h1>
+
+        {selectedPlan && (
+          <div className="rounded-md bg-primary/10 p-3 text-center text-sm font-medium text-primary">
+            Retornando para assinar o plano: <span className="font-bold">{selectedPlan}</span>
+          </div>
+        )}
 
         <FormField
           control={form.control}
@@ -76,11 +85,19 @@ export const LoginForm = () => {
           </Button>
         ) : null}
 
-        <p className="text-muted-foreground text-center text-sm">
-          <a href="/forgot-password" className="underline">
-            Esqueci minha senha
-          </a>
-        </p>
+        <div className="flex flex-col gap-2 pt-2">
+          <p className="text-muted-foreground text-center text-sm">
+            Não tem uma conta?{' '}
+            <a href={selectedPlan ? `/register?plan=${selectedPlan}` : "/register"} className="underline">
+              Cadastre-se
+            </a>
+          </p>
+          <p className="text-muted-foreground text-center text-sm">
+            <a href="/forgot-password" className="underline">
+              Esqueci minha senha
+            </a>
+          </p>
+        </div>
       </form>
     </Form>
   );
