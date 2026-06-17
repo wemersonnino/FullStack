@@ -15,6 +15,7 @@ public class CompanyService {
     public static final String DEFAULT_COMPANY_SLUG = "escala-demo";
 
     private final CompanyRepository companyRepository;
+    private final com.escala.authservice.core.company.port.in.CompanyUseCase companyUseCase;
 
     public List<Company> list() {
         return companyRepository.findAll();
@@ -26,36 +27,32 @@ public class CompanyService {
 
     public Company resolve(String slug) {
         String normalized = (slug == null || slug.isBlank()) ? DEFAULT_COMPANY_SLUG : slug.trim().toLowerCase();
-        return companyRepository.findBySlug(normalized)
-                .orElseThrow(() -> new IllegalArgumentException("Empresa nao encontrada"));
+        // Delegar para o core
+        var domain = companyUseCase.resolve(normalized);
+        return companyRepository.findById(domain.getId()).orElseThrow();
+    }
+
+    public boolean existsBySlugAndIdNot(String slug, Long id) {
+        return companyRepository.existsBySlugAndIdNot(slug, id);
     }
 
     public Company create(CompanyRequest request) {
-        String slug = request.getName().toLowerCase().replaceAll("[^a-z0-9]", "-");
-        
-        String planType = request.getPlanType() != null ? request.getPlanType() : "TRIAL";
-        OffsetDateTime trialExpiresAt = request.getTrialExpiresAt() != null ? request.getTrialExpiresAt() : OffsetDateTime.now().plusDays(14);
-        
-        return companyRepository.save(Company.builder()
+        // Mapear DTO -> Domain
+        var domain = com.escala.authservice.core.company.domain.CompanyDomain.builder()
                 .name(request.getName())
-                .slug(slug)
                 .cnpj(request.getCnpj())
-                .logoUrl(request.getLogoUrl())
+                .active(request.getActive() == null || request.getActive())
+                .planType(request.getPlanType() != null ? request.getPlanType() : "TRIAL")
+                .trialExpiresAt(request.getTrialExpiresAt() != null ? request.getTrialExpiresAt() : OffsetDateTime.now().plusDays(14))
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
-                .allowedRadius(request.getAllowedRadius() != null ? request.getAllowedRadius() : 200)
-                .address(request.getAddress())
-                .cep(request.getCep())
-                .street(request.getStreet())
-                .number(request.getNumber())
-                .complement(request.getComplement())
-                .neighborhood(request.getNeighborhood())
-                .city(request.getCity())
-                .state(request.getState())
-                .active(request.getActive() == null || request.getActive())
-                .planType(planType)
-                .trialExpiresAt(trialExpiresAt)
-                .build());
+                .build();
+        
+        // Delegar para o Core
+        var savedDomain = companyUseCase.create(domain);
+        
+        // Retornar entidade para compatibilidade legado
+        return companyRepository.findById(savedDomain.getId()).orElseThrow();
     }
 
     public Company update(Long id, CompanyRequest request) {

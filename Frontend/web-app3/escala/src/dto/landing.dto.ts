@@ -4,12 +4,12 @@ import {
   LandingFaq,
   LandingFeature,
   LandingIconKey,
+  LandingInfoCard,
   LandingIndustry,
   LandingMedia,
   LandingPageContent,
   LandingPricingPlan,
 } from '@/interfaces/landing/landing.interface';
-import { LandingPageSchema } from '@/lib/schemas/landing.schema';
 
 type AnyRecord = Record<string, any>;
 
@@ -56,7 +56,7 @@ function asIndustry(item: AnyRecord): LandingIndustry {
   };
 }
 
-function normalizeFeatures(value: unknown): string[] {
+export function normalizeFeatures(value: unknown): string[] {
   if (Array.isArray(value)) return value.map((item) => String(item)).filter(Boolean);
   if (typeof value === 'string' && value.trim()) return [value.trim()];
   return [];
@@ -96,6 +96,16 @@ function asCtaButton(item: AnyRecord): LandingCtaButton {
   };
 }
 
+function asInfoCard(item: AnyRecord, index: number): LandingInfoCard {
+  const iconKey = iconKeys.includes(item.iconKey) ? item.iconKey : 'shield';
+  return {
+    id: item.id ?? item.title ?? index,
+    title: item.title || '',
+    description: item.description || '',
+    iconKey,
+  };
+}
+
 export const fallbackLandingPage: LandingPageContent = {
   eyebrow: 'Gestao inteligente de escalas B2B',
   heroTitle: 'Escala SaaS',
@@ -108,6 +118,41 @@ export const fallbackLandingPage: LandingPageContent = {
   trialDescription: 'Aplicacao com 3 meses de teste gratuito para sua empresa validar a operacao completa.',
   aiTrialDescription: 'IA assistiva com liberacao menor ou limite por creditos para controlar custo operacional.',
   securityStatement: 'Autorizacao no backend, minimizacao de dados pessoais, auditoria e separacao clara entre CMS e regras criticas de negocio.',
+  demoEyebrow: 'Demo',
+  demoTitle: 'Veja a operacao antes de conversar com vendas.',
+  demoDescription:
+    'A demonstracao mostra como a plataforma organiza escalas, aponta limites comerciais e captura leads com consentimento explicito.',
+  demoCards: [
+    {
+      id: 'secure-flow',
+      title: 'Fluxo comercial seguro',
+      description: 'O lead entra pelo BFF publico e chega ao backend com UTM, referrer e consentimento.',
+      iconKey: 'shield',
+    },
+    {
+      id: 'business-context',
+      title: 'Atendimento orientado ao negocio',
+      description: 'A equipe comercial recebe contexto suficiente para responder com foco em conversao.',
+      iconKey: 'users',
+    },
+  ],
+  demoLinkLabel: 'Abrir pagina de demo',
+  demoLinkUrl: '/demo',
+  demoFormTitle: 'Receba uma proposta guiada',
+  demoFormDescription: 'Deixe seu contato e a gente responde com uma demonstracao focada na sua operacao.',
+  featuresEyebrow: 'Modulos',
+  featuresTitle: 'Operacao, regras e auditoria no mesmo fluxo.',
+  industriesEyebrow: 'Setores',
+  industriesTitle: 'Preparado para operacoes com ritmos diferentes.',
+  pricingEyebrow: 'Planos',
+  pricingTitle: 'Teste comercial com controle de custo da IA.',
+  faqEyebrow: 'FAQ',
+  faqTitle: 'Perguntas frequentes.',
+  blogEyebrow: 'Conteudo',
+  blogTitle: 'Conteudo para gestores.',
+  blogDescription: 'Artigos editoriais continuam vindo do Strapi.',
+  blogLinkLabel: 'Ver artigos',
+  blogLinkUrl: '/artigos',
   features: [
     {
       id: 'scheduling',
@@ -223,6 +268,29 @@ export function mapLandingPage(data?: AnyRecord | null): LandingPageContent {
     trialDescription: entry.trialDescription || fallbackLandingPage.trialDescription,
     aiTrialDescription: entry.aiTrialDescription || fallbackLandingPage.aiTrialDescription,
     securityStatement: entry.securityStatement || fallbackLandingPage.securityStatement,
+    demoEyebrow: entry.demoEyebrow || fallbackLandingPage.demoEyebrow,
+    demoTitle: entry.demoTitle || fallbackLandingPage.demoTitle,
+    demoDescription: entry.demoDescription || fallbackLandingPage.demoDescription,
+    demoCards: pickArray(entry.demoCards)
+      .map(asInfoCard)
+      .filter((item) => item.title && item.description),
+    demoLinkLabel: entry.demoLinkLabel || fallbackLandingPage.demoLinkLabel,
+    demoLinkUrl: entry.demoLinkUrl || fallbackLandingPage.demoLinkUrl,
+    demoFormTitle: entry.demoFormTitle || fallbackLandingPage.demoFormTitle,
+    demoFormDescription: entry.demoFormDescription || fallbackLandingPage.demoFormDescription,
+    featuresEyebrow: entry.featuresEyebrow || fallbackLandingPage.featuresEyebrow,
+    featuresTitle: entry.featuresTitle || fallbackLandingPage.featuresTitle,
+    industriesEyebrow: entry.industriesEyebrow || fallbackLandingPage.industriesEyebrow,
+    industriesTitle: entry.industriesTitle || fallbackLandingPage.industriesTitle,
+    pricingEyebrow: entry.pricingEyebrow || fallbackLandingPage.pricingEyebrow,
+    pricingTitle: entry.pricingTitle || fallbackLandingPage.pricingTitle,
+    faqEyebrow: entry.faqEyebrow || fallbackLandingPage.faqEyebrow,
+    faqTitle: entry.faqTitle || fallbackLandingPage.faqTitle,
+    blogEyebrow: entry.blogEyebrow || fallbackLandingPage.blogEyebrow,
+    blogTitle: entry.blogTitle || fallbackLandingPage.blogTitle,
+    blogDescription: entry.blogDescription || fallbackLandingPage.blogDescription,
+    blogLinkLabel: entry.blogLinkLabel || fallbackLandingPage.blogLinkLabel,
+    blogLinkUrl: entry.blogLinkUrl || fallbackLandingPage.blogLinkUrl,
     features: pickArray(entry.features).map(asFeature).filter((item) => item.title && item.description),
     industries: pickArray(entry.industries).map(asIndustry).filter((item) => item.title && item.valueProposition),
     pricingPlans: pickArray(entry.pricingPlans).map(asPricingPlan),
@@ -232,6 +300,7 @@ export function mapLandingPage(data?: AnyRecord | null): LandingPageContent {
 
   return {
     ...content,
+    demoCards: content.demoCards.length ? content.demoCards : fallbackLandingPage.demoCards,
     features: content.features.length ? content.features : fallbackLandingPage.features,
     industries: content.industries.length ? content.industries : fallbackLandingPage.industries,
     pricingPlans: content.pricingPlans.length ? content.pricingPlans : fallbackLandingPage.pricingPlans,

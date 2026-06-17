@@ -1,5 +1,90 @@
 # Changelog
 
+## 2026-06-16 - Refatoração Hexagonal Estrita e Otimização via Matrizes
+
+### Adicionado
+- Nova página de **Contato** pública com formulário validado via **Zod**.
+- Loja de estado global para contato usando **Zustand**.
+- Estrutura de **Matriz Bidimensional** para renderização $O(1)$ da grade de escalas.
+- Novo módulo de **Contato** no backend seguindo **Arquitetura Hexagonal Estrita** (Core POJO).
+- Novo `GenerateScheduleService` no Core Hexagonal, desacoplado do Spring Boot.
+- Paleta semântica de cores baseada em **Teoria das Cores** para estados de turno.
+
+### Alterado
+- Refatoração do `ScheduleService` para atuar como adaptador, delegando lógica para o Core Hexagonal.
+- Implementado padrão **Server Side Page -> BFF -> Dumb UI** na jornada de contato.
+- Adicionada **Visão de Grade** (Grid View) no Dashboard Administrativo de escalas.
+
+### Corrigido
+- Discrepâncias arquiteturais onde regras de negócio estavam vazando para os Controllers/Services do Spring.
+
+## 2026-06-16 - Otimização de Performance Backend e Docker Strapi
+
+### Adicionado
+- Novo método de busca em lote no `EmployeeRepository` e `WorkShiftRepository`.
+- Estruturas de dados em memória (`HashSet`/`HashMap`) no `ScheduleService` para busca $O(1)$.
+- Validação de null-safety no `CheckInService` (empresa e plano).
+
+### Alterado
+- Refatoração do `ScheduleService` para eliminar problemas de consultas N+1 na geração mensal de escalas.
+- `Dockerfile` do Strapi migrado para **Multi-Stage Build** com pré-compilação do Admin Panel.
+- `docker-compose.yml` do Strapi configurado com `NODE_ENV=production` para startup instantâneo.
+
+### Corrigido
+- Potencial `NullPointerException` no registro de ponto eletrônico.
+- Lentidão crítica no carregamento inicial do container Strapi.
+
+## 2026-06-16 - Strapi com seed idempotente e cron
+
+### Adicionado
+
+- Script `ensure-marketing-content.js` para criar conteudo inicial de marketing somente quando o CMS estiver vazio.
+- Cron nativo do Strapi para verificar periodicamente o conteudo base consumido pelo frontend.
+- Documentacao das variaveis `STRAPI_CRON_ENABLED`, `STRAPI_MARKETING_CRON_RULE`, `STRAPI_AUTO_SEED_MARKETING` e `STRAPI_FORCE_MARKETING_SEED`.
+
+### Alterado
+
+- Bootstrap do Strapi deixou de executar o seed destrutivo diretamente em todo startup.
+- Seed automatico passa a preservar conteudo editorial existente e apenas registrar aviso quando encontra dados parciais.
+
+### Riscos conhecidos
+
+- `STRAPI_FORCE_MARKETING_SEED=true` recria colecoes de marketing e deve ficar restrito a ambientes descartaveis.
+
+## 2026-06-16 - Documentacao Docker e padronizacao Escala
+
+### Alterado
+
+- Atualizada a documentacao de DevOps com o estado atual dos Dockerfiles e Compose do projeto Escala.
+- Registradas as motivacoes dos ajustes Docker: usuarios nao-root, tags sem `latest`, `.dockerignore`, cache de pacotes, `npm ci`, `pnpm --frozen-lockfile` e secrets fora das imagens.
+- Padronizadas referencias antigas de projeto para Escala nos documentos de arquitetura.
+- Atualizado o fallback do banner publico para "Bem-vindo à Plataforma Escala".
+
+### Validado
+
+- Busca textual sem ocorrencias restantes da nomenclatura antiga fora de dependencias/artefatos ignorados.
+
+## 2026-06-16 - Faturamento SaaS, Integração Stripe e Sincronização Strapi
+
+### Adicionado
+- Integração completa com **Stripe** no backend Java (SDK v33.0.0).
+- Entidades de domínio `Subscription` e `Invoice` para gestão de faturamento.
+- Endpoint de Webhook seguro com validação de assinatura para eventos do Stripe.
+- Novas páginas de Billing no Dashboard: `/plans`, `/success`, `/cancel`.
+- Componente `PricingTable` dinâmico que consome planos da coleção `pricing-plan-contents` do Strapi.
+- Link "Planos e Faturamento" na barra lateral administrativa.
+- Suporte a `NEXT_INTERNAL_API_BASE_URL` no frontend para garantir conectividade em ambientes Docker.
+
+### Alterado
+- O fluxo de autenticação (Login/Registro) agora preserva o plano selecionado na Home pública.
+- Componente `Button` global e botões nativos agora exibem `cursor-pointer`.
+- Páginas de autenticação envoltas em `Suspense` para suportar `useSearchParams` com rendering estático.
+
+### Corrigido
+- Erro 401 Unauthorized no login do BFF ao rodar em containers Docker.
+- Falhas de build no Next.js relacionadas a `useSearchParams` fora de Suspense boundaries.
+
+
 ## 2026-06-15 - PLG com captura publica de leads e pagina de demo
 
 ### Adicionado

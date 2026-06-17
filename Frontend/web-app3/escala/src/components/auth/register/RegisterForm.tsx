@@ -17,9 +17,13 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { Chrome } from 'lucide-react';
 import { ENV } from '@/constants/env';
+import { useSearchParams } from 'next/navigation';
 
 export const RegisterForm = () => {
   const { register, loginGoogle } = useAuth();
+  const searchParams = useSearchParams();
+  const selectedPlan = searchParams.get('plan');
+
   const form = useForm<RegisterSchemaType>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: { username: '', email: '', password: '', companyName: '' },
@@ -28,6 +32,8 @@ export const RegisterForm = () => {
   const onSubmit = async (data: RegisterSchemaType) => {
     try {
       await register(data);
+      // Success redirection logic is usually inside useAuth.register hook
+      // But we could pass the plan to it or handle it in the callback
     } catch {
       toast.error('Erro ao registrar usuário.');
     }
@@ -40,6 +46,12 @@ export const RegisterForm = () => {
         className="bg-background/60 mx-auto mt-16 max-w-md space-y-4 rounded-lg border p-6"
       >
         <h1 className="text-center text-xl font-semibold">Criar conta</h1>
+        
+        {selectedPlan && (
+          <div className="rounded-md bg-primary/10 p-3 text-center text-sm font-medium text-primary">
+            Você escolheu o plano: <span className="font-bold">{selectedPlan}</span>
+          </div>
+        )}
 
         <FormField
           control={form.control}

@@ -1,5 +1,5 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 
@@ -8,14 +8,13 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 /**
  * Gera as rotas estáticas para cada idioma.
  * Necessário para build estático do Next.js.
  */
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
-
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;
 
@@ -23,9 +22,6 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-
-  // Necessário para renderização estática por idioma
-  setRequestLocale(locale);
 
   // Carrega mensagens do idioma atual
   const messages = await getMessages();

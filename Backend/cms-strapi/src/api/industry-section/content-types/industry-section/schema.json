@@ -5,7 +5,7 @@
     "singularName": "industry-section",
     "pluralName": "industry-sections",
     "displayName": "Industry Section",
-    "description": "Propostas de valor por setor atendido."
+    "description": "Blocos editoriais de segmentos atendidos na home."
   },
   "options": {
     "draftAndPublish": true
@@ -30,6 +30,7 @@
         "logistics",
         "marketing",
         "home_office",
+        "retail",
         "other"
       ],
       "default": "healthcare"

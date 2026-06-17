@@ -79,25 +79,18 @@ async function syncPublicReadPermissions(strapi: Core.Strapi) {
   });
 }
 
-async function seedCmsContent(strapi: Core.Strapi) {
-  // Not needed if we run V3 seed
-}
-
 export default {
   register(/* { strapi }: { strapi: Core.Strapi } */) {},
 
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     await syncPublicReadPermissions(strapi);
 
-    // Seed Marketing V3 Content
     try {
       // @ts-ignore
-      const seedFunc = require(path.join(process.cwd(), 'scripts', 'seed-marketing-v3'));
-      if (typeof seedFunc === 'function') {
-        await seedFunc(strapi);
-      }
+      const ensureMarketingContent = require(path.join(process.cwd(), 'scripts', 'ensure-marketing-content'));
+      await ensureMarketingContent(strapi, { source: 'bootstrap' });
     } catch (e) {
-      console.error('Falha ao rodar Seed V3:', e);
+      console.error('Falha ao garantir conteudo inicial do CMS:', e);
     }
 
     try {

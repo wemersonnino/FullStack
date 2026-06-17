@@ -10,7 +10,17 @@ export const API_ROUTES = {
   CALENDAR: `${baseUrl}/api/calendar-events?populate=*`,
   ANNOUNCEMENTS: `${baseUrl}/api/announcements?populate=*`,
   GLOBAL: `${baseUrl}/api/global?populate=*`,
-  LANDING_PAGE: `${baseUrl}/api/landing-pages?populate=*`,
+  LANDING_PAGE:
+    `${baseUrl}/api/landing-pages?` +
+    'populate[heroImage]=true' +
+    '&populate[heroBackgroundImage]=true' +
+    '&populate[sectionBackgroundImage]=true' +
+    '&populate[features][sort]=order:asc' +
+    '&populate[industries][sort]=order:asc' +
+    '&populate[pricingPlans][sort]=order:asc' +
+    '&populate[faqs][sort]=order:asc' +
+    '&populate[ctaButtons][sort]=order:asc' +
+    '&populate[seo]=true',
   FEATURE_SECTIONS: `${baseUrl}/api/feature-sections?filters[active][$eq]=true&sort=order:asc`,
   INDUSTRY_SECTIONS: `${baseUrl}/api/industry-sections?filters[active][$eq]=true&sort=order:asc`,
   PRICING_PLAN_CONTENTS: `${baseUrl}/api/pricing-plan-contents?filters[active][$eq]=true&sort=order:asc`,

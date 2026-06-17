@@ -29,6 +29,7 @@ public class AuthenticationService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final RecaptchaService recaptchaService;
     private final GoogleIdentityService googleIdentityService;
+    private final com.escala.authservice.core.auth.port.in.AuthenticationUseCase authenticationUseCase;
 
     public AuthenticationResponse register(RegisterRequest request) {
         recaptchaService.verifyIfProduction(request.getRecaptchaToken());
@@ -76,19 +77,34 @@ public class AuthenticationService {
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         recaptchaService.verifyIfProduction(request.getRecaptchaToken());
-        Company company = companyService.resolve(request.getCompanySlug());
-        var user = repository.findByEmailAndCompanySlug(request.getEmail(), company.getSlug())
-                .orElseThrow();
+        
+        // Delegar para o Core Hexagonal (Lógica Pura)
+        var userDomain = authenticationUseCase.authenticate(request.getEmail(), request.getCompanySlug(), request.getPassword());
 
-        if (!user.isActive() || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Credenciais invalidas");
-        }
+        // Mapear para DTOs do Spring (Capa de Adaptação)
+        var userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(userDomain.getEmail())
+                .password(userDomain.getPassword())
+                .authorities(userDomain.getRoles().toArray(String[]::new))
+                .build();
 
-        var userDetails = userDetails(user);
-        var jwtToken = jwtService.generateToken(jwtClaims(user), userDetails);
+        var jwtToken = jwtService.generateToken(Map.of(
+                "id", userDomain.getId(),
+                "roles", userDomain.getRoles(),
+                "companyId", userDomain.getCompanyId() != null ? userDomain.getCompanyId() : "",
+                "companySlug", userDomain.getCompanySlug() != null ? userDomain.getCompanySlug() : ""
+        ), userDetails);
+
         return AuthenticationResponse.builder()
                 .token(jwtToken)
-                .user(toUserDto(user))
+                .user(AuthenticationResponse.UserDto.builder()
+                        .id(userDomain.getId())
+                        .username(userDomain.getUsername())
+                        .email(userDomain.getEmail())
+                        .roles(userDomain.getRoles())
+                        .companyId(userDomain.getCompanyId())
+                        .companySlug(userDomain.getCompanySlug())
+                        .build())
                 .build();
     }
 
@@ -257,8 +273,8 @@ public class AuthenticationService {
         company.setName(request.getCompanyName());
         // Gera novo slug baseado no nome real
         String newSlug = request.getCompanyName().toLowerCase().replaceAll("[^a-z0-9]", "-");
-        // Verifica se o slug já existe para outra empresa
-        if (companyService.list().stream().anyMatch(c -> c.getSlug().equals(newSlug) && !c.getId().equals(company.getId()))) {
+        // Verifica se o slug já existe para outra empresa de forma eficiente via banco
+        if (companyService.existsBySlugAndIdNot(newSlug, company.getId())) {
              company.setSlug(newSlug + "-" + UUID.randomUUID().toString().substring(0, 4));
         } else {
              company.setSlug(newSlug);
@@ -283,10 +299,8 @@ public class AuthenticationService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        // 3. Marcar Lead como Convertido
-        marketingLeadRepository.findAll().stream()
-                .filter(l -> l.getEmail().equals(email))
-                .findFirst()
+        // 3. Marcar Lead como Convertido de forma eficiente
+        marketingLeadRepository.findByEmailIgnoreCase(email)
                 .ifPresent(l -> {
                     l.setConverted(true);
                     marketingLeadRepository.save(l);

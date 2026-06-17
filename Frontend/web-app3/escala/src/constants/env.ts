@@ -21,6 +21,7 @@ export const ENV = {
     process.env.NEXTAUTH_URL ||
     'http://localhost:3000',
   COMPANY_SLUG: process.env.NEXT_PUBLIC_COMPANY_SLUG || 'escala-demo',
+  HOME_LANDING_PAGE_KEY: process.env.NEXT_PUBLIC_HOME_LANDING_PAGE_KEY || 'home',
   RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '',
   RECAPTCHA_ENABLED:
     process.env.NEXT_PUBLIC_RECAPTCHA_ENABLED === 'true' ||

@@ -16,11 +16,11 @@ export async function createMetadata(options: MetaOptions = {}) {
 
   const title = options.title
     ? `${options.title} | ${global?.siteName ?? ""}`
-    : global?.defaultSeo.metaTitle || "Escala Web App";
+    : global?.defaultSeo?.metaTitle || "Escala Web App";
 
   const description =
     options.description ||
-    global?.defaultSeo.metaDescription ||
+    global?.defaultSeo?.metaDescription ||
     global?.siteDescription ||
     "";
 

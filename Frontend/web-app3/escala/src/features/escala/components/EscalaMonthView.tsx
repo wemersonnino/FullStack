@@ -37,15 +37,23 @@ export function EscalaMonthView({ currentDate, escalas, isAdmin, holidays = [] }
     return eachDayOfInterval({ start, end });
   }, [currentDate]);
 
-  const getEscalasForDay = (day: Date) => {
-    return escalas.filter(escala => {
-      if (!escala.data) return false;
-      try {
-        return isSameDay(parseISO(escala.data), day);
-      } catch {
-        return false;
+  // Optimize: Group scales by date string for O(1) lookup during cell rendering
+  const escalasByDate = useMemo(() => {
+    const map = new Map<string, Escala[]>();
+    escalas.forEach(escala => {
+      if (!escala.data) return;
+      const dateKey = escala.data.split('T')[0]; // Ensure we only have the date part
+      if (!map.has(dateKey)) {
+        map.set(dateKey, []);
       }
+      map.get(dateKey)!.push(escala);
     });
+    return map;
+  }, [escalas]);
+
+  const getEscalasForDay = (day: Date) => {
+    const dateKey = format(day, 'yyyy-MM-dd');
+    return escalasByDate.get(dateKey) || [];
   };
 
   const getHolidayForDay = (day: Date) => {

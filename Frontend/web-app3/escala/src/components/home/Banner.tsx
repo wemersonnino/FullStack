@@ -4,7 +4,7 @@ import Image from "next/image";
 export const Banner = ({ data }: { data?: BannerType }) => {
   const defaultImage = "/default-banner.svg";
   const imageUrl = data?.image?.url || defaultImage;
-  const title = data?.title || "Bem-vindo ao Portal Fundep";
+  const title = data?.title || "Bem-vindo à Plataforma Escala";
   const subtitle = data?.subtitle || "Conteúdos, notícias e oportunidades.";
   const buttonText = data?.button_text || "Saiba mais";
   const buttonLink = data?.button_link?.trim();

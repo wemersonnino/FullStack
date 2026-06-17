@@ -3,7 +3,7 @@ services:
     container_name: escala-postgres
     build:
       context: ./Data/postgres
-      dockerfile: Dockerfile
+      dockerfile: ./Docker/develop/Dockerfile
     image: escala-postgres:16-alpine
     restart: unless-stopped
     env_file:
@@ -20,8 +20,8 @@ services:
     container_name: escala-backend
     build:
       context: ./Backend/java-app1/demo
-      dockerfile: Dockerfile
-    image: escala-backend:latest
+      dockerfile: ./Docker/develop/Dockerfile
+    image: escala-backend:develop
     restart: unless-stopped
     depends_on:
       - postgres
@@ -45,8 +45,8 @@ services:
     container_name: cms-strapi
     build:
       context: ./Backend/cms-strapi
-      dockerfile: ./Docker/Dockerfile
-    image: cms-strapi:latest
+      dockerfile: ./Docker/develop/Dockerfile
+    image: cms-strapi:develop
     restart: unless-stopped
     depends_on:
       - postgres
@@ -58,7 +58,7 @@ services:
       DATABASE_PORT: 5432
       DATABASE_NAME: strapi_cms
       DATABASE_USERNAME: strapi_user
-      DATABASE_PASSWORD: strapi1234567890
+      DATABASE_PASSWORD: 3#Ubuntu2025*
       NODE_ENV: development
       HOST: 0.0.0.0
       PORT: 1337
@@ -69,6 +69,7 @@ services:
     volumes:
       - ./Backend/cms-strapi/config:/opt/app/config
       - ./Backend/cms-strapi/src:/opt/app/src
+      - ./Backend/cms-strapi/scripts:/opt/app/scripts
       - ./Backend/cms-strapi/public/uploads:/opt/app/public/uploads
     networks:
       - escala-network
@@ -77,8 +78,8 @@ services:
     container_name: escala-nextapp
     build:
       context: ./Frontend/web-app3/escala
-      dockerfile: ./Docker/Dockerfile
-      target: dev
+      dockerfile: ./Docker/develop/Dockerfile
+    image: fullstack-frontend:develop
     restart: unless-stopped
     depends_on:
       - backend
@@ -92,6 +93,7 @@ services:
       NEXT_PUBLIC_STRAPI_PUBLIC_URL: http://localhost:1337
       NEXT_INTERNAL_STRAPI_URL: http://strapi:1337
       NEXT_PUBLIC_COMPANY_SLUG: ${NEXT_PUBLIC_COMPANY_SLUG:-escala-demo}
+      NEXT_PUBLIC_HOME_LANDING_PAGE_KEY: ${NEXT_PUBLIC_HOME_LANDING_PAGE_KEY:-home}
       NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:-}
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "1"
@@ -102,7 +104,7 @@ services:
       - /app/node_modules
       - /app/.next
     working_dir: /app
-    command: pnpm dev
+    command: sh -lc "rm -rf /app/.next/* && pnpm dev"
     networks:
       - escala-network
 

@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { getEscalas, getUsuariosEscala } from '@/core/services/escala.service';
+import { getEscalas, getUsuariosEscala } from '@/core/adapters/escala.service';
 import { EscalaAdminPage as EscalaAdminFeaturePage } from '@/features/escala/pages/EscalaAdminPage';
 
 export default async function EscalaAdminPage() {

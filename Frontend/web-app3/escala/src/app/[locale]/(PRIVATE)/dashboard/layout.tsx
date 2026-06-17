@@ -2,6 +2,8 @@ import { DashboardClient } from '@/components/dashboard/DashboardClient';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
+import { AiAssistantPanel } from '@/features/ai/components/AiAssistantPanel';
+import { AiAssistantTrigger } from '@/features/ai/components/AiAssistantTrigger';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -55,6 +57,9 @@ export default async function DashboardLayout({
 
       {/* O children original do dashboard pode ser usado para modais ou rotas aninhadas */}
       {children}
+
+      <AiAssistantPanel />
+      <AiAssistantTrigger />
     </div>
   );
 }

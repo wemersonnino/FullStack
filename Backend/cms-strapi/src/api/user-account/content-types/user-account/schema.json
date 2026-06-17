@@ -77,12 +77,6 @@
     },
     "state": {
       "type": "string"
-    },
-    "companies": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::company.company",
-      "mappedBy": "user_accounts"
     }
   }
 }

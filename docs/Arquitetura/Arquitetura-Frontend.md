@@ -1,6 +1,6 @@
 # 🎨 Arquitetura do Front-End — Next.js 15 + TypeScript
 
-> **Projeto:** Plataforma Fundep (Estudo Full-Stack)
+> **Projeto:** Plataforma Escala (Estudo Full-Stack)
 > **Stack:** Next.js 15 + TypeScript + Tailwind 4 + NextAuth + next-themes + Zustand + Zod + Radix UI
 > **Objetivo:** construir um front-end modular, acessível e escalável, aplicando boas práticas e integração direta com o backend Java (OAuth2) e APIs externas (Strapi, .NET).
 

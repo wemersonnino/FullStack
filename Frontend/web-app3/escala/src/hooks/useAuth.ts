@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { toast } from "sonner"
 import { useAppStore } from "@/stores/app.store"
@@ -33,6 +33,7 @@ interface ResetPayload {
 
 export function useAuth() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { data: session, update } = useSession()
   const { setLoading } = useAppStore()
 
@@ -41,6 +42,9 @@ export function useAuth() {
     setLoading(true)
     try {
       const recaptchaToken = await getRecaptchaToken("login")
+      const plan = searchParams.get('plan')
+      const callbackUrl = plan ? `/dashboard/billing/plans` : "/dashboard"
+      
       const res = await signIn("credentials", {
         email,
         password,
@@ -51,7 +55,7 @@ export function useAuth() {
 
       if (res?.ok) {
         toast.success("Login realizado com sucesso")
-        router.push("/dashboard")
+        router.push(callbackUrl)
       } else {
         toast.error("Credenciais inválidas")
       }
@@ -74,8 +78,12 @@ export function useAuth() {
         recaptchaToken,
       })
       if (res) {
-        toast.success("Conta criada com sucesso! Faça login.")
-        router.push("/login")
+        toast.success("Conta criada com sucesso!")
+        
+        // Auto login or redirect to login with plan context
+        const plan = searchParams.get('plan')
+        const loginUrl = plan ? `/login?plan=${plan}` : "/login"
+        router.push(loginUrl)
       } else {
         toast.error("Erro ao registrar. Tente novamente.")
       }
@@ -151,7 +159,9 @@ export function useAuth() {
       toast.error("Login Google nao configurado.")
       return
     }
-    await signIn("google", { callbackUrl: "/dashboard" })
+    const plan = searchParams.get('plan')
+    const callbackUrl = plan ? `/dashboard/billing/plans` : "/dashboard"
+    await signIn("google", { callbackUrl })
   }
 
   // 🎨 Atualizar tema do usuário logado

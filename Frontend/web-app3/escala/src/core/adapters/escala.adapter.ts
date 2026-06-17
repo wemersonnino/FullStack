@@ -22,6 +22,10 @@ export function adaptEscalaDtoToEscala(dto: AnyRecord): Escala {
   const project = first(dto.project, dto.projeto, employee.project, employee.projeto) ?? {};
   const company = first(dto.company, dto.empresa, employee.company, employee.empresa) ?? {};
   const role = first(dto.role, employee.role, employee.user?.roles?.[0], employee.roles?.[0]);
+  const dataInicio = asString(first(dto.dataInicio, dto.shiftDate, dto.date));
+  const horarioInicio = first(dto.horarioInicio, dto.startTime, null);
+  const horarioFim = first(dto.horarioFim, dto.endTime, null);
+  const remoto = first(dto.remoto, dto.workMode === 'REMOTO', false);
 
   return {
     id: asString(dto.id),
@@ -31,10 +35,13 @@ export function adaptEscalaDtoToEscala(dto: AnyRecord): Escala {
     cargo: first(dto.cargo, employee.cargo, employee.position, null),
     email: first(dto.email, employee.email, null),
     role: role ? asString(role) : null,
-    dataInicio: asString(first(dto.dataInicio, dto.shiftDate, dto.date)),
+    dataInicio,
+    data: dataInicio,
     dataFim: first(dto.dataFim, dto.endDate, null),
-    horarioInicio: first(dto.horarioInicio, dto.startTime, null),
-    horarioFim: first(dto.horarioFim, dto.endTime, null),
+    horarioInicio,
+    startTime: horarioInicio,
+    horarioFim,
+    endTime: horarioFim,
     setorId: first(dto.setorId, sector.id ? asString(sector.id) : null),
     setor: first(dto.setor, sector.name, sector.nome, null),
     setorNome: first(dto.setorNome, sector.name, sector.nome, null),
@@ -44,7 +51,8 @@ export function adaptEscalaDtoToEscala(dto: AnyRecord): Escala {
     empresaId: first(dto.empresaId, company.id ? asString(company.id) : null),
     empresaNome: first(dto.empresaNome, company.name, company.nome, null),
     local: first(dto.local, dto.location, project.name, sector.name, null),
-    remoto: first(dto.remoto, dto.workMode === 'REMOTO', false),
+    remoto,
+    workMode: remoto ? 'REMOTO' : 'PRESENCIAL',
     observacao: first(dto.observacao, dto.notes, null),
     status: first(dto.status, null),
     criadoPor: first(dto.criadoPor, dto.createdBy, null),

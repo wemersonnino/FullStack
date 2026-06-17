@@ -87,6 +87,7 @@ public class OpenApiController {
                 tag("Relatorios", "Relatorios de folha, horas e exportacao CSV."),
                 tag("Convites", "Convites de equipe para novos usuarios vinculados a uma empresa."),
                 tag("Marketing", "Captura de leads, demo comercial e rastreio de campanha com consentimento."),
+                tag("Billing", "Gerenciamento de assinaturas, planos, faturamento e webhooks do Stripe."),
                 tag("Operacional", "Endpoints operacionais de saude e suporte a monitoramento.")
         );
     }
@@ -115,7 +116,14 @@ public class OpenApiController {
         paths.put("/api/v1/auth/reset-password", pathPost(postPublic("Auth", "Redefinir senha", "Valida token de recuperacao e troca a senha do usuario.", "ResetPasswordRequest")));
         paths.put("/api/v1/auth/complete-registration", pathPost(post("Auth", "Concluir cadastro convidado", "Completa os dados de um usuario previamente convidado para uma equipe.", "CompleteRegistrationRequest")));
         paths.put("/api/v1/auth/google", pathPost(postPublic("Auth", "Autenticar com Google", "Valida idToken do Google, provisiona ou autentica o usuario e retorna tokens de acesso.", "GoogleLoginRequest")));
+        paths.put("/api/v1/public/contact", pathPost(postPublic("Marketing", "Enviar mensagem de contato", "Recebe nome, email, assunto e mensagem via formulario hexagonal e processa o envio.", "ContactRequest")));
         paths.put("/api/v1/leads", pathPost(postPublic("Marketing", "Capturar lead comercial", "Recebe nome, email, empresa, consentimento e metadados de campanha para o fluxo de demo e relacionamento comercial.", "LeadCaptureRequest")));
+
+        paths.put("/api/v1/learning-progress", path(
+                get("Usuarios", "Meu progresso de aprendizado", "Retorna a lista de topicos e modulos concluídos pelo usuario logado."),
+                post("Usuarios", "Registrar progresso", "Salva a conclusão de um novo topico de aprendizado.", "LearningProgressRequest")
+        ));
+        paths.put("/api/v1/learning-progress/{id}/complete", pathPatch(patch("Usuarios", "Marcar como concluído", "Atualiza um item de aprendizado existente para o estado concluído.", pathParam("id", "ID do registro."))));
 
         paths.put("/api/v1/users", path(
                 get("Usuarios", "Listar usuarios", "Lista usuarios cadastrados para administracao."),
@@ -225,6 +233,12 @@ public class OpenApiController {
         ));
         paths.put("/api/v1/team/invitations/token/{token}", pathGet(getPublic("Convites", "Buscar convite por token", "Consulta convite publico por token para preencher fluxo de cadastro.", pathParam("token", "Token do convite."))));
         paths.put("/api/v1/team/invitations/{id}", pathDelete(delete("Convites", "Cancelar convite", "Cancela convite de equipe da empresa do usuario autenticado.", pathParam("id", "ID do convite."))));
+
+        paths.put("/api/v1/billing/checkout", pathPost(post("Billing", "Criar sessao de checkout", "Gera uma URL do Stripe Checkout para assinatura de plano.", "BillingCheckoutRequest")));
+        paths.put("/api/v1/billing/subscription", pathGet(get("Billing", "Consultar assinatura", "Retorna dados da assinatura ativa da empresa do usuario.")));
+        paths.put("/api/v1/billing/cancel", pathPost(post("Billing", "Cancelar assinatura", "Solicita o cancelamento da assinatura ativa no Stripe.", null)));
+        paths.put("/api/v1/billing/webhook", pathPost(postPublic("Billing", "Webhook do Stripe", "Endpoint assincrono para recebimento de eventos do Stripe (pagamento, atualizacao), protegido por assinatura digital.", null)));
+
         paths.put("/actuator/health", pathGet(getPublic("Operacional", "Health check", "Retorna o estado de saude do backend para validacao local, Docker e monitoramento.")));
 
         return paths;

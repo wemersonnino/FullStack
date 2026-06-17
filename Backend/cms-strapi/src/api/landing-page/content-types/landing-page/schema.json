@@ -16,10 +16,21 @@
     }
   },
   "attributes": {
+    "pageKey": {
+      "type": "enumeration",
+      "enum": [
+        "home",
+        "segment",
+        "campaign",
+        "generic"
+      ],
+      "default": "generic",
+      "required": true
+    },
     "slug": {
       "type": "uid",
       "targetField": "heroTitle",
-      "required": true
+      "required": false
     },
     "eyebrow": {
       "type": "string"
@@ -83,20 +94,103 @@
     "securityStatement": {
       "type": "text"
     },
+    "demoEyebrow": {
+      "type": "string",
+      "default": "Demo"
+    },
+    "demoTitle": {
+      "type": "string",
+      "default": "Veja a operacao antes de conversar com vendas."
+    },
+    "demoDescription": {
+      "type": "text",
+      "default": "A demonstracao mostra como a plataforma organiza escalas, aponta limites comerciais e captura leads com consentimento explicito."
+    },
+    "demoCards": {
+      "type": "json"
+    },
+    "demoLinkLabel": {
+      "type": "string",
+      "default": "Abrir pagina de demo"
+    },
+    "demoLinkUrl": {
+      "type": "string",
+      "default": "/demo"
+    },
+    "demoFormTitle": {
+      "type": "string",
+      "default": "Receba uma proposta guiada"
+    },
+    "demoFormDescription": {
+      "type": "text",
+      "default": "Deixe seu contato e a gente responde com uma demonstracao focada na sua operacao."
+    },
+    "featuresEyebrow": {
+      "type": "string",
+      "default": "Modulos"
+    },
+    "featuresTitle": {
+      "type": "string",
+      "default": "Operacao, regras e auditoria no mesmo fluxo."
+    },
+    "industriesEyebrow": {
+      "type": "string",
+      "default": "Setores"
+    },
+    "industriesTitle": {
+      "type": "string",
+      "default": "Preparado para operacoes com ritmos diferentes."
+    },
+    "pricingEyebrow": {
+      "type": "string",
+      "default": "Planos"
+    },
+    "pricingTitle": {
+      "type": "string",
+      "default": "Teste comercial com controle de custo da IA."
+    },
+    "faqEyebrow": {
+      "type": "string",
+      "default": "FAQ"
+    },
+    "faqTitle": {
+      "type": "string",
+      "default": "Perguntas frequentes."
+    },
+    "blogEyebrow": {
+      "type": "string",
+      "default": "Conteudo"
+    },
+    "blogTitle": {
+      "type": "string",
+      "default": "Conteudo para gestores."
+    },
+    "blogDescription": {
+      "type": "text",
+      "default": "Artigos editoriais continuam vindo do Strapi."
+    },
+    "blogLinkLabel": {
+      "type": "string",
+      "default": "Ver artigos"
+    },
+    "blogLinkUrl": {
+      "type": "string",
+      "default": "/artigos"
+    },
     "features": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::feature-section.feature-section"
     },
-    "segment": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::market-segment.market-segment"
-    },
     "industries": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::industry-section.industry-section"
+    },
+    "segment": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::market-segment.market-segment"
     },
     "pricingPlans": {
       "type": "relation",
@@ -115,8 +209,8 @@
     },
     "seo": {
       "type": "component",
-      "repeatable": false,
-      "component": "shared.seo"
+      "component": "shared.seo",
+      "repeatable": false
     }
   }
 }

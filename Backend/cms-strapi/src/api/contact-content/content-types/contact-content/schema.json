@@ -1,0 +1,44 @@
+{
+  "kind": "singleType",
+  "collectionName": "contact_contents",
+  "info": {
+    "singularName": "contact-content",
+    "pluralName": "contact-contents",
+    "displayName": "Página de Contato",
+    "description": "Conteúdo editável da página de contato"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "phone1": {
+      "type": "string"
+    },
+    "phone2": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "address": {
+      "type": "string"
+    },
+    "faqLinkText": {
+      "type": "string",
+      "default": "Dúvidas frequentes? Acesse nossa FAQ"
+    }
+  }
+}

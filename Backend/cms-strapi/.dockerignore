@@ -1,0 +1,14 @@
+.git
+.idea
+.cache
+.env
+.env.*
+.tmp
+build
+dist
+node_modules
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+Docker/docker-compose.yml

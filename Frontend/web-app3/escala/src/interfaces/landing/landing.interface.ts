@@ -58,6 +58,13 @@ export interface LandingCtaButton {
   location: 'hero' | 'pricing' | 'demo' | 'footer' | 'onboarding';
 }
 
+export interface LandingInfoCard {
+  id: number | string;
+  title: string;
+  description: string;
+  iconKey: LandingIconKey;
+}
+
 export interface LandingPageContent {
   eyebrow?: string;
   heroTitle: string;
@@ -72,6 +79,27 @@ export interface LandingPageContent {
   trialDescription: string;
   aiTrialDescription: string;
   securityStatement: string;
+  demoEyebrow: string;
+  demoTitle: string;
+  demoDescription: string;
+  demoCards: LandingInfoCard[];
+  demoLinkLabel: string;
+  demoLinkUrl: string;
+  demoFormTitle: string;
+  demoFormDescription: string;
+  featuresEyebrow: string;
+  featuresTitle: string;
+  industriesEyebrow: string;
+  industriesTitle: string;
+  pricingEyebrow: string;
+  pricingTitle: string;
+  faqEyebrow: string;
+  faqTitle: string;
+  blogEyebrow: string;
+  blogTitle: string;
+  blogDescription: string;
+  blogLinkLabel: string;
+  blogLinkUrl: string;
   features: LandingFeature[];
   industries: LandingIndustry[];
   pricingPlans: LandingPricingPlan[];

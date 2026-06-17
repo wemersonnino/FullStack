@@ -22,11 +22,13 @@ services:
       - API_BASE_URL=http://escala-backend:8080
       - NEXT_PUBLIC_STRAPI_PUBLIC_URL=http://localhost:1337
       - NEXT_INTERNAL_STRAPI_URL=http://cms-strapi:1337
+      - NEXT_PUBLIC_HOME_LANDING_PAGE_KEY=home
     volumes:
       - ../:/app                    # monta o código-fonte do projeto
       - /app/node_modules           # ignora node_modules do host
+      - /app/.next                  # cache isolado e limpo a cada start
     working_dir: /app
-    command: pnpm dev
+    command: sh -lc "rm -rf /app/.next/* && pnpm dev"
     networks:
       escala-network:
 

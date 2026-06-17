@@ -4,7 +4,10 @@ import com.escala.authservice.entity.ShiftSwapRequest;
 import com.escala.authservice.entity.SwapStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface ShiftSwapRequestRepository extends JpaRepository<ShiftSwapRequest, Long> {
     long countByStatus(SwapStatus status);
     long countByStatusAndRequesterCompanyId(SwapStatus status, Long companyId);
+    List<ShiftSwapRequest> findByRequesterCompanyIdOrderByCreatedAtDesc(Long companyId);
 }

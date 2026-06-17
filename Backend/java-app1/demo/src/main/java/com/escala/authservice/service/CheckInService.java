@@ -6,18 +6,18 @@ import com.escala.authservice.repository.TimeRecordRepository;
 import com.escala.authservice.repository.UserRepository;
 import com.escala.authservice.core.commercial.usecase.CheckPlanLimitUseCase;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CheckInService {
     private final UserRepository userRepository;
     private final TimeRecordRepository timeRecordRepository;
@@ -27,12 +27,19 @@ public class CheckInService {
         User user = userRepository.findByEmail(userEmail).orElseThrow();
         Company company = user.getCompany();
 
-        // 1. Validar plano
-        checkPlanLimitUseCase.validateFeatureAccess(company.getPlanType(), "GEOLOCATION");
+        if (company == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não está vinculado a uma empresa");
+        }
 
-        if (company == null || company.getLatitude() == null || company.getLongitude() == null) {
+        if (company.getPlanType() == null) {
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Plano da empresa não definido");
+        }
+
+        if (company.getLatitude() == null || company.getLongitude() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Configuração de geolocalização da empresa pendente");
         }
+
+        checkPlanLimitUseCase.validateFeatureAccess(company.getPlanType(), "GEOLOCATION");
 
         // 2. Validar distância
         double distance = calculateDistance(
@@ -72,7 +79,7 @@ public class CheckInService {
                 .build();
         
         timeRecordRepository.save(record);
-        System.out.println("Ponto " + nextType + " registrado para " + userEmail + " via IP " + ipAddress + " em " + now);
+        log.info("Ponto {} registrado para {} via IP {} em {}", nextType, userEmail, ipAddress, now);
     }
 
     private double calculateDistance(double lat1, double lon1, double lat2, double longitude2) {

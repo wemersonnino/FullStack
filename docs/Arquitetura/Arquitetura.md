@@ -1,6 +1,6 @@
 # 🏗️ Documento de Arquitetura do Sistema
 
-> **Projeto:** Plataforma Fundep (Estudo e Prática de Desenvolvimento Full-Stack)
+> **Projeto:** Plataforma Escala (Estudo e Prática de Desenvolvimento Full-Stack)
 > **Tecnologias:** Next.js 15 + TypeScript + TailwindCSS 4 + NextAuth + Spring Boot (Java) + PostgreSQL + Strapi + .NET
 > **Objetivo:** aprender e praticar a construção de um ecossistema moderno, escalável e modular, unindo boas práticas de front-end, back-end e metodologias ágeis.
 
@@ -87,7 +87,7 @@ Strapi / .NET APIs externas
      "user": {
        "id": 1,
        "name": "Nino",
-       "email": "nino@fundep.br",
+       "email": "nino@escala.br",
        "roles": ["ADMIN", "USER"],
        "theme": "dark"
      }

@@ -1,19 +1,25 @@
 export interface GlobalSEO {
-  id: number;
+  id?: number;
   metaTitle: string;
   metaDescription: string;
+  shareImage?: GlobalMedia;
 }
 
-export interface GlobalFavicon {
-  id: number;
+export interface GlobalMedia {
+  id?: number;
   url: string;
   alternativeText?: string | null;
+  mime?: string | null;
 }
+
+export type GlobalFavicon = GlobalMedia;
+export type GlobalLogo = GlobalMedia;
 
 export interface GlobalInterface {
   id: number;
   siteName: string;
   siteDescription: string;
-  favicon: GlobalFavicon;
-  defaultSeo: GlobalSEO;
+  favicon?: GlobalFavicon;
+  logo?: GlobalLogo;
+  defaultSeo?: GlobalSEO;
 }

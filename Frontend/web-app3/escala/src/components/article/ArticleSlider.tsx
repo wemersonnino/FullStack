@@ -45,7 +45,7 @@ export function ArticleSlider({ files }: ArticleSliderProps) {
               type="button"
               aria-label="Imagem anterior"
               onClick={goPrevious}
-              className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white transition hover:bg-black/75"
+              className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white transition hover:bg-black/75 cursor-pointer"
             >
               <ChevronLeft className="size-5" />
             </button>
@@ -53,7 +53,7 @@ export function ArticleSlider({ files }: ArticleSliderProps) {
               type="button"
               aria-label="Proxima imagem"
               onClick={goNext}
-              className="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white transition hover:bg-black/75"
+              className="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white transition hover:bg-black/75 cursor-pointer"
             >
               <ChevronRight className="size-5" />
             </button>
