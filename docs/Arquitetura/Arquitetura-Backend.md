@@ -56,7 +56,7 @@ O Swagger atual documenta `37` paths e `10` grupos. Mais detalhes em `docs/api/s
 
 ## Historico anterior
 
-> **Projeto:** Plataforma Fundep (Estudo Full-Stack)
+> **Projeto:** Plataforma Escala (Estudo Full-Stack)
 > **Tecnologias:** Spring Boot 3.x + Java 21 + PostgreSQL + Docker
 > **Integrações:** NextAuth (Next.js), Strapi, .NET (módulos externos)
 
@@ -76,18 +76,22 @@ Construir uma **API REST segura e modular** para:
 ---
 
 ## 🧩 2. Estrutura de Pastas Sugerida
-
-`backend/`
+`backend/` (Referente a `Backend/java-app1/demo`)
 `├─ src/`
 `│ ├─ main/`
-`│ │ ├─ java/br/ufmg/fundep/`
-`│ │ │ ├─ FundepApplication.java`
+`│ │ ├─ java/com/escala/authservice/`
+`│ │ │ ├─ EscalaApplication.java`
+`│ │ │ ├─ core/ ← Domínio e Regras de Negócio (Hexagonal) `
+`│ │ │ │ ├─ ai/`
+`│ │ │ │ ├─ commercial/`
+`│ │ │ ├─ scheduling/ ← Módulo de Escalas (Início Hexagonal) `
+`│ │ │ │ ├─ domain/`
 `│ │ │ ├─ config/ ← segurança e CORS`
-`│ │ │ ├─ controller/ ← endpoints REST`
+`│ │ │ ├─ controller/ ← endpoints REST (Adaptores de Entrada)`
 `│ │ │ ├─ dto/ ← objetos de transporte`
-`│ │ │ ├─ entity/ ← entidades JPA`
-`│ │ │ ├─ repository/ ← interfaces JpaRepository`
-`│ │ │ ├─ service/ ← regras de negócio`
+`│ │ │ ├─ entity/ ← entidades JPA (Modelos de Persistência)`
+`│ │ │ ├─ repository/ ← interfaces JpaRepository (Adaptores de Saída)`
+`│ │ │ ├─ service/ ← Camada de Aplicação (Orquestração Legacy/Layered)`
 `│ │ │ └─ security/ ← JWT, filtros e provider`
 `│ │ └─ resources/`
 `│ │ ├─ application.yml`
@@ -96,47 +100,54 @@ Construir uma **API REST segura e modular** para:
 `│ └─ ...`
 `└─ Dockerfile`
 
-## 🐳 3. Docker Compose
+## 🏗️ 3. Evolução Arquitetural
 
+O projeto está em transição da **Arquitetura em Camadas (Layered)** para a **Arquitetura Hexagonal (Ports and Adapters)**:
+- **Módulos Novos (`core/`, `scheduling/domain/`)**: Seguindo princípios de DDD e Hexagonal, com independência de frameworks e portas bem definidas.
+- **Módulos Legados (`service/`)**: Ainda seguem o padrão tradicional do Spring Boot, mas estão sendo gradualmente refatorados para mover a lógica de negócio para o `core/`.
+
+---
+
+## 🐳 4. Docker Compose
 ```yaml
 version: "3.9"
 services:
   api-java:
     build: ./backend
-    container_name: fundep-api-java
+    container_name: escala-api-java
     ports:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_NAME=fundep_db
-      - DB_USER=fundep_user
-      - DB_PASS=fundep_pass
+      - DB_NAME=escala_db
+      - DB_USER=escala_user
+      - DB_PASS=escala_pass
     depends_on:
       - postgres
     networks:
-      - fundep_net
+      - escala_net
 
   postgres:
     image: postgres:15
-    container_name: fundep-db
+    container_name: escala-db
     environment:
-      - POSTGRES_DB=fundep_db
-      - POSTGRES_USER=fundep_user
-      - POSTGRES_PASSWORD=fundep_pass
+      - POSTGRES_DB=escala_db
+      - POSTGRES_USER=escala_user
+      - POSTGRES_PASSWORD=escala_pass
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - fundep_net
+      - escala_net
 
 volumes:
   pgdata:
 
 networks:
-  fundep_net:
+  escala_net:
     driver: bridge
 
 ```
@@ -153,7 +164,7 @@ networks:
   `"user": {`
     `"id": 1,`
     `"name": "Wemerson",`
-    `"email": "wemerson@fundep.br",`
+    `"email": "wemerson@escala.br",`
     `"roles": ["ADMIN", "USER"],`
     `"theme": "dark"`
   `}`

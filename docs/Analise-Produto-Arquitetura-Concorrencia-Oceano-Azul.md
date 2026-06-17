@@ -72,7 +72,7 @@ Lacunas:
 - O BFF tem rota para varias areas, mas falta `/api/bff/check-in`, embora o componente `CheckInButton` chame essa URL.
 - A permissao central de escala no frontend permite gestao apenas para `ADMIN`, enquanto outras telas mencionam `OWNER` e `MANAGER`.
 - A UI privada ainda tem alguns dados mockados, por exemplo projetos ativos no dashboard.
-- A landing melhorou o posicionamento, mas ainda ha componentes antigos como `Banner.tsx` com texto "Portal Fundep".
+- A landing melhorou o posicionamento, mas ainda ha componentes antigos com fallback generico de portal/conteudo.
 - O calendario visual e bom para MVP, mas ainda nao oferece a visao operacional por posto, cobertura minima, buracos de escala, custo previsto ou sugestao de substituto.
 
 ### 3.3 Backend Spring Boot
@@ -176,7 +176,7 @@ Lacunas:
 
 ### Problemas de UX/produto
 
-- O produto ainda parece dividido entre "portal/conteudo" e "plataforma operacional"; remover rastros de Fundep e padronizar a narrativa e essencial.
+- O produto ainda parece dividido entre "portal/conteudo" e "plataforma operacional"; remover rastros de nomenclatura legada e padronizar a narrativa e essencial.
 - O dashboard principal nao mostra ainda o que o gestor operacional mais precisa: postos descobertos, risco de hora extra, conflitos, ausencias, trocas pendentes, cobertura minima e proxima acao recomendada.
 - A experiencia de colaborador ainda precisa ser mais simples: "minha escala", "bater ponto", "solicitar troca", "meu banco de horas" e "meus comprovantes".
 - Para empresas com operacao critica, a visao por posto/unidade/cliente e mais importante que apenas por funcionario.

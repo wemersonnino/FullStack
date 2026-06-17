@@ -1,32 +1,64 @@
 'use client';
 
-import { Check, ClipboardList, LogIn, Menu as MenuIcon, X } from 'lucide-react';
+import { ClipboardList, Menu as MenuIcon, X } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { useSession } from 'next-auth/react';
-import { cn } from '@/lib/utils';
+import { GlobalInterface } from '@/interfaces/global/global.interface';
+import { MenuItem } from '@/interfaces/menu/menu.interface';
 
-export const HeaderPublic = () => {
+type HeaderPublicProps = {
+  global?: GlobalInterface | null;
+  menuItems?: MenuItem[];
+};
+
+const fallbackNavLinks = [
+  { name: 'Funcionalidades', href: '#modulos' },
+  { name: 'Setores', href: '#setores' },
+  { name: 'Planos', href: '#pricing' },
+  { name: 'Conteúdo', href: '#blog' },
+];
+
+function getNavLinks(menuItems?: MenuItem[]) {
+  const cmsLinks = (menuItems || [])
+    .filter((item) => item.active)
+    .map((item) => ({
+      name: item.title,
+      href: item.destination?.trim() || '#',
+    }));
+
+  return cmsLinks.length ? cmsLinks : fallbackNavLinks;
+}
+
+export const HeaderPublic = ({ global, menuItems }: HeaderPublicProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
-
-  const navLinks = [
-    { name: 'Funcionalidades', href: '#features' },
-    { name: 'Preços', href: '#pricing' },
-    { name: 'Segurança', href: '#security' },
-    { name: 'Blog', href: '#blog' },
-  ];
+  const navLinks = getNavLinks(menuItems);
+  const siteName = global?.siteName || 'Escala SaaS';
+  const logo = global?.logo;
 
   return (
     <header className="fixed top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-20 items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="rounded-lg bg-primary p-1.5 transition-transform group-hover:rotate-12">
-            <ClipboardList className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-black tracking-tighter text-primary">ESCALA<span className="text-foreground">SaaS</span></span>
+          {logo?.url ? (
+            <Image
+              src={logo.url}
+              alt={logo.alternativeText || siteName}
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-lg object-contain"
+              priority
+            />
+          ) : (
+            <div className="rounded-lg bg-primary p-1.5 transition-transform group-hover:rotate-12">
+              <ClipboardList className="h-6 w-6 text-primary-foreground" />
+            </div>
+          )}
+          <span className="text-xl font-black tracking-tighter text-primary">{siteName}</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -57,7 +89,7 @@ export const HeaderPublic = () => {
                 <Link href="/login">Login</Link>
               </Button>
               <Button asChild size="sm" className="rounded-full px-6 shadow-lg shadow-primary/20">
-                <Link href="/register">Teste Grátis</Link>
+                <Link href="/register">Teste grátis</Link>
               </Button>
             </div>
           )}
@@ -85,7 +117,7 @@ export const HeaderPublic = () => {
             ))}
             <hr />
             <Button asChild className="w-full">
-              <Link href="/register">Começar Teste de 90 Dias</Link>
+              <Link href="/register">Começar teste grátis</Link>
             </Button>
           </nav>
         </div>

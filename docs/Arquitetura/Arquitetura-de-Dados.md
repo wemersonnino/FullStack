@@ -1,6 +1,6 @@
 # 🧩 Arquitetura de Dados — PostgreSQL
 
-> **Projeto:** Plataforma Fundep
+> **Projeto:** Plataforma Escala
 > **Objetivo:** projetar o modelo de dados relacional que servirá o backend (Java Spring Boot), o CMS (Strapi) e integrações (.NET).
 > **Banco:** PostgreSQL 15 (rodando em container Docker)
 
@@ -66,7 +66,7 @@
 
 ```sql
 -- =============================
---  DATABASE: FUNDEP_PLATFORM
+--  DATABASE: ESCALA_PLATFORM
 -- =============================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

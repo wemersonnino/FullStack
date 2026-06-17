@@ -1,6 +1,6 @@
-# 🏗️ Arquitetura de Sistema — Fundep Platform
+# 🏗️ Arquitetura de Sistema — Escala Platform
 
-> **Projeto:** Plataforma Fundep
+> **Projeto:** Plataforma Escala
 > **Escopo:** integração entre módulos Frontend (Next.js), Backend (Spring Boot), Banco de Dados (PostgreSQL), CMS (Strapi) e APIs .NET.
 > **Objetivo:** apresentar o fluxo completo de autenticação, comunicação e troca de dados no ecossistema da aplicação.
 
@@ -64,7 +64,7 @@ sequenceDiagram
 ```json
 {
   "sub": "user_id",
-  "email": "user@fundep.br",
+  "email": "user@escala.br",
   "roles": ["ADMIN", "USER"],
   "theme": "dark",
   "exp": "2025-01-15T10:00:00Z"
@@ -185,9 +185,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=fundep_db
-      - POSTGRES_USER=fundep_user
-      - POSTGRES_PASSWORD=fundep_pass
+      - POSTGRES_DB=escala_db
+      - POSTGRES_USER=escala_user
+      - POSTGRES_PASSWORD=escala_pass
 ```
 
 ---

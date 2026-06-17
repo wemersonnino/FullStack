@@ -1,5 +1,156 @@
 # Decisoes Tecnicas
 
+## 2026-06-16 - Refatoração para Arquitetura Hexagonal Estrita e Otimização via Matrizes
+
+### Contexto
+
+Para garantir a independência de framework exigida pela arquitetura alvo, iniciamos a refatoração do backend para isolar as regras de negócio das dependências do Spring Boot. Simultaneamente, identificamos a necessidade de otimizar a renderização do Dashboard de Escalas para suportar grandes volumes de dados sem perda de fluidez.
+
+### Decisões confirmadas
+
+- **Isolamento de Domínio**: Criado o pacote `core/` no backend contendo `domain` (POJOs), `port` (Interfaces) e `usecase` (Lógica pura). O framework Spring Boot agora reside apenas nos adaptadores (`adapter/`) e na configuração (`config/`).
+- **Módulo de Contato Hexagonal**: Implementada a nova funcionalidade de contato seguindo 100% o padrão Hexagonal Estrito, servindo como modelo para refatorações futuras.
+- **Frontend Server-Side Pattern**: Consolidado o fluxo `Server Page -> BFF -> Dumb UI`. A página de Contato (`/contato`) busca dados via BFF e delega a renderização para componentes que usam **Zod** para validação e **Zustand** para estado local.
+- **Matrizes para Performance O(1)**: Implementada a estrutura de **Matriz Bidimensional [Funcionário][Dia]** no frontend para renderização da grade de escalas. Isso substitui filtros $O(N)$ por acesso direto em tempo constante, otimizando o grid para centenas de colaboradores.
+- **Teoria das Cores**: Adotada paleta semântica (`SHIFT_COLORS`) para padronizar estados de escala (Cores Frias para estabilidade, Quentes para alertas), melhorando a cognição do gestor.
+
+### Por que fizemos
+
+- Proteger a inteligência de negócio contra mudanças tecnológicas e facilitar testes unitários puros.
+- Garantir escalabilidade da interface em cenários SaaS com alta densidade de informações.
+- Melhorar a experiência do desenvolvedor (DX) com validações robustas e estados previsíveis.
+
+### Resultados
+
+- Backend: Lógica de geração de escalas e contato totalmente desacoplada.
+- Frontend: Redução drástica no tempo de renderização (scripting time) do calendário administrativo.
+
+## 2026-06-16 - Otimização de Performance Backend e Hardening Strapi Docker
+
+### Contexto
+
+Durante a auditoria técnica, foram identificados gargalos de performance no `ScheduleService` (geração de escalas mensais) causados por consultas repetitivas ao banco de dados dentro de loops (problema N+1). Também foi detectado um risco de `NullPointerException` no `CheckInService` e lentidão excessiva no startup do Strapi via Docker devido ao build do admin panel em runtime.
+
+### Decisões confirmadas
+
+- **Otimização de Escalas (N+1)**: Refatorado o `ScheduleService` para pré-carregar escalas relacionadas e contagens de ocupação diária em lote.
+- **Estruturas de Memória O(1)**: Implementado o uso de `HashSet` (chaves compostas `funcionarioId:data`) e `HashMap` para validações de regras de trabalho e lotação na JVM, garantindo tempo de busca constante.
+- **Eficiência de Query**: Adicionado o método `findByIdInAndActiveTrueAndCompanyId` no `EmployeeRepository` para delegar filtragem de funcionários ativos e multi-tenant para o banco de dados SQL.
+- **Segurança e Null-Safety**: Implementadas validações defensivas no `CheckInService` para garantir que `company` e `planType` não sejam nulos antes do processamento de geofencing.
+- **Strapi Docker Multi-Stage**: O `Dockerfile` do Strapi foi migrado para *Multi-Stage build*. Agora o `npm run build` do painel administrativo acontece durante a criação da imagem.
+- **Produção por Padrão**: O Strapi Docker passou a usar `NODE_ENV=production` e `npm run start`, eliminando o overhead de watch mode e recompilação em containers locais/produção.
+
+### Por que fizemos
+
+- Reduzir o tempo de geração de escalas mensais para grandes equipes, eliminando centenas de chamadas ao banco.
+- Garantir estabilidade do sistema de ponto eletrônico contra falhas de configuração de empresa.
+- Reduzir o tempo de startup do Strapi de minutos para segundos, facilitando o fluxo de desenvolvimento e CI/CD.
+
+### Resultados
+
+- Backend: `BUILD SUCCESS` via Maven, com performance de geração de escalas otimizada.
+- Docker: Imagem do Strapi mais leve e rápida, com artefatos de admin panel pré-compilados.
+
+## 2026-06-16 - Conteudo dinamico do Strapi com seed idempotente e cron
+
+### Contexto
+
+O frontend principal ja consome conteudo dinamico do Strapi para home, banners, menus, blog e planos. Durante a analise arquitetural foi identificado que o bootstrap do Strapi executava `scripts/seed-marketing-v3` em todo startup. Esse seed remove colecoes de marketing antes de recria-las, o que entra em conflito com o papel oficial do Strapi como CMS editorial.
+
+### Decisoes confirmadas
+
+- O Strapi continua restrito a CMS: conteudo, SEO, acessibilidade editorial, URLs, menus, landing pages, blog e dados comerciais exibidos publicamente.
+- O seed destrutivo `seed-marketing-v3` deixou de rodar diretamente no bootstrap.
+- Foi criado `scripts/ensure-marketing-content.js` para verificar se existe conteudo minimo (`landing-page` home, secoes de features e planos) antes de executar o seed.
+- O seed automatico so roda quando o CMS esta vazio. Se houver conteudo parcial, a rotina registra aviso e preserva os dados.
+- O cron nativo do Strapi foi configurado em `config/server.ts` e `config/cron-tasks.ts` para executar a mesma verificacao periodicamente.
+- `STRAPI_FORCE_MARKETING_SEED=true` ficou reservado para ambientes descartaveis, pois permite recriar conteudo de marketing.
+
+### Por que fizemos
+
+- Evitar perda de conteudo criado manualmente no painel administrativo do Strapi.
+- Garantir que ambientes novos ainda tenham conteudo inicial para o frontend renderizar dados dinamicos.
+- Manter a responsabilidade editorial no Strapi sem transforma-lo em fonte da verdade para usuarios finais ou regras de negocio.
+
+### Para que serve
+
+- A home publica, secoes de marketing, planos e blog podem ser alimentados dinamicamente pelo CMS.
+- Restarts do container Strapi deixam de apagar alteracoes editoriais.
+- O ambiente local continua facil de subir, porque o conteudo inicial e criado automaticamente quando o banco esta vazio.
+
+### Riscos pendentes
+
+- Existem content types no Strapi que parecem pertencer ao dominio transacional (`company`, `user-account`, `user-theme`, `learning-progress`). Eles devem ser tratados como legado/experimento e nao como fonte oficial da aplicacao.
+- Se o CMS estiver parcialmente populado, a rotina nao completa dados automaticamente para evitar sobrescrita. A correcao deve ser feita via painel ou seed manual controlado.
+
+## 2026-06-16 - Hardening Docker local e Maven Wrapper do backend
+
+### Contexto
+
+O ambiente local foi revalidado na branch `develop` após falhas de build causadas por acesso instável ao Docker Hub via IPv6 no host WSL. Aproveitamos a revisão para ajustar os Dockerfiles conforme boas práticas de segurança e reprodutibilidade: evitar `latest`, reduzir camadas desnecessárias, limpar caches no mesmo layer, não copiar `.env` para imagens e executar runtimes com usuários não-root.
+
+### Decisoes confirmadas
+
+- O backend continua em `Backend/java-app1/demo`, com Docker multi-stage usando `maven:3.9-eclipse-temurin-25` no build e `eclipse-temurin:25-jre` no runtime.
+- O runtime do backend agora cria e usa o usuário estático `app` com UID/GID `10001`.
+- O JAR do backend é copiado com `COPY --chown=app:app` e o container roda com `USER app`.
+- O frontend principal continua sendo `Frontend/web-app3/escala`, com Dockerfile baseado em `node:22-alpine`, Corepack e `pnpm@10.33.3`.
+- O frontend usa `pnpm install --frozen-lockfile` para respeitar o lockfile e evitar instalações divergentes.
+- O Strapi em `Backend/cms-strapi` usa `npm ci --legacy-peer-deps` em vez de `npm install`, mantendo instalação baseada no `package-lock.json`.
+- O Strapi não copia mais `.env` para dentro da imagem. Variáveis sensíveis devem entrar em runtime via `env_file`, variáveis de ambiente ou secret manager.
+- As imagens locais deixam de usar `latest`: `escala-backend:develop`, `cms-strapi:develop` e `escala-postgres:16-alpine`.
+- O PostgreSQL customizado do projeto não usa mais o mesmo nome da imagem oficial `postgres:16.0-alpine`.
+- O `init.sql` do PostgreSQL é montado como somente leitura.
+- Cada serviço principal passou a ter `.dockerignore` próprio para reduzir contexto de build e evitar envio de artefatos locais.
+- O backend recebeu Maven Wrapper (`mvnw`, `mvnw.cmd`, `.mvn/wrapper/maven-wrapper.properties`) configurado para Maven `3.8.7`.
+
+### Por que fizemos
+
+- Reduzir superfície de ataque de containers que não precisam rodar como root.
+- Evitar que secrets locais sejam empacotados em imagens Docker.
+- Deixar builds de Node e Strapi reprodutíveis a partir dos lockfiles.
+- Evitar cache de gerenciadores de pacotes persistido em camadas Docker.
+- Evitar ambiguidade operacional causada por tags `latest`.
+- Facilitar onboarding: com `mvnw`, o backend pode ser validado sem depender da versão global do Maven, desde que exista JDK compatível.
+- Separar claramente imagem customizada do projeto e imagem oficial baixada do Docker Hub.
+
+### Para que serve
+
+- `docker compose build postgres backend` passa a produzir imagens locais identificáveis e alinhadas ao ambiente `develop`.
+- O backend roda em container com usuário não-root, reduzindo impacto caso algum processo seja comprometido.
+- O frontend e o Strapi ficam menos sensíveis a variações de dependências.
+- O Strapi passa a depender de configuração externa no runtime, que é o comportamento esperado para secrets.
+- O PostgreSQL fica mais previsível e o script de inicialização fica protegido contra escrita acidental.
+
+### Validacao executada
+
+```bash
+java --version
+mvn --version
+docker pull postgres:16.0-alpine
+docker pull maven:3.9-eclipse-temurin-25
+docker pull eclipse-temurin:25-jre
+docker compose build postgres backend
+docker compose build backend
+MAVEN_USER_HOME=/tmp/m2 ./mvnw --version
+MAVEN_USER_HOME=/tmp/m2 ./mvnw test
+```
+
+Resultados:
+
+- Java local no WSL: OpenJDK `25.0.3`.
+- Maven local no WSL: Apache Maven `3.8.7`.
+- `docker compose build postgres backend`: sucesso.
+- `docker compose build backend`: sucesso.
+- `./mvnw --version`: Maven `3.8.7` usando Java `25.0.3`.
+- `./mvnw test`: `24` testes, `0` falhas, `0` erros.
+
+### Riscos pendentes
+
+- O Maven 3.8.7 atende ao requisito do Spring Boot 4, mas a imagem Docker de build segue usando Maven `3.9` para manter alinhamento com a validação da branch Java 25.
+- Warnings externos de Java 25 sobre `Jansi` e `sun.misc.Unsafe` aparecem durante execução do Maven, mas não vêm do código da aplicação e não bloquearam build/testes.
+- Ainda falta ampliar testes de integração para autenticação, JPA, JWT e endpoints REST.
+
 ## 2026-06-16 - Faturamento SaaS (Billing) e Integração Stripe
 
 ### Contexto

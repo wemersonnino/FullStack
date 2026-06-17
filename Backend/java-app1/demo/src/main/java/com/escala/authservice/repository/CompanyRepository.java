@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findBySlug(String slug);
+    boolean existsBySlugAndIdNot(String slug, Long id);
     long countByPlanType(String planType);
 }
