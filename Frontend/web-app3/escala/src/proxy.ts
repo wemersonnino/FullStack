@@ -1,7 +1,7 @@
 import { getToken } from 'next-auth/jwt';
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
-import { routing } from '@/i18n/routing';
+import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -43,7 +43,7 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // Capture UTM parameters and Referrer
+  // Capture UTM parameters and Referrer for Marketing ROI
   const url = req.nextUrl;
   const utm_source = url.searchParams.get('utm_source');
   const utm_medium = url.searchParams.get('utm_medium');
@@ -85,4 +85,3 @@ export const config = {
     '/([\\w-]+)?/users/(.+)',
   ],
 };
-

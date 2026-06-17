@@ -16,9 +16,12 @@ export type Escala = {
   email?: string | null;
   role?: string | null;
   dataInicio: string;
+  data?: string;
   dataFim?: string | null;
   horarioInicio?: string | null;
+  startTime?: string | null;
   horarioFim?: string | null;
+  endTime?: string | null;
   setorId?: string | null;
   setor?: string | null;
   setorNome?: string | null;
@@ -29,6 +32,7 @@ export type Escala = {
   empresaNome?: string | null;
   local?: string | null;
   remoto?: boolean;
+  workMode?: 'PRESENCIAL' | 'REMOTO';
   observacao?: string | null;
   status?: string | null;
   criadoPor?: string | null;

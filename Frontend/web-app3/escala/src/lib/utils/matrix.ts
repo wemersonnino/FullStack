@@ -29,7 +29,8 @@ export function createEscalaMatrix(
     const userIndex = userMap.get(escala.usuarioId);
     if (userIndex === undefined) return;
 
-    const dateKey = escala.data.split('T')[0];
+    const dateValue = escala.data ?? escala.dataInicio;
+    const dateKey = dateValue.split('T')[0];
     const dayIndex = dayKeys.indexOf(dateKey);
     
     if (dayIndex !== -1) {

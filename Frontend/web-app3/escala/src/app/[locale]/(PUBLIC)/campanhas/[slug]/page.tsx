@@ -1,20 +1,18 @@
 import React from "react"
 import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+import { getLandingPage } from "@/services/landing.service"
 
 interface CampaignPageProps {
-  params: {
+  params: Promise<{
     locale: string
     slug: string
-  }
+  }>
 }
 
 export default async function CampaignPage({ params }: CampaignPageProps) {
   const { slug, locale } = await params
   
-  // Here we would typically fetch the campaign data from Strapi via BFF
-  // const campaign = await getCampaignBySlug(slug, locale)
-  // if (!campaign) notFound()
+  const lp = await getLandingPage({ locale, slug, pageKey: 'campaign' })
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -24,10 +22,10 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                  Campanha: {slug}
+                  Campanha: {lp.heroTitle}
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                  Esta é uma página de campanha dinâmica. O conteúdo será carregado do CMS com base no slug.
+                  {lp.heroDescription}
                 </p>
               </div>
             </div>

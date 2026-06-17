@@ -211,26 +211,20 @@ export function ProfileForm({ user }: ProfileFormProps) {
       }
 
       const payload = {
-        ...(!isGoogleUser
-          ? {
-              username: data.username,
-              email: data.email,
-              avatarUrl,
-            }
-          : {}),
+        username: data.username,
+        email: data.email,
+        avatarUrl,
         theme: data.theme,
         position: data.position,
         function: data.function,
-        address: {
-          cep: data.cep,
-          street: data.street,
-          number: data.number,
-          complement: data.complement,
-          neighborhood: data.neighborhood,
-          city: data.city,
-          state: data.state,
-          additionalInfo: data.address,
-        }
+        address: data.address,
+        cep: data.cep,
+        street: data.street,
+        number: data.number,
+        complement: data.complement,
+        neighborhood: data.neighborhood,
+        city: data.city,
+        state: data.state,
       };
 
       const updated = await updateMyProfile(payload);

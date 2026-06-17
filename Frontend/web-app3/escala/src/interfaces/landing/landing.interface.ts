@@ -65,7 +65,11 @@ export interface LandingInfoCard {
   iconKey: LandingIconKey;
 }
 
+export type LandingPageKey = 'home' | 'segment' | 'campaign' | 'generic';
+
 export interface LandingPageContent {
+  pageKey?: LandingPageKey;
+  slug?: string;
   eyebrow?: string;
   heroTitle: string;
   heroDescription: string;
