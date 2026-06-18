@@ -2,7 +2,7 @@ import { baseUrl } from '@/constants';
 import { httpGet } from '@/lib/http/request';
 import { Article } from '@/interfaces/article/article.interface';
 import { StrapiResponse } from '@/interfaces/strapi/strapi-response.interface';
-import { mapArticle, mapArticles } from '@/dto';
+import { mapArticle, mapArticles, fallbackArticles } from '@/dto';
 
 const ARTICLE_POPULATE =
   'populate[cover]=true' +
@@ -15,12 +15,12 @@ export async function getArticles(limit = 6, locale?: string): Promise<Article[]
     const localeFilter = locale ? `&locale=${locale}` : '';
     const url = `${baseUrl}/api/articles?${ARTICLE_POPULATE}&pagination[limit]=${limit}${localeFilter}`;
     const json = await httpGet<StrapiResponse<Article>>(url);
-    if (!json?.data) return [];
+    if (!json?.data || json.data.length === 0) return fallbackArticles.slice(0, limit);
 
     return mapArticles(json.data);
   } catch (error) {
     console.error('Erro ao buscar artigos:', error);
-    return [];
+    return fallbackArticles.slice(0, limit);
   }
 }
 

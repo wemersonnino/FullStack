@@ -7,24 +7,35 @@ type RequestOptions = {
 };
 
 function resolveUrl(url: string) {
-  if (!url.startsWith('/') || globalThis.window !== undefined) return url;
-  return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
+  if (!url.startsWith('/')) return url;
+  if (typeof window !== 'undefined') return url;
+  
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  return new URL(url, baseUrl).toString();
 }
 
 /**
  * Retorna cabeçalhos de autenticação caso o usuário esteja logado.
  */
 async function getAuthHeaders(options?: RequestOptions) {
-  const session = globalThis.window === undefined ? null : await getSession();
-  const token = options?.authToken ?? (session?.user as any)?.token;
+  let token = options?.authToken;
+  
+  if (!token && typeof window !== 'undefined') {
+    const session = await getSession();
+    token = (session?.user as any)?.token;
+  }
+  
   const headers: Record<string, string> = {};
-
   if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
 }
 
 async function getRequestHeaders(url: string, options?: RequestOptions) {
-  if (url.startsWith('/api/server')) return {};
+  // Se for uma chamada client-side para /api/server, o browser envia os cookies automaticamente.
+  // Se for uma chamada server-side (ou se um token for explicitamente passado), precisamos do header.
+  if (url.startsWith('/api/server') && typeof window !== 'undefined' && !options?.authToken) {
+    return {};
+  }
   return getAuthHeaders(options);
 }
 

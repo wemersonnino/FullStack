@@ -97,3 +97,32 @@ export function mapArticle(item: any): Article {
 export function mapArticles(data: any[]): Article[] {
   return data.map(mapArticle);
 }
+
+export const fallbackArticles: Article[] = [
+  {
+    id: 'art-1',
+    title: 'Como reduzir 30% das horas extras com escalas inteligentes',
+    slug: 'reduzir-horas-extras-escalas',
+    description: 'Dicas práticas para otimizar sua jornada de trabalho usando dados.',
+    published_at: '2026-06-17T10:00:00.000Z',
+    cover_image: {
+      url: '/uploads/coffee-art.jpg',
+      alternativeText: 'Como reduzir 30% das horas extras com escalas inteligentes',
+    },
+    content: 'Dicas práticas para otimizar sua jornada de trabalho usando dados.',
+    blocks: [],
+  },
+  {
+    id: 'art-2',
+    title: 'Geofencing: A prova de presença definitiva no B2B',
+    slug: 'geofencing-prova-presenca',
+    description: 'Por que hospitais e empresas de segurança estão abandonando o ponto físico.',
+    published_at: '2026-06-17T11:00:00.000Z',
+    cover_image: {
+      url: '/uploads/what-s-inside-a-black-hole.jpg',
+      alternativeText: 'Geofencing: A prova de presença definitiva no B2B',
+    },
+    content: 'Por que hospitais e empresas de segurança estão abandonando o ponto físico.',
+    blocks: [],
+  },
+];

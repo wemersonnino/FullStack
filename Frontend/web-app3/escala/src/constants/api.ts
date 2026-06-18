@@ -12,7 +12,8 @@ export const API_ROUTES = {
   GLOBAL: `${baseUrl}/api/global?populate=*`,
   LANDING_PAGE:
     `${baseUrl}/api/landing-pages?` +
-    'populate[heroImage]=true' +
+    'sort=updatedAt:desc' +
+    '&populate[heroImage]=true' +
     '&populate[heroBackgroundImage]=true' +
     '&populate[sectionBackgroundImage]=true' +
     '&populate[features][sort]=order:asc' +
