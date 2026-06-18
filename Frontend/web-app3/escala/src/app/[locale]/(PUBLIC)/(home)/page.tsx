@@ -55,7 +55,7 @@ interface HomePageProps {
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
   const [landing, articles] = await Promise.all([
-    getLandingPage(locale), 
+    getLandingPage({ locale }), 
     getArticles(3, locale)
   ]);
   

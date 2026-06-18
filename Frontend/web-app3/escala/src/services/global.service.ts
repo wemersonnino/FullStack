@@ -4,13 +4,14 @@ import { normalizeStrapiUrl } from "@/lib/utils";
 import { GlobalInterface } from "@/interfaces/global/global.interface";
 
 function mapMedia(media: any) {
-  if (!media?.url) return undefined;
+  const file = media?.data ?? media;
+  if (!file?.url) return undefined;
 
   return {
-    id: media.id,
-    url: normalizeStrapiUrl(media.url),
-    alternativeText: media.alternativeText || null,
-    mime: media.mime || null,
+    id: file.id,
+    url: normalizeStrapiUrl(file.url),
+    alternativeText: file.alternativeText || null,
+    mime: file.mime || null,
   };
 }
 
@@ -23,18 +24,21 @@ export async function getGlobal(): Promise<GlobalInterface | null> {
     const data = json?.data;
     if (!data) return null;
 
+    // Atributos podem estar na raiz (v5) ou em .attributes (v4/v5 wrapper)
+    const attrs = data.attributes ?? data;
+
     return {
       id: data.id,
-      siteName: data.siteName,
-      siteDescription: data.siteDescription,
-      favicon: mapMedia(data.favicon),
-      logo: mapMedia(data.logo),
-      defaultSeo: data.defaultSeo
+      siteName: attrs.siteName || "Escala SaaS",
+      siteDescription: attrs.siteDescription || "",
+      favicon: mapMedia(attrs.favicon),
+      logo: mapMedia(attrs.logo),
+      defaultSeo: attrs.defaultSeo
         ? {
-            id: data.defaultSeo.id,
-            metaTitle: data.defaultSeo.metaTitle || "",
-            metaDescription: data.defaultSeo.metaDescription || "",
-            shareImage: mapMedia(data.defaultSeo.shareImage),
+            id: attrs.defaultSeo.id,
+            metaTitle: attrs.defaultSeo.metaTitle || "",
+            metaDescription: attrs.defaultSeo.metaDescription || "",
+            shareImage: mapMedia(attrs.defaultSeo.shareImage),
           }
         : undefined,
     };

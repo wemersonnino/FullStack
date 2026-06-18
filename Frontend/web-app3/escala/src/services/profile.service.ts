@@ -32,7 +32,7 @@ export async function getMyProfile(): Promise<User | null> {
 
 import { UserProfile } from '@/core/domain/models/user.model';
 
-export async function updateMyProfile(payload: Partial<UserProfile>): Promise<UserProfile | null> {
+export async function updateMyProfile(payload: Partial<UpdateMyProfilePayload>): Promise<UserProfile | null> {
   return await httpPatch<UserProfile>(`${API_ROUTES.USERS}/me`, payload);
 }
 

@@ -81,22 +81,27 @@ async function runSeedV3(strapi) {
   }
   console.log('Dados antigos removidos.');
 
-  // 1. Features
-  const featureIds = [];
-  for (const feature of data.features) {
-    const entry = await strapi.db.query('api::feature-section.feature-section').create({
-      data: { ...feature, locale: 'pt-BR', publishedAt: new Date() }
+  // Helper para criar documento via Document Service (Strapi v5)
+  const createDoc = async (uid, data) => {
+    return await strapi.documents(uid).create({
+      data: data,
+      status: 'published'
     });
-    featureIds.push(entry.id);
+  };
+
+  // 1. Features
+  const featureDocIds = [];
+  for (const feature of data.features) {
+    const entry = await createDoc('api::feature-section.feature-section', { ...feature, locale: 'pt-BR' });
+    featureDocIds.push(entry.documentId);
   }
-  console.log(`${featureIds.length} Features criadas.`);
+  console.log(`${featureDocIds.length} Features criadas.`);
 
   // 2. Industry Sections
-  const industryIds = [];
+  const industryDocIds = [];
   const industries = data.industries?.length ? data.industries : marketingContent.industries || [];
   for (const [index, industry] of industries.entries()) {
-    const entry = await strapi.db.query('api::industry-section.industry-section').create({
-      data: {
+    const entry = await createDoc('api::industry-section.industry-section', {
         title: industry.title,
         segment: industry.segment || 'other',
         valueProposition: industry.valueProposition || industry.description,
@@ -104,53 +109,44 @@ async function runSeedV3(strapi) {
         highlightMetric: industry.highlightMetric || '',
         order: index,
         active: true,
-        locale: 'pt-BR',
-        publishedAt: new Date()
-      }
+        locale: 'pt-BR'
     });
-    industryIds.push(entry.id);
+    industryDocIds.push(entry.documentId);
   }
-  console.log(`${industryIds.length} Segmentos editoriais criados.`);
+  console.log(`${industryDocIds.length} Segmentos editoriais criados.`);
 
   // 3. Market Segments
-  const segmentIds = [];
+  const segmentDocIds = [];
   for (const segment of data.marketSegments) {
-    const entry = await strapi.db.query('api::market-segment.market-segment').create({
-      data: { ...segment, locale: 'pt-BR', publishedAt: new Date() }
-    });
-    segmentIds.push(entry.id);
+    const entry = await createDoc('api::market-segment.market-segment', { ...segment, locale: 'pt-BR' });
+    segmentDocIds.push(entry.documentId);
   }
-  console.log(`${segmentIds.length} Segmentos de mercado criados.`);
+  console.log(`${segmentDocIds.length} Segmentos de mercado criados.`);
 
   // 4. Pricing Plans
-  const pricingIds = [];
+  const pricingDocIds = [];
   for (const [index, plan] of data.pricingPlans.entries()) {
-    const entry = await strapi.db.query('api::pricing-plan-content.pricing-plan-content').create({
-      data: { ...plan, order: plan.order ?? index, active: plan.active ?? true, locale: 'pt-BR', publishedAt: new Date() }
-    });
-    pricingIds.push(entry.id);
+    const entry = await createDoc('api::pricing-plan-content.pricing-plan-content', { ...plan, order: plan.order ?? index, active: plan.active ?? true, locale: 'pt-BR' });
+    pricingDocIds.push(entry.documentId);
   }
-  console.log(`${pricingIds.length} Planos de precificação criados.`);
+  console.log(`${pricingDocIds.length} Planos de precificação criados.`);
 
   // 5. FAQs
-  const faqIds = [];
+  const faqDocIds = [];
   const faqs = data.faqs?.length ? data.faqs : marketingContent.faqs || [];
   for (const [index, faq] of faqs.entries()) {
-    const entry = await strapi.db.query('api::faq.faq').create({
-      data: {
+    const entry = await createDoc('api::faq.faq', {
         ...faq,
         order: faq.order ?? index,
         active: faq.active ?? true,
-        locale: 'pt-BR',
-        publishedAt: new Date()
-      }
+        locale: 'pt-BR'
     });
-    faqIds.push(entry.id);
+    faqDocIds.push(entry.documentId);
   }
-  console.log(`${faqIds.length} FAQs criadas.`);
+  console.log(`${faqDocIds.length} FAQs criadas.`);
 
   // 6. CTA Buttons
-  const ctaIds = [];
+  const ctaDocIds = [];
   const ctas = [
     {
       label: data.landingPages?.[0]?.primaryCtaLabel || 'Começar teste grátis',
@@ -166,18 +162,15 @@ async function runSeedV3(strapi) {
     }
   ];
   for (const [index, cta] of ctas.entries()) {
-    const entry = await strapi.db.query('api::cta-button.cta-button').create({
-      data: {
+    const entry = await createDoc('api::cta-button.cta-button', {
         ...cta,
         order: index,
         active: true,
-        locale: 'pt-BR',
-        publishedAt: new Date()
-      }
+        locale: 'pt-BR'
     });
-    ctaIds.push(entry.id);
+    ctaDocIds.push(entry.documentId);
   }
-  console.log(`${ctaIds.length} CTAs criados.`);
+  console.log(`${ctaDocIds.length} CTAs criados.`);
 
   // 7. Header Menu
   const headerMenus = [
@@ -187,14 +180,12 @@ async function runSeedV3(strapi) {
     { title: 'Conteúdo', slug: 'conteudo', destination: '#blog', order: 3 }
   ];
   for (const item of headerMenus) {
-    await strapi.db.query('api::menu.menu').create({
-      data: {
+    await createDoc('api::menu.menu', {
         ...item,
         location: 'header',
         linkType: 'internal',
         iconPosition: 'left',
         active: true
-      }
     });
   }
   console.log(`${headerMenus.length} itens de menu do header criados.`);
@@ -202,14 +193,11 @@ async function runSeedV3(strapi) {
   // 8. Articles
   for (const article of data.articles) {
     const cover = await uploadFile(strapi, article.imageName);
-    await strapi.db.query('api::article.article').create({
-      data: {
+    await createDoc('api::article.article', {
         title: article.title,
         slug: article.slug,
         description: article.description,
-        cover: cover ? cover.id : null,
-        publishedAt: new Date()
-      }
+        cover: cover ? cover.documentId || cover.id : null
     });
   }
   console.log('Artigos do blog criados.');
@@ -219,35 +207,25 @@ async function runSeedV3(strapi) {
     const heroBg = lp.heroBackgroundImageName ? await uploadFile(strapi, lp.heroBackgroundImageName) : null;
     const sectionBg = lp.sectionBackgroundImageName ? await uploadFile(strapi, lp.sectionBackgroundImageName) : null;
 
-    const entry = await strapi.db.query('api::landing-page.landing-page').create({
-      data: {
+    const entry = await createDoc('api::landing-page.landing-page', {
         ...lp,
         pageKey: lp.slug === 'home' ? 'home' : 'segment',
-        heroBackgroundImage: heroBg ? heroBg.id : null,
-        sectionBackgroundImage: sectionBg ? sectionBg.id : null,
+        heroBackgroundImage: heroBg ? heroBg.documentId || heroBg.id : null,
+        sectionBackgroundImage: sectionBg ? sectionBg.documentId || sectionBg.id : null,
         locale: 'pt-BR',
-        publishedAt: new Date()
-      }
+        features: featureDocIds,
+        industries: industryDocIds,
+        pricingPlans: pricingDocIds,
+        faqs: faqDocIds,
+        ctaButtons: ctaDocIds
     });
 
-    // Link relations manually via db.query to ensure they are saved
-    await strapi.db.query('api::landing-page.landing-page').update({
-        where: { id: entry.id },
-        data: {
-            features: featureIds,
-            industries: industryIds,
-            pricingPlans: pricingIds,
-            faqs: faqIds,
-            ctaButtons: ctaIds
-        }
-    });
-    console.log(`Landing Page criada e vinculada: ${lp.slug} (PT-BR) (ID: ${entry.id})`);
+    console.log(`Landing Page criada e vinculada: ${lp.slug} (PT-BR) (DocumentID: ${entry.documentId})`);
 
     // 5.1 Add English version for home
     if (lp.slug === 'home') {
       try {
-        const enEntry = await strapi.db.query('api::landing-page.landing-page').create({
-          data: {
+        const enEntry = await createDoc('api::landing-page.landing-page', {
             ...lp,
             pageKey: "home",
             heroTitle: "Smart Schedule Management for B2B",
@@ -256,30 +234,21 @@ async function runSeedV3(strapi) {
             secondaryCtaLabel: "Request Demo",
             trialDescription: "Full access for 14 days for your team.",
             locale: 'en',
-            publishedAt: new Date()
-          }
-        });
-
-        await strapi.db.query('api::landing-page.landing-page').update({
-            where: { id: enEntry.id },
-            data: {
-                features: featureIds,
-                industries: industryIds,
-                pricingPlans: pricingIds,
-                faqs: faqIds,
-                ctaButtons: ctaIds
-            }
+            features: featureDocIds,
+            industries: industryDocIds,
+            pricingPlans: pricingDocIds,
+            faqs: faqDocIds,
+            ctaButtons: ctaDocIds
         });
         console.log('Versão em inglês (EN) da Home criada e vinculada.');
       } catch (e) {
-        console.warn('Não foi possível criar versão EN via db.query:', e.message);
+        console.warn('Não foi possível criar versão EN via documents:', e.message);
       }
     }
   }
 
   // 10. Contact Content
-  await strapi.db.query('api::contact-content.contact-content').create({
-    data: {
+  await createDoc('api::contact-content.contact-content', {
       title: "Fale Conosco",
       description: "Estamos aqui para ajudar você a otimizar sua gestão de escalas. Escolha o canal de sua preferência ou preencha o formulário.",
       phone1: "+55 (11) 4002-8922",
@@ -287,9 +256,7 @@ async function runSeedV3(strapi) {
       email: "contato@escala.app",
       address: "Av. Paulista, 1000 - São Paulo, SP",
       faqLinkText: "Dúvidas frequentes? Acesse nossa FAQ",
-      locale: 'pt-BR',
-      publishedAt: new Date()
-    }
+      locale: 'pt-BR'
   });
   console.log('Conteúdo da página de contato criado.');
 
@@ -297,12 +264,9 @@ async function runSeedV3(strapi) {
   try {
     const existingGlobal = await strapi.db.query('api::global.global').findOne({ where: {} });
     if (!existingGlobal) {
-        await strapi.db.query('api::global.global').create({
-          data: {
+        await createDoc('api::global.global', {
             siteName: "Escala SaaS",
-            siteDescription: "Gestão Inteligente de Escalas V3",
-            publishedAt: new Date()
-          }
+            siteDescription: "Gestão Inteligente de Escalas V3"
         });
     }
   } catch (err) {
@@ -313,12 +277,9 @@ async function runSeedV3(strapi) {
     const existingFooter = await strapi.db.query('api::footer.footer').findOne({ where: {} });
     console.log('existingFooter:', existingFooter);
     if (!existingFooter) {
-        await strapi.db.query('api::footer.footer').create({
-          data: {
+        await createDoc('api::footer.footer', {
             copyright: "© 2026 Escala Plataforma SaaS. Todos os direitos reservados.",
-            description: "A plataforma líder em gestão inteligente de escalas e conformidade trabalhista.",
-            publishedAt: new Date()
-          }
+            description: "A plataforma líder em gestão inteligente de escalas e conformidade trabalhista."
         });
         console.log('Conteúdo do Footer criado.');
     }

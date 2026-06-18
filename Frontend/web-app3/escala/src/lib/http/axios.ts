@@ -17,7 +17,7 @@ export const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
       signOut({ callbackUrl: '/login' });
     }
 

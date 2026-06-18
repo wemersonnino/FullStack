@@ -87,9 +87,17 @@ async function proxyToBackend(request: NextRequest, context: RouteContext) {
     return jsonError('Metodo nao permitido', 405);
   }
 
-  await getServerSession(authOptions);
+  // Tenta obter o token via cookie (NextAuth)
   const jwt = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-  const accessToken = typeof jwt?.accessToken === 'string' ? jwt.accessToken : undefined;
+  let accessToken = typeof jwt?.accessToken === 'string' ? jwt.accessToken : undefined;
+
+  // Fallback: Tenta obter o token via header Authorization (útil para chamadas server-to-server)
+  if (!accessToken) {
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      accessToken = authHeader.substring(7);
+    }
+  }
 
   if (!accessToken) {
     return jsonError('Nao autorizado', 401);
