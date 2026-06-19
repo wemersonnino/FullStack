@@ -25,17 +25,9 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-development}
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: escala_core
-      DB_USER: escala_api_user
-      DB_PASS: escala_api_password
-      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-      STRAPI_BASE_URL: http://strapi:1337
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      RECAPTCHA_SECRET: ${RECAPTCHA_SECRET:-}
+    volumes:
+      - ./Backend/java-app1/demo/.env:/app/.env:ro
+      - ~/.m2:/root/.m2
     ports:
       - "8080:8080"
     networks:

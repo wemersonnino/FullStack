@@ -5,6 +5,7 @@ import com.escala.authservice.entity.Employee;
 import com.escala.authservice.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,23 +17,27 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @GetMapping
-    public List<Employee> list() {
-        return employeeService.list();
+    public List<Employee> list(Authentication authentication) {
+        return employeeService.list(authentication.getName());
     }
 
     @PostMapping
-    public ResponseEntity<Employee> create(@RequestBody EmployeeRequest request) {
-        return ResponseEntity.ok(employeeService.create(request));
+    public ResponseEntity<Employee> create(Authentication authentication, @RequestBody EmployeeRequest request) {
+        return ResponseEntity.ok(employeeService.create(authentication.getName(), request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> update(@PathVariable Long id, @RequestBody EmployeeRequest request) {
-        return ResponseEntity.ok(employeeService.update(id, request));
+    public ResponseEntity<Employee> update(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody EmployeeRequest request
+    ) {
+        return ResponseEntity.ok(employeeService.update(authentication.getName(), id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remove(@PathVariable Long id) {
-        employeeService.remove(id);
+    public ResponseEntity<Void> remove(Authentication authentication, @PathVariable Long id) {
+        employeeService.remove(authentication.getName(), id);
         return ResponseEntity.noContent().build();
     }
 }

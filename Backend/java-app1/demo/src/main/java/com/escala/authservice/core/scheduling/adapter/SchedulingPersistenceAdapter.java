@@ -20,10 +20,38 @@ public class SchedulingPersistenceAdapter implements WorkShiftOutputPort {
 
     @Override
     public void saveAll(List<WorkShiftDomain> shifts) {
+        List<Long> employeeIds = shifts.stream()
+                .map(WorkShiftDomain::getEmployeeId)
+                .distinct()
+                .toList();
+
+        java.util.Map<Long, Employee> employeeMap = employeeRepository.findAllById(employeeIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Employee::getId, e -> e));
+
         List<WorkShift> entities = shifts.stream()
-                .map(this::toEntity)
+                .map(domain -> {
+                    Employee employee = employeeMap.get(domain.getEmployeeId());
+                    if (employee == null) {
+                        throw new java.util.NoSuchElementException("Employee com ID " + domain.getEmployeeId() + " nao encontrado");
+                    }
+                    return toEntityWithEmployee(domain, employee);
+                })
                 .toList();
         workShiftRepository.saveAll(entities);
+    }
+
+    private WorkShift toEntityWithEmployee(WorkShiftDomain domain, Employee employee) {
+        return WorkShift.builder()
+                .id(domain.getId())
+                .employee(employee)
+                .shiftDate(domain.getShiftDate())
+                .startTime(domain.getStartTime())
+                .endTime(domain.getEndTime())
+                .status(domain.getStatus())
+                .workMode(domain.getWorkMode())
+                .padraoEscala(domain.getPadraoEscala())
+                .notes(domain.getNotes())
+                .build();
     }
 
     @Override

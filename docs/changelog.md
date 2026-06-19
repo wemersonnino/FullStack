@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-06-18 - Segurança Multitenant, Otimização de Performance, Normalização 3NF e Cobertura Swagger
+
+### Adicionado
+- **Capacidade Mínima Operacional:** Nova entidade `OperationalCapacity` para parametrizar o número mínimo de funcionários exigido por Posto de Trabalho e Setor.
+- **Triggers PostgreSQL:** Automatização no startup via `JdbcTemplate` para injetar a função PL/pgSQL `tg_validate_operational_capacity` e o gatilho `trg_check_operational_capacity` na tabela `work_shifts`, bloqueando movimentações/exclusões inválidas.
+- **Normalização 3NF (Tabela Address):** Criação da entidade `Address` para desacoplar e armazenar de forma estruturada os dados de endereço das tabelas `User` e `Company`, eliminando redundâncias e dependências transitivas.
+- **Mapeamento Swagger Completo:** Novas rotas no painel Swagger UI para `AiController` (endpoints com a tag `"IA"`), `StatsController` (resumos e métricas) e `WorkPostController` (postos de trabalho).
+- **Novos Schemas no Swagger:** Adicionados schemas interativos para `AiContextRequest`, `WorkPostRequest` e `LearningProgressRequest` com propriedades e exemplos reais.
+
+### Alterado
+- **Segurança Multitenant (Prevenção de BOLA/IDOR):** Refatorados serviços e controllers de funcionários (`EmployeeController`) e usuários (`UserManagementController`) para injetar a autenticação ativa, filtrando todas as listas pelo tenant do usuário requisitante e validando a pertinência nos métodos de alteração/exclusão.
+- **Variáveis de Ambiente (.env) Seguras:** Alterado bootstrap em `AuthServiceApplication` para parsear e injetar variáveis de `.env` localmente no escopo do JVM.
+- **Ocultação de Environment do Docker:** Removida a exposição de variáveis de ambiente em texto puro no `docker-compose.yml` para evitar vazamento em runtimes inspecionáveis.
+
+### Corrigido
+- **Gargalo N+1 Select:** Refatorado `SchedulingPersistenceAdapter.saveAll` para consultar os dados dos funcionários em lote (`findAllById`) e resolver as dependências em memória, otimizando o fluxo de inserção de escalas.
+- **Swagger UI Request Bodies:** Corrigidos schemas com propriedades vazias de requisição como `ForgotPasswordRequest`, `ResetPasswordRequest` e `CompleteRegistrationRequest`.
+- **Mismatch em DTO do LearningProgress:** Sincronizados os nomes dos campos da requisição no Swagger com a assinatura real do DTO record.
+
 ## 2026-06-16 - Refatoração Hexagonal Estrita e Otimização via Matrizes
 
 ### Adicionado

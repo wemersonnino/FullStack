@@ -88,6 +88,7 @@ public class OpenApiController {
                 tag("Convites", "Convites de equipe para novos usuarios vinculados a uma empresa."),
                 tag("Marketing", "Captura de leads, demo comercial e rastreio de campanha com consentimento."),
                 tag("Billing", "Gerenciamento de assinaturas, planos, faturamento e webhooks do Stripe."),
+                tag("IA", "Assistente de Inteligência Artificial para escala e riscos."),
                 tag("Operacional", "Endpoints operacionais de saude e suporte a monitoramento.")
         );
     }
@@ -118,6 +119,11 @@ public class OpenApiController {
         paths.put("/api/v1/auth/google", pathPost(postPublic("Auth", "Autenticar com Google", "Valida idToken do Google, provisiona ou autentica o usuario e retorna tokens de acesso.", "GoogleLoginRequest")));
         paths.put("/api/v1/public/contact", pathPost(postPublic("Marketing", "Enviar mensagem de contato", "Recebe nome, email, assunto e mensagem via formulario hexagonal e processa o envio.", "ContactRequest")));
         paths.put("/api/v1/leads", pathPost(postPublic("Marketing", "Capturar lead comercial", "Recebe nome, email, empresa, consentimento e metadados de campanha para o fluxo de demo e relacionamento comercial.", "LeadCaptureRequest")));
+
+        // IA
+        paths.put("/api/v1/ai/suggest-replacement", pathPost(post("IA", "Sugerir substituto", "Sugere um colaborador substituto qualificado para um turno vago usando IA.", "AiContextRequest")));
+        paths.put("/api/v1/ai/analyze-risk", pathPost(post("IA", "Analisar riscos de escala", "Analisa os riscos de cobertura e gargalos na escala para o periodo usando IA.", "AiContextRequest")));
+        paths.put("/api/v1/ai/explain-conflict", pathPost(post("IA", "Explicar conflito de escala", "Explica o motivo de um conflito trabalhista gerado por uma escala usando IA.", "AiContextRequest")));
 
         paths.put("/api/v1/learning-progress", path(
                 get("Usuarios", "Meu progresso de aprendizado", "Retorna a lista de topicos e modulos concluídos pelo usuario logado."),
@@ -196,6 +202,13 @@ public class OpenApiController {
                 delete("Organizacao", "Excluir projeto", "Exclui projeto quando permitido pelas regras do service.", pathParam("id", "ID do projeto."))
         ));
 
+        // WorkPosts
+        paths.put("/api/v1/work-posts", path(
+                get("Organizacao", "Listar postos de trabalho", "Lista postos de trabalho cadastrados."),
+                post("Organizacao", "Criar posto de trabalho", "Cria um novo posto de trabalho associado a um projeto e empresa.", "WorkPostRequest")
+        ));
+        paths.put("/api/v1/work-posts/{id}", pathDelete(delete("Organizacao", "Excluir posto de trabalho", "Remove o posto de trabalho informado.", pathParam("id", "ID do posto de trabalho."))));
+
         paths.put("/api/v1/escala/me", pathGet(get("Escala Operacional", "Minhas escalas", "Lista escalas do usuario autenticado em um periodo opcional.", queryParam("inicio", "Data inicial ISO yyyy-MM-dd."), queryParam("fim", "Data final ISO yyyy-MM-dd."))));
         paths.put("/api/v1/escala", path(
                 get("Escala Operacional", "Listar escalas administrativas", "Lista escalas com filtros administrativos por periodo, usuario, setor e projeto. Requer ADMIN.", queryParam("inicio", "Data inicial ISO yyyy-MM-dd."), queryParam("fim", "Data final ISO yyyy-MM-dd."), queryParam("usuarioId", "ID do usuario escalado."), queryParam("setorId", "ID do setor."), queryParam("projetoId", "ID do projeto.")),
@@ -238,6 +251,10 @@ public class OpenApiController {
         paths.put("/api/v1/billing/subscription", pathGet(get("Billing", "Consultar assinatura", "Retorna dados da assinatura ativa da empresa do usuario.")));
         paths.put("/api/v1/billing/cancel", pathPost(post("Billing", "Cancelar assinatura", "Solicita o cancelamento da assinatura ativa no Stripe.", null)));
         paths.put("/api/v1/billing/webhook", pathPost(postPublic("Billing", "Webhook do Stripe", "Endpoint assincrono para recebimento de eventos do Stripe (pagamento, atualizacao), protegido por assinatura digital.", null)));
+
+        // Stats
+        paths.put("/api/v1/stats/summary", pathGet(get("Relatorios", "Resumo estatistico do dashboard", "Retorna indicadores do mes para o dashboard administrativo.", queryParamRequired("year", "Ano do resumo."), queryParamRequired("month", "Mes do resumo, de 1 a 12."))));
+        paths.put("/api/v1/stats/marketing", pathGet(get("Marketing", "Estatisticas de marketing", "Retorna metricas de conversao de leads e atribuicao de campanhas. Requer ADMIN.")));
 
         paths.put("/actuator/health", pathGet(getPublic("Operacional", "Health check", "Retorna o estado de saude do backend para validacao local, Docker e monitoramento.")));
 
@@ -356,9 +373,7 @@ public class OpenApiController {
     }
 
     private Map<String, Object> requestBody(String requestName) {
-        Map<String, Object> schema = new LinkedHashMap<>();
-        schema.put("type", "object");
-        schema.put("description", "Payload " + requestName + ". Consulte os DTOs Java do backend para os campos exatos enquanto a geracao automatica de schemas estiver desabilitada no Spring Boot 4.");
+        Map<String, Object> schema = buildRequestSchema(requestName);
 
         Map<String, Object> mediaType = new LinkedHashMap<>();
         mediaType.put("schema", schema);
@@ -368,6 +383,197 @@ public class OpenApiController {
         requestBody.put("description", requestName);
         requestBody.put("content", Map.of("application/json", mediaType));
         return requestBody;
+    }
+
+    private Map<String, Object> buildRequestSchema(String requestName) {
+        Map<String, Object> schema = new LinkedHashMap<>();
+        schema.put("type", "object");
+        schema.put("title", requestName);
+
+        Map<String, Object> properties = new LinkedHashMap<>();
+
+        switch (requestName) {
+            case "AuthenticationRequest":
+                properties.put("email", Map.of("type", "string", "example", "admin@escala.local"));
+                properties.put("password", Map.of("type", "string", "example", "Admin@123456"));
+                properties.put("companySlug", Map.of("type", "string", "example", "escala-demo"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                break;
+            case "RegisterRequest":
+                properties.put("username", Map.of("type", "string", "example", "gestor1"));
+                properties.put("email", Map.of("type", "string", "example", "gestor1@escala.local"));
+                properties.put("password", Map.of("type", "string", "example", "Admin@123456"));
+                properties.put("companyName", Map.of("type", "string", "example", "Minha Empresa LTDA"));
+                properties.put("companySlug", Map.of("type", "string", "example", "minha-empresa"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                break;
+            case "ForgotPasswordRequest":
+                properties.put("email", Map.of("type", "string", "example", "admin@escala.local"));
+                properties.put("companySlug", Map.of("type", "string", "example", "escala-demo"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                break;
+            case "ResetPasswordRequest":
+                properties.put("code", Map.of("type", "string", "example", "abc-123-xyz"));
+                properties.put("password", Map.of("type", "string", "example", "NovaSenha@123"));
+                properties.put("passwordConfirmation", Map.of("type", "string", "example", "NovaSenha@123"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                break;
+            case "CompleteRegistrationRequest":
+                properties.put("companyName", Map.of("type", "string", "example", "Minha Empresa LTDA"));
+                properties.put("cnpj", Map.of("type", "string", "example", "12.345.678/0001-90"));
+                properties.put("password", Map.of("type", "string", "example", "NovaSenha@123"));
+                break;
+            case "GoogleLoginRequest":
+                properties.put("idToken", Map.of("type", "string", "example", "eyJhbGciOiJSUzI1NiIs..."));
+                properties.put("companySlug", Map.of("type", "string", "example", "escala-demo"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                properties.put("attribution", Map.of(
+                    "type", "object",
+                    "properties", Map.of(
+                        "utm_source", Map.of("type", "string", "example", "google"),
+                        "utm_medium", Map.of("type", "string", "example", "cpc"),
+                        "utm_campaign", Map.of("type", "string", "example", "blackfriday")
+                    )
+                ));
+                break;
+            case "ContactRequest":
+                properties.put("name", Map.of("type", "string", "example", "João Silva"));
+                properties.put("email", Map.of("type", "string", "example", "joao@empresa.com"));
+                properties.put("subject", Map.of("type", "string", "example", "Dúvida sobre planos"));
+                properties.put("message", Map.of("type", "string", "example", "Gostaria de saber mais sobre o plano Professional."));
+                break;
+            case "LeadCaptureRequest":
+                properties.put("name", Map.of("type", "string", "example", "João Silva"));
+                properties.put("email", Map.of("type", "string", "example", "joao@empresa.com"));
+                properties.put("companyName", Map.of("type", "string", "example", "Minha Empresa LTDA"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                break;
+            case "LearningProgressRequest":
+                properties.put("module", Map.of("type", "string", "example", "Treinamento Inicial"));
+                properties.put("topic", Map.of("type", "string", "example", "introducao-escala"));
+                properties.put("completed", Map.of("type", "boolean", "example", true));
+                properties.put("notes", Map.of("type", "string", "example", "Comentários adicionais sobre o progresso"));
+                break;
+            case "UpdateCurrentUserRequest":
+                properties.put("username", Map.of("type", "string", "example", "admin_novo"));
+                properties.put("email", Map.of("type", "string", "example", "admin@escala.local"));
+                properties.put("theme", Map.of("type", "string", "example", "dark"));
+                properties.put("avatarUrl", Map.of("type", "string", "example", "http://avatar.url"));
+                properties.put("address", Map.of("type", "string", "example", "Rua A, 123"));
+                properties.put("cep", Map.of("type", "string", "example", "30140-000"));
+                properties.put("street", Map.of("type", "string", "example", "Rua A"));
+                properties.put("number", Map.of("type", "string", "example", "123"));
+                properties.put("complement", Map.of("type", "string", "example", "Apto 1"));
+                properties.put("neighborhood", Map.of("type", "string", "example", "Centro"));
+                properties.put("city", Map.of("type", "string", "example", "Belo Horizonte"));
+                properties.put("state", Map.of("type", "string", "example", "MG"));
+                properties.put("position", Map.of("type", "string", "example", "Diretor"));
+                properties.put("function", Map.of("type", "string", "example", "Administrador"));
+                break;
+            case "ChangePasswordRequest":
+                properties.put("currentPassword", Map.of("type", "string", "example", "Admin@123456"));
+                properties.put("newPassword", Map.of("type", "string", "example", "NovaSenha@123"));
+                break;
+            case "RoleChangeRequest":
+                properties.put("roleName", Map.of("type", "string", "example", "MANAGER"));
+                break;
+            case "ThemeRequest":
+                properties.put("theme", Map.of("type", "string", "example", "dark"));
+                break;
+            case "SectorRequest":
+                properties.put("name", Map.of("type", "string", "example", "UTI Pediátrica"));
+                properties.put("description", Map.of("type", "string", "example", "Ala de internação intensiva pediátrica"));
+                properties.put("maxSeats", Map.of("type", "integer", "example", 5));
+                break;
+            case "ProjectRequest":
+                properties.put("name", Map.of("type", "string", "example", "Plantão Noturno HGB"));
+                properties.put("description", Map.of("type", "string", "example", "Alocação do plantão noturno no Hospital Geral"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
+                break;
+            case "AiContextRequest":
+                properties.put("employeeId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("shiftId", Map.of("type", "integer", "format", "int64", "example", 101));
+                properties.put("date", Map.of("type", "string", "format", "date", "example", "2026-06-25"));
+                properties.put("sectorId", Map.of("type", "integer", "format", "int64", "example", 1));
+                break;
+            case "WorkPostRequest":
+                properties.put("name", Map.of("type", "string", "example", "Posto de Recepção"));
+                properties.put("description", Map.of("type", "string", "example", "Guarita de entrada do bloco A"));
+                properties.put("project", Map.of(
+                    "type", "object",
+                    "properties", Map.of("id", Map.of("type", "integer", "format", "int64", "example", 1))
+                ));
+                break;
+            case "GenerateScheduleRequest":
+                properties.put("year", Map.of("type", "integer", "example", 2026));
+                properties.put("month", Map.of("type", "integer", "example", 6));
+                properties.put("startTime", Map.of("type", "string", "format", "time", "example", "08:00:00"));
+                properties.put("endTime", Map.of("type", "string", "format", "time", "example", "17:00:00"));
+                properties.put("workMode", Map.of("type", "string", "example", "PRESENCIAL"));
+                properties.put("maxPresentialPerDay", Map.of("type", "integer", "example", 10));
+                properties.put("employeeIds", Map.of("type", "array", "items", Map.of("type", "integer"), "example", List.of(1, 2, 3)));
+                break;
+            case "CheckInRequest":
+                properties.put("latitude", Map.of("type", "number", "format", "double", "example", -23.55052));
+                properties.put("longitude", Map.of("type", "number", "format", "double", "example", -46.633308));
+                properties.put("deviceFingerprint", Map.of("type", "string", "example", "browser-fingerprint-abc123xyz"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                break;
+            case "EscalaRequest":
+                properties.put("employeeId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("dates", Map.of("type", "array", "items", Map.of("type", "string", "format", "date"), "example", List.of("2026-06-20", "2026-06-21")));
+                properties.put("startTime", Map.of("type", "string", "format", "time", "example", "08:00:00"));
+                properties.put("endTime", Map.of("type", "string", "format", "time", "example", "17:00:00"));
+                properties.put("workMode", Map.of("type", "string", "enum", List.of("PRESENCIAL", "REMOTO"), "example", "PRESENCIAL"));
+                properties.put("padraoEscala", Map.of("type", "string", "enum", List.of("COMUM", "SEIS_X_UM", "CINCO_X_DOIS", "DOZE_X_TRINTA_E_SEIS"), "example", "COMUM"));
+                properties.put("notes", Map.of("type", "string", "example", "Escala do plantão"));
+                properties.put("sectorId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("projectId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("companyId", Map.of("type", "integer", "format", "int64", "example", 1));
+                break;
+            case "CreateShiftSwapRequest":
+                properties.put("requesterId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("originalShiftId", Map.of("type", "integer", "format", "int64", "example", 101));
+                properties.put("compensationDate", Map.of("type", "string", "format", "date", "example", "2026-06-25"));
+                properties.put("comments", Map.of("type", "string", "example", "Necessidade pessoal"));
+                break;
+            case "DecideShiftSwapRequest":
+                properties.put("approved", Map.of("type", "boolean", "example", true));
+                properties.put("effective", Map.of("type", "boolean", "example", true));
+                properties.put("adminComments", Map.of("type", "string", "example", "Aprovado de acordo com a escala"));
+                break;
+            case "EmployeeRequest":
+                properties.put("fullName", Map.of("type", "string", "example", "João Silva"));
+                properties.put("email", Map.of("type", "string", "example", "joao.silva@empresa.com"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
+                properties.put("sectorId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("projectId", Map.of("type", "integer", "format", "int64", "example", 1));
+                break;
+            case "CompanyRequest":
+                properties.put("name", Map.of("type", "string", "example", "Minha Empresa LTDA"));
+                properties.put("cnpj", Map.of("type", "string", "example", "12.345.678/0001-90"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
+                properties.put("planType", Map.of("type", "string", "example", "TRIAL"));
+                properties.put("allowedRadius", Map.of("type", "integer", "example", 100));
+                properties.put("latitude", Map.of("type", "number", "format", "double", "example", -23.55052));
+                properties.put("longitude", Map.of("type", "number", "format", "double", "example", -46.633308));
+                break;
+            case "TeamInvitationRequest":
+                properties.put("email", Map.of("type", "string", "example", "novo_membro@empresa.com"));
+                properties.put("roleName", Map.of("type", "string", "example", "USER"));
+                break;
+            case "BillingCheckoutRequest":
+                properties.put("planType", Map.of("type", "string", "example", "PROFESSIONAL"));
+                properties.put("successUrl", Map.of("type", "string", "example", "http://localhost:3000/success"));
+                properties.put("cancelUrl", Map.of("type", "string", "example", "http://localhost:3000/cancel"));
+                break;
+            default:
+                schema.put("description", "Payload " + requestName + ". Consulte os DTOs Java do backend para os campos exatos.");
+                return schema;
+        }
+
+        schema.put("properties", properties);
+        return schema;
     }
 
     private Map<String, Object> responses() {

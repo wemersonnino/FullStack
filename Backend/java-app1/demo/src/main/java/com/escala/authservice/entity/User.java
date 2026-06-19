@@ -48,14 +48,72 @@ public class User {
 
     private String avatarUrl;
 
-    private String address;
-    private String cep;
-    private String street;
-    private String number;
-    private String complement;
-    private String neighborhood;
-    private String city;
-    private String state;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "address_id")
+    private Address addressEntity;
+
+    public String getAddress() {
+        return addressEntity != null ? addressEntity.getAddressLine() : null;
+    }
+    public void setAddress(String address) {
+        ensureAddressEntity().setAddressLine(address);
+    }
+
+    public String getCep() {
+        return addressEntity != null ? addressEntity.getCep() : null;
+    }
+    public void setCep(String cep) {
+        ensureAddressEntity().setCep(cep);
+    }
+
+    public String getStreet() {
+        return addressEntity != null ? addressEntity.getStreet() : null;
+    }
+    public void setStreet(String street) {
+        ensureAddressEntity().setStreet(street);
+    }
+
+    public String getNumber() {
+        return addressEntity != null ? addressEntity.getNumber() : null;
+    }
+    public void setNumber(String number) {
+        ensureAddressEntity().setNumber(number);
+    }
+
+    public String getComplement() {
+        return addressEntity != null ? addressEntity.getComplement() : null;
+    }
+    public void setComplement(String complement) {
+        ensureAddressEntity().setComplement(complement);
+    }
+
+    public String getNeighborhood() {
+        return addressEntity != null ? addressEntity.getNeighborhood() : null;
+    }
+    public void setNeighborhood(String neighborhood) {
+        ensureAddressEntity().setNeighborhood(neighborhood);
+    }
+
+    public String getCity() {
+        return addressEntity != null ? addressEntity.getCity() : null;
+    }
+    public void setCity(String city) {
+        ensureAddressEntity().setCity(city);
+    }
+
+    public String getState() {
+        return addressEntity != null ? addressEntity.getState() : null;
+    }
+    public void setState(String state) {
+        ensureAddressEntity().setState(state);
+    }
+
+    private Address ensureAddressEntity() {
+        if (addressEntity == null) {
+            addressEntity = new Address();
+        }
+        return addressEntity;
+    }
     private String position;
     private String function;
 
