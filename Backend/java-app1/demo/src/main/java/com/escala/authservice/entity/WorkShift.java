@@ -15,6 +15,9 @@ import java.time.LocalTime;
         name = "work_shifts",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_work_shift_employee_date", columnNames = {"employee_id", "shiftDate"})
+        },
+        indexes = {
+                @Index(name = "idx_work_shifts_emp_date_status", columnList = "employee_id, shiftDate, status")
         }
 )
 @Data
@@ -52,4 +55,7 @@ public class WorkShift {
     private PadraoEscala padraoEscala = PadraoEscala.COMUM;
 
     private String notes;
+
+    @Version
+    private Long version;
 }

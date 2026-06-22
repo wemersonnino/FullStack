@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface SectorRepository extends JpaRepository<Sector, Long> {
     List<Sector> findByCompanyId(Long companyId);
+    List<Sector> findByManagerEmail(String email);
+    List<Sector> findByCompanyIdAndManagerEmail(Long companyId, String email);
 }

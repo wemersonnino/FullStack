@@ -23,4 +23,5 @@ public class EscalaRequest {
     private String sector;
     private String project;
     private String notes;
+    private Long version;
 }

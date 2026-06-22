@@ -9,7 +9,7 @@ interface BillingSuccessPageProps {
 
 export default async function BillingSuccessPage({ params }: BillingSuccessPageProps) {
   const { locale } = await params;
-  const landing = await getLandingPage(locale);
+  const landing = await getLandingPage({ locale });
 
   // Here we can use general success messages from Strapi if they exist
   // For now, using the ones specified by the user but prepared for localization/strapi

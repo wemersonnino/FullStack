@@ -6,7 +6,10 @@ export class OrganizationMapper {
       id: dto.id?.toString() || "",
       name: dto.name || "",
       description: dto.description,
-      active: !!dto.active,
+      active: dto.active !== undefined ? !!dto.active : true,
+      managerId: dto.manager?.id?.toString() || dto.managerId?.toString(),
+      managerName: dto.manager?.username || dto.managerName,
+      maxSeats: dto.maxSeats,
     };
   }
 
@@ -15,6 +18,8 @@ export class OrganizationMapper {
       name: domain.name,
       description: domain.description,
       active: domain.active,
+      managerId: domain.managerId ? parseInt(domain.managerId) : undefined,
+      maxSeats: domain.maxSeats,
     };
   }
 

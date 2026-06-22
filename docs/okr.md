@@ -68,6 +68,17 @@
 
 ---
 
+## 🎯 Objetivo 7 — Controle ReBAC, Mensageria Dinâmica e Integração Assistida por IA
+
+**KR7.1:** Implementar a hierarquia de controle ReBAC (Owner, Admin, Gestores de 1000, 100, 50, 10) e escopo de atuação restrito.
+**KR7.2:** Desenvolver a Central de Notificações assíncrona no header com contador de mensagens e fila/pilha de exibição.
+**KR7.3:** Desenhar os formulários dinâmicos de mensagens que se adaptam conforme o teor da solicitação (Permissões, Troca de turno, Acordo).
+**KR7.4:** Desenvolver a integração do chatbot (WhatsApp/Telegram) assistida por IA para detecção de faltas e alocação automática de substitutos.
+
+📈 **Métrica:** Hierarquia funcional, notificações operando com rotas paralelas e protótipo de chat WhatsApp assistido por IA.
+
+---
+
 ## 🧾 Revisão Trimestral
 
 - **Ciclo:** 12 semanas (3 meses).

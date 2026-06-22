@@ -36,7 +36,7 @@ public class DataInitializer {
         return args -> {
             createTriggers();
 
-            for (String roleName : List.of("ADMIN", "MANAGER", "USER", "OWNER", "LEAD")) {
+            for (String roleName : List.of("ADMIN", "MANAGER", "USER", "OWNER", "LEAD", "MANAGER_DIRETOR", "MANAGER_GERENTE", "MANAGER_COORDENADOR", "MANAGER_SUPERVISOR")) {
                 roleRepository.findByName(roleName)
                         .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
             }
@@ -88,6 +88,56 @@ public class DataInitializer {
                             .email("funcionario@escala.local")
                             .active(true)
                             .user(employeeUser)
+                            .company(company)
+                            .build()));
+
+            // Seed sub-managers
+            Role dirRole = roleRepository.findByName("MANAGER_DIRETOR").orElseThrow();
+            Role gerRole = roleRepository.findByName("MANAGER_GERENTE").orElseThrow();
+            Role coordRole = roleRepository.findByName("MANAGER_COORDENADOR").orElseThrow();
+            Role supRole = roleRepository.findByName("MANAGER_SUPERVISOR").orElseThrow();
+
+            userRepository.findByEmail("dir@escala.local")
+                    .orElseGet(() -> userRepository.save(User.builder()
+                            .username("Diretor")
+                            .email("dir@escala.local")
+                            .password(passwordEncoder.encode("Manager@123456"))
+                            .roles(Set.of(dirRole))
+                            .theme("system")
+                            .active(true)
+                            .company(company)
+                            .build()));
+
+            userRepository.findByEmail("ger@escala.local")
+                    .orElseGet(() -> userRepository.save(User.builder()
+                            .username("Gerente")
+                            .email("ger@escala.local")
+                            .password(passwordEncoder.encode("Manager@123456"))
+                            .roles(Set.of(gerRole))
+                            .theme("system")
+                            .active(true)
+                            .company(company)
+                            .build()));
+
+            userRepository.findByEmail("coord@escala.local")
+                    .orElseGet(() -> userRepository.save(User.builder()
+                            .username("Coordenador")
+                            .email("coord@escala.local")
+                            .password(passwordEncoder.encode("Manager@123456"))
+                            .roles(Set.of(coordRole))
+                            .theme("system")
+                            .active(true)
+                            .company(company)
+                            .build()));
+
+            userRepository.findByEmail("sup@escala.local")
+                    .orElseGet(() -> userRepository.save(User.builder()
+                            .username("Supervisor")
+                            .email("sup@escala.local")
+                            .password(passwordEncoder.encode("Manager@123456"))
+                            .roles(Set.of(supRole))
+                            .theme("system")
+                            .active(true)
                             .company(company)
                             .build()));
         };

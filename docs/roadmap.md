@@ -30,7 +30,10 @@
 |**S7–S9**|Backend Java|API REST + PostgreSQL|
 |**S10**|Integração Front ↔ Java|Fluxo de login unificado|
 |**S11**|Serviços .NET|Relatórios e analytics|
-|**S12**|Deploy e Revisão|Build final e retrospectiva
+|**S12**|Deploy e Revisão|Build final e retrospectiva|
+|**S13**|Hierarquia & ReBAC|Estrutura de níveis de gestão (Jethro model) e permissões centralizadas em ADMIN/OWNER|
+|**S14**|Notificações e Mensagens|Central de Notificações no Header, Parallel Routes, Modais e Forms Dinâmicos|
+|**S15**|IA Chat & RH Sync|Integração de WhatsApp/Telegram + Engine IA de sugestão e relatórios de RH|
 
 ---
 
@@ -47,6 +50,5 @@
 
 ## 📅 Entrega Final
 
-**Objetivo:** Aplicação full-stack em Docker com login funcional, dashboard privado, tema persistente e conteúdo SSR do Strapi integrado ao NextAuth.
-**Evolução futura:** integração com API Java e .NET para autenticação e analytics.
-**Prazo sugerido:** 12 semanas (3 meses).
+**Objetivo:** Aplicação full-stack em Docker com login funcional, dashboard privado com abas para Setores/Postos e Capacidade Mínima, delegação ReBAC avançada, central de mensagens dinâmica, e integração simulada/webhook com chatbot assistido por IA.
+**Prazo sugerido:** 15 semanas.

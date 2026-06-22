@@ -89,6 +89,8 @@ public class OpenApiController {
                 tag("Marketing", "Captura de leads, demo comercial e rastreio de campanha com consentimento."),
                 tag("Billing", "Gerenciamento de assinaturas, planos, faturamento e webhooks do Stripe."),
                 tag("IA", "Assistente de Inteligência Artificial para escala e riscos."),
+                tag("Mensageria", "Mensagens, notificacoes, solicitacoes de permissao e central de comunicacao."),
+                tag("Capacidade Operacional", "Gerenciamento de capacidade minima de colaboradores por posto ou setor."),
                 tag("Operacional", "Endpoints operacionais de saude e suporte a monitoramento.")
         );
     }
@@ -256,6 +258,30 @@ public class OpenApiController {
         paths.put("/api/v1/stats/summary", pathGet(get("Relatorios", "Resumo estatistico do dashboard", "Retorna indicadores do mes para o dashboard administrativo.", queryParamRequired("year", "Ano do resumo."), queryParamRequired("month", "Mes do resumo, de 1 a 12."))));
         paths.put("/api/v1/stats/marketing", pathGet(get("Marketing", "Estatisticas de marketing", "Retorna metricas de conversao de leads e atribuicao de campanhas. Requer ADMIN.")));
 
+        // Mensageria e Notificações (ReBAC)
+        paths.put("/api/v1/messages", path(
+                get("Mensageria", "Listar mensagens", "Retorna mensagens e solicitacoes recebidas ou enviadas pelo usuario autenticado, opcionalmente filtrando por status.", queryParam("status", "Status da mensagem (PENDING, APPROVED, REJECTED, READ).")),
+                post("Mensageria", "Criar/Enviar mensagem", "Envia uma mensagem ou cria uma solicitacao de decisao.", "MessageRequest")
+        ));
+        paths.put("/api/v1/messages/{id}/decision", pathPatch(patch("Mensageria", "Decidir solicitacao", "Aprova ou rejeita uma solicitacao pendente (por exemplo, troca de escala ou permissao).", "MessageDecisionRequest", pathParam("id", "ID da mensagem/solicitacao."))));
+
+        // Capacidade Operacional
+        paths.put("/api/v1/operational-capacities", path(
+                get("Capacidade Operacional", "Listar capacidades", "Retorna a lista completa de capacidades operacionais configuradas para a empresa do usuario logado."),
+                post("Capacidade Operacional", "Definir capacidade", "Configura uma nova capacidade minima operacional para um setor ou posto de trabalho.", "OperationalCapacityRequest")
+        ));
+        paths.put("/api/v1/operational-capacities/target", pathGet(get("Capacidade Operacional", "Buscar por setor ou posto", "Retorna capacidades operacionais filtradas por targetId e targetType.", queryParamRequired("targetId", "ID do setor ou posto de trabalho."), queryParamRequired("targetType", "Tipo de destino (SECTOR ou WORK_POST)."))));
+        paths.put("/api/v1/operational-capacities/{id}", path(
+                null,
+                null,
+                put("Capacidade Operacional", "Atualizar capacidade", "Atualiza os limites de capacidade operacional existentes.", "OperationalCapacityRequest", pathParam("id", "ID do registro de capacidade.")),
+                null,
+                delete("Capacidade Operacional", "Excluir capacidade", "Exclui a configuracao de capacidade operacional informada.", pathParam("id", "ID do registro de capacidade."))
+        ));
+
+        // IA Chatbot Webhook
+        paths.put("/api/v1/webhooks/chatbot", pathPost(postPublic("IA", "Webhook do Chatbot", "Recebe payloads simulados de mensagens do WhatsApp/Telegram para analise de trocas via IA.", "ChatbotWebhookRequest")));
+
         paths.put("/actuator/health", pathGet(getPublic("Operacional", "Health check", "Retorna o estado de saude do backend para validacao local, Docker e monitoramento.")));
 
         return paths;
@@ -358,7 +384,8 @@ public class OpenApiController {
         if (requestName != null) {
             operation.put("requestBody", requestBody(requestName));
         }
-        operation.put("responses", responses());
+        String responseName = inferResponseName(summary, requestName);
+        operation.put("responses", responses(responseName));
         if (publicEndpoint) {
             operation.put("security", List.of());
         }
@@ -567,6 +594,29 @@ public class OpenApiController {
                 properties.put("successUrl", Map.of("type", "string", "example", "http://localhost:3000/success"));
                 properties.put("cancelUrl", Map.of("type", "string", "example", "http://localhost:3000/cancel"));
                 break;
+            case "MessageRequest":
+                properties.put("receiverId", Map.of("type", "integer", "format", "int64", "example", 2));
+                properties.put("type", Map.of("type", "string", "enum", List.of("PERMISSION_REQUEST", "SHIFT_SWAP", "MESSAGE", "CHAT"), "example", "PERMISSION_REQUEST"));
+                properties.put("title", Map.of("type", "string", "example", "Solicitação de Acesso"));
+                properties.put("content", Map.of("type", "string", "example", "Solicito permissão para gerenciar a escala do setor UTI."));
+                properties.put("metadata", Map.of("type", "string", "example", "{\"sectorId\":1}"));
+                break;
+            case "MessageDecisionRequest":
+                properties.put("decision", Map.of("type", "string", "enum", List.of("APPROVED", "REJECTED"), "example", "APPROVED"));
+                break;
+            case "OperationalCapacityRequest":
+                properties.put("targetId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("targetType", Map.of("type", "string", "enum", List.of("SECTOR", "WORK_POST"), "example", "SECTOR"));
+                properties.put("dayOfWeek", Map.of("type", "integer", "minimum", 1, "maximum", 7, "example", 1));
+                properties.put("startTime", Map.of("type", "string", "format", "time", "example", "08:00:00"));
+                properties.put("endTime", Map.of("type", "string", "format", "time", "example", "17:00:00"));
+                properties.put("minEmployeesRequired", Map.of("type", "integer", "example", 2));
+                break;
+            case "ChatbotWebhookRequest":
+                properties.put("senderEmail", Map.of("type", "string", "example", "colaborador@escala.local"));
+                properties.put("message", Map.of("type", "string", "example", "Preciso de uma troca para o meu plantão de amanhã"));
+                properties.put("phone", Map.of("type", "string", "example", "+5531999998888"));
+                break;
             default:
                 schema.put("description", "Payload " + requestName + ". Consulte os DTOs Java do backend para os campos exatos.");
                 return schema;
@@ -577,13 +627,231 @@ public class OpenApiController {
     }
 
     private Map<String, Object> responses() {
+        return responses(null);
+    }
+
+    private Map<String, Object> responses(String responseName) {
         Map<String, Object> responses = new LinkedHashMap<>();
-        responses.put("200", Map.of("description", "Operacao realizada com sucesso."));
+        if (responseName != null) {
+            Map<String, Object> schema = buildResponseSchema(responseName);
+            Map<String, Object> mediaType = new LinkedHashMap<>();
+            mediaType.put("schema", schema);
+            responses.put("200", Map.of(
+                "description", "Operacao realizada com sucesso.",
+                "content", Map.of("application/json", mediaType)
+            ));
+        } else {
+            responses.put("200", Map.of("description", "Operacao realizada com sucesso."));
+        }
         responses.put("400", Map.of("description", "Requisicao invalida ou regra de dominio violada."));
         responses.put("401", Map.of("description", "Token ausente, invalido ou expirado."));
         responses.put("403", Map.of("description", "Usuario autenticado sem permissao para a operacao."));
         responses.put("404", Map.of("description", "Recurso nao encontrado."));
         return responses;
+    }
+
+    private String inferResponseName(String summary, String requestName) {
+        String s = summary.toLowerCase();
+        if (s.contains("autenticar") || s.contains("registrar usuario") || s.contains("google")) {
+            return "AuthResponse";
+        }
+        if (s.contains("usuario") || s.contains("users") || s.contains("minha senha") || s.contains("role")) {
+            return "UserResponse";
+        }
+        if (s.contains("funcionario")) {
+            return "EmployeeResponse";
+        }
+        if (s.contains("empresa")) {
+            return "CompanyResponse";
+        }
+        if (s.contains("setor")) {
+            return "SectorResponse";
+        }
+        if (s.contains("projeto")) {
+            return "ProjectResponse";
+        }
+        if (s.contains("posto de trabalho")) {
+            return "WorkPostResponse";
+        }
+        if (s.contains("mensagem") || s.contains("solicitacao") || s.contains("decidir")) {
+            return "MessageResponse";
+        }
+        if (s.contains("capacidade")) {
+            return "OperationalCapacityResponse";
+        }
+        if (s.contains("ponto") || s.contains("check-in")) {
+            return "CheckInResponse";
+        }
+        if (s.contains("escala") || s.contains("schedule")) {
+            return "EscalaResponse";
+        }
+        if (s.contains("troca")) {
+            return "ShiftSwapResponse";
+        }
+        if (s.contains("checkout")) {
+            return "CheckoutResponse";
+        }
+        if (s.contains("assinatura")) {
+            return "SubscriptionResponse";
+        }
+        if (s.contains("progresso")) {
+            return "LearningProgressResponse";
+        }
+        if (s.contains("folha") || s.contains("payroll")) {
+            return "PayrollResponse";
+        }
+        if (s.contains("estatistico") || s.contains("marketing")) {
+            return "StatsResponse";
+        }
+        if (s.contains("webhook")) {
+            return "WebhookResponse";
+        }
+        return null;
+    }
+
+    private Map<String, Object> buildResponseSchema(String responseName) {
+        Map<String, Object> schema = new LinkedHashMap<>();
+        schema.put("type", "object");
+        schema.put("title", responseName);
+
+        Map<String, Object> properties = new LinkedHashMap<>();
+
+        switch (responseName) {
+            case "AuthResponse":
+                properties.put("token", Map.of("type", "string", "example", "eyJhbGciOiJSUzI1NiIs..."));
+                properties.put("refreshToken", Map.of("type", "string", "example", "d3b07384d113ed1a..."));
+                properties.put("user", Map.of(
+                    "type", "object",
+                    "properties", Map.of(
+                        "id", Map.of("type", "integer", "example", 1),
+                        "username", Map.of("type", "string", "example", "admin"),
+                        "email", Map.of("type", "string", "example", "admin@escala.local")
+                    )
+                ));
+                break;
+            case "UserResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("username", Map.of("type", "string", "example", "admin"));
+                properties.put("email", Map.of("type", "string", "example", "admin@escala.local"));
+                properties.put("roles", Map.of("type", "array", "items", Map.of("type", "string"), "example", List.of("ADMIN")));
+                properties.put("theme", Map.of("type", "string", "example", "dark"));
+                properties.put("avatarUrl", Map.of("type", "string", "example", "http://avatar.url"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
+                break;
+            case "EmployeeResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("fullName", Map.of("type", "string", "example", "João Silva"));
+                properties.put("email", Map.of("type", "string", "example", "joao.silva@empresa.com"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
+                properties.put("sectorId", Map.of("type", "integer", "example", 1));
+                properties.put("projectId", Map.of("type", "integer", "example", 1));
+                break;
+            case "CompanyResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("name", Map.of("type", "string", "example", "Minha Empresa LTDA"));
+                properties.put("cnpj", Map.of("type", "string", "example", "12.345.678/0001-90"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
+                properties.put("planType", Map.of("type", "string", "example", "TRIAL"));
+                properties.put("allowedRadius", Map.of("type", "integer", "example", 100));
+                break;
+            case "SectorResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("name", Map.of("type", "string", "example", "UTI Pediátrica"));
+                properties.put("description", Map.of("type", "string", "example", "Ala intensiva"));
+                properties.put("maxSeats", Map.of("type", "integer", "example", 5));
+                break;
+            case "ProjectResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("name", Map.of("type", "string", "example", "Plantão Noturno HGB"));
+                properties.put("description", Map.of("type", "string", "example", "Ala HGB"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
+                break;
+            case "WorkPostResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("name", Map.of("type", "string", "example", "Posto Recepção"));
+                properties.put("description", Map.of("type", "string", "example", "Guarita bloco A"));
+                break;
+            case "MessageResponse":
+                properties.put("id", Map.of("type", "integer", "example", 10));
+                properties.put("senderId", Map.of("type", "integer", "example", 1));
+                properties.put("receiverId", Map.of("type", "integer", "example", 2));
+                properties.put("type", Map.of("type", "string", "example", "PERMISSION_REQUEST"));
+                properties.put("title", Map.of("type", "string", "example", "Solicitação"));
+                properties.put("content", Map.of("type", "string", "example", "Permissão para escala."));
+                properties.put("status", Map.of("type", "string", "example", "PENDING"));
+                properties.put("metadata", Map.of("type", "string", "example", "{}"));
+                break;
+            case "OperationalCapacityResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("targetId", Map.of("type", "integer", "example", 1));
+                properties.put("targetType", Map.of("type", "string", "example", "SECTOR"));
+                properties.put("dayOfWeek", Map.of("type", "integer", "example", 1));
+                properties.put("startTime", Map.of("type", "string", "example", "08:00:00"));
+                properties.put("endTime", Map.of("type", "string", "example", "17:00:00"));
+                properties.put("minEmployeesRequired", Map.of("type", "integer", "example", 2));
+                break;
+            case "CheckInResponse":
+                properties.put("message", Map.of("type", "string", "example", "Ponto registrado com sucesso dentro da área permitida"));
+                break;
+            case "EscalaResponse":
+                properties.put("id", Map.of("type", "integer", "example", 101));
+                properties.put("employeeId", Map.of("type", "integer", "example", 1));
+                properties.put("shiftDate", Map.of("type", "string", "example", "2026-06-20"));
+                properties.put("startTime", Map.of("type", "string", "example", "08:00:00"));
+                properties.put("endTime", Map.of("type", "string", "example", "17:00:00"));
+                properties.put("workMode", Map.of("type", "string", "example", "PRESENCIAL"));
+                properties.put("padraoEscala", Map.of("type", "string", "example", "COMUM"));
+                properties.put("notes", Map.of("type", "string", "example", "Plantão"));
+                properties.put("sectorId", Map.of("type", "integer", "example", 1));
+                properties.put("projectId", Map.of("type", "integer", "example", 1));
+                properties.put("version", Map.of("type", "integer", "example", 0));
+                break;
+            case "ShiftSwapResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("requesterId", Map.of("type", "integer", "example", 1));
+                properties.put("originalShiftId", Map.of("type", "integer", "example", 101));
+                properties.put("compensationDate", Map.of("type", "string", "example", "2026-06-25"));
+                properties.put("comments", Map.of("type", "string", "example", "Troca"));
+                properties.put("status", Map.of("type", "string", "example", "SOLICITADO"));
+                break;
+            case "CheckoutResponse":
+                properties.put("url", Map.of("type", "string", "example", "https://checkout.stripe.com/..."));
+                break;
+            case "SubscriptionResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("status", Map.of("type", "string", "example", "ACTIVE"));
+                properties.put("planType", Map.of("type", "string", "example", "TRIAL"));
+                properties.put("stripeSubscriptionId", Map.of("type", "string", "example", "sub_123"));
+                break;
+            case "LearningProgressResponse":
+                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("module", Map.of("type", "string", "example", "Treinamento"));
+                properties.put("topic", Map.of("type", "string", "example", "escala"));
+                properties.put("completed", Map.of("type", "boolean", "example", true));
+                break;
+            case "PayrollResponse":
+                properties.put("month", Map.of("type", "string", "example", "2026-06"));
+                properties.put("totalHours", Map.of("type", "integer", "example", 160));
+                properties.put("totalEmployees", Map.of("type", "integer", "example", 10));
+                break;
+            case "StatsResponse":
+                properties.put("activeEmployees", Map.of("type", "integer", "example", 50));
+                properties.put("totalSectors", Map.of("type", "integer", "example", 5));
+                properties.put("totalProjects", Map.of("type", "integer", "example", 3));
+                break;
+            case "WebhookResponse":
+                properties.put("status", Map.of("type", "string", "example", "success"));
+                properties.put("action", Map.of("type", "string", "example", "SUGGEST_REPLACEMENT"));
+                properties.put("response", Map.of("type", "string", "example", "Olá! Analisamos a mensagem..."));
+                properties.put("suggestions", Map.of("type", "array", "items", Map.of("type", "string"), "example", List.of("João Silva (joao@escala.local)")));
+                break;
+            default:
+                schema.put("description", "Retorno " + responseName + ". Consulte os DTOs/Entities Java do backend.");
+                return schema;
+        }
+
+        schema.put("properties", properties);
+        return schema;
     }
 
     private Map<String, Object> pathParam(String name, String description) {

@@ -3,6 +3,9 @@ export interface Sector {
   name: string;
   description?: string;
   active: boolean;
+  managerId?: string;
+  managerName?: string;
+  maxSeats?: number;
 }
 
 export interface Project {

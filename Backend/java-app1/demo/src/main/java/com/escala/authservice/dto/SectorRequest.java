@@ -7,4 +7,5 @@ public class SectorRequest {
     private String name;
     private String description;
     private Integer maxSeats;
+    private Long managerId;
 }
