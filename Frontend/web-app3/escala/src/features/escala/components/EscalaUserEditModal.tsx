@@ -52,6 +52,7 @@ import { createEscalas } from '@/services/escala.service';
 import { createSector, getProjects, getSectors, Project, Sector } from '@/services/organization.service';
 
 const EscalaSchema = z.object({
+  usuarioId: z.string().optional(),
   dates: z.array(z.date()).min(1, 'Selecione pelo menos um dia.'),
   startTime: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horário inválido.'),
   endTime: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horário inválido.'),
@@ -87,6 +88,8 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
   const isManaged = 'open' in props;
   const user: ModalUsuarioEscala | null = isManaged ? props.usuario : props.user;
   const isOpen = isManaged ? props.open : props.isOpen;
+  const usuarios = isManaged ? props.usuarios : [];
+  const escala = isManaged ? props.escala : null;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [sectors, setSectors] = useState<Sector[]>([]);
@@ -97,6 +100,7 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
   const form = useForm<EscalaFormValues>({
     resolver: zodResolver(EscalaSchema),
     defaultValues: {
+      usuarioId: undefined,
       dates: [],
       startTime: '08:00',
       endTime: '17:00',
@@ -131,24 +135,36 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || !user) return;
+    if (!isOpen) return;
+
+    const selectedUserId = user?.id ? String(user.id) : escala?.usuarioId ? String(escala.usuarioId) : undefined;
+    const selectedUser = selectedUserId
+      ? (user ?? usuarios.find((item) => String(item.id) === selectedUserId) ?? null)
+      : user;
+    const escalaDate = escala?.dataInicio ? new Date(escala.dataInicio) : null;
 
     form.reset({
-      dates: [],
-      startTime: '08:00',
-      endTime: '17:00',
-      workMode: 'PRESENCIAL',
-      notes: '',
-      projectId: user.projetoId ? String(user.projetoId) : undefined,
-      sectorId: user.setorId ? String(user.setorId) : undefined,
+      usuarioId: selectedUserId,
+      dates: escalaDate && !Number.isNaN(escalaDate.getTime()) ? [escalaDate] : [],
+      startTime: escala?.horarioInicio ?? '08:00',
+      endTime: escala?.horarioFim ?? '17:00',
+      workMode: escala?.remoto ? 'REMOTO' : 'PRESENCIAL',
+      notes: escala?.observacao ?? '',
+      projectId: escala?.projetoId ? String(escala.projetoId) : selectedUser?.projetoId ? String(selectedUser.projetoId) : undefined,
+      sectorId: escala?.setorId ? String(escala.setorId) : selectedUser?.setorId ? String(selectedUser.setorId) : undefined,
     });
-  }, [form, isOpen, user]);
+  }, [escala, form, isOpen, user, usuarios]);
 
   async function onSubmit(values: EscalaFormValues) {
-    if (!user) return;
+    const selectedUser = user ?? usuarios.find((item) => String(item.id) === values.usuarioId) ?? null;
 
-    const selectedProjectId = values.projectId ?? (user.projetoId ? String(user.projetoId) : undefined);
-    const selectedSectorId = values.sectorId ?? (user.setorId ? String(user.setorId) : undefined);
+    if (!selectedUser) {
+      toast.error('Selecione um colaborador para criar a escala.');
+      return;
+    }
+
+    const selectedProjectId = values.projectId ?? (selectedUser.projetoId ? String(selectedUser.projetoId) : undefined);
+    const selectedSectorId = values.sectorId ?? (selectedUser.setorId ? String(selectedUser.setorId) : undefined);
 
     if (!selectedProjectId && !selectedSectorId) {
       toast.error('Informe um setor para este colaborador antes de criar a escala.');
@@ -160,7 +176,7 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
     try {
       if (isManaged) {
         const payload: CriarEscalaPayload = {
-          usuarioId: String(user.id),
+          usuarioId: String(selectedUser.id),
           datas: values.dates.map((date) => format(date, 'yyyy-MM-dd')),
           horarioInicio: values.startTime,
           horarioFim: values.endTime,
@@ -168,13 +184,13 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
           observacao: values.notes,
           projetoId: selectedProjectId,
           setorId: selectedSectorId,
-          version: props.escala?.version,
+          version: escala?.version,
         };
 
-        await props.onSave(payload, props.escala?.id);
+        await props.onSave(payload, escala?.id);
       } else {
         const payload: EscalaRequest = {
-          employeeId: Number(user.id),
+          employeeId: Number(selectedUser.id),
           dates: values.dates.map((date) => format(date, 'yyyy-MM-dd')),
           startTime: values.startTime,
           endTime: values.endTime,
@@ -236,6 +252,41 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
+            {isManaged && !user && (
+              <FormField
+                control={form.control}
+                name="usuarioId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Colaborador</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        const selected = usuarios.find((item) => String(item.id) === value);
+                        form.setValue('projectId', selected?.projetoId ? String(selected.projetoId) : undefined);
+                        form.setValue('sectorId', selected?.setorId ? String(selected.setorId) : undefined);
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um colaborador" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {usuarios.map((item) => (
+                          <SelectItem key={item.id} value={String(item.id)}>
+                            {item.nome || item.username || item.email}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             {projects.length === 0 && (
               <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
                 <div className="flex gap-2">

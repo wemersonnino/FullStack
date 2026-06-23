@@ -46,7 +46,7 @@ http://localhost:8080/v3/api-docs
 
 ## Grupos documentados
 
-O JSON OpenAPI atual documenta `11` grupos:
+O JSON OpenAPI atual documenta `16` grupos:
 
 - `Auth`
 - `Usuarios`
@@ -59,6 +59,11 @@ O JSON OpenAPI atual documenta `11` grupos:
 - `Relatorios`
 - `Convites`
 - `Marketing`
+- `Billing`
+- `IA`
+- `Mensageria`
+- `Capacidade Operacional`
+- `Operacional`
 
 ## Controllers cobertos
 
@@ -67,25 +72,44 @@ O JSON OpenAPI atual documenta `11` grupos:
 - `CompanyController`
 - `EmployeeController`
 - `OrganizationController`
+- `WorkPostController`
 - `EscalaController`
 - `ScheduleController`
 - `CheckInController`
 - `ReportController`
 - `TeamInvitationController`
 - `LeadController`
+- `ContactController`
+- `BillingController`
+- `StripeWebhookController`
+- `AiController`
+- `ChatbotWebhookController`
+- `LearningProgressController`
+- `MessageController`
+- `OperationalCapacityController`
+- `StatsController`
 
 ## Endpoints documentados
 
-O Swagger atual documenta `38` paths:
+O Swagger atual documenta `59` paths:
 
 ```text
+/actuator/health
 /api/v1/auth/authenticate
 /api/v1/auth/complete-registration
 /api/v1/auth/forgot-password
 /api/v1/auth/google
 /api/v1/auth/register
 /api/v1/auth/reset-password
+/api/v1/public/contact
 /api/v1/leads
+/api/v1/ai/analyze-risk
+/api/v1/ai/explain-conflict
+/api/v1/ai/suggest-replacement
+/api/v1/billing/cancel
+/api/v1/billing/checkout
+/api/v1/billing/subscription
+/api/v1/billing/webhook
 /api/v1/check-in
 /api/v1/companies
 /api/v1/companies/{id}
@@ -97,6 +121,13 @@ O Swagger atual documenta `38` paths:
 /api/v1/escala/usuarios
 /api/v1/escala/usuarios/{id}
 /api/v1/escala/{id}
+/api/v1/learning-progress
+/api/v1/learning-progress/{id}/complete
+/api/v1/messages
+/api/v1/messages/{id}/decision
+/api/v1/operational-capacities
+/api/v1/operational-capacities/target
+/api/v1/operational-capacities/{id}
 /api/v1/organization/projects
 /api/v1/organization/projects/{id}
 /api/v1/organization/sectors
@@ -109,6 +140,8 @@ O Swagger atual documenta `38` paths:
 /api/v1/schedules/swap-requests
 /api/v1/schedules/swap-requests/{id}/colleague-approval
 /api/v1/schedules/swap-requests/{id}/decision
+/api/v1/stats/marketing
+/api/v1/stats/summary
 /api/v1/team/invitations
 /api/v1/team/invitations/token/{token}
 /api/v1/team/invitations/{id}
@@ -117,6 +150,9 @@ O Swagger atual documenta `38` paths:
 /api/v1/users/me/password
 /api/v1/users/{id}/roles
 /api/v1/users/{id}/theme
+/api/v1/webhooks/chatbot
+/api/v1/work-posts
+/api/v1/work-posts/{id}
 ```
 
 ## Validacao
@@ -134,8 +170,8 @@ Resultado validado:
 
 - Swagger UI: `200`
 - OpenAPI JSON: `200`
-- Tags: `11`
-- Paths: `38`
+- Tags: `16`
+- Paths: `59`
 - Testes Maven: `24` testes, `0` falhas, `0` erros
 
 ## Regras de manutencao

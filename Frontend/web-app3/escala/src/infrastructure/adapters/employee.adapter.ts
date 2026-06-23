@@ -1,12 +1,17 @@
-import { ENV } from "@/constants/env";
 import { EmployeeMapper } from "./mappers/employee.mapper";
 import { Employee } from "@/core/domain/models/employee.model";
 
 export class EmployeeBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff/employees';
+
+  private static url(path = '') {
+    const url = `${this.baseUrl}${path}`;
+    if (typeof window !== 'undefined') return url;
+    return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
+  }
 
   static async list(token: string): Promise<Employee[]> {
-    const response = await fetch(`${this.baseUrl}/api/v1/employees`, {
+    const response = await fetch(this.url(), {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -19,7 +24,7 @@ export class EmployeeBackendAdapter {
   }
 
   static async findById(id: string, token: string): Promise<Employee> {
-    const response = await fetch(`${this.baseUrl}/api/v1/employees/${id}`, {
+    const response = await fetch(this.url(`/${id}`), {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -33,7 +38,7 @@ export class EmployeeBackendAdapter {
 
   static async create(employee: Partial<Employee>, token: string): Promise<Employee> {
     const dto = EmployeeMapper.toDto(employee);
-    const response = await fetch(`${this.baseUrl}/api/v1/employees`, {
+    const response = await fetch(this.url(), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -49,7 +54,7 @@ export class EmployeeBackendAdapter {
 
   static async update(id: string, employee: Partial<Employee>, token: string): Promise<Employee> {
     const dto = EmployeeMapper.toDto(employee);
-    const response = await fetch(`${this.baseUrl}/api/v1/employees/${id}`, {
+    const response = await fetch(this.url(`/${id}`), {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -64,7 +69,7 @@ export class EmployeeBackendAdapter {
   }
 
   static async delete(id: string, token: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/v1/employees/${id}`, {
+    const response = await fetch(this.url(`/${id}`), {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,

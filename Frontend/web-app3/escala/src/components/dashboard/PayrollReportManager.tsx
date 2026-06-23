@@ -45,10 +45,6 @@ export function PayrollReportManager() {
   const handleExport = async () => {
     toast.info('Iniciando exportação...');
     try {
-        // Chamada direta para o backend principal via browser para download de arquivo
-        const response = await fetch(`${window.location.origin}/api/v1/reports/payroll/export?month=${month}`);
-        // Nota: Em um ambiente real, o BFF cuidaria do proxy do blob.
-        // Aqui simularemos o download usando o serviço.
         window.open(`/api/bff/reports/payroll/export?month=${month}`, '_blank');
     } catch (error) {
         toast.error('Erro ao baixar arquivo.');
@@ -56,7 +52,10 @@ export function PayrollReportManager() {
   };
 
   useEffect(() => {
-    fetchReport();
+    const timer = window.setTimeout(() => {
+      void fetchReport();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [month]);
 
   return (

@@ -1,12 +1,17 @@
-import { ENV } from "@/constants/env";
 import { ScheduleMapper } from "./mappers/schedule.mapper";
 import { Shift, ShiftSwap } from "@/core/domain/models/schedule.model";
 
 export class ScheduleBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff';
+
+  private static url(path: string) {
+    const url = `${this.baseUrl}${path}`;
+    if (typeof window !== 'undefined') return url;
+    return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
+  }
 
   static async listShifts(token: string, params?: URLSearchParams): Promise<Shift[]> {
-    const url = new URL(`${this.baseUrl}/api/v1/escala`);
+    const url = new URL(this.url('/escala'));
     if (params) {
       params.forEach((value, key) => url.searchParams.set(key, value));
     }
@@ -23,7 +28,7 @@ export class ScheduleBackendAdapter {
   }
 
   static async createShift(shift: Partial<Shift>, token: string): Promise<Shift> {
-    const response = await fetch(`${this.baseUrl}/api/v1/escala`, {
+    const response = await fetch(this.url('/escala'), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -37,7 +42,7 @@ export class ScheduleBackendAdapter {
   }
 
   static async updateShift(id: string, shift: Partial<Shift>, token: string): Promise<Shift> {
-    const response = await fetch(`${this.baseUrl}/api/v1/escala/${id}`, {
+    const response = await fetch(this.url(`/escala/${id}`), {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -51,7 +56,7 @@ export class ScheduleBackendAdapter {
   }
 
   static async deleteShift(id: string, token: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/v1/escala/${id}`, {
+    const response = await fetch(this.url(`/escala/${id}`), {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -62,7 +67,7 @@ export class ScheduleBackendAdapter {
 
   // Swaps
   static async listSwaps(token: string): Promise<ShiftSwap[]> {
-    const response = await fetch(`${this.baseUrl}/api/v1/schedules/swap-requests`, {
+    const response = await fetch(this.url('/schedules/swap-requests'), {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -74,7 +79,7 @@ export class ScheduleBackendAdapter {
   }
 
   static async createSwap(swap: Partial<ShiftSwap>, token: string): Promise<ShiftSwap> {
-    const response = await fetch(`${this.baseUrl}/api/v1/schedules/swap-requests`, {
+    const response = await fetch(this.url('/schedules/swap-requests'), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -88,7 +93,7 @@ export class ScheduleBackendAdapter {
   }
 
   static async decideSwap(id: string, decision: { approved: boolean; adminComments?: string }, token: string): Promise<ShiftSwap> {
-    const response = await fetch(`${this.baseUrl}/api/v1/schedules/swap-requests/${id}/decision`, {
+    const response = await fetch(this.url(`/schedules/swap-requests/${id}/decision`), {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,

@@ -1,12 +1,17 @@
-import { ENV } from "@/constants/env";
 import { UserMapper } from "./mappers/user.mapper";
 import { UserProfile } from "@/core/domain/models/user.model";
 
 export class UserBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff/users';
+
+  private static url(path: string) {
+    const url = `${this.baseUrl}${path}`;
+    if (typeof window !== 'undefined') return url;
+    return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
+  }
 
   static async getMe(token: string): Promise<UserProfile> {
-    const response = await fetch(`${this.baseUrl}/api/v1/users/me`, {
+    const response = await fetch(this.url('/me'), {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -22,7 +27,7 @@ export class UserBackendAdapter {
   static async updateMe(token: string, profile: Partial<UserProfile>): Promise<UserProfile> {
     const dto = UserMapper.toUpdateDto(profile);
     
-    const response = await fetch(`${this.baseUrl}/api/v1/users/me`, {
+    const response = await fetch(this.url('/me'), {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,

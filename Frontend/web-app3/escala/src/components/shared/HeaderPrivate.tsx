@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Bell, ChevronDown, LogOut, User, Settings, Shield, MailOpen } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
-import { normalizeAvatarUrl } from '@/lib/utils';
+import { resolveAvatarUrl } from '@/lib/utils';
 import { MessageModel } from '@/infrastructure/adapters/message.adapter';
 import { MessageService } from '@/core/application/services/message.service';
 import { MessageDetailsModal } from '@/components/dashboard/MessageDetailsModal';
@@ -30,6 +30,8 @@ type HeaderUser = {
   token?: string;
   avatarUrl?: string | null;
   image?: string | null;
+  picture?: string | null;
+  avatar?: string | { url?: string | null } | null;
 };
 
 export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
@@ -47,7 +49,7 @@ export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
   const [selectedMessage, setSelectedMessage] = useState<MessageModel | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const fetchNotifications = async () => {
+  async function refreshNotifications() {
     if (!token) return;
     try {
       const data = await MessageService.listMessages(token, 'PENDING');
@@ -55,17 +57,35 @@ export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
-  };
+  }
 
   useEffect(() => {
-    fetchNotifications();
+    let cancelled = false;
+    async function loadNotifications() {
+      if (!token) return;
+      try {
+        const data = await MessageService.listMessages(token, 'PENDING');
+        if (!cancelled) setMessages(data);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    }
+
+    const initialLoad = window.setTimeout(() => {
+      void loadNotifications();
+    }, 0);
     
-    // Optional: poll every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      void loadNotifications();
+    }, 30000);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(initialLoad);
+      clearInterval(interval);
+    };
   }, [token]);
 
-  const avatarSrc = normalizeAvatarUrl(user?.avatarUrl || user?.image);
+  const avatarSrc = resolveAvatarUrl(user);
 
   const handleMessageClick = (msg: MessageModel) => {
     setSelectedMessage(msg);
@@ -202,7 +222,7 @@ export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
             setModalOpen(false);
             setSelectedMessage(null);
           }}
-          onDecisionSuccess={fetchNotifications}
+          onDecisionSuccess={refreshNotifications}
           token={token}
         />
       )}

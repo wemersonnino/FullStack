@@ -1,15 +1,19 @@
-import { ENV } from "@/constants/env";
 import { InvitationMapper } from "./mappers/invitation.mapper";
 import { TeamInvitation, TeamInvitationCreate } from "@/core/domain/models/invitation.model";
 
 export class InvitationBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff/team/invitations';
 
-  static async invite(invitation: TeamInvitationCreate, token: string): Promise<TeamInvitation> {
-    const response = await fetch(`${this.baseUrl}/api/v1/team/invitations`, {
+  private static url(path = '') {
+    const url = `${this.baseUrl}${path}`;
+    if (typeof window !== 'undefined') return url;
+    return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
+  }
+
+  static async invite(invitation: TeamInvitationCreate, _token: string): Promise<TeamInvitation> {
+    const response = await fetch(this.url(), {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(invitation),
@@ -20,10 +24,10 @@ export class InvitationBackendAdapter {
     return InvitationMapper.toDomain(dto);
   }
 
-  static async list(token: string): Promise<TeamInvitation[]> {
-    const response = await fetch(`${this.baseUrl}/api/v1/team/invitations`, {
+  static async list(_token: string): Promise<TeamInvitation[]> {
+    const response = await fetch(this.url(), {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
       },
     });
 
@@ -32,19 +36,16 @@ export class InvitationBackendAdapter {
     return dtos.map((dto: any) => InvitationMapper.toDomain(dto));
   }
 
-  static async cancel(id: string, token: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/v1/team/invitations/${id}`, {
+  static async cancel(id: string, _token: string): Promise<void> {
+    const response = await fetch(this.url(`/${id}`), {
       method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     });
 
     if (!response.ok) throw new Error("Failed to cancel invitation");
   }
 
   static async findByToken(token: string): Promise<TeamInvitation> {
-    const response = await fetch(`${this.baseUrl}/api/v1/team/invitations/token/${token}`, {
+    const response = await fetch(this.url(`/token/${token}`), {
       headers: {
         Accept: 'application/json',
       },

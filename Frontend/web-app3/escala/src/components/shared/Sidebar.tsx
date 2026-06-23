@@ -21,11 +21,13 @@ import {
   ClipboardList,
   UserPlus,
   BarChart4,
+  Megaphone,
   ShieldCheck,
-  CreditCard
+  CreditCard,
+  GraduationCap
 } from 'lucide-react';
 import { MenuItem } from '@/interfaces/menu/menu.interface';
-import { cn, normalizeAvatarUrl } from '@/lib/utils';
+import { cn, resolveAvatarUrl } from '@/lib/utils';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -38,6 +40,9 @@ interface SidebarProps {
     email?: string | null;
     roles?: string[];
     avatarUrl?: string | null;
+    image?: string | null;
+    picture?: string | null;
+    avatar?: string | { url?: string | null } | null;
   };
 }
 
@@ -72,9 +77,17 @@ const navigationGroups = [
     ]
   },
   {
+    title: 'Marketing',
+    roles: ['ADMIN', 'OWNER', 'MARKETING'],
+    items: [
+      { title: 'Métricas de Marketing', href: '/dashboard/marketing', icon: Megaphone },
+    ]
+  },
+  {
     title: 'Sistema',
     items: [
       { title: 'Meu Perfil', href: '/dashboard/perfil', icon: User },
+      { title: 'Aprendizado', href: '/dashboard/aprendizado', icon: GraduationCap },
       { title: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
     ]
   }
@@ -85,6 +98,7 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
   const { logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const avatarSrc = resolveAvatarUrl(user);
 
   const filteredGroups = useMemo(() => {
     const userRoles = user.roles || [];
@@ -171,9 +185,9 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
             collapsed ? "justify-center p-2" : "px-4"
         )}>
           <Avatar className="h-10 w-10 border-2 border-primary/10 transition-transform hover:scale-105 overflow-hidden relative">
-            {normalizeAvatarUrl(user.avatarUrl || (user as any)?.image) ? (
+            {avatarSrc ? (
               <Image 
-                src={normalizeAvatarUrl(user.avatarUrl || (user as any)?.image)} 
+                src={avatarSrc} 
                 alt={user.username || 'Usuario'} 
                 fill
                 sizes="40px"

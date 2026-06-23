@@ -1,5 +1,3 @@
-import { ENV } from "@/constants/env";
-
 export interface WorkPostModel {
   id?: string;
   name: string;
@@ -8,12 +6,11 @@ export interface WorkPostModel {
 }
 
 export class WorkPostBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff/work-posts';
 
-  static async list(token: string): Promise<WorkPostModel[]> {
-    const response = await fetch(`${this.baseUrl}/api/v1/work-posts`, {
+  static async list(_token: string): Promise<WorkPostModel[]> {
+    const response = await fetch(this.baseUrl, {
       headers: {
-        Authorization: `Bearer ${token}`,
         Accept: 'application/json',
       },
     });
@@ -27,11 +24,10 @@ export class WorkPostBackendAdapter {
     }));
   }
 
-  static async create(workPost: WorkPostModel, token: string): Promise<WorkPostModel> {
-    const response = await fetch(`${this.baseUrl}/api/v1/work-posts`, {
+  static async create(workPost: WorkPostModel, _token: string): Promise<WorkPostModel> {
+    const response = await fetch(this.baseUrl, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -50,12 +46,9 @@ export class WorkPostBackendAdapter {
     };
   }
 
-  static async delete(id: string, token: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/v1/work-posts/${id}`, {
+  static async delete(id: string, _token: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/${id}`, {
       method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     });
     if (!response.ok) throw new Error("Failed to delete work post");
   }

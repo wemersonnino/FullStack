@@ -1,6 +1,6 @@
 import { httpDelete, httpGet, httpPost, httpPut } from '@/lib/http/request';
 
-const BASE_URL = '/api/server/api/v1/companies';
+const BASE_URL = '/api/bff/companies';
 
 export interface Company {
   id: number;

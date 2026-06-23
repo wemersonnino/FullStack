@@ -13,7 +13,7 @@ import {
 } from '@/core/domain/escala/escala.types';
 import { httpDelete, httpGet, httpPost, httpPut } from '@/lib/http/request';
 
-const BASE = '/api/server/api/v1/escala';
+const BASE = '/api/bff/escala';
 
 type ServiceOptions = {
   authToken?: string;

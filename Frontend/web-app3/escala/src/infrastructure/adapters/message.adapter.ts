@@ -1,5 +1,3 @@
-import { ENV } from "@/constants/env";
-
 export interface MessageModel {
   id: string;
   senderId?: string;
@@ -18,16 +16,15 @@ export interface MessageModel {
 }
 
 export class MessageBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff/messages';
 
-  static async listMessages(token: string, status?: string): Promise<MessageModel[]> {
+  static async listMessages(_token: string, status?: string): Promise<MessageModel[]> {
     const url = status 
-      ? `${this.baseUrl}/api/v1/messages?status=${status}`
-      : `${this.baseUrl}/api/v1/messages`;
+      ? `${this.baseUrl}?status=${status}`
+      : this.baseUrl;
       
     const response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${token}`,
         Accept: 'application/json',
       },
     });
@@ -35,11 +32,10 @@ export class MessageBackendAdapter {
     return await response.json();
   }
 
-  static async createMessage(message: Partial<MessageModel>, token: string): Promise<MessageModel> {
-    const response = await fetch(`${this.baseUrl}/api/v1/messages`, {
+  static async createMessage(message: Partial<MessageModel>, _token: string): Promise<MessageModel> {
+    const response = await fetch(this.baseUrl, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -54,11 +50,10 @@ export class MessageBackendAdapter {
     return await response.json();
   }
 
-  static async decideMessage(id: string, decision: 'APPROVED' | 'REJECTED', token: string): Promise<MessageModel> {
-    const response = await fetch(`${this.baseUrl}/api/v1/messages/${id}/decision`, {
+  static async decideMessage(id: string, decision: 'APPROVED' | 'REJECTED', _token: string): Promise<MessageModel> {
+    const response = await fetch(`${this.baseUrl}/${id}/decision`, {
       method: 'PATCH',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ decision }),

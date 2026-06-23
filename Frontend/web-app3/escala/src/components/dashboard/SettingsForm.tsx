@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useAppTheme } from '@/components/shared/providers/ThemeProvider';
 import { useAppStore } from '@/stores/app.store';
@@ -64,10 +64,9 @@ const AVAILABLE_ROLES = [
 ];
 
 export function SettingsForm({ user, isAdmin }: SettingsFormProps) {
-  const { theme, setTheme, resolvedTheme } = useAppTheme();
+  const { theme, setTheme } = useAppTheme();
   const { data: session, update } = useSession();
   const { setTheme: setAppTheme } = useAppStore();
-  const [mounted, setMounted] = useState(false);
 
   // States for user permission management
   const [users, setUsers] = useState<UserResponse[]>([]);
@@ -75,14 +74,7 @@ export function SettingsForm({ user, isAdmin }: SettingsFormProps) {
   const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
   const [editingRolesOpen, setEditingRolesOpen] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    if (isAdmin) {
-      loadUsers();
-    }
-  }, [isAdmin]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoadingUsers(true);
     try {
       const list = await getUsers();
@@ -92,7 +84,13 @@ export function SettingsForm({ user, isAdmin }: SettingsFormProps) {
     } finally {
       setLoadingUsers(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const timer = window.setTimeout(loadUsers, 0);
+    return () => window.clearTimeout(timer);
+  }, [isAdmin, loadUsers]);
 
   const handleThemeChange = async (newTheme: string) => {
     const enumTheme = newTheme as ThemeEnum;
@@ -143,8 +141,6 @@ export function SettingsForm({ user, isAdmin }: SettingsFormProps) {
       toast.error('Erro ao atualizar cargos do usuário.');
     }
   };
-
-  if (!mounted) return null;
 
   return (
     <div className="space-y-6">

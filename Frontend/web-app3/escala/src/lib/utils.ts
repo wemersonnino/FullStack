@@ -73,3 +73,17 @@ export function normalizeAvatarUrl(url?: string | null): string {
 
   return url;
 }
+
+type AvatarLike = {
+  avatarUrl?: string | null;
+  image?: string | null;
+  picture?: string | null;
+  avatar?: string | { url?: string | null } | null;
+};
+
+export function resolveAvatarUrl(user?: AvatarLike | null): string {
+  if (!user) return '';
+
+  const avatarValue = typeof user.avatar === 'string' ? user.avatar : user.avatar?.url;
+  return normalizeAvatarUrl(user.avatarUrl || avatarValue || user.image || user.picture || null);
+}
