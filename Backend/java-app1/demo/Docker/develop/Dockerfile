@@ -3,9 +3,8 @@ FROM maven:3.9-eclipse-temurin-25
 WORKDIR /app
 
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
+# COPY src para build rápido
 COPY src ./src
 
-# Development command: runs with hot-reload if configured
+# Executa o boot-run em runtime
 CMD ["mvn", "spring-boot:run"]

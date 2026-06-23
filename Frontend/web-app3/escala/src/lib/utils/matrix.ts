@@ -18,6 +18,10 @@ export function createEscalaMatrix(
   const userMap = new Map<string | number, number>();
   usuarios.forEach((u, i) => userMap.set(u.id, i));
 
+  // Mapear datas para índices de coluna
+  const dayIndexMap = new Map<string, number>();
+  dayKeys.forEach((key, i) => dayIndexMap.set(key, i));
+
   // Inicializar Matriz (Filas x Colunas)
   const matrix: (Escala | null)[][] = Array.from(
     { length: usuarios.length }, 
@@ -31,9 +35,9 @@ export function createEscalaMatrix(
 
     const dateValue = escala.data ?? escala.dataInicio;
     const dateKey = dateValue.split('T')[0];
-    const dayIndex = dayKeys.indexOf(dateKey);
+    const dayIndex = dayIndexMap.get(dateKey);
     
-    if (dayIndex !== -1) {
+    if (dayIndex !== undefined) {
       matrix[userIndex][dayIndex] = escala;
     }
   });

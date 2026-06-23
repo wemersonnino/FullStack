@@ -168,6 +168,7 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
           observacao: values.notes,
           projetoId: selectedProjectId,
           setorId: selectedSectorId,
+          version: props.escala?.version,
         };
 
         await props.onSave(payload, props.escala?.id);

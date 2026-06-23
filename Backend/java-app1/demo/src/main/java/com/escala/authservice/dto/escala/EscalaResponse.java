@@ -27,6 +27,7 @@ public class EscalaResponse {
     private String project;
     private Long companyId;
     private String company;
+    private Long version;
 
     public static EscalaResponse from(WorkShift shift) {
         Employee employee = shift.getEmployee();
@@ -47,6 +48,7 @@ public class EscalaResponse {
                 .project(employee.getProject() == null ? null : employee.getProject().getName())
                 .companyId(employee.getCompany() == null ? null : employee.getCompany().getId())
                 .company(employee.getCompany() == null ? null : employee.getCompany().getName())
+                .version(shift.getVersion())
                 .build();
     }
 }

@@ -39,6 +39,9 @@ const isGoogleAvatarUrl = (url?: unknown) =>
 const isGoogleManagedIdentity = (provider?: unknown, avatarUrl?: unknown) =>
   provider === 'google' || isGoogleAvatarUrl(avatarUrl);
 
+const isRealGoogleCredential = (value?: string) =>
+  Boolean(value) && !value!.startsWith('mock-');
+
 async function getAttributionData() {
   const cookieStore = await cookies();
   const attributionStr = cookieStore.get(process.env.CAMPAIGN_COOKIE_NAME || 'escala_marketing_attribution')?.value;
@@ -184,7 +187,10 @@ const providers: AuthOptions['providers'] = [
   }),
 ];
 
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+if (
+  isRealGoogleCredential(process.env.GOOGLE_CLIENT_ID) &&
+  isRealGoogleCredential(process.env.GOOGLE_CLIENT_SECRET)
+) {
   providers.push(
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,

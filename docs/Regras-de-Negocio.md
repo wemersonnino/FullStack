@@ -4,11 +4,11 @@ Este documento descreve as regras lógicas e restrições que regem o funcioname
 
 ## 1. Gestão de Multi-Tenancy (Empresas)
 *   **Isolamento Total:** Um usuário autenticado só pode visualizar, criar ou editar dados pertencentes ao seu `company_id`.
-*   **Propriedade (Ownership):** Cada empresa deve ter pelo menos um usuário com a role `OWNER`.
+*   **Propriedade (Ownership):** Cada empresa deve ter pelo menos um usuário com a role `OWNER` (Dono do Tenant, hierarquia máxima).
 *   **Identificação Única:** Cada empresa é identificada por um `slug` único e um CNPJ válido (suportando o novo formato alfanumérico).
 
 ## 2. Onboarding e Convites
-*   **Convite por Email:** O administrador (`OWNER`/`MANAGER`) envia um convite vinculado a um email e uma role específica.
+*   **Convite por Email:** O administrador (`OWNER`/`ADMIN`) envia um convite vinculado a um email e uma role específica.
 *   **Expiração:** Links de convite expiram automaticamente após 7 dias corridos.
 *   **Vínculo Obrigatório:** Ao aceitar um convite, o novo usuário é automaticamente vinculado à empresa do remetente, não podendo criar uma nova empresa no mesmo fluxo.
 
@@ -18,16 +18,32 @@ Este documento descreve as regras lógicas e restrições que regem o funcioname
 *   **Validação Cruzada:** O sistema deve registrar o IP do dispositivo e o Fingerprint do navegador para auditoria de fraude.
 *   **Haversine Formula:** O cálculo de distância deve ser realizado no servidor utilizando a fórmula de Haversine para precisão esférica.
 
-## 4. Gestão de Escalas e Trocas
-*   **Conflito de Horário:** O sistema não deve permitir que um colaborador seja escalado para dois turnos sobrepostos na mesma empresa.
-*   **Descanso Obrigatório:** Deve haver um intervalo mínimo (conforme legislação vigente) entre o fim de um turno e o início do próximo.
-*   **Aprovação de Trocas:** Trocas de turno solicitadas por funcionários (`USER`) requerem obrigatoriamente a aprovação de um `MANAGER` ou `OWNER`.
+## 4. Hierarquia e Delegação de Autoridade (ReBAC)
+*   **Níveis de Hierarquia (Modelo Jethro):**
+    1.  **OWNER (Dono do Tenant):** Poder absoluto sobre a conta e faturamento da empresa.
+    2.  **ADMIN (TI / Administrador):** Responsável por dar permissões, gerenciar usuários, cadastros e atribuir gestores.
+    3.  **MANAGER_1000 (Gestor de Mil / Diretor):** Responsável por grandes unidades operacionais ou departamentos inteiros.
+    4.  **MANAGER_100 (Gestor de Cem / Gerente):** Responsável por setores específicos.
+    5.  **MANAGER_50 (Gestor de Cinquenta / Coordenador):** Responsável por equipes ou postos de trabalho.
+    6.  **MANAGER_10 (Gestor de Dez / Supervisor/Líder):** Responsável por equipes pequenas ou escalas diretas.
+*   **Responsabilidade de Permissões:** O cadastro de gestores e atribuição de permissões de gestão (atribuição sobre setores, postos ou equipes) é restrita a usuários com perfil de administrador/TI (`ADMIN`/`OWNER`).
+*   **Limite de Ação do Gestor:** Um gestor só pode realizar ações de edição, criação e exclusão de escalas para funcionários sob sua alocação direta.
+*   **Aprovação Administrativa:** Movimentar, adicionar ou excluir subordinados de equipes, postos ou setores por parte de um gestor exige permissão explícita ou aprovação em fluxo de trabalho pelos perfis `ADMIN`/`OWNER`.
 
-## 5. Financeiro e Folha de Pagamento
-*   **Cálculo de Adicional Noturno:** Horas trabalhadas entre 22:00 e 05:00 devem ser contabilizadas com o percentual de adicional noturno configurado.
-*   **Horas Extras:** Qualquer tempo que exceda a carga horária semanal definida no contrato do colaborador deve ser exportado como hora extra.
+## 5. Central de Notificações, Mensageria e Concorrência
+*   **Controle de Concorrência:** Uma escala não pode ser alterada simultaneamente por mais de um usuário. O sistema deve validar a versão do registro (`@Version`) e rejeitar atualizações conflitantes.
+*   **Solicitações e Mensageria:**
+    *   Gestores podem solicitar permissões adicionais temporárias ou permanentes para o `ADMIN`/`OWNER`.
+    *   Subordinados podem solicitar trocas de turno com colegas ou com o gestor.
+    *   A troca de mensagens segue fluxos: Gestor ↔ Admin, Gestor ↔ Subordinado e Subordinado ↔ Subordinado.
+*   **Interface Dinâmica de Mensagens:** A visualização de uma mensagem no modal de detalhes muda dinamicamente conforme sua classe (ex: se for solicitação de permissão, exibe botões de "Permitir" e checkbox de ações; se for troca de turno, exibe botões "Aceitar" / "Recusar").
 
-## 6. Papéis e Permissões (RBAC)
-*   **OWNER:** Acesso total à gestão da empresa, financeiro, convites e configurações de sistema.
-*   **MANAGER:** Gestão operacional de escalas, colaboradores e aprovação de trocas.
-*   **USER:** Visualização de própria escala, solicitação de trocas e registro de ponto.
+## 6. Integração com WhatsApp/Telegram e IA
+*   **Captura e Análise de Mensagens:** A aplicação escutará canais oficiais (WhatsApp/Telegram) vinculados a cada empresa.
+*   **Processamento por IA:** A IA processará conversas para identificar solicitações de troca de turno ou avisos de faltas/atrasos.
+*   **Busca de Substitutos:** Em caso de ausência relatada no chat, a IA buscará automaticamente colaboradores qualificados próximos geograficamente (integrado ao geofencing) e com disponibilidade de banco de horas para sugerir o substituto ao gestor.
+*   **Sincronização com RH e Calendário:** Todas as trocas aprovadas devem atualizar automaticamente o calendário de escalas e ser comunicadas ao departamento de RH para fechamento de folha.
+
+## 7. Trilha de Auditoria
+*   **Rastreabilidade Total:** Todas as ações críticas (criação de escalas, login, alteração de permissões, trocas de turno e batidas de ponto) devem gravar logs de auditoria detalhados e assinados na empresa correspondente.
+

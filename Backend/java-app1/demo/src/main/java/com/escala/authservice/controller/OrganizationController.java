@@ -7,6 +7,7 @@ import com.escala.authservice.entity.Sector;
 import com.escala.authservice.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,44 +19,52 @@ public class OrganizationController {
     private final OrganizationService organizationService;
 
     @GetMapping("/sectors")
-    public List<Sector> sectors() {
-        return organizationService.sectors();
+    public List<Sector> sectors(Authentication authentication) {
+        return organizationService.sectors(authentication.getName());
     }
 
     @PostMapping("/sectors")
-    public ResponseEntity<Sector> createSector(@RequestBody SectorRequest request) {
-        return ResponseEntity.ok(organizationService.createSector(request));
+    public ResponseEntity<Sector> createSector(Authentication authentication, @RequestBody SectorRequest request) {
+        return ResponseEntity.ok(organizationService.createSector(authentication.getName(), request));
     }
 
     @PutMapping("/sectors/{id}")
-    public ResponseEntity<Sector> updateSector(@PathVariable Long id, @RequestBody SectorRequest request) {
-        return ResponseEntity.ok(organizationService.updateSector(id, request));
+    public ResponseEntity<Sector> updateSector(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody SectorRequest request
+    ) {
+        return ResponseEntity.ok(organizationService.updateSector(authentication.getName(), id, request));
     }
 
     @DeleteMapping("/sectors/{id}")
-    public ResponseEntity<Void> deleteSector(@PathVariable Long id) {
-        organizationService.deleteSector(id);
+    public ResponseEntity<Void> deleteSector(Authentication authentication, @PathVariable Long id) {
+        organizationService.deleteSector(authentication.getName(), id);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/projects")
-    public List<Project> projects() {
-        return organizationService.projects();
+    public List<Project> projects(Authentication authentication) {
+        return organizationService.projects(authentication.getName());
     }
 
     @PostMapping("/projects")
-    public ResponseEntity<Project> createProject(@RequestBody ProjectRequest request) {
-        return ResponseEntity.ok(organizationService.createProject(request));
+    public ResponseEntity<Project> createProject(Authentication authentication, @RequestBody ProjectRequest request) {
+        return ResponseEntity.ok(organizationService.createProject(authentication.getName(), request));
     }
 
     @PutMapping("/projects/{id}")
-    public ResponseEntity<Project> updateProject(@PathVariable Long id, @RequestBody ProjectRequest request) {
-        return ResponseEntity.ok(organizationService.updateProject(id, request));
+    public ResponseEntity<Project> updateProject(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody ProjectRequest request
+    ) {
+        return ResponseEntity.ok(organizationService.updateProject(authentication.getName(), id, request));
     }
 
     @DeleteMapping("/projects/{id}")
-    public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
-        organizationService.deleteProject(id);
+    public ResponseEntity<Void> deleteProject(Authentication authentication, @PathVariable Long id) {
+        organizationService.deleteProject(authentication.getName(), id);
         return ResponseEntity.ok().build();
     }
 }

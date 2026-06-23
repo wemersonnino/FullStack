@@ -20,8 +20,8 @@ public class UserManagementController {
     private final UserManagementService userManagementService;
 
     @GetMapping
-    public List<UserResponse> list() {
-        return userManagementService.list().stream().map(UserResponse::from).toList();
+    public List<UserResponse> list(Authentication authentication) {
+        return userManagementService.list(authentication.getName()).stream().map(UserResponse::from).toList();
     }
 
     @GetMapping("/me")
@@ -47,17 +47,29 @@ public class UserManagementController {
     }
 
     @PostMapping("/{id}/roles")
-    public ResponseEntity<UserResponse> grantRole(@PathVariable Long id, @RequestBody RoleChangeRequest request) {
-        return ResponseEntity.ok(UserResponse.from(userManagementService.grantRole(id, request)));
+    public ResponseEntity<UserResponse> grantRole(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody RoleChangeRequest request
+    ) {
+        return ResponseEntity.ok(UserResponse.from(userManagementService.grantRole(authentication.getName(), id, request)));
     }
 
     @DeleteMapping("/{id}/roles")
-    public ResponseEntity<UserResponse> revokeRole(@PathVariable Long id, @RequestBody RoleChangeRequest request) {
-        return ResponseEntity.ok(UserResponse.from(userManagementService.revokeRole(id, request)));
+    public ResponseEntity<UserResponse> revokeRole(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody RoleChangeRequest request
+    ) {
+        return ResponseEntity.ok(UserResponse.from(userManagementService.revokeRole(authentication.getName(), id, request)));
     }
 
     @PatchMapping("/{id}/theme")
-    public ResponseEntity<UserResponse> updateTheme(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(UserResponse.from(userManagementService.updateTheme(id, body.getOrDefault("theme", "system"))));
+    public ResponseEntity<UserResponse> updateTheme(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body
+    ) {
+        return ResponseEntity.ok(UserResponse.from(userManagementService.updateTheme(authentication.getName(), id, body.getOrDefault("theme", "system"))));
     }
 }

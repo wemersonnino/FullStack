@@ -100,7 +100,7 @@ export function mapArticles(data: any[]): Article[] {
 
 export const fallbackArticles: Article[] = [
   {
-    id: 'art-1',
+    id: 1,
     title: 'Como reduzir 30% das horas extras com escalas inteligentes',
     slug: 'reduzir-horas-extras-escalas',
     description: 'Dicas práticas para otimizar sua jornada de trabalho usando dados.',
@@ -113,7 +113,7 @@ export const fallbackArticles: Article[] = [
     blocks: [],
   },
   {
-    id: 'art-2',
+    id: 2,
     title: 'Geofencing: A prova de presença definitiva no B2B',
     slug: 'geofencing-prova-presenca',
     description: 'Por que hospitais e empresas de segurança estão abandonando o ponto físico.',

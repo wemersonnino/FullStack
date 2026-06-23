@@ -6,6 +6,8 @@ export type Sector = {
   name: string;
   description?: string;
   maxSeats?: number | null;
+  managerId?: number | null;
+  managerName?: string | null;
 };
 
 export type Project = {
@@ -19,6 +21,7 @@ export type OrganizationPayload = {
   name: string;
   description?: string;
   maxSeats?: number | null;
+  managerId?: number | null;
   active?: boolean;
 };
 

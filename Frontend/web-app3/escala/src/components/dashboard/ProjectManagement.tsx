@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Loading } from '@/components/ui/loading';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -139,9 +141,7 @@ export function ProjectManagement() {
       </div>
 
       {isLoading ? (
-        <div className="flex h-40 items-center justify-center">
-          <p>Carregando projetos...</p>
-        </div>
+        <Loading text="Carregando projetos..." />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
@@ -191,9 +191,18 @@ export function ProjectManagement() {
             </div>
           ))}
           {projects.length === 0 && (
-            <div className="col-span-full flex h-40 flex-col items-center justify-center rounded-xl border border-dashed text-muted-foreground">
-              <Briefcase className="mb-2 h-8 w-8 opacity-20" />
-              <p>Nenhum projeto cadastrado.</p>
+            <div className="col-span-full">
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Briefcase />
+                  </EmptyMedia>
+                  <EmptyTitle>Nenhum projeto cadastrado</EmptyTitle>
+                  <EmptyDescription>
+                    Adicione um projeto para começar a gerenciar alocações de colaboradores.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             </div>
           )}
         </div>
@@ -259,7 +268,7 @@ export function ProjectManagement() {
                 )}
               />
               <DialogFooter className="pt-4">
-                <Button type="submit" disabled={form.formState.isSubmitting}>
+                <Button type="submit" disabled={form.formState.isSubmitting} isLoading={form.formState.isSubmitting}>
                   {form.formState.isSubmitting ? 'Salvando...' : 'Salvar'}
                 </Button>
               </DialogFooter>

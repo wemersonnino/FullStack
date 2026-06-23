@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Building2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Loading } from '@/components/ui/loading';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import {
   Dialog,
@@ -211,9 +213,7 @@ export function CompanyManagement() {
       </div>
 
       {isLoading ? (
-        <div className="flex h-40 items-center justify-center">
-          <p>Carregando empresas...</p>
-        </div>
+        <Loading text="Carregando empresas..." />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {companies.map((company) => (
@@ -266,9 +266,18 @@ export function CompanyManagement() {
             </div>
           ))}
           {companies.length === 0 && (
-            <div className="col-span-full flex h-40 flex-col items-center justify-center rounded-xl border border-dashed text-muted-foreground">
-              <Building2 className="mb-2 h-8 w-8 opacity-20" />
-              <p>Nenhuma empresa cadastrada.</p>
+            <div className="col-span-full">
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Building2 />
+                  </EmptyMedia>
+                  <EmptyTitle>Nenhuma empresa cadastrada</EmptyTitle>
+                  <EmptyDescription>
+                    Cadastre uma nova empresa para integrá-la ao sistema.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             </div>
           )}
         </div>

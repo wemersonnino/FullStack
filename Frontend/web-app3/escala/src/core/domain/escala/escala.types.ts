@@ -38,6 +38,7 @@ export type Escala = {
   criadoPor?: string | null;
   criadoEm?: string | null;
   atualizadoEm?: string | null;
+  version?: number;
 };
 
 export type UsuarioEscala = {
@@ -86,6 +87,7 @@ export type CriarEscalaPayload = {
   local?: string;
   remoto?: boolean;
   observacao?: string;
+  version?: number;
 };
 
 export type AtualizarEscalaPayload = Partial<CriarEscalaPayload> & {

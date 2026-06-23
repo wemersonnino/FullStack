@@ -3,6 +3,7 @@
 import { CalendarPlus, LayoutGrid, List } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { CriarEscalaPayload, Escala, SessionLikeUser, UsuarioEscala } from '@/core/domain/escala/escala.types';
 import { atualizarEscala, criarEscala } from '@/core/adapters/escala.service';
 import { groupEscalasByDay, toDateKey } from '../hooks/useEscalaCalendar';
@@ -53,8 +54,16 @@ export function EscalaDashboardAdmin({ initialEscalas, usuarios }: Props) {
         const created = await criarEscala(payload);
         setEscalas((current) => [...current, ...created]);
       }
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Nao foi possivel salvar a escala');
+    } catch (error: any) {
+      const errorMsg = error?.message || '';
+      const isConcurrency = errorMsg.includes('409') || errorMsg.toLowerCase().includes('concorr') || errorMsg.toLowerCase().includes('lock') || errorMsg.toLowerCase().includes('optimistic');
+      
+      if (isConcurrency) {
+        toast.error('Erro de Concorrência: Esta escala foi alterada por outro usuário. Recarregue a página antes de editar.');
+      } else {
+        toast.error(errorMsg || 'Não foi possível salvar a escala.');
+      }
+      throw error;
     }
   }
 

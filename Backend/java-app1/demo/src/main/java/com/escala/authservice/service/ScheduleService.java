@@ -47,7 +47,25 @@ public class ScheduleService {
 
     public List<WorkShift> listMonth(int year, int month, String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        boolean isManagerOnly = user.getRoles().stream().anyMatch(r -> r.getName().startsWith("MANAGER")) &&
+                               user.getRoles().stream().noneMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        
         YearMonth yearMonth = YearMonth.of(year, month);
+        if (isManagerOnly) {
+            List<Sector> managedSectors = sectorRepository.findByCompanyIdAndManagerEmail(company.getId(), userEmail);
+            List<Long> sectorIds = managedSectors.stream().map(Sector::getId).toList();
+            if (sectorIds.isEmpty()) {
+                return Collections.emptyList();
+            }
+            return workShiftRepository.findByEmployeeCompanyIdAndEmployeeSectorIdInAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(
+                    company.getId(),
+                    sectorIds,
+                    yearMonth.atDay(1),
+                    yearMonth.atEndOfMonth()
+            );
+        }
+
         return workShiftRepository.findByEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(
                 company.getId(),
                 yearMonth.atDay(1),
@@ -57,8 +75,30 @@ public class ScheduleService {
 
     public List<EscalaResponse> listEscalas(LocalDate inicio, LocalDate fim, Long usuarioId, Long setorId, Long projetoId, String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        boolean isManagerOnly = user.getRoles().stream().anyMatch(r -> r.getName().startsWith("MANAGER")) &&
+                               user.getRoles().stream().noneMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        
         LocalDate start = inicio == null ? YearMonth.now().atDay(1) : inicio;
         LocalDate end = fim == null ? YearMonth.from(start).atEndOfMonth() : fim;
+
+        if (isManagerOnly) {
+            List<Sector> managedSectors = sectorRepository.findByCompanyIdAndManagerEmail(company.getId(), userEmail);
+            List<Long> sectorIds = managedSectors.stream().map(Sector::getId).toList();
+            if (sectorIds.isEmpty()) {
+                return Collections.emptyList();
+            }
+            if (setorId != null) {
+                if (!sectorIds.contains(setorId)) {
+                    throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a ver escalas deste setor");
+                }
+            } else {
+                return workShiftRepository.findByEmployeeCompanyIdAndEmployeeSectorIdInAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(
+                        company.getId(), sectorIds, start, end).stream()
+                        .map(EscalaResponse::from)
+                        .toList();
+            }
+        }
         
         return workShiftRepository.findEscalas(company.getId(), start, end, usuarioId, setorId, projetoId).stream()
                 .map(EscalaResponse::from)
@@ -93,6 +133,20 @@ public class ScheduleService {
         
         if (!Objects.equals(employee.getCompany().getId(), company.getId())) {
             throw new org.springframework.security.access.AccessDeniedException("Funcionario nao pertence a sua empresa");
+        }
+
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        boolean isManagerOnly = user.getRoles().stream().anyMatch(r -> r.getName().startsWith("MANAGER")) &&
+                               user.getRoles().stream().noneMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        
+        if (isManagerOnly) {
+            List<Sector> managedSectors = sectorRepository.findByCompanyIdAndManagerEmail(company.getId(), userEmail);
+            List<Long> sectorIds = managedSectors.stream().map(Sector::getId).toList();
+            Long empSectorId = employee.getSector() == null ? null : employee.getSector().getId();
+            Long requestSectorId = request.getSectorId() != null ? request.getSectorId() : empSectorId;
+            if (requestSectorId == null || !sectorIds.contains(requestSectorId)) {
+                throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a gerir escalas para este setor");
+            }
         }
 
         applyEmployeeAllocation(employee, request);
@@ -146,6 +200,26 @@ public class ScheduleService {
             throw new org.springframework.security.access.AccessDeniedException("Escala nao pertence a sua empresa");
         }
 
+        // Concurrency Check (Optimistic Locking)
+        if (request.getVersion() != null && !Objects.equals(shift.getVersion(), request.getVersion())) {
+            throw new org.springframework.orm.ObjectOptimisticLockingFailureException(WorkShift.class, id);
+        }
+
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        boolean isManagerOnly = user.getRoles().stream().anyMatch(r -> r.getName().startsWith("MANAGER")) &&
+                               user.getRoles().stream().noneMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        
+        if (isManagerOnly) {
+            List<Sector> managedSectors = sectorRepository.findByCompanyIdAndManagerEmail(company.getId(), userEmail);
+            List<Long> sectorIds = managedSectors.stream().map(Sector::getId).toList();
+            Long currentSectorId = shift.getEmployee().getSector() == null ? null : shift.getEmployee().getSector().getId();
+            Long targetSectorId = request.getSectorId() != null ? request.getSectorId() : currentSectorId;
+            if (currentSectorId == null || !sectorIds.contains(currentSectorId) || 
+                targetSectorId == null || !sectorIds.contains(targetSectorId)) {
+                throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar escala neste setor");
+            }
+        }
+
         if (request.getEmployeeId() != null && !Objects.equals(request.getEmployeeId(), shift.getEmployee().getId())) {
             Employee newEmp = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
             if (!Objects.equals(newEmp.getCompany().getId(), company.getId())) {
@@ -184,6 +258,20 @@ public class ScheduleService {
         if (!Objects.equals(shift.getEmployee().getCompany().getId(), company.getId())) {
             throw new org.springframework.security.access.AccessDeniedException("Escala nao pertence a sua empresa");
         }
+
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        boolean isManagerOnly = user.getRoles().stream().anyMatch(r -> r.getName().startsWith("MANAGER")) &&
+                               user.getRoles().stream().noneMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        
+        if (isManagerOnly) {
+            List<Sector> managedSectors = sectorRepository.findByCompanyIdAndManagerEmail(company.getId(), userEmail);
+            List<Long> sectorIds = managedSectors.stream().map(Sector::getId).toList();
+            Long sectorId = shift.getEmployee().getSector() == null ? null : shift.getEmployee().getSector().getId();
+            if (sectorId == null || !sectorIds.contains(sectorId)) {
+                throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a cancelar escala deste setor");
+            }
+        }
+
         shift.setStatus(ShiftStatus.CANCELLED);
         workShiftRepository.save(shift);
         auditLogService.record(userEmail, "SHIFT_CANCELLED", "WorkShift", id, "Escala cancelada");
@@ -191,8 +279,33 @@ public class ScheduleService {
 
     public List<UsuarioEscalaResponse> usuariosEscalaveis(Long projectId, Long sectorId, Long companyId, String query, String userEmail) {
         Company myCompany = resolveCompany(userEmail);
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        boolean isManagerOnly = user.getRoles().stream().anyMatch(r -> r.getName().startsWith("MANAGER")) &&
+                               user.getRoles().stream().noneMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        
+        Long finalSectorId = sectorId;
+        if (isManagerOnly) {
+            List<Sector> managedSectors = sectorRepository.findByCompanyIdAndManagerEmail(myCompany.getId(), userEmail);
+            List<Long> sectorIds = managedSectors.stream().map(Sector::getId).toList();
+            if (sectorIds.isEmpty()) {
+                return Collections.emptyList();
+            }
+            if (sectorId != null) {
+                if (!sectorIds.contains(sectorId)) {
+                    throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a gerir este setor");
+                }
+            } else {
+                String normalizedQuery = normalizeSearchQuery(query);
+                List<Employee> list = employeeRepository.findSchedulableEmployees(myCompany.getId(), projectId, null, normalizedQuery);
+                return list.stream()
+                        .filter(e -> e.getSector() != null && sectorIds.contains(e.getSector().getId()))
+                        .map(UsuarioEscalaResponse::from)
+                        .toList();
+            }
+        }
+
         String normalizedQuery = normalizeSearchQuery(query);
-        return employeeRepository.findSchedulableEmployees(myCompany.getId(), projectId, sectorId, normalizedQuery).stream()
+        return employeeRepository.findSchedulableEmployees(myCompany.getId(), projectId, finalSectorId, normalizedQuery).stream()
                 .map(UsuarioEscalaResponse::from)
                 .toList();
     }

@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Chrome } from 'lucide-react';
 import { ENV } from '@/constants/env';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 export const LoginForm = () => {
   const { login, loginGoogle } = useAuth();
@@ -41,7 +42,7 @@ export const LoginForm = () => {
         <h1 className="text-center text-xl font-semibold">Acessar conta</h1>
 
         {selectedPlan && (
-          <div className="rounded-md bg-primary/10 p-3 text-center text-sm font-medium text-primary">
+          <div className="bg-primary/10 text-primary rounded-md p-3 text-center text-sm font-medium">
             Retornando para assinar o plano: <span className="font-bold">{selectedPlan}</span>
           </div>
         )}
@@ -74,11 +75,11 @@ export const LoginForm = () => {
           )}
         />
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" isLoading={form.formState.isSubmitting}>
           Entrar
         </Button>
 
-        {ENV.GOOGLE_CLIENT_ID ? (
+        {ENV.GOOGLE_AUTH_ENABLED ? (
           <Button type="button" variant="outline" className="w-full" onClick={loginGoogle}>
             <Chrome className="mr-2 size-4" />
             Entrar com Google
@@ -88,15 +89,16 @@ export const LoginForm = () => {
         <div className="flex flex-col gap-2 pt-2">
           <p className="text-muted-foreground text-center text-sm">
             Não tem uma conta?{' '}
-            <a href={selectedPlan ? `/register?plan=${selectedPlan}` : "/register"} className="underline">
+            <a
+              href={selectedPlan ? `/register?plan=${selectedPlan}` : '/register'}
+              className="underline"
+            >
               Cadastre-se
             </a>
           </p>
-          <p className="text-muted-foreground text-center text-sm">
-            <a href="/forgot-password" className="underline">
-              Esqueci minha senha
-            </a>
-          </p>
+          <Link href="/forgot-password" className="underline">
+            <span className="text-muted-foreground text-center text-sm">Esqueci minha senha</span>
+          </Link>
         </div>
       </form>
     </Form>

@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Chrome } from 'lucide-react';
 import { ENV } from '@/constants/env';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 export const RegisterForm = () => {
   const { register, loginGoogle } = useAuth();
@@ -105,21 +106,21 @@ export const RegisterForm = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" isLoading={form.formState.isSubmitting}>
           Registrar
         </Button>
-        {ENV.GOOGLE_CLIENT_ID ? (
+        {ENV.GOOGLE_AUTH_ENABLED ? (
           <Button type="button" variant="outline" className="w-full" onClick={loginGoogle}>
             <Chrome className="mr-2 size-4" />
             Cadastrar com Google
           </Button>
         ) : null}
-        <p className="text-muted-foreground text-center text-sm">
+        <div className="text-muted-foreground text-center text-sm">
           Já possui conta?{' '}
-          <a href="/login" className="underline">
+          <Link href="/login" className="underline">
             Entrar
-          </a>
-        </p>
+          </Link>
+        </div>
       </form>
     </Form>
   );

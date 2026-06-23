@@ -1,6 +1,14 @@
 import React from "react"
 import { FileQuestion } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 
 interface EmptyStateProps {
   title?: string
@@ -20,19 +28,21 @@ export function EmptyState({
   className = "",
 }: EmptyStateProps) {
   return (
-    <div className={`flex flex-col items-center justify-center p-12 text-center border rounded-lg border-dashed bg-muted/50 ${className}`}>
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-        {icon || <FileQuestion className="h-6 w-6 text-muted-foreground" />}
-      </div>
-      <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-      <p className="mb-4 mt-2 text-sm text-muted-foreground max-w-sm">
-        {description}
-      </p>
+    <Empty className={className}>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          {icon || <FileQuestion />}
+        </EmptyMedia>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
+      </EmptyHeader>
       {actionLabel && onAction && (
-        <Button onClick={onAction}>
-          {actionLabel}
-        </Button>
+        <EmptyContent>
+          <Button onClick={onAction}>
+            {actionLabel}
+          </Button>
+        </EmptyContent>
       )}
-    </div>
+    </Empty>
   )
 }

@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface WorkShiftRepository extends JpaRepository<WorkShift, Long> {
     List<WorkShift> findByEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(Long companyId, LocalDate start, LocalDate end);
+    List<WorkShift> findByEmployeeCompanyIdAndEmployeeSectorIdInAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(Long companyId, List<Long> sectorIds, LocalDate start, LocalDate end);
     List<WorkShift> findByEmployeeIdAndEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(Long employeeId, Long companyId, LocalDate start, LocalDate end);
     @Query("""
             select ws

@@ -7,7 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "sectors")
+@Table(
+        name = "sectors",
+        indexes = {
+                @Index(name = "idx_sectors_company_manager", columnList = "company_id, manager_id")
+        }
+)
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,4 +31,8 @@ public class Sector {
 
     @ManyToOne
     private Company company;
+
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    private User manager;
 }

@@ -1,7 +1,8 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Spinner } from '@/components/ui/spinner';
+import { Empty, EmptyHeader, EmptyMedia, EmptyDescription } from '@/components/ui/empty';
 
 interface LoadingProps {
   className?: string;
@@ -11,14 +12,17 @@ interface LoadingProps {
 
 export function Loading({ className, size = 32, text }: LoadingProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center p-8", className)}>
-      <Loader2 
-        className="animate-spin text-primary" 
-        size={size} 
-        aria-label="Carregando..."
-      />
-      {text && <p className="mt-4 text-sm text-muted-foreground animate-pulse">{text}</p>}
-    </div>
+    <Empty className={cn("border-none min-h-[200px] p-4", className)}>
+      <EmptyHeader>
+        <EmptyMedia>
+          <Spinner 
+            className="text-primary animate-spin" 
+            style={{ width: size, height: size }}
+          />
+        </EmptyMedia>
+        {text && <EmptyDescription className="mt-2 animate-pulse">{text}</EmptyDescription>}
+      </EmptyHeader>
+    </Empty>
   );
 }
 

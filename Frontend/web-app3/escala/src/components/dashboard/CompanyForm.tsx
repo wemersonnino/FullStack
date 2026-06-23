@@ -440,7 +440,7 @@ export function CompanyForm({ companyId }: { companyId?: number }) {
               <Button type="button" variant="ghost" asChild>
                 <Link href="/dashboard/empresas">Cancelar</Link>
               </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting} className="gap-2">
+              <Button type="submit" disabled={form.formState.isSubmitting} isLoading={form.formState.isSubmitting} className="gap-2">
                 <Save className="h-4 w-4" />
                 {form.formState.isSubmitting ? 'Salvando...' : 'Salvar Empresa'}
               </Button>

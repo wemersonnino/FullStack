@@ -1,7 +1,8 @@
 import { BlogCard } from '@/components/home/BlogCard';
 import { Button } from '@/components/ui/button';
 import { getArticles } from '@/services/article.service';
-import { Search } from 'lucide-react';
+import { Search, Newspaper } from 'lucide-react';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import Link from 'next/link';
 
 interface ArticlesPageProps {
@@ -111,9 +112,14 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
 
 function EmptyArticlesMessage({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border bg-card p-10 text-center text-card-foreground shadow-sm">
-      <h2 className="text-xl font-semibold">Nenhum conteúdo para exibir</h2>
-      <p className="mt-2 text-muted-foreground">{message}</p>
-    </div>
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Newspaper />
+        </EmptyMedia>
+        <EmptyTitle>Nenhum conteúdo para exibir</EmptyTitle>
+        <EmptyDescription>{message}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 }

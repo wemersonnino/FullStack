@@ -22,8 +22,9 @@ public class UserManagementService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<User> list() {
-        return userRepository.findAll();
+    public List<User> list(String requesterEmail) {
+        User requester = currentUser(requesterEmail);
+        return userRepository.findByCompanyId(requester.getCompany().getId());
     }
 
     public User currentUser(String email) {
@@ -86,22 +87,40 @@ public class UserManagementService {
         userRepository.save(user);
     }
 
-    public User grantRole(Long userId, RoleChangeRequest request) {
+    public User grantRole(String requesterEmail, Long userId, RoleChangeRequest request) {
+        User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
+        
+        if (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar roles de usuario de outra empresa");
+        }
+
         Role role = roleRepository.findByName(request.getRoleName())
                 .orElseGet(() -> roleRepository.save(Role.builder().name(request.getRoleName()).build()));
         user.getRoles().add(role);
         return userRepository.save(user);
     }
 
-    public User revokeRole(Long userId, RoleChangeRequest request) {
+    public User revokeRole(String requesterEmail, Long userId, RoleChangeRequest request) {
+        User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
+        
+        if (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar roles de usuario de outra empresa");
+        }
+
         user.getRoles().removeIf(role -> role.getName().equals(request.getRoleName()));
         return userRepository.save(user);
     }
 
-    public User updateTheme(Long userId, String theme) {
+    public User updateTheme(String requesterEmail, Long userId, String theme) {
+        User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
+        
+        if (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar tema de usuario de outra empresa");
+        }
+
         user.setTheme(theme);
         return userRepository.save(user);
     }

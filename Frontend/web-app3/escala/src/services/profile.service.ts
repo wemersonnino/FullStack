@@ -26,8 +26,8 @@ export type ChangeMyPasswordPayload = {
   newPassword: string;
 };
 
-export async function getMyProfile(): Promise<User | null> {
-  return await httpGet<User>(`${API_ROUTES.USERS}/me`);
+export async function getMyProfile(token?: string): Promise<User | null> {
+  return await httpGet<User>(`${API_ROUTES.USERS}/me`, undefined, token ? { authToken: token } : undefined);
 }
 
 import { UserProfile } from '@/core/domain/models/user.model';

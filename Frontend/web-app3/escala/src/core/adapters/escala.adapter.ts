@@ -58,6 +58,7 @@ export function adaptEscalaDtoToEscala(dto: AnyRecord): Escala {
     criadoPor: first(dto.criadoPor, dto.createdBy, null),
     criadoEm: first(dto.criadoEm, dto.createdAt, null),
     atualizadoEm: first(dto.atualizadoEm, dto.updatedAt, null),
+    version: dto.version !== undefined && dto.version !== null ? Number(dto.version) : undefined,
   };
 }
 
@@ -104,6 +105,7 @@ export function adaptCriarEscalaPayloadToDto(payload: CriarEscalaPayload) {
     sector: payload.setor,
     project: payload.projeto,
     notes: payload.observacao,
+    version: payload.version,
   };
 }
 
@@ -121,5 +123,6 @@ export function adaptAtualizarEscalaPayloadToDto(payload: AtualizarEscalaPayload
     sector: payload.setor,
     project: payload.projeto,
     notes: payload.observacao,
+    version: payload.version,
   };
 }

@@ -81,7 +81,7 @@ export const ResetPasswordForm = () => {
         {/* Código de redefinição oculto */}
         <input type="hidden" {...form.register('code')} />
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" isLoading={form.formState.isSubmitting}>
           Redefinir senha
         </Button>
       </form>

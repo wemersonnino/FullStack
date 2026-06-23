@@ -101,7 +101,7 @@ export default function NovoProjetoPage() {
             <Button type="button" variant="ghost" asChild>
               <Link href="/dashboard/escala/admin">Cancelar</Link>
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="gap-2">
+            <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting} className="gap-2">
               <Save className="h-4 w-4" />
               {isSubmitting ? 'Salvando...' : 'Salvar projeto'}
             </Button>

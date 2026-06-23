@@ -173,7 +173,7 @@ export function TeamInviteManager() {
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={sending}>
+            <Button type="submit" className="w-full" disabled={sending} isLoading={sending}>
               {sending ? 'Enviando...' : 'Enviar Convite'}
               <Plus className="ml-2 h-4 w-4" />
             </Button>
