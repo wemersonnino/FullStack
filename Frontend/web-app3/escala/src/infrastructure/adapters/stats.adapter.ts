@@ -1,17 +1,27 @@
-import { ENV } from "@/constants/env";
 import { StatsMapper } from "./mappers/stats.mapper";
 import { DashboardStats } from "@/core/domain/models/stats.model";
 
 export class StatsBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff/stats';
+
+  private static url(path: string) {
+    const url = `${this.baseUrl}${path}`;
+    if (typeof window !== 'undefined') return url;
+    return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
+  }
 
   static async getDashboardSummary(token: string): Promise<DashboardStats> {
-    const response = await fetch(`${this.baseUrl}/api/v1/dashboard/summary`, {
+    const now = new Date();
+    const params = new URLSearchParams({
+      year: String(now.getFullYear()),
+      month: String(now.getMonth() + 1),
+    });
+    const response = await fetch(this.url(`/summary?${params.toString()}`), {
       headers: {
-        Authorization: `Bearer ${token}`,
         Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
       },
-      next: { revalidate: 60 } // Revalida a cada minuto (Cache Next.js)
+      cache: 'no-store',
     });
 
     if (!response.ok) {

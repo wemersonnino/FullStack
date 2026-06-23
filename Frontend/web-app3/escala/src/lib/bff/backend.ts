@@ -55,6 +55,10 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
   });
 
   const contentType = response.headers.get('content-type') ?? '';
+  if (response.status === 204) {
+    return new NextResponse(null, { status: 204 });
+  }
+
   const data = contentType.includes('application/json') ? await response.json() : await response.text();
 
   return NextResponse.json(data, { status: response.status });

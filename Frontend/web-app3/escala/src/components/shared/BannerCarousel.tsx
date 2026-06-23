@@ -19,10 +19,6 @@ export const BannerCarousel = ({
   const bannersWithImages = banners.filter((banner) => banner.image?.url);
 
   useEffect(() => {
-    setCurrent(0);
-  }, [bannersWithImages.length]);
-
-  useEffect(() => {
     if (bannersWithImages.length <= 1) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % bannersWithImages.length);
@@ -32,7 +28,8 @@ export const BannerCarousel = ({
 
   if (bannersWithImages.length === 0) return null;
 
-  const currentBanner = bannersWithImages[current] ?? bannersWithImages[0];
+  const safeCurrent = current >= bannersWithImages.length ? 0 : current;
+  const currentBanner = bannersWithImages[safeCurrent] ?? bannersWithImages[0];
   const imageUrl = currentBanner.image.url;
   const buttonLink = currentBanner.button_link?.trim();
 
@@ -80,7 +77,7 @@ export const BannerCarousel = ({
               aria-label={`Exibir banner ${idx + 1}`}
               onClick={() => setCurrent(idx)}
               className={`w-3 h-3 rounded-full transition cursor-pointer ${
-                idx === current ? "bg-white" : "bg-white/50"
+                idx === safeCurrent ? "bg-white" : "bg-white/50"
               }`}
             />
           ))}

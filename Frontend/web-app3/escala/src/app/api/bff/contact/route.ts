@@ -1,7 +1,10 @@
-import { proxyBackend } from '@/lib/bff/backend';
+import { proxyBackend, readJson } from '@/lib/bff/backend';
 
 export async function POST(request: Request) {
   return proxyBackend('/api/v1/public/contact', {
+    method: 'POST',
+    body: await readJson(request),
+    authenticated: false,
     request,
   });
 }

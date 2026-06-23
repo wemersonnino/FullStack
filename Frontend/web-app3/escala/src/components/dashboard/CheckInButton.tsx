@@ -46,7 +46,7 @@ export function CheckInButton({ companyLocation }: CheckInButtonProps) {
         setUserPos(currentPos);
 
         try {
-          const response = await fetch('/api/server/api/v1/check-in', {
+          const response = await fetch('/api/bff/check-in', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

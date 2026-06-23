@@ -1,5 +1,3 @@
-import { ENV } from "@/constants/env";
-
 export interface OperationalCapacityModel {
   id?: string;
   targetId: string;
@@ -11,12 +9,11 @@ export interface OperationalCapacityModel {
 }
 
 export class OperationalCapacityBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff/operational-capacities';
 
-  static async listCapacities(token: string): Promise<OperationalCapacityModel[]> {
-    const response = await fetch(`${this.baseUrl}/api/v1/operational-capacities`, {
+  static async listCapacities(_token: string): Promise<OperationalCapacityModel[]> {
+    const response = await fetch(this.baseUrl, {
       headers: {
-        Authorization: `Bearer ${token}`,
         Accept: 'application/json',
       },
     });
@@ -24,11 +21,10 @@ export class OperationalCapacityBackendAdapter {
     return await response.json();
   }
 
-  static async createCapacity(capacity: OperationalCapacityModel, token: string): Promise<OperationalCapacityModel> {
-    const response = await fetch(`${this.baseUrl}/api/v1/operational-capacities`, {
+  static async createCapacity(capacity: OperationalCapacityModel, _token: string): Promise<OperationalCapacityModel> {
+    const response = await fetch(this.baseUrl, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -44,12 +40,9 @@ export class OperationalCapacityBackendAdapter {
     return await response.json();
   }
 
-  static async deleteCapacity(id: string, token: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/v1/operational-capacities/${id}`, {
+  static async deleteCapacity(id: string, _token: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/${id}`, {
       method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     });
     if (!response.ok) throw new Error("Failed to delete capacity");
   }

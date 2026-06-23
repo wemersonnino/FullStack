@@ -1,12 +1,17 @@
-import { ENV } from "@/constants/env";
 import { CompanyMapper } from "./mappers/company.mapper";
 import { Company } from "@/core/domain/models/company.model";
 
 export class CompanyBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff/companies';
+
+  private static url(path = '') {
+    const url = `${this.baseUrl}${path}`;
+    if (typeof window !== 'undefined') return url;
+    return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
+  }
 
   static async list(token: string): Promise<Company[]> {
-    const response = await fetch(`${this.baseUrl}/api/v1/companies`, {
+    const response = await fetch(this.url(), {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -19,7 +24,7 @@ export class CompanyBackendAdapter {
   }
 
   static async findById(id: string, token: string): Promise<Company> {
-    const response = await fetch(`${this.baseUrl}/api/v1/companies/${id}`, {
+    const response = await fetch(this.url(`/${id}`), {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -33,7 +38,7 @@ export class CompanyBackendAdapter {
 
   static async create(company: Partial<Company>, token: string): Promise<Company> {
     const dto = CompanyMapper.toDto(company);
-    const response = await fetch(`${this.baseUrl}/api/v1/companies`, {
+    const response = await fetch(this.url(), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -49,7 +54,7 @@ export class CompanyBackendAdapter {
 
   static async update(id: string, company: Partial<Company>, token: string): Promise<Company> {
     const dto = CompanyMapper.toDto(company);
-    const response = await fetch(`${this.baseUrl}/api/v1/companies/${id}`, {
+    const response = await fetch(this.url(`/${id}`), {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -64,7 +69,7 @@ export class CompanyBackendAdapter {
   }
 
   static async delete(id: string, token: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/v1/companies/${id}`, {
+    const response = await fetch(this.url(`/${id}`), {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,

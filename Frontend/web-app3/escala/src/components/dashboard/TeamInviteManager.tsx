@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/select';
 import { TeamInvitation } from '@/core/domain/models/invitation.model';
 
-const TEAM_INVITATIONS_URL = '/api/server/api/v1/team/invitations';
+const TEAM_INVITATIONS_URL = '/api/bff/team/invitations';
 
 const InviteSchema = z.object({
   email: z.string().email('Email inválido'),

@@ -13,10 +13,10 @@ export interface CheckoutResponse {
 }
 
 export const billingService = {
-  getSubscription: () => httpGet<Subscription>("/api/server/api/v1/billing/subscription"),
+  getSubscription: () => httpGet<Subscription>("/api/bff/billing/subscription"),
   
   createCheckoutSession: (planType: string, successUrl: string, cancelUrl: string) => 
-    httpPost<CheckoutResponse>("/api/server/api/v1/billing/checkout", { planType, successUrl, cancelUrl }),
+    httpPost<CheckoutResponse>("/api/bff/billing/checkout", { planType, successUrl, cancelUrl }),
   
-  cancelSubscription: () => httpPost<void>("/api/server/api/v1/billing/cancel", {}),
+  cancelSubscription: () => httpPost<void>("/api/bff/billing/cancel", {}),
 };

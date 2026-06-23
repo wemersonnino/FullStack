@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
   const res = await proxyBackend(endpoint, {
     method: 'POST',
-    body: JSON.stringify(body.context || {}),
+    body: body.context || {},
     request,
   });
 

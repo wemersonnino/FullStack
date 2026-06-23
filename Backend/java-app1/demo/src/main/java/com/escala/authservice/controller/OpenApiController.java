@@ -69,7 +69,7 @@ public class OpenApiController {
     private Map<String, Object> info() {
         Map<String, Object> info = new LinkedHashMap<>();
         info.put("title", "Escala API");
-        info.put("description", "API Spring Boot para autenticacao, usuarios, empresas, funcionarios, organizacao, escalas, trocas, ponto e relatorios.");
+        info.put("description", "API Spring Boot para autenticacao, usuarios, empresas, funcionarios, organizacao, escalas, trocas, ponto, relatorios, billing, IA, mensageria, capacidade operacional, marketing e endpoints operacionais.");
         info.put("version", "v1");
         return info;
     }
@@ -256,7 +256,7 @@ public class OpenApiController {
 
         // Stats
         paths.put("/api/v1/stats/summary", pathGet(get("Relatorios", "Resumo estatistico do dashboard", "Retorna indicadores do mes para o dashboard administrativo.", queryParamRequired("year", "Ano do resumo."), queryParamRequired("month", "Mes do resumo, de 1 a 12."))));
-        paths.put("/api/v1/stats/marketing", pathGet(get("Marketing", "Estatisticas de marketing", "Retorna metricas de conversao de leads e atribuicao de campanhas. Requer ADMIN.")));
+        paths.put("/api/v1/stats/marketing", pathGet(get("Marketing", "Estatisticas de marketing", "Retorna metricas de conversao de leads e atribuicao de campanhas. Requer ADMIN, OWNER ou MARKETING.")));
 
         // Mensageria e Notificações (ReBAC)
         paths.put("/api/v1/messages", path(

@@ -36,7 +36,7 @@ public class DataInitializer {
         return args -> {
             createTriggers();
 
-            for (String roleName : List.of("ADMIN", "MANAGER", "USER", "OWNER", "LEAD", "MANAGER_DIRETOR", "MANAGER_GERENTE", "MANAGER_COORDENADOR", "MANAGER_SUPERVISOR")) {
+            for (String roleName : List.of("ADMIN", "MANAGER", "USER", "OWNER", "LEAD", "MARKETING", "MANAGER_DIRETOR", "MANAGER_GERENTE", "MANAGER_COORDENADOR", "MANAGER_SUPERVISOR")) {
                 roleRepository.findByName(roleName)
                         .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
             }

@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { billingService } from '@/services/billing.service';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { LandingPricingPlan } from '@/interfaces/landing/landing.interface';
 
@@ -14,11 +15,11 @@ interface PricingTableProps {
 
 export const PricingTable = ({ plans, isPublic = false }: PricingTableProps) => {
   const [loading, setLoading] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleSubscribe = async (plan: LandingPricingPlan) => {
     if (isPublic) {
-      // Redirect to register with selected plan in query param
-      window.location.href = `/register?plan=${plan.name.toUpperCase()}`;
+      router.push(`/register?plan=${plan.name.toUpperCase()}`);
       return;
     }
 
@@ -29,7 +30,7 @@ export const PricingTable = ({ plans, isPublic = false }: PricingTableProps) => 
       
       const response = await billingService.createCheckoutSession(plan.name, successUrl, cancelUrl);
       if (response?.url) {
-        window.location.href = response.url;
+        window.location.assign(response.url);
       }
     } catch (error) {
       console.error('Erro ao iniciar checkout:', error);

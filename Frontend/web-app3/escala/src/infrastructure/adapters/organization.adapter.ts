@@ -1,13 +1,18 @@
-import { ENV } from "@/constants/env";
 import { OrganizationMapper } from "./mappers/organization.mapper";
 import { Sector, Project } from "@/core/domain/models/organization.model";
 
 export class OrganizationBackendAdapter {
-  private static baseUrl = ENV.API_BASE_URL;
+  private static baseUrl = '/api/bff/organization';
+
+  private static url(path: string) {
+    const url = `${this.baseUrl}${path}`;
+    if (typeof window !== 'undefined') return url;
+    return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
+  }
 
   // Sectors
   static async listSectors(token: string): Promise<Sector[]> {
-    const response = await fetch(`${this.baseUrl}/api/v1/organization/sectors`, {
+    const response = await fetch(this.url('/sectors'), {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -19,7 +24,7 @@ export class OrganizationBackendAdapter {
   }
 
   static async createSector(sector: Partial<Sector>, token: string): Promise<Sector> {
-    const response = await fetch(`${this.baseUrl}/api/v1/organization/sectors`, {
+    const response = await fetch(this.url('/sectors'), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -33,8 +38,8 @@ export class OrganizationBackendAdapter {
   }
 
   static async updateSector(id: string, sector: Partial<Sector>, token: string): Promise<Sector> {
-    const response = await fetch(`${this.baseUrl}/api/v1/organization/sectors/${id}`, {
-      method: 'PUT',
+    const response = await fetch(this.url(`/sectors/${id}`), {
+      method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -47,7 +52,7 @@ export class OrganizationBackendAdapter {
   }
 
   static async deleteSector(id: string, token: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/v1/organization/sectors/${id}`, {
+    const response = await fetch(this.url(`/sectors/${id}`), {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -58,7 +63,7 @@ export class OrganizationBackendAdapter {
 
   // Projects
   static async listProjects(token: string): Promise<Project[]> {
-    const response = await fetch(`${this.baseUrl}/api/v1/organization/projects`, {
+    const response = await fetch(this.url('/projects'), {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -70,7 +75,7 @@ export class OrganizationBackendAdapter {
   }
 
   static async createProject(project: Partial<Project>, token: string): Promise<Project> {
-    const response = await fetch(`${this.baseUrl}/api/v1/organization/projects`, {
+    const response = await fetch(this.url('/projects'), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -84,8 +89,8 @@ export class OrganizationBackendAdapter {
   }
 
   static async updateProject(id: string, project: Partial<Project>, token: string): Promise<Project> {
-    const response = await fetch(`${this.baseUrl}/api/v1/organization/projects/${id}`, {
-      method: 'PUT',
+    const response = await fetch(this.url(`/projects/${id}`), {
+      method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -98,7 +103,7 @@ export class OrganizationBackendAdapter {
   }
 
   static async deleteProject(id: string, token: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/v1/organization/projects/${id}`, {
+    const response = await fetch(this.url(`/projects/${id}`), {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,
