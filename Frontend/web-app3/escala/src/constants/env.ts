@@ -27,4 +27,8 @@ export const ENV = {
     process.env.NEXT_PUBLIC_RECAPTCHA_ENABLED === 'true' ||
     (process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_RECAPTCHA_ENABLED !== 'false'),
   GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+  GOOGLE_AUTH_ENABLED:
+    Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) &&
+    !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID.startsWith('mock-') &&
+    process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED !== 'false',
 };

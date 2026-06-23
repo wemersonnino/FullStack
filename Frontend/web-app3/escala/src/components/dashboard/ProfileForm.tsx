@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { MapPin, Search } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { formatCep } from '@brazilian-utils/brazilian-utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,6 +92,7 @@ const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'i
 const isGoogleAvatarUrl = (url?: string | null) => Boolean(url?.includes('googleusercontent.com'));
 
 export function ProfileForm({ user }: ProfileFormProps) {
+  const router = useRouter();
   const { update } = useSession();
   const rawAvatarUrl = user.avatarUrl || user.avatar?.url || (typeof user.avatar === 'string' ? user.avatar : null);
   const isGoogleUser = user.provider?.toLowerCase() === 'google' || isGoogleAvatarUrl(rawAvatarUrl);
@@ -246,6 +248,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         : { ...user, ...updated };
 
       await update({ user: sessionUser });
+      router.refresh();
       setAvatarPreview(
         normalizeAvatarUrl(isGoogleUser ? user.avatarUrl : updated.avatarUrl) || null
       );
@@ -563,7 +566,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             />
 
             <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={savingProfile}>
+                <Button type="submit" disabled={savingProfile} isLoading={savingProfile}>
                   {savingProfile ? 'Salvando...' : 'Salvar perfil'}
                 </Button>
             </div>
@@ -626,7 +629,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               />
 
               <div className="flex justify-end">
-                <Button type="submit" variant="outline" disabled={savingPassword}>
+                <Button type="submit" variant="outline" disabled={savingPassword} isLoading={savingPassword}>
                   {savingPassword ? 'Atualizando...' : 'Alterar senha'}
                 </Button>
               </div>

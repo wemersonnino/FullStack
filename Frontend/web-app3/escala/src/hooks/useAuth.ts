@@ -155,8 +155,8 @@ export function useAuth() {
   }
 
   async function loginGoogle() {
-    if (!ENV.GOOGLE_CLIENT_ID) {
-      toast.error("Login Google nao configurado.")
+    if (!ENV.GOOGLE_AUTH_ENABLED) {
+      toast.error("Login Google nao configurado com credenciais reais.")
       return
     }
     const plan = searchParams.get('plan')

@@ -1,13 +1,16 @@
 import { CalendarDays } from 'lucide-react';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 
 export function EscalaEmptyState({ title = 'Sem escalas no periodo' }: { title?: string }) {
   return (
-    <div className="grid min-h-40 place-items-center rounded-lg border border-dashed bg-card/60 p-6 text-center">
-      <div>
-        <CalendarDays className="mx-auto size-8 text-muted-foreground" />
-        <p className="mt-3 font-medium">{title}</p>
-        <p className="mt-1 text-sm text-muted-foreground">Ajuste o periodo ou selecione outro dia.</p>
-      </div>
-    </div>
+    <Empty className="bg-card/60">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <CalendarDays />
+        </EmptyMedia>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>Ajuste o periodo ou selecione outro dia.</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 }

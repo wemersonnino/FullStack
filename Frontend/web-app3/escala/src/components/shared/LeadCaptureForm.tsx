@@ -183,7 +183,7 @@ export function LeadCaptureForm({
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full" disabled={isSubmitting} isLoading={isSubmitting}>
                 {isSubmitting ? 'Enviando...' : ctaLabel}
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </Button>

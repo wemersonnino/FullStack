@@ -8,6 +8,8 @@ import { toast } from 'sonner';
 import { Mail, Plus, Search, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Loading } from '@/components/ui/loading';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -125,10 +127,20 @@ export default function TeamPage() {
           </TableBody>
         </Table>
         {!isLoading && filteredEmployees.length === 0 && (
-          <div className="py-16 text-center text-muted-foreground">Nenhum colaborador encontrado.</div>
+          <Empty className="border-none py-12">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Users />
+              </EmptyMedia>
+              <EmptyTitle>Nenhum colaborador encontrado</EmptyTitle>
+              <EmptyDescription>
+                Não há colaboradores cadastrados ou correspondentes à sua busca.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
         {isLoading && (
-          <div className="py-16 text-center text-muted-foreground">Carregando colaboradores...</div>
+          <Loading text="Carregando colaboradores..." className="py-12" />
         )}
       </div>
     </div>

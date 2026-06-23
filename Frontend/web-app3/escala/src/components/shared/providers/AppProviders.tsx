@@ -6,8 +6,12 @@ import { AppSessionProvider } from '@/components/shared/providers/SessionProvide
 import { AppThemeProvider } from '@/components/shared/providers/ThemeProvider';
 import { AppTransitionProvider } from '@/components/shared/providers/TransitionProvider';
 import { AppToaster } from '@/components/shared/Toaster';
+import { LoadingPage } from '@/components/ui/loading';
+import { useAppStore } from '@/stores/app.store';
 
 export function AppProviders({ children }: { readonly children: ReactNode }) {
+  const loading = useAppStore((state) => state.loading);
+
   /*  const locale = useLocale();
 
   useEffect(() => {
@@ -19,6 +23,7 @@ export function AppProviders({ children }: { readonly children: ReactNode }) {
       <AppThemeProvider>
         <AppTransitionProvider>
           <AppToaster />
+          {loading && <LoadingPage />}
           {children}
         </AppTransitionProvider>
       </AppThemeProvider>

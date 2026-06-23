@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Loading } from '@/components/ui/loading';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -136,9 +138,7 @@ export function SectorManagement() {
       </div>
 
       {isLoading ? (
-        <div className="flex h-40 items-center justify-center">
-          <p>Carregando setores...</p>
-        </div>
+        <Loading text="Carregando setores..." />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {sectors.map((sector) => (
@@ -185,9 +185,18 @@ export function SectorManagement() {
             </div>
           ))}
           {sectors.length === 0 && (
-            <div className="col-span-full flex h-40 flex-col items-center justify-center rounded-xl border border-dashed text-muted-foreground">
-              <Layers className="mb-2 h-8 w-8 opacity-20" />
-              <p>Nenhum setor cadastrado.</p>
+            <div className="col-span-full">
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Layers />
+                  </EmptyMedia>
+                  <EmptyTitle>Nenhum setor cadastrado</EmptyTitle>
+                  <EmptyDescription>
+                    Adicione um setor para começar a organizar as escalas de trabalho.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             </div>
           )}
         </div>
@@ -246,7 +255,7 @@ export function SectorManagement() {
                 )}
               />
               <DialogFooter className="pt-4">
-                <Button type="submit" disabled={form.formState.isSubmitting}>
+                <Button type="submit" disabled={form.formState.isSubmitting} isLoading={form.formState.isSubmitting}>
                   {form.formState.isSubmitting ? 'Salvando...' : 'Salvar'}
                 </Button>
               </DialogFooter>

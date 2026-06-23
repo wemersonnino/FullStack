@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Plus, Trash2, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -143,11 +144,17 @@ export function WorkPostManagement() {
           ))}
         </div>
       ) : workPosts.length === 0 ? (
-        <Card className="border border-dashed border-border/80 rounded-2xl bg-muted/10 p-8 text-center flex flex-col items-center justify-center">
-          <Award className="size-10 text-muted-foreground/60 mb-2 stroke-[1.5]" />
-          <p className="text-sm font-bold text-foreground">Nenhum posto de trabalho cadastrado</p>
-          <p className="text-xs text-muted-foreground mt-1">Crie postos para segmentar os locais físicos de cobertura de escalas.</p>
-        </Card>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Award />
+            </EmptyMedia>
+            <EmptyTitle>Nenhum posto de trabalho cadastrado</EmptyTitle>
+            <EmptyDescription>
+              Crie postos para segmentar os locais físicos de cobertura de escalas.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {workPosts.map((wp) => {

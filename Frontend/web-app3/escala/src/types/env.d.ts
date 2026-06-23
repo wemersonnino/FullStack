@@ -5,6 +5,7 @@ declare namespace NodeJS {
         readonly NEXT_PUBLIC_COMPANY_SLUG: string;
         readonly NEXT_PUBLIC_RECAPTCHA_SITE_KEY: string;
         readonly NEXT_PUBLIC_GOOGLE_CLIENT_ID: string;
+        readonly NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: string;
         readonly GOOGLE_CLIENT_ID: string;
         readonly GOOGLE_CLIENT_SECRET: string;
         readonly NEXTAUTH_SECRET: string;

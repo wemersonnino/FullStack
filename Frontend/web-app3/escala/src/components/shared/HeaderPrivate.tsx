@@ -23,9 +23,24 @@ import { MessageModel } from '@/infrastructure/adapters/message.adapter';
 import { MessageService } from '@/core/application/services/message.service';
 import { MessageDetailsModal } from '@/components/dashboard/MessageDetailsModal';
 
-export const HeaderPrivate = () => {
+type HeaderUser = {
+  username?: string | null;
+  email?: string | null;
+  roles?: string[];
+  token?: string;
+  avatarUrl?: string | null;
+  image?: string | null;
+};
+
+export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
   const { session, logout } = useAuth();
-  const user = session?.user;
+  const sessionUser = session?.user as HeaderUser | undefined;
+  const user = {
+    ...initialUser,
+    ...sessionUser,
+    avatarUrl: sessionUser?.avatarUrl || initialUser?.avatarUrl || null,
+    image: sessionUser?.image || initialUser?.image || null,
+  };
   const token = (user as any)?.token;
 
   const [messages, setMessages] = useState<MessageModel[]>([]);
@@ -50,7 +65,7 @@ export const HeaderPrivate = () => {
     return () => clearInterval(interval);
   }, [token]);
 
-  const avatarSrc = normalizeAvatarUrl(user?.avatarUrl || (user as any)?.image);
+  const avatarSrc = normalizeAvatarUrl(user?.avatarUrl || user?.image);
 
   const handleMessageClick = (msg: MessageModel) => {
     setSelectedMessage(msg);

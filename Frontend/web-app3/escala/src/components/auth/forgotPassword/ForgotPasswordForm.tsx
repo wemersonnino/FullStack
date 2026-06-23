@@ -54,7 +54,7 @@ export const ForgotPasswordForm = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" isLoading={form.formState.isSubmitting}>
           Enviar link de recuperação
         </Button>
       </form>
