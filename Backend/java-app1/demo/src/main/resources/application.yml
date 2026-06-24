@@ -20,6 +20,11 @@ logging:
   level:
     org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
 
+app:
+  openapi:
+    enabled: ${OPENAPI_ENABLED:true}
+    include-admin: ${OPENAPI_INCLUDE_ADMIN:true}
+
 application:
   security:
     jwt:
@@ -64,3 +69,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+app:
+  openapi:
+    enabled: false
+    include-admin: false
