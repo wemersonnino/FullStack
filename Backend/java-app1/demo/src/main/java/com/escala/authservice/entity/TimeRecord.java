@@ -8,7 +8,13 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "time_records")
+@Table(
+        name = "time_records",
+        indexes = {
+                @Index(name = "idx_time_records_user_time", columnList = "user_id, recordTime"),
+                @Index(name = "idx_time_records_type_time", columnList = "type, recordTime")
+        }
+)
 @Data
 @Builder
 @NoArgsConstructor

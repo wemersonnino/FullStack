@@ -28,6 +28,9 @@ public class UserResponse {
     private String position;
     private String function;
     private boolean active;
+    private Long companyId;
+    private String companyName;
+    private String companySlug;
 
     public static UserResponse from(User user) {
         return UserResponse.builder()
@@ -48,6 +51,9 @@ public class UserResponse {
                 .position(user.getPosition())
                 .function(user.getFunction())
                 .active(user.isActive())
+                .companyId(user.getCompany() == null ? null : user.getCompany().getId())
+                .companyName(user.getCompany() == null ? null : user.getCompany().getName())
+                .companySlug(user.getCompany() == null ? null : user.getCompany().getSlug())
                 .build();
     }
 }

@@ -24,6 +24,20 @@ export class UserBackendAdapter {
     return UserMapper.toDomain(dto);
   }
 
+  static async listUsers(token: string): Promise<UserProfile[]> {
+    const response = await fetch(this.url(''), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch users from backend");
+    const dtos = await response.json();
+    return dtos.map((dto: unknown) => UserMapper.toDomain(dto));
+  }
+
   static async updateMe(token: string, profile: Partial<UserProfile>): Promise<UserProfile> {
     const dto = UserMapper.toUpdateDto(profile);
     

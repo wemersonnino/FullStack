@@ -9,7 +9,13 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "audit_logs")
+@Table(
+        name = "audit_logs",
+        indexes = {
+                @Index(name = "idx_audit_logs_company_created_at", columnList = "company_id, created_at"),
+                @Index(name = "idx_audit_logs_company_action", columnList = "company_id, action")
+        }
+)
 @Data
 @Builder
 @NoArgsConstructor
@@ -32,6 +38,10 @@ public class AuditLog {
 
     @Column(length = 4000)
     private String details;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @Builder.Default
     @Column(nullable = false)

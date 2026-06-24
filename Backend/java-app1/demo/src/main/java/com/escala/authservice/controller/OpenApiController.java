@@ -1,5 +1,7 @@
 package com.escala.authservice.controller;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,9 +11,13 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@ConditionalOnProperty(prefix = "app.openapi", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiController {
 
     private static final String SWAGGER_UI_VERSION = "5.32.2";
+
+    @Value("${app.openapi.include-admin:true}")
+    private boolean includeAdminPaths;
 
     @GetMapping(value = {"/swagger-ui/index.html", "/swagger-ui.html"}, produces = MediaType.TEXT_HTML_VALUE)
     public String swaggerUi() {
@@ -62,8 +68,26 @@ public class OpenApiController {
         spec.put("tags", tags());
         spec.put("components", components());
         spec.put("security", List.of(Map.of("bearerAuth", List.of())));
-        spec.put("paths", paths());
+        spec.put("paths", filterExposedPaths(paths()));
         return spec;
+    }
+
+    private Map<String, Object> filterExposedPaths(Map<String, Object> paths) {
+        if (includeAdminPaths) {
+            return paths;
+        }
+
+        Map<String, Object> filtered = new LinkedHashMap<>(paths);
+        List<String> adminPrefixes = List.of(
+                "/api/v1/audit-logs",
+                "/api/v1/billing",
+                "/api/v1/companies",
+                "/api/v1/rebac",
+                "/api/v1/stats/marketing",
+                "/api/v1/users"
+        );
+        filtered.keySet().removeIf(path -> adminPrefixes.stream().anyMatch(path::startsWith));
+        return filtered;
     }
 
     private Map<String, Object> info() {
@@ -91,6 +115,7 @@ public class OpenApiController {
                 tag("IA", "Assistente de Inteligência Artificial para escala e riscos."),
                 tag("Mensageria", "Mensagens, notificacoes, solicitacoes de permissao e central de comunicacao."),
                 tag("Capacidade Operacional", "Gerenciamento de capacidade minima de colaboradores por posto ou setor."),
+                tag("Auditoria", "Consulta administrativa de trilhas de auditoria por empresa."),
                 tag("Operacional", "Endpoints operacionais de saude e suporte a monitoramento.")
         );
     }
@@ -227,6 +252,21 @@ public class OpenApiController {
         paths.put("/api/v1/escala/usuarios", pathGet(get("Escala Operacional", "Listar usuarios escalaveis", "Lista usuarios disponiveis para escala com filtros por projeto, setor, empresa e busca textual. Requer ADMIN.", queryParam("projetoId", "ID do projeto."), queryParam("setorId", "ID do setor."), queryParam("empresaId", "ID da empresa."), queryParam("q", "Texto para busca por nome ou email."))));
         paths.put("/api/v1/escala/usuarios/{id}", pathGet(get("Escala Operacional", "Buscar usuario escalavel", "Retorna dados de um usuario disponivel para escala. Requer ADMIN.", pathParam("id", "ID do usuario."))));
 
+        paths.put("/api/v1/rebac/manager-assignments", path(
+                get("ReBAC", "Listar manager assignments", "Lista associacoes administrativas entre gestores e escopos operacionais. Requer OWNER ou ADMIN."),
+                post("ReBAC", "Criar manager assignment", "Associa um gestor a um escopo COMPANY, SECTOR, PROJECT, WORK_POST, TEAM ou EMPLOYEE. Requer OWNER ou ADMIN.", "ManagerAssignmentRequest")
+        ));
+        paths.put("/api/v1/rebac/manager-assignments/{id}", pathDelete(delete("ReBAC", "Excluir manager assignment", "Remove uma associacao de gestor por ID. Requer OWNER ou ADMIN.", pathParam("id", "ID do manager assignment."))));
+        paths.put("/api/v1/rebac/management-edges", path(
+                get("ReBAC", "Listar management edges", "Lista arestas diretas da hierarquia de gestores da empresa. Requer OWNER ou ADMIN."),
+                post("ReBAC", "Criar management edge", "Cria vinculo direto de subordinacao entre gestor pai e gestor/usuario subordinado. Requer OWNER ou ADMIN.", "ManagementEdgeRequest")
+        ));
+        paths.put("/api/v1/rebac/management-edges/{id}", pathDelete(delete("ReBAC", "Excluir management edge", "Remove uma aresta direta da hierarquia. Requer OWNER ou ADMIN.", pathParam("id", "ID da management edge."))));
+        paths.put("/api/v1/rebac/management-closure", pathGet(get("ReBAC", "Listar management closure", "Lista a tabela transitiva calculada da hierarquia de gestores. Requer OWNER ou ADMIN.")));
+        paths.put("/api/v1/rebac/management-closure/recalculate", pathPost(post("ReBAC", "Recalcular management closure", "Recalcula caminhos transitivos da hierarquia a partir das arestas ativas. Requer OWNER ou ADMIN.", null)));
+        paths.put("/api/v1/rebac/enums/manager-scope-types", pathGet(get("ReBAC", "Listar ManagerScopeType", "Lista os escopos de gestao aceitos pelo dominio ReBAC. Requer OWNER ou ADMIN.")));
+        paths.put("/api/v1/rebac/enums/manager-role-levels", pathGet(get("ReBAC", "Listar ManagerRoleLevel", "Lista niveis hierarquicos e seus pesos usados pelo PolicyService. Requer OWNER ou ADMIN.")));
+
         paths.put("/api/v1/schedules", pathGet(get("Escalas e Trocas", "Listar escala mensal", "Lista turnos de trabalho de um mes e ano.", queryParamRequired("year", "Ano da escala."), queryParamRequired("month", "Mes da escala, de 1 a 12."))));
         paths.put("/api/v1/schedules/generate", pathPost(post("Escalas e Trocas", "Gerar escala mensal", "Gera escala mensal a partir das regras de planejamento e disponibilidade.", "GenerateScheduleRequest")));
         paths.put("/api/v1/schedules/swap-requests", path(
@@ -257,6 +297,8 @@ public class OpenApiController {
         // Stats
         paths.put("/api/v1/stats/summary", pathGet(get("Relatorios", "Resumo estatistico do dashboard", "Retorna indicadores do mes para o dashboard administrativo.", queryParamRequired("year", "Ano do resumo."), queryParamRequired("month", "Mes do resumo, de 1 a 12."))));
         paths.put("/api/v1/stats/marketing", pathGet(get("Marketing", "Estatisticas de marketing", "Retorna metricas de conversao de leads e atribuicao de campanhas. Requer ADMIN, OWNER ou MARKETING.")));
+
+        paths.put("/api/v1/audit-logs", pathGet(get("Auditoria", "Consultar logs de auditoria", "Lista eventos de auditoria da empresa do usuario autenticado. Requer OWNER ou ADMIN.", queryParam("actor", "Filtro parcial por ator/email."), queryParam("action", "Filtro parcial por acao."), queryParam("entityType", "Filtro exato por tipo de entidade."), queryParam("page", "Pagina zero-based."), queryParam("size", "Tamanho da pagina, limitado pelo backend."))));
 
         // Mensageria e Notificações (ReBAC)
         paths.put("/api/v1/messages", path(
@@ -422,38 +464,38 @@ public class OpenApiController {
         switch (requestName) {
             case "AuthenticationRequest":
                 properties.put("email", Map.of("type", "string", "example", "admin@escala.local"));
-                properties.put("password", Map.of("type", "string", "example", "Admin@123456"));
+                properties.put("password", Map.of("type", "string", "format", "password", "example", "********"));
                 properties.put("companySlug", Map.of("type", "string", "example", "escala-demo"));
-                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 break;
             case "RegisterRequest":
                 properties.put("username", Map.of("type", "string", "example", "gestor1"));
                 properties.put("email", Map.of("type", "string", "example", "gestor1@escala.local"));
-                properties.put("password", Map.of("type", "string", "example", "Admin@123456"));
+                properties.put("password", Map.of("type", "string", "format", "password", "example", "********"));
                 properties.put("companyName", Map.of("type", "string", "example", "Minha Empresa LTDA"));
                 properties.put("companySlug", Map.of("type", "string", "example", "minha-empresa"));
-                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 break;
             case "ForgotPasswordRequest":
                 properties.put("email", Map.of("type", "string", "example", "admin@escala.local"));
                 properties.put("companySlug", Map.of("type", "string", "example", "escala-demo"));
-                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 break;
             case "ResetPasswordRequest":
-                properties.put("code", Map.of("type", "string", "example", "abc-123-xyz"));
-                properties.put("password", Map.of("type", "string", "example", "NovaSenha@123"));
-                properties.put("passwordConfirmation", Map.of("type", "string", "example", "NovaSenha@123"));
-                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                properties.put("code", Map.of("type", "string", "example", "<reset-code>"));
+                properties.put("password", Map.of("type", "string", "format", "password", "example", "********"));
+                properties.put("passwordConfirmation", Map.of("type", "string", "format", "password", "example", "********"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 break;
             case "CompleteRegistrationRequest":
                 properties.put("companyName", Map.of("type", "string", "example", "Minha Empresa LTDA"));
                 properties.put("cnpj", Map.of("type", "string", "example", "12.345.678/0001-90"));
-                properties.put("password", Map.of("type", "string", "example", "NovaSenha@123"));
+                properties.put("password", Map.of("type", "string", "format", "password", "example", "********"));
                 break;
             case "GoogleLoginRequest":
-                properties.put("idToken", Map.of("type", "string", "example", "eyJhbGciOiJSUzI1NiIs..."));
+                properties.put("idToken", Map.of("type", "string", "example", "<google-id-token>"));
                 properties.put("companySlug", Map.of("type", "string", "example", "escala-demo"));
-                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 properties.put("attribution", Map.of(
                     "type", "object",
                     "properties", Map.of(
@@ -473,7 +515,7 @@ public class OpenApiController {
                 properties.put("name", Map.of("type", "string", "example", "João Silva"));
                 properties.put("email", Map.of("type", "string", "example", "joao@empresa.com"));
                 properties.put("companyName", Map.of("type", "string", "example", "Minha Empresa LTDA"));
-                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 break;
             case "LearningProgressRequest":
                 properties.put("module", Map.of("type", "string", "example", "Treinamento Inicial"));
@@ -498,8 +540,8 @@ public class OpenApiController {
                 properties.put("function", Map.of("type", "string", "example", "Administrador"));
                 break;
             case "ChangePasswordRequest":
-                properties.put("currentPassword", Map.of("type", "string", "example", "Admin@123456"));
-                properties.put("newPassword", Map.of("type", "string", "example", "NovaSenha@123"));
+                properties.put("currentPassword", Map.of("type", "string", "format", "password", "example", "********"));
+                properties.put("newPassword", Map.of("type", "string", "format", "password", "example", "********"));
                 break;
             case "RoleChangeRequest":
                 properties.put("roleName", Map.of("type", "string", "example", "MANAGER"));
@@ -544,7 +586,7 @@ public class OpenApiController {
                 properties.put("latitude", Map.of("type", "number", "format", "double", "example", -23.55052));
                 properties.put("longitude", Map.of("type", "number", "format", "double", "example", -46.633308));
                 properties.put("deviceFingerprint", Map.of("type", "string", "example", "browser-fingerprint-abc123xyz"));
-                properties.put("recaptchaToken", Map.of("type", "string", "example", "valid-token"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 break;
             case "EscalaRequest":
                 properties.put("employeeId", Map.of("type", "integer", "format", "int64", "example", 1));
@@ -557,6 +599,23 @@ public class OpenApiController {
                 properties.put("sectorId", Map.of("type", "integer", "format", "int64", "example", 1));
                 properties.put("projectId", Map.of("type", "integer", "format", "int64", "example", 1));
                 properties.put("companyId", Map.of("type", "integer", "format", "int64", "example", 1));
+                break;
+            case "ManagerAssignmentRequest":
+                properties.put("managerUserId", Map.of("type", "integer", "format", "int64", "example", 2));
+                properties.put("scopeType", Map.of("type", "string", "enum", List.of("COMPANY", "SECTOR", "PROJECT", "WORK_POST", "TEAM", "EMPLOYEE"), "example", "SECTOR"));
+                properties.put("scopeId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("roleLevel", Map.of("type", "string", "enum", List.of("OWNER", "ADMIN", "MANAGER_DIRETOR", "MANAGER_GERENTE", "MANAGER_COORDENADOR", "MANAGER_SUPERVISOR"), "example", "MANAGER_GERENTE"));
+                properties.put("startsAt", Map.of("type", "string", "format", "date-time", "example", "2026-06-24T08:00:00"));
+                properties.put("endsAt", Map.of("type", "string", "format", "date-time", "example", "2026-12-31T18:00:00"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
+                break;
+            case "ManagementEdgeRequest":
+                properties.put("parentUserId", Map.of("type", "integer", "format", "int64", "example", 2));
+                properties.put("childUserId", Map.of("type", "integer", "format", "int64", "example", 3));
+                properties.put("relationType", Map.of("type", "string", "example", "REPORTS_TO"));
+                properties.put("startsAt", Map.of("type", "string", "format", "date-time", "example", "2026-06-24T08:00:00"));
+                properties.put("endsAt", Map.of("type", "string", "format", "date-time", "example", "2026-12-31T18:00:00"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
                 break;
             case "CreateShiftSwapRequest":
                 properties.put("requesterId", Map.of("type", "integer", "format", "int64", "example", 1));
@@ -718,8 +777,8 @@ public class OpenApiController {
 
         switch (responseName) {
             case "AuthResponse":
-                properties.put("token", Map.of("type", "string", "example", "eyJhbGciOiJSUzI1NiIs..."));
-                properties.put("refreshToken", Map.of("type", "string", "example", "d3b07384d113ed1a..."));
+                properties.put("token", Map.of("type", "string", "example", "<jwt-token>"));
+                properties.put("refreshToken", Map.of("type", "string", "example", "<refresh-token>"));
                 properties.put("user", Map.of(
                     "type", "object",
                     "properties", Map.of(

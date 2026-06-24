@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginSchema, LoginSchemaType } from '@/lib/schemas/login.schema';
@@ -14,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth } from '@/hooks/useAuth';
-import { Chrome } from 'lucide-react';
+import { Chrome, Eye, EyeOff } from 'lucide-react';
 import { ENV } from '@/constants/env';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -23,6 +24,7 @@ export const LoginForm = () => {
   const { login, loginGoogle } = useAuth();
   const searchParams = useSearchParams();
   const selectedPlan = searchParams.get('plan');
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginSchemaType>({
     resolver: zodResolver(LoginSchema),
@@ -30,7 +32,15 @@ export const LoginForm = () => {
   });
 
   const onSubmit = async (data: LoginSchemaType) => {
-    await login(data.email, data.password);
+    const success = await login(data.email, data.password);
+    if (!success) {
+      form.setError('root', {
+        type: 'server',
+        message: 'E-mail ou senha incorretos. Verifique os dados e tente novamente.',
+      });
+      form.setError('email', { type: 'server', message: ' ' });
+      form.setError('password', { type: 'server', message: ' ' });
+    }
   };
 
   return (
@@ -40,6 +50,12 @@ export const LoginForm = () => {
         className="bg-background/60 mx-auto mt-16 max-w-md space-y-4 rounded-lg border p-6"
       >
         <h1 className="text-center text-xl font-semibold">Acessar conta</h1>
+
+        {form.formState.errors.root?.message && (
+          <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {form.formState.errors.root.message}
+          </div>
+        )}
 
         {selectedPlan && (
           <div className="bg-primary/10 text-primary rounded-md p-3 text-center text-sm font-medium">
@@ -68,7 +84,25 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel>Senha</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="******" {...field} />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="******"
+                    className="pr-10"
+                    autoComplete="current-password"
+                    {...field}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
+                    aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+                    onClick={() => setShowPassword((current) => !current)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

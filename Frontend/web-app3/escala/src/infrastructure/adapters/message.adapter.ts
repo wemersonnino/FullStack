@@ -18,25 +18,33 @@ export interface MessageModel {
 export class MessageBackendAdapter {
   private static baseUrl = '/api/bff/messages';
 
-  static async listMessages(_token: string, status?: string): Promise<MessageModel[]> {
+  static async listMessages(token: string, status?: string): Promise<MessageModel[]> {
     const url = status 
       ? `${this.baseUrl}?status=${status}`
       : this.baseUrl;
-      
-    const response = await fetch(url, {
-      headers: {
-        Accept: 'application/json',
-      },
-    });
-    if (!response.ok) throw new Error("Failed to fetch messages");
-    return await response.json();
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Accept: 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        cache: 'no-store',
+      });
+      if (!response.ok) return [];
+      return await response.json();
+    } catch (error) {
+      console.warn('Failed to fetch messages', error);
+      return [];
+    }
   }
 
-  static async createMessage(message: Partial<MessageModel>, _token: string): Promise<MessageModel> {
+  static async createMessage(message: Partial<MessageModel>, token: string): Promise<MessageModel> {
     const response = await fetch(this.baseUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
         receiverId: message.receiverId ? parseInt(message.receiverId) : null,
@@ -50,11 +58,12 @@ export class MessageBackendAdapter {
     return await response.json();
   }
 
-  static async decideMessage(id: string, decision: 'APPROVED' | 'REJECTED', _token: string): Promise<MessageModel> {
+  static async decideMessage(id: string, decision: 'APPROVED' | 'REJECTED', token: string): Promise<MessageModel> {
     const response = await fetch(`${this.baseUrl}/${id}/decision`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({ decision }),
     });

@@ -1,40 +1,55 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, X, BrainCircuit, RefreshCcw, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { Sparkles, X, BrainCircuit, RefreshCcw, ShieldAlert, CheckCircle2, Send } from 'lucide-react';
 import { useAiStore } from '../store/useAiStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Loading } from '@/components/ui/loading';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { AiAssistantTask } from '@/core/domain/models/ai-assistant.model';
+import { AiAssistantService } from '@/core/application/services/ai-assistant.service';
 import { toast } from 'sonner';
 
 export function AiAssistantPanel() {
   const { isOpen, closeAi, isAnalyzing, setAnalyzing, analysis, setAnalysis, credits } = useAiStore();
+  const [prompt, setPrompt] = useState('');
+  const [task, setTask] = useState<AiAssistantTask>('ANALYZE_RISK');
 
-  async function handleAnalyze() {
+  async function runAiTask(nextTask = task, nextPrompt = prompt) {
     setAnalyzing(true);
     setAnalysis(null);
     
     try {
-      // BFF: /api/bff/ai/analyze-schedule
-      const response = await fetch('/api/bff/ai/task', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task: 'ANALYZE_RISK', context: 'Current monthly schedule' }),
+      const response = await AiAssistantService.execute({
+        task: nextTask,
+        prompt: nextPrompt || 'Analise riscos da escala atual.',
       });
-
-      if (!response.ok) throw new Error('Falha na análise da IA');
-
-      const data = await response.json();
-      setAnalysis(data.response);
+      setAnalysis(response);
       toast.success('Análise concluída com sucesso!');
     } catch (err) {
-      toast.error('Erro ao processar análise inteligente');
+      toast.error(err instanceof Error ? err.message : 'Erro ao processar análise inteligente');
     } finally {
       setAnalyzing(false);
     }
+  }
+
+  async function handleAnalyze() {
+    await runAiTask('ANALYZE_RISK', 'Analise a escala atual e identifique riscos de cobertura, excesso de horas e conflitos trabalhistas.');
+  }
+
+  async function handleSendPrompt() {
+    await runAiTask(task, prompt);
   }
 
   return (
@@ -88,21 +103,39 @@ export function AiAssistantPanel() {
                       </CardContent>
                     </Card>
 
-                    {!analysis && !isAnalyzing && (
-                      <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <div className="mb-4 rounded-full bg-primary/5 p-6 text-primary">
-                          <BrainCircuit className="h-12 w-12" />
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Conversa operacional</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <Select value={task} onValueChange={(value) => setTask(value as typeof task)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ANALYZE_RISK">Analisar risco</SelectItem>
+                            <SelectItem value="SUGGEST_REPLACEMENT">Sugerir substituto</SelectItem>
+                            <SelectItem value="EXPLAIN_CONFLICT">Explicar conflito</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Textarea
+                          value={prompt}
+                          onChange={(event) => setPrompt(event.target.value)}
+                          placeholder="Ex.: quais setores terão baixa cobertura presencial na próxima semana?"
+                          className="min-h-28"
+                        />
+                        <div className="flex gap-2">
+                          <Button className="flex-1 gap-2" onClick={handleSendPrompt} disabled={isAnalyzing}>
+                            <Send className="h-4 w-4" />
+                            Enviar
+                          </Button>
+                          <Button variant="outline" className="gap-2" onClick={handleAnalyze} disabled={isAnalyzing}>
+                            <RefreshCcw className="h-4 w-4" />
+                            Risco
+                          </Button>
                         </div>
-                        <h3 className="text-lg font-bold">Análise de Risco</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          Solicite uma análise para identificar gaps de cobertura ou infrações de regras trabalhistas.
-                        </p>
-                        <Button className="mt-6 gap-2" onClick={handleAnalyze}>
-                          <RefreshCcw className="h-4 w-4" />
-                          Iniciar Análise
-                        </Button>
-                      </div>
-                    )}
+                      </CardContent>
+                    </Card>
 
                     {isAnalyzing && (
                       <div className="flex flex-col items-center justify-center py-12">

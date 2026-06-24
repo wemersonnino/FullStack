@@ -10,7 +10,13 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "shift_swap_requests")
+@Table(
+        name = "shift_swap_requests",
+        indexes = {
+                @Index(name = "idx_shift_swap_requester_status_created", columnList = "requester_id, status, createdAt"),
+                @Index(name = "idx_shift_swap_original_shift", columnList = "original_shift_id")
+        }
+)
 @Data
 @Builder
 @NoArgsConstructor

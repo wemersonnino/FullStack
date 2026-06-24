@@ -1,24 +1,21 @@
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { ArrowLeft, BarChart3 } from 'lucide-react';
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { format } from 'date-fns';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { ReportService } from '@/core/application/services/report.service';
+import { RelatoriosView } from '@/features/reports/components/RelatoriosView';
 
-export default function RelatoriosPage() {
-  return (
-    <div className="container mx-auto py-10 space-y-6">
-      <Button variant="ghost" asChild className="gap-2">
-        <Link href="/dashboard">
-          <ArrowLeft className="h-4 w-4" /> Voltar
-        </Link>
-      </Button>
-      
-      <div className="flex flex-col items-center justify-center h-[60vh] border rounded-xl border-dashed bg-card">
-        <BarChart3 className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-        <h1 className="text-2xl font-bold">Relatórios</h1>
-        <p className="text-muted-foreground mt-2">Esta funcionalidade está em desenvolvimento.</p>
-        <Button className="mt-6" asChild>
-          <Link href="/dashboard">Voltar para o Dashboard</Link>
-        </Button>
-      </div>
-    </div>
-  );
+type RelatoriosPageProps = {
+  searchParams?: Promise<{ month?: string }>;
+};
+
+export default async function RelatoriosPage({ searchParams }: RelatoriosPageProps) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.token) redirect('/login');
+
+  const params = await searchParams;
+  const month = params?.month || format(new Date(), 'yyyy-MM');
+  const items = await ReportService.getPayrollData(session.user.token, month);
+
+  return <RelatoriosView month={month} items={items} />;
 }

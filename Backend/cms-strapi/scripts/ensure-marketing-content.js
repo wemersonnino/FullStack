@@ -220,6 +220,21 @@ async function ensureCtaButtons(strapi) {
   return entries;
 }
 
+async function ensureLandingPages(strapi) {
+  const entries = [];
+  const source = marketingV3.landingPages || [];
+
+  for (const lp of source) {
+    const entry = await findOrCreateByField(strapi, 'api::landing-page.landing-page', 'slug', lp.slug, {
+      ...lp,
+      pageKey: lp.slug === 'home' ? 'home' : 'segment',
+    });
+    entries.push(entry);
+  }
+
+  return entries;
+}
+
 async function ensureHeaderMenus(strapi) {
   const source = [
     { title: 'Funcionalidades', slug: 'funcionalidades', destination: '#modulos', order: 0 },
@@ -298,6 +313,7 @@ async function syncRelation(db, tableName, landingPageId, relatedColumn, orderCo
 
 async function backfillMarketingCollections(strapi, logger) {
   const related = {
+    landingPages: await ensureLandingPages(strapi),
     features: await ensureFeatureSections(strapi),
     industries: await ensureIndustrySections(strapi),
     pricingPlans: await ensurePricingPlans(strapi),
@@ -309,7 +325,7 @@ async function backfillMarketingCollections(strapi, logger) {
   const home = await ensureHomeLandingRelations(strapi, related);
 
   logger.info(
-    `[marketing-content:backfill] Conteudo pt-BR garantido: features=${related.features.length}, industries=${related.industries.length}, pricing=${related.pricingPlans.length}, faqs=${related.faqs.length}, ctas=${related.ctaButtons.length}, menus=${menus.length}${home ? `, home=${home.id}` : ''}.`
+    `[marketing-content:backfill] Conteudo pt-BR garantido: landingPages=${related.landingPages.length}, features=${related.features.length}, industries=${related.industries.length}, pricing=${related.pricingPlans.length}, faqs=${related.faqs.length}, ctas=${related.ctaButtons.length}, menus=${menus.length}${home ? `, home=${home.id}` : ''}.`
   );
 }
 

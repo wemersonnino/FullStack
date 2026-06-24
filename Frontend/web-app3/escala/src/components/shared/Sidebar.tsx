@@ -73,6 +73,7 @@ const navigationGroups = [
       { title: 'Empresas (Tenants)', href: '/dashboard/empresas', icon: Building2 },
       { title: 'Relatórios Avançados', href: '/dashboard/relatorios', icon: BarChart4 },
       { title: 'Planos e Faturamento', href: '/dashboard/billing/plans', icon: CreditCard },
+      { title: 'ReBAC Jethro', href: '/dashboard/rebac', icon: ShieldCheck },
       { title: 'Auditoria e Logs', href: '/dashboard/auditoria', icon: ShieldCheck },
     ]
   },

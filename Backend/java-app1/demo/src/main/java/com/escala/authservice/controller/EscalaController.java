@@ -94,13 +94,13 @@ public class EscalaController {
 
     private void requireAdmin(Authentication authentication) {
         if (!isAdmin(authentication)) {
-            throw new org.springframework.security.access.AccessDeniedException("ADMIN role required");
+            throw new org.springframework.security.access.AccessDeniedException("Permissao de gestor requerida");
         }
     }
 
     private boolean isAdmin(Authentication authentication) {
         return authentication != null && authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(role -> role.equals("ADMIN") || role.equals("MANAGER") || role.equals("OWNER"));
+                .anyMatch(role -> role.equals("ADMIN") || role.equals("OWNER") || role.equals("MANAGER") || role.startsWith("MANAGER_"));
     }
 }
