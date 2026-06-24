@@ -5,15 +5,20 @@ function normalizeRoles(user?: SessionLikeUser | null) {
 }
 
 export function isAdmin(user?: SessionLikeUser | null) {
-  return normalizeRoles(user).includes(EscalaRole.ADMIN);
+  const roles = normalizeRoles(user);
+  return roles.includes(EscalaRole.ADMIN) || roles.includes('OWNER');
+}
+
+export function isManager(user?: SessionLikeUser | null) {
+  return normalizeRoles(user).some((role) => role === 'MANAGER' || role.startsWith('MANAGER_'));
 }
 
 export function canManageEscala(user?: SessionLikeUser | null) {
-  return isAdmin(user);
+  return isAdmin(user) || isManager(user);
 }
 
 export function canViewAllEscalas(user?: SessionLikeUser | null) {
-  return isAdmin(user);
+  return canManageEscala(user);
 }
 
 export function canViewOwnEscala(user?: SessionLikeUser | null) {

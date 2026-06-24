@@ -227,6 +227,21 @@ public class OpenApiController {
         paths.put("/api/v1/escala/usuarios", pathGet(get("Escala Operacional", "Listar usuarios escalaveis", "Lista usuarios disponiveis para escala com filtros por projeto, setor, empresa e busca textual. Requer ADMIN.", queryParam("projetoId", "ID do projeto."), queryParam("setorId", "ID do setor."), queryParam("empresaId", "ID da empresa."), queryParam("q", "Texto para busca por nome ou email."))));
         paths.put("/api/v1/escala/usuarios/{id}", pathGet(get("Escala Operacional", "Buscar usuario escalavel", "Retorna dados de um usuario disponivel para escala. Requer ADMIN.", pathParam("id", "ID do usuario."))));
 
+        paths.put("/api/v1/rebac/manager-assignments", path(
+                get("ReBAC", "Listar manager assignments", "Lista associacoes administrativas entre gestores e escopos operacionais. Requer OWNER ou ADMIN."),
+                post("ReBAC", "Criar manager assignment", "Associa um gestor a um escopo COMPANY, SECTOR, PROJECT, WORK_POST, TEAM ou EMPLOYEE. Requer OWNER ou ADMIN.", "ManagerAssignmentRequest")
+        ));
+        paths.put("/api/v1/rebac/manager-assignments/{id}", pathDelete(delete("ReBAC", "Excluir manager assignment", "Remove uma associacao de gestor por ID. Requer OWNER ou ADMIN.", pathParam("id", "ID do manager assignment."))));
+        paths.put("/api/v1/rebac/management-edges", path(
+                get("ReBAC", "Listar management edges", "Lista arestas diretas da hierarquia de gestores da empresa. Requer OWNER ou ADMIN."),
+                post("ReBAC", "Criar management edge", "Cria vinculo direto de subordinacao entre gestor pai e gestor/usuario subordinado. Requer OWNER ou ADMIN.", "ManagementEdgeRequest")
+        ));
+        paths.put("/api/v1/rebac/management-edges/{id}", pathDelete(delete("ReBAC", "Excluir management edge", "Remove uma aresta direta da hierarquia. Requer OWNER ou ADMIN.", pathParam("id", "ID da management edge."))));
+        paths.put("/api/v1/rebac/management-closure", pathGet(get("ReBAC", "Listar management closure", "Lista a tabela transitiva calculada da hierarquia de gestores. Requer OWNER ou ADMIN.")));
+        paths.put("/api/v1/rebac/management-closure/recalculate", pathPost(post("ReBAC", "Recalcular management closure", "Recalcula caminhos transitivos da hierarquia a partir das arestas ativas. Requer OWNER ou ADMIN.", null)));
+        paths.put("/api/v1/rebac/enums/manager-scope-types", pathGet(get("ReBAC", "Listar ManagerScopeType", "Lista os escopos de gestao aceitos pelo dominio ReBAC. Requer OWNER ou ADMIN.")));
+        paths.put("/api/v1/rebac/enums/manager-role-levels", pathGet(get("ReBAC", "Listar ManagerRoleLevel", "Lista niveis hierarquicos e seus pesos usados pelo PolicyService. Requer OWNER ou ADMIN.")));
+
         paths.put("/api/v1/schedules", pathGet(get("Escalas e Trocas", "Listar escala mensal", "Lista turnos de trabalho de um mes e ano.", queryParamRequired("year", "Ano da escala."), queryParamRequired("month", "Mes da escala, de 1 a 12."))));
         paths.put("/api/v1/schedules/generate", pathPost(post("Escalas e Trocas", "Gerar escala mensal", "Gera escala mensal a partir das regras de planejamento e disponibilidade.", "GenerateScheduleRequest")));
         paths.put("/api/v1/schedules/swap-requests", path(
@@ -557,6 +572,23 @@ public class OpenApiController {
                 properties.put("sectorId", Map.of("type", "integer", "format", "int64", "example", 1));
                 properties.put("projectId", Map.of("type", "integer", "format", "int64", "example", 1));
                 properties.put("companyId", Map.of("type", "integer", "format", "int64", "example", 1));
+                break;
+            case "ManagerAssignmentRequest":
+                properties.put("managerUserId", Map.of("type", "integer", "format", "int64", "example", 2));
+                properties.put("scopeType", Map.of("type", "string", "enum", List.of("COMPANY", "SECTOR", "PROJECT", "WORK_POST", "TEAM", "EMPLOYEE"), "example", "SECTOR"));
+                properties.put("scopeId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("roleLevel", Map.of("type", "string", "enum", List.of("OWNER", "ADMIN", "MANAGER_DIRETOR", "MANAGER_GERENTE", "MANAGER_COORDENADOR", "MANAGER_SUPERVISOR"), "example", "MANAGER_GERENTE"));
+                properties.put("startsAt", Map.of("type", "string", "format", "date-time", "example", "2026-06-24T08:00:00"));
+                properties.put("endsAt", Map.of("type", "string", "format", "date-time", "example", "2026-12-31T18:00:00"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
+                break;
+            case "ManagementEdgeRequest":
+                properties.put("parentUserId", Map.of("type", "integer", "format", "int64", "example", 2));
+                properties.put("childUserId", Map.of("type", "integer", "format", "int64", "example", 3));
+                properties.put("relationType", Map.of("type", "string", "example", "REPORTS_TO"));
+                properties.put("startsAt", Map.of("type", "string", "format", "date-time", "example", "2026-06-24T08:00:00"));
+                properties.put("endsAt", Map.of("type", "string", "format", "date-time", "example", "2026-12-31T18:00:00"));
+                properties.put("active", Map.of("type", "boolean", "example", true));
                 break;
             case "CreateShiftSwapRequest":
                 properties.put("requesterId", Map.of("type", "integer", "format", "int64", "example", 1));

@@ -54,6 +54,14 @@ function mapBackendShiftSwap(swap: BackendShiftSwap): ShiftSwap {
     comments: swap.comments,
     status: swap.status.toLowerCase() as ShiftSwap['status'],
     adminComments: swap.adminComments,
+    requester: swap.requester
+      ? {
+          id: swap.requester.id,
+          username: swap.requester.fullName,
+          email: swap.requester.email,
+          roles: [],
+        }
+      : undefined,
     originalShift: swap.originalShift ? mapBackendShift(swap.originalShift) : undefined,
     createdAt: swap.createdAt ?? '',
     updatedAt: swap.decidedAt ?? swap.createdAt ?? '',

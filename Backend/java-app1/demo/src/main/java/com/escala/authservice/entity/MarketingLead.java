@@ -8,7 +8,14 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "marketing_leads")
+@Table(
+        name = "marketing_leads",
+        indexes = {
+                @Index(name = "idx_marketing_leads_email", columnList = "email"),
+                @Index(name = "idx_marketing_leads_campaign_created", columnList = "campaignSlug, createdAt"),
+                @Index(name = "idx_marketing_leads_source_created", columnList = "utmSource, createdAt")
+        }
+)
 @Data
 @Builder
 @NoArgsConstructor

@@ -56,12 +56,15 @@ export function useAuth() {
       if (res?.ok) {
         toast.success("Login realizado com sucesso")
         router.push(callbackUrl)
+        return true
       } else {
         toast.error("Credenciais inválidas")
+        return false
       }
     } catch (err) {
       console.error("Erro no login:", err)
       toast.error("Erro ao conectar-se")
+      return false
     } finally {
       setLoading(false)
     }

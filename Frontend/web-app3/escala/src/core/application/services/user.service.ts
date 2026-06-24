@@ -7,6 +7,10 @@ export class UserService {
     return await UserBackendAdapter.getMe(token);
   }
 
+  static async listUsers(token: string): Promise<UserProfile[]> {
+    return await UserBackendAdapter.listUsers(token);
+  }
+
   static async updateProfile(token: string, profile: Partial<UserProfile>): Promise<UserProfile> {
     // Regra de Negócio Exemplo: Validar campos específicos ou disparar eventos de auditoria
     return await UserBackendAdapter.updateMe(token, profile);
