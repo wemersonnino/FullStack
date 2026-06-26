@@ -1,87 +1,112 @@
-# 🎯 OKRs — Ciclo de Estudos e Desenvolvimento Full-Stack (Next.js + Strapi + Java + . NET)
+# OKRs — Gestao Inteligente de Escalas
 
----
+Data de referencia: 2026-06-25.
 
-## 💡 Objetivo 1 — Dominar arquitetura modular com Next.js 15
+## Visao
 
-**KR1.1:** Implementar estrutura `(PUBLIC)/(PRIVATE)` + `/lib`, `/services`, `/components/shared`.
-**KR1.2:** Configurar SSR/SSG/revalidate nas páginas `/home` e `/noticias`.
-**KR1.3:** Aplicar tema dark/light persistente (`next-themes`).
-**KR1.4:** Implementar i18n com `next-intl` e rotas localizadas.
+Construir um SaaS B2B multi-tenant que substitui planilhas, WhatsApp e controles manuais por uma plataforma segura, auditavel e inteligente para escalas, jornada, banco de horas, ponto, dimensionamento e decisoes operacionais.
 
-📈 **Métrica:** UI completa, temas funcionais e rotas multilíngues estáveis.
+O produto deve comecar com uma promessa vendavel e defensavel: sair da planilha e montar uma escala mensal correta, com feriados, contadores, alertas e publicacao segura. Ponto, banco de horas, geolocalizacao e IA devem entrar como expansoes graduais, sempre com o backend Spring Boot como fonte da verdade.
 
----
+## Estado atual considerado
 
-## 🔐 Objetivo 2 — Aprender autenticação segura com Strapi + NextAuth (+ futuro Java)
+- Frontend oficial: `Frontend/web-app3/escala`, com Next.js 16, TypeScript, BFF em `app/api/bff`, rotas publicas/privadas, landing, dashboard, escala, relatorios, ReBAC, auditoria e conteudo Strapi.
+- Backend oficial: `Backend/java-app1/demo`, com Spring Boot 4.1.0, Java 25, JWT, empresas, usuarios, funcionarios, setores, projetos, escalas, trocas, ponto web basico, marketing leads, auditoria, capacidade operacional, billing e IA mock.
+- CMS: `Backend/cms-strapi`, restrito por decisao arquitetural a conteudo, SEO, landing pages, menus, legal pages, formularios editoriais e campanhas.
+- Banco: PostgreSQL em Docker, com bancos/usuarios separados para backend e Strapi.
+- Estado validado do backend: 24 testes, 0 falhas, suite concentrada no dominio de escala.
 
-**KR2.1:** Integrar NextAuth ao Strapi (CredentialsProvider).
-**KR2.2:** Adicionar campos extras em User (`theme`, `locale`).
-**KR2.3:** Configurar middleware para rotas públicas/privadas.
-**KR2.4:** Criar `<RequireRole roles={['ADMIN']}>` para controle granular.
-**KR2.5:** Planejar migração para API Java (OAuth2 JWT) em fase posterior.
+## OKR 1 — Reduzir esforco manual na criacao de escalas
 
-📈 **Métrica:** Login e cadastro Strapi operantes + sessão JWT com roles e tema.
+**Objetivo:** permitir que empresas pequenas e medias montem escalas mensais em minutos, com base em templates e regras configuraveis.
 
----
+**Resultados-chave:**
 
-## ⚙️ Objetivo 3 — Gerenciar estados e interação de UI
+- KR1: gerar calendario mensal automatico para 100% dos meses do ano, incluindo meses com 28, 29, 30 e 31 dias.
+- KR2: suportar templates 5x2, 6x1 e 12x36 no MVP operacional, com base backend.
+- KR3: reduzir em 70% o tempo manual de criacao de uma escala mensal em teste piloto.
+- KR4: calcular automaticamente dias trabalhados, ausentes, descansos, feriados trabalhados, fins de semana trabalhados e horas previstas por colaborador.
+- KR5: publicar escala versionada com audit log de quem alterou, quando alterou, motivo e valores relevantes antes/depois.
 
-**KR3.1:** Implementar store global (Zustand).
-**KR3.2:** Criar Contexts (`useModalContext`, `useSidebarContext`).
-**KR3.3:** Integrar hooks customizados (`usePermission`, `useUserTheme`).
-**KR3.4:** Usar `react-hot-toast` para feedback de ações.
+## OKR 2 — Reduzir riscos trabalhistas e operacionais
 
-📈 **Métrica:** 90 % da UI controlada via estado global e contextos.
+**Objetivo:** transformar regras criticas de jornada em validacoes backend auditaveis.
 
----
+**Resultados-chave:**
 
-## 🧱 Objetivo 4 — Aprofundar backend (Strapi + Java + PostgreSQL)
+- KR1: alertar sobre 44h semanais, 10h/dia quando aplicavel, DSR, interjornada, conflito com ferias/ausencias e mais de seis dias consecutivos.
+- KR2: impedir publicacao sem ciencia explicita dos alertas criticos.
+- KR3: registrar 100% das alteracoes criticas em audit log.
+- KR4: reduzir inconsistencias encontradas em revisao manual de escala em 60% no piloto.
+- KR5: documentar quais validacoes sao tecnicas e quais exigem parametrizacao juridica por CCT, categoria ou politica interna.
 
-**KR4.1:** Configurar Strapi com roles, permissions e JWT.
-**KR4.2:** Conectar PostgreSQL via Docker Compose.
-**KR4.3:** Criar coleções dinâmicas (`noticias`, `blog`, `banners`).
-**KR4.4:** Futuramente integrar API Java (Spring Boot) para autenticação corporativa.
+## OKR 3 — Melhorar aquisicao e qualificacao comercial
 
-📈 **Métrica:** Strapi operacional + conteúdo SSR integrado ao Next + banco PostgreSQL sincronizado.
+**Objetivo:** capturar leads B2B com dados suficientes para segmentacao, trial, onboarding e conversao.
 
----
+**Resultados-chave:**
 
-## 🌍 Objetivo 5 — Internacionalização e acessibilidade
+- KR1: 100% dos formularios publicos capturam UTM, referrer, origem, landing/campanha e data de captura.
+- KR2: 100% dos leads possuem segmento e faixa de colaboradores normalizados.
+- KR3: identificar emails pessoais em campos de email corporativo, sem bloquear necessariamente o lead.
+- KR4: criar recomendacao inicial de plano e template de escala por segmento.
+- KR5: registrar consentimentos LGPD com versao de documento, finalidade e timestamp.
 
-**KR5.1:** Traduzir interfaces (pt-BR/en) com `next-intl`.
-**KR5.2:** Garantir padrões WCAG nos componentes Radix.
-**KR5.3:** Adicionar switch de idioma e persistência de locale.
+## OKR 4 — Criar base para retencao e expansao
 
-📈 **Métrica:** alternância de idioma sem recarregar e acessibilidade validadas.
+**Objetivo:** entregar funcionalidades que reduzem churn e abrem upsell para planos maiores.
 
----
+**Resultados-chave:**
 
-## 📊 Objetivo 6 — Metodologia Ágil e Ciclo de Aprendizado
+- KR1: liberar troca de turnos com fluxo de aceite do colega e aprovacao final do gestor.
+- KR2: liberar banco de horas basico com saldo positivo, negativo, compensado e expirado.
+- KR3: evoluir ponto web basico para check-in, check-out, intervalo, relatorio de presenca e trilha antifraude minima.
+- KR4: criar dashboard operacional para gestor com cobertura, conflitos, trocas pendentes e risco de hora extra.
+- KR5: medir uso de IA e limites por plano, mantendo sugestoes explicaveis e validacao final no backend.
 
-**KR6.1:** Executar sprints semanais (plan → dev → review).
-**KR6.2:** Usar Trello/Notion para gestão de tarefas.
-**KR6.3:** Atualizar `docs/changelog.md` a cada sprint.
-**KR6.4:** Documentar retrospectivas e lições aprendidas.
+## OKR 5 — Fortalecer arquitetura e seguranca para SaaS B2B
 
-📈 **Métrica:** 100 % das sprints com entregas revisadas e registradas.
+**Objetivo:** reduzir risco tecnico antes de trial publico e clientes piloto.
 
----
+**Resultados-chave:**
 
-## 🎯 Objetivo 7 — Controle ReBAC, Mensageria Dinâmica e Integração Assistida por IA
+- KR1: manter o frontend sem acesso direto ao banco e sem regra trabalhista critica no client.
+- KR2: garantir que rotas privadas passem pelo BFF e pelo backend com token protegido.
+- KR3: reforcar isolamento por tenant/company em repositories, services, BFF e DTOs.
+- KR4: alinhar RBAC/ReBAC para Owner, Admin, Manager, HR e Employee sem quebrar fluxos existentes.
+- KR5: ampliar testes de integracao para autenticacao, JPA, JWT, endpoints de escala, leads, ponto e auditoria.
 
-**KR7.1:** Implementar a hierarquia de controle ReBAC (Owner, Admin, Gestores de 1000, 100, 50, 10) e escopo de atuação restrito.
-**KR7.2:** Desenvolver a Central de Notificações assíncrona no header com contador de mensagens e fila/pilha de exibição.
-**KR7.3:** Desenhar os formulários dinâmicos de mensagens que se adaptam conforme o teor da solicitação (Permissões, Troca de turno, Acordo).
-**KR7.4:** Desenvolver a integração do chatbot (WhatsApp/Telegram) assistida por IA para detecção de faltas e alocação automática de substitutos.
+## Metricas de produto
 
-📈 **Métrica:** Hierarquia funcional, notificações operando com rotas paralelas e protótipo de chat WhatsApp assistido por IA.
+- Tempo medio para criar escala mensal.
+- Percentual de escalas publicadas sem alerta critico.
+- Quantidade de ajustes pos-publicacao.
+- Numero de trocas solicitadas, aprovadas, rejeitadas e efetivadas pelo sistema.
+- Horas extras previstas x realizadas.
+- Saldo medio de banco de horas.
+- Taxa de leads com email corporativo.
+- Conversao lead -> trial -> pago.
+- Uso de templates por segmento.
+- Uso de campanhas por UTM, segmento e faixa de colaboradores.
+- NPS/CSAT do gestor e do colaborador.
 
----
+## Marcos de go/no-go
 
-## 🧾 Revisão Trimestral
+### Go para beta fechado
 
-- **Ciclo:** 12 semanas (3 meses).
+- Escala mensal 5x2, 6x1 e 12x36 funcional.
+- Feriados e contadores funcionando.
+- Alertas minimos de backend para jornada e conflitos.
+- BFF implementado sem exposicao de token.
+- Testes essenciais passando no backend e typecheck/build do frontend validado.
+- Auditoria minima para criacao, alteracao, cancelamento e publicacao de escala.
 
-- **Revisão final:** avaliar OKRs, consolidar aprendizados e definir nova meta:
-    ➡ integração plena com APIs Java e . NET + monitoramento contínuo.
+### Go para trial publico
+
+- Cadastro com Google SSO e trial.
+- Segmentacao de lead e atribuicao de campanha.
+- Onboarding por segmento.
+- Logs e auditoria minimos.
+- Politicas LGPD, privacidade, termos e consentimento publicadas.
+- Documentacao de suporte, rollback e ambiente.
+- Limites de plano e uso de IA/ponto controlados pelo backend.

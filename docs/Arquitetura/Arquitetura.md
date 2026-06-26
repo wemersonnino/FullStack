@@ -1,8 +1,8 @@
 # 🏗️ Documento de Arquitetura do Sistema
 
 > **Projeto:** Plataforma Escala (Estudo e Prática de Desenvolvimento Full-Stack)
-> **Tecnologias:** Next.js 15 + TypeScript + TailwindCSS 4 + NextAuth + Spring Boot (Java) + PostgreSQL + Strapi + .NET
-> **Objetivo:** aprender e praticar a construção de um ecossistema moderno, escalável e modular, unindo boas práticas de front-end, back-end e metodologias ágeis.
+> **Tecnologias atuais:** Next.js 16 + React 19 + TypeScript + TailwindCSS 4 + NextAuth + Spring Boot 4.1.0/Java 25 + PostgreSQL + Strapi v5
+> **Objetivo:** construir um SaaS B2B moderno, escalavel e modular para gestao inteligente de escalas, jornada, ponto, leads e conteudo editorial.
 
 ---
 
@@ -15,7 +15,7 @@ Usuário → Next.js (Frontend) → API Gateway (Java Spring Boot)
 ↓
 PostgreSQL (Banco)
 ↓
-Strapi / .NET APIs externas
+Strapi CMS
 
 
 ---
@@ -24,7 +24,7 @@ Strapi / .NET APIs externas
 
 | Camada | Tecnologia | Responsabilidade |
 |--------|-------------|------------------|
-| **Frontend** | Next.js 15 + TypeScript | Interface, SSR/SSG, roteamento, i18n |
+| **Frontend** | Next.js 16 + React 19 + TypeScript | Interface, SSR/SSG, roteamento, i18n e BFF |
 | **Estilo** | TailwindCSS 4 + Radix UI + Framer Motion | UI responsiva, acessível e animada |
 | **Autenticação** | NextAuth.js + OAuth2 (via API Java) | Login, roles e sessão segura |
 | **Tema** | next-themes | Alternância e persistência de tema |
@@ -32,8 +32,8 @@ Strapi / .NET APIs externas
 | **Validação** | Zod + React Hook Form | Validação de formulários e schemas |
 | **Backend** | Java Spring Boot (REST API) | Lógica de negócio, autenticação, orquestração |
 | **Banco de Dados** | PostgreSQL | Persistência de dados (usuários, permissões, logs) |
-| **CMS** | Strapi | Conteúdo dinâmico (notícias, banners, blog) |
-| **APIs Externas** | .NET Services | Módulos específicos (calendários, relatórios, gráficos) |
+| **CMS** | Strapi v5 | Conteúdo editorial, landing pages, campanhas, menus, SEO e legal pages |
+| **APIs Externas** | Futuras integrações | Folha, ERP, mensageria, mapas ou automações quando necessario |
 | **Infraestrutura** | Docker + Docker Compose | Contêinerização e orquestração local |
 | **Monitoramento** | New Relic / Grafana (futuro) | Métricas e logs |
 
@@ -65,7 +65,7 @@ Strapi / .NET APIs externas
 `│ ├─ axios.ts ← Configuração global do axios com interceptors`
 `│ ├─ schema/ ← Schemas de validação com Zod`
 `│ └─ constants/ ← Constantes de rotas, roles, datas`
-`├─ services/ ← Comunicação com APIs (Strapi, Java, .NET)`
+`├─ services/ ← Comunicação com BFF, Spring Boot, Strapi e integracoes futuras`
 `├─ stores/ ← Zustand stores (estado global)`
 `├─ styles/ ← Estilos globais (Tailwind)`
 `├─ types/ ← Tipos globais (NextAuth, env, etc.)`
@@ -122,9 +122,9 @@ O backend pode armazenar essa preferência para sincronização entre dispositiv
 Origem  Destino Descrição
 Next.js API Java    Login, autenticação, dados do dashboard
 Next.js Strapi  Conteúdo dinâmico (notícias, banners, blog)
-Next.js .NET APIs   Dados de relatórios e calendário
+Next.js BFF     Relatorios, calendario, leads, ponto e fluxos protegidos
 API Java    PostgreSQL  Persistência e validação de usuários, roles, logs
-API Java    Strapi / .NET   Integração e orquestração de dados externos
+API Java    Strapi / integrações futuras   Conteudo editorial e orquestracao de dados externos quando necessario
 🔄 7. Estado Global e Contextos
 Zustand (stores/app.store.ts)
 
@@ -214,7 +214,7 @@ Review Sprint — checklist de entregas + retro.
 
  Adicionar logs e métricas com New Relic.
 
- Integrar .NET APIs para relatórios e dashboards.
+ Integrar APIs externas para folha, ERP, mensageria ou dashboards quando houver necessidade de produto.
 
  Publicar build em ambiente cloud (AWS ECS ou Railway).
 

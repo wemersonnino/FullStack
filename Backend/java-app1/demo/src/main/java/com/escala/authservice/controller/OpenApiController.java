@@ -514,8 +514,14 @@ public class OpenApiController {
             case "LeadCaptureRequest":
                 properties.put("name", Map.of("type", "string", "example", "João Silva"));
                 properties.put("email", Map.of("type", "string", "example", "joao@empresa.com"));
+                properties.put("phone", Map.of("type", "string", "example", "+5531999998888"));
                 properties.put("companyName", Map.of("type", "string", "example", "Minha Empresa LTDA"));
-                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
+                properties.put("employeeRange", Map.of("type", "string", "enum", List.of("1-10", "11-50", "51-100", "101-200", "201-500", "501+"), "example", "51-100"));
+                properties.put("companySegment", Map.of("type", "string", "example", "seguranca"));
+                properties.put("marketingConsentGranted", Map.of("type", "boolean", "example", true));
+                properties.put("consentVersion", Map.of("type", "string", "example", "marketing-consent-v1"));
+                properties.put("landingPageSlug", Map.of("type", "string", "example", "seguranca-e-facilities"));
+                properties.put("campaignSlug", Map.of("type", "string", "example", "google-cpc-seguranca-6x1"));
                 break;
             case "LearningProgressRequest":
                 properties.put("module", Map.of("type", "string", "example", "Treinamento Inicial"));

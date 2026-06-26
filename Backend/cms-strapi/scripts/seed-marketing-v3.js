@@ -68,8 +68,17 @@ async function runSeedV3(strapi) {
     'api::cta-button.cta-button',
     'api::menu.menu',
     'api::article.article',
+    'api::testimonial.testimonial',
+    'api::banner.banner',
+    'api::announcement.announcement',
+    'api::lead-form.lead-form',
+    'api::legal-page.legal-page',
     'api::landing-page.landing-page',
-    'api::contact-content.contact-content'
+    'api::contact-content.contact-content',
+    'api::global.global',
+    'api::footer.footer',
+    'api::campaign-page.campaign-page',
+    'api::email-template-content.email-template-content'
   ];
 
   for (const uid of collectionsToClean) {
@@ -197,12 +206,63 @@ async function runSeedV3(strapi) {
         title: article.title,
         slug: article.slug,
         description: article.description,
-        cover: cover ? cover.documentId || cover.id : null
+        cover: cover ? cover.id : null
     });
   }
   console.log('Artigos do blog criados.');
 
-  // 9. Landing Pages
+  // 9. Testimonials
+  for (const testimonial of data.testimonials || []) {
+    await createDoc('api::testimonial.testimonial', {
+      ...testimonial,
+      locale: 'pt-BR'
+    });
+  }
+  console.log(`${(data.testimonials || []).length} depoimentos criados.`);
+
+  // 10. Campaign Banners
+  for (const banner of data.banners || []) {
+    const image = await uploadFile(strapi, banner.imageName);
+    await createDoc('api::banner.banner', {
+      title: banner.title,
+      description: banner.description,
+      image: image ? image.id : null,
+    });
+  }
+  console.log(`${(data.banners || []).length} banners criados.`);
+
+  // 11. Announcements
+  for (const announcement of data.announcements || []) {
+    const image = announcement.imageName ? await uploadFile(strapi, announcement.imageName) : null;
+    await createDoc('api::announcement.announcement', {
+      title: announcement.title,
+      slug: announcement.slug,
+      content: announcement.content,
+      category: announcement.category || 'update',
+      image: image ? image.id : null,
+    });
+  }
+  console.log(`${(data.announcements || []).length} comunicados criados.`);
+
+  // 12. Lead Forms
+  for (const leadForm of data.leadForms || []) {
+    await createDoc('api::lead-form.lead-form', leadForm);
+  }
+  console.log(`${(data.leadForms || []).length} formularios de lead criados.`);
+
+  // 13. Legal Pages
+  for (const legalPage of data.legalPages || []) {
+    await createDoc('api::legal-page.legal-page', legalPage);
+  }
+  console.log(`${(data.legalPages || []).length} paginas legais criadas.`);
+
+  // 13.1 Email Templates
+  for (const emailTemplate of data.emailTemplates || []) {
+    await createDoc('api::email-template-content.email-template-content', emailTemplate);
+  }
+  console.log(`${(data.emailTemplates || []).length} templates de email criados.`);
+
+  // 14. Landing Pages
   for (const lp of data.landingPages) {
     const heroBg = lp.heroBackgroundImageName ? await uploadFile(strapi, lp.heroBackgroundImageName) : null;
     const sectionBg = lp.sectionBackgroundImageName ? await uploadFile(strapi, lp.sectionBackgroundImageName) : null;
@@ -210,8 +270,8 @@ async function runSeedV3(strapi) {
     const entry = await createDoc('api::landing-page.landing-page', {
         ...lp,
         pageKey: lp.slug === 'home' ? 'home' : 'segment',
-        heroBackgroundImage: heroBg ? heroBg.documentId || heroBg.id : null,
-        sectionBackgroundImage: sectionBg ? sectionBg.documentId || sectionBg.id : null,
+        heroBackgroundImage: heroBg ? heroBg.id : null,
+        sectionBackgroundImage: sectionBg ? sectionBg.id : null,
         locale: 'pt-BR',
         features: featureDocIds,
         industries: industryDocIds,
@@ -228,6 +288,7 @@ async function runSeedV3(strapi) {
         const enEntry = await createDoc('api::landing-page.landing-page', {
             ...lp,
             pageKey: "home",
+            slug: "home-en",
             heroTitle: "Smart Schedule Management for B2B",
             heroDescription: "Eliminate the chaos of manual scheduling with AI, Geofencing, and total compliance.",
             primaryCtaLabel: "Start Free Trial (14 days)",
@@ -247,7 +308,19 @@ async function runSeedV3(strapi) {
     }
   }
 
-  // 10. Contact Content
+  // 13.2 Campaign Pages (Ads)
+  for (const campaignPage of data.campaignPages || []) {
+    const homeLanding = await strapi.db.query('api::landing-page.landing-page').findOne({
+      where: { slug: 'home', locale: 'pt-BR' }
+    });
+    await createDoc('api::campaign-page.campaign-page', {
+      ...campaignPage,
+      landingPage: homeLanding ? homeLanding.id : null
+    });
+  }
+  console.log(`${(data.campaignPages || []).length} paginas de campanha criadas.`);
+
+  // 11. Contact Content
   await createDoc('api::contact-content.contact-content', {
       title: "Fale Conosco",
       description: "Estamos aqui para ajudar você a otimizar sua gestão de escalas. Escolha o canal de sua preferência ou preencha o formulário.",
@@ -260,29 +333,32 @@ async function runSeedV3(strapi) {
   });
   console.log('Conteúdo da página de contato criado.');
 
-  // 11. Global / Footer
+  // 12. Global / Footer
   try {
-    const existingGlobal = await strapi.db.query('api::global.global').findOne({ where: {} });
-    if (!existingGlobal) {
-        await createDoc('api::global.global', {
-            siteName: "Escala SaaS",
-            siteDescription: "Gestão Inteligente de Escalas V3"
-        });
-    }
+    const logo = await uploadFile(strapi, 'shiftlink-logo-horizontal.png');
+    await createDoc('api::global.global', {
+        siteName: "SharedLink Escala",
+        siteDescription: "Gestão inteligente de escalas mensais, jornada e operação.",
+        logo: logo ? logo.id : null
+    });
+    console.log('Configuração global criada com marca editorial.');
   } catch (err) {
     console.error('Erro ao criar global:', err.message);
   }
 
   try {
-    const existingFooter = await strapi.db.query('api::footer.footer').findOne({ where: {} });
-    console.log('existingFooter:', existingFooter);
-    if (!existingFooter) {
-        await createDoc('api::footer.footer', {
-            copyright: "© 2026 Escala Plataforma SaaS. Todos os direitos reservados.",
-            description: "A plataforma líder em gestão inteligente de escalas e conformidade trabalhista."
-        });
-        console.log('Conteúdo do Footer criado.');
-    }
+    await createDoc('api::footer.footer', {
+        copyright: "© 2026 SharedLink Escala. Todos os direitos reservados.",
+        description: "Plataforma para gestão inteligente de escalas mensais, publicação segura e evolução para jornada, banco de horas e IA.",
+        links: [
+          { label: 'Funcionalidades', url: '#modulos' },
+          { label: 'Planos', url: '#pricing' },
+          { label: 'Termos de Uso', url: '/legal/terms' },
+          { label: 'Privacidade', url: '/legal/privacy' },
+          { label: 'Segurança', url: '/legal/security' }
+        ]
+    });
+    console.log('Conteúdo do Footer criado.');
   } catch (err) {
     console.error('Erro ao criar footer:', err.message);
   }

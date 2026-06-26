@@ -6,13 +6,17 @@ import {
   CalendarDays,
   Clock,
   MapPin,
+  Megaphone,
+  MessageSquareQuote,
   ShieldCheck,
   Shuffle,
   Sparkles,
   Users,
 } from 'lucide-react';
 import { getArticles } from '@/services/article.service';
-import { getLandingPage } from '@/services/landing.service';
+import { getLandingPage, getTestimonials } from '@/services/landing.service';
+import { getBanners } from '@/services/banner.service';
+import { getLatestAnnouncement } from '@/services/announcement.service';
 import { BlogList } from '@/components/home/BlogList';
 import { LeadCaptureForm } from '@/components/shared/LeadCaptureForm';
 import { Button } from '@/components/ui/button';
@@ -54,13 +58,17 @@ interface HomePageProps {
 
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
-  const [landing, articles] = await Promise.all([
+  const [landing, articles, testimonials, banners, announcement] = await Promise.all([
     getLandingPage({ locale }), 
-    getArticles(3, locale)
+    getArticles(3, locale),
+    getTestimonials(locale),
+    getBanners(),
+    getLatestAnnouncement(),
   ]);
   
   const heroBgUrl = landing.heroBackgroundImage?.url || '/default-banner.svg';
   const sectionBgUrl = landing.sectionBackgroundImage?.url;
+  const primaryBanner = banners[0];
 
   return (
     <div className="flex flex-col bg-background">
@@ -120,6 +128,23 @@ export default async function HomePage({ params }: HomePageProps) {
         </div>
       </section>
 
+      {announcement && (
+        <section className="border-b bg-primary/5">
+          <div className="container mx-auto flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Megaphone className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm font-bold">{announcement.title}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{announcement.content}</p>
+              </div>
+            </div>
+            <Badge variant="outline" className="w-fit rounded-md capitalize">{announcement.category}</Badge>
+          </div>
+        </section>
+      )}
+
       <section id="demo" className="border-b bg-muted/25 py-20">
         <div className="container mx-auto px-6">
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
@@ -158,6 +183,31 @@ export default async function HomePage({ params }: HomePageProps) {
           </div>
         </div>
       </section>
+
+      {primaryBanner?.image?.url && (
+        <section className="border-b py-16">
+          <div className="container mx-auto px-6">
+            <div className="grid overflow-hidden rounded-lg border bg-card lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="relative min-h-[260px]">
+                <Image
+                  src={primaryBanner.image.url}
+                  alt={primaryBanner.image.alternativeText || primaryBanner.title}
+                  fill
+                  sizes="(min-width: 1024px) 45vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
+              <div className="flex flex-col justify-center p-8 lg:p-10">
+                <Badge variant="outline" className="mb-4 w-fit rounded-md">Campanha ativa</Badge>
+                <h2 className="text-2xl font-black tracking-tight sm:text-3xl">{primaryBanner.title}</h2>
+                {primaryBanner.description && (
+                  <p className="mt-4 text-base leading-7 text-muted-foreground">{primaryBanner.description}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section id="modulos" className="border-b py-20 relative">
         {sectionBgUrl && (
@@ -202,6 +252,34 @@ export default async function HomePage({ params }: HomePageProps) {
                 <h3 className="text-xl font-bold">{industry.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-muted-foreground">{industry.valueProposition}</p>
                 {industry.description && <p className="mt-3 text-sm leading-6 text-muted-foreground">{industry.description}</p>}
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="depoimentos" className="border-b py-20">
+        <div className="container mx-auto px-6">
+          <div className="mb-10 max-w-3xl">
+            <Badge variant="outline" className="mb-4 rounded-md">Prova operacional</Badge>
+            <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
+              Histórias de saída da planilha para escala auditável.
+            </h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">
+              Cases iniciais anonimizados ajudam a validar a promessa central do produto sem exagerar maturidade regulatória.
+            </p>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            {testimonials.map((testimonial) => (
+              <article key={testimonial.id} className="rounded-lg border bg-card p-5 shadow-sm">
+                <MessageSquareQuote className="h-6 w-6 text-primary" aria-hidden="true" />
+                <h3 className="mt-5 text-lg font-bold">{testimonial.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">{testimonial.content}</p>
+                <div className="mt-5 border-t pt-4">
+                  <p className="font-semibold">{testimonial.authorName}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{testimonial.authorRole}</p>
+                </div>
               </article>
             ))}
           </div>

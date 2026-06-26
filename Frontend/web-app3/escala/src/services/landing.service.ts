@@ -1,7 +1,6 @@
 import { API_ROUTES } from '@/constants';
-import { ENV } from '@/constants/env';
 import { mapLandingPage, fallbackLandingPage, normalizeFeatures } from '@/dto/landing.dto';
-import { LandingPageContent, LandingPricingPlan } from '@/interfaces/landing/landing.interface';
+import { LandingPageContent, LandingPricingPlan, LandingTestimonial } from '@/interfaces/landing/landing.interface';
 import { httpGet } from '@/lib/http/request';
 
 type StrapiResponse<T> = {
@@ -85,5 +84,57 @@ export async function getPricingPlans(locale?: string): Promise<LandingPricingPl
   } catch (error) {
     console.error('Erro ao buscar planos do Strapi:', error);
     return fallbackLandingPage.pricingPlans;
+  }
+}
+
+export const fallbackTestimonials: LandingTestimonial[] = [
+  {
+    id: 'varejo-6x1',
+    title: 'Menos ajuste manual no fechamento do mês',
+    authorName: 'Gestora de Operações',
+    authorRole: 'Rede de varejo com escala 6x1',
+    content:
+      'O maior ganho foi parar de conferir folga e feriado em várias abas de planilha. A equipe passou a revisar a escala por alerta e contador.',
+  },
+  {
+    id: 'facilities',
+    title: 'Trocas com histórico e menos ruído',
+    authorName: 'Coordenador de Facilities',
+    authorRole: 'Operação multiunidade',
+    content:
+      'Antes, parte das trocas ficava perdida em mensagens. O fluxo com solicitação, aceite e aprovação deixa claro quem pediu e qual escala mudou.',
+  },
+  {
+    id: 'clinica',
+    title: 'Demo já chega com contexto comercial',
+    authorName: 'Responsável de RH',
+    authorRole: 'Clínica com plantões 12x36',
+    content:
+      'O formulário direcionou a conversa para o template certo. A demonstração começou pelo problema real: plantão, feriado e cobertura mínima.',
+  },
+];
+
+export async function getTestimonials(locale?: string): Promise<LandingTestimonial[]> {
+  try {
+    const localeParam = locale ? `&locale=${locale}` : '';
+    const response = await httpGet<StrapiResponse<any>>(`${API_ROUTES.TESTIMONIALS}${localeParam}`);
+
+    if (!response?.data || response.data.length === 0) {
+      return fallbackTestimonials;
+    }
+
+    return response.data.map((item: any) => {
+      const attrs = item.attributes ?? item;
+      return {
+        id: item.documentId ?? item.id,
+        title: attrs.title || 'Operação com menos retrabalho',
+        authorName: attrs.authorName || 'Cliente anonimizando',
+        authorRole: attrs.authorRole || 'Operação B2B',
+        content: attrs.content || '',
+      };
+    }).filter((item) => item.content);
+  } catch (error) {
+    console.error('Erro ao buscar depoimentos do Strapi:', error);
+    return fallbackTestimonials;
   }
 }

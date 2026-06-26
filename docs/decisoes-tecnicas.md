@@ -1,5 +1,25 @@
 # Decisoes Tecnicas
 
+## 2026-06-26 - Manutenção do Padrão REST com DTOs Selecionados vs GraphQL e Copywriting via Strapi v5
+
+### Contexto
+
+Analisamos a viabilidade de introduzir GraphQL para mitigar os problemas de over-fetching (excesso de dados enviados ao cliente, como entidades completas de Company e Address aninhadas em turnos de escala) e under-fetching (múltiplas chamadas HTTP sequenciais). Também avaliamos a necessidade de gerenciar dinamicamente textos de copywriting persuasivo para anúncios, e-mails de trial e roteiros de vídeos VSL através do CMS.
+
+### Decisões confirmadas
+
+- **Manutenção de REST com Projeções/DTOs no BFF**: Decidimos manter a arquitetura REST atual e mitigar o over-fetching por meio de DTOs enxutos projetados diretamente no Next.js BFF (Route Handlers) no servidor. Isso evitou a complexidade operacional, a latência de consultas SQL N+1 no banco PostgreSQL e a perda do cache HTTP nativo associados ao GraphQL.
+- **Coleções Editoriais de Marketing no Strapi v5**: Geramos as coleções `campaign-page` (páginas de campanha/anúncios) e `email-template-content` (conteúdo de templates de e-mail de nutrição) no CMS.
+- **Gerenciamento Editorial de Vídeos (VSL)**: Acrescentamos campos de roteiro e vídeo (`vslTitle`, `vslVideoUrl`, `vslScript`) diretamente à coleção `landing-page` no Strapi, centralizando o script do vídeo de vendas com a respectiva página de captura.
+- **Mapeamento Tipado no Frontend**: Ajustamos a interface `LandingPageContent` e o mapeador DTO `landing.dto.ts` no Next.js para expor os novos campos VSL tipados ao cliente browser.
+- **Idempotência de Seed V3**: Atualizamos o script `seed-marketing-v3.js` para preencher o CMS com os criativos persuasivos do Copywriter, validando o bootstrap completo de marketing em ambientes descartáveis e de desenvolvimento.
+
+### Por que fizemos
+
+- **Simplicidade de Infraestrutura**: Evitar o acoplamento com um schema GraphQL complexo e resolvers pesados no BFF, acelerando o tempo de entrega e mantendo o proxy de rede limpo.
+- **Performance e Otimização**: Reduzir drasticamente o payload JSON do calendário de escalas no navegador mantendo compatibilidade absoluta com os adaptadores do cliente Next.js.
+- **Autonomia de Marketing**: Dar ao Product Marketing Manager (PMM) e ao Copywriter controle total sobre chamadas de conversão (ads, e-mails, scripts de VSL) diretamente pelo painel administrativo do Strapi, sem necessidade de novos deploys de código frontend.
+
 ## 2026-06-16 - Refatoração para Arquitetura Hexagonal Estrita e Otimização via Matrizes
 
 ### Contexto
@@ -469,3 +489,19 @@ Resultados:
 - Os schemas de request/response ainda sao descritivos e nao gerados automaticamente a partir dos DTOs.
 - Ao alterar endpoints, e necessario atualizar manualmente o `OpenApiController`.
 - Quando surgir versao do Springdoc compativel com Spring Boot 4, reavaliar substituir a documentacao manual por geracao automatica.
+
+## 2026-06-26 - Segurança do BFF: Ocultação do JWT do Backend no Cliente
+
+### Contexto
+O token JWT emitido pelo backend Spring Boot (`token` ou `accessToken`) estava sendo exposto ao navegador através do campo `token` retornado no endpoint `/api/auth/session` do NextAuth. Isso violava o princípio básico de segurança do padrão BFF (Backend-for-Frontend), que dita que credenciais de APIs externas devem permanecer estritamente no servidor (armazenadas dentro de cookies HttpOnly) para mitigar o risco de roubo de sessão via ataques XSS.
+
+### Decisão
+1. **Ocultação de Token no Cliente:** Envelopar o handler `GET` e `POST` do NextAuth em `src/app/api/auth/[...nextauth]/route.ts` para interceptar chamadas ao endpoint `/api/auth/session`. O JSON retornado é interceptado, a propriedade `user.token` é removida e a resposta é devolvida de forma limpa.
+2. **Extração de Token Baseada em Cookies:** Atualizar o utilitário BFF `proxyBackend` em `src/lib/bff/backend.ts` para usar a função `getToken` do NextAuth. Isso permite descriptografar o cookie de sessão seguro (`next-auth.session-token`) diretamente no lado do servidor (Node.js) e extrair o token do backend, eliminando a necessidade de o cliente passar o token explicitamente.
+3. **Refatoração do Cliente HTTP:** Ajustar o gerador de cabeçalhos de requisição em `src/lib/http/request.ts` para que requisições client-side feitas para endpoints `/api/bff` não tentem ler a sessão ou anexar o cabeçalho `Authorization`. O navegador enviará os cookies automaticamente nas chamadas de mesma origem.
+4. **Substituição de Checagens no Cliente:** Atualizar os componentes e hooks do lado do cliente (como `ThemeToggle.tsx` e `useAuth.ts`) para checar a validade e a presença do objeto de usuário `session?.user` em vez da chave `session?.user?.token`.
+
+### Validação
+- **Tipagem:** A compilação via `pnpm typecheck` no WSL foi executada com sucesso, apresentando zero erros ou incompatibilidades de tipo.
+- **Requisição à Sessão:** Chamadas ao `/api/auth/session` via `curl` foram testadas com sucesso: retornam HTTP `200` e eliminam o campo `token` do payload JSON de resposta, mantendo os cookies de controle de sessão do NextAuth intactos.
+- **Transmissão Segura:** As chamadas de listagem, modificação de escalas e atualização de tema continuam funcionando normalmente, com o BFF injetando o token JWT nas chamadas à API do Spring Boot a partir da extração segura do cookie.

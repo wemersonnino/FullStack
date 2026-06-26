@@ -3,31 +3,34 @@
     {
       "slug": "home",
       "eyebrow": "SaaS B2B de Gestão Inteligente 2",
-      "heroTitle": "Elimine o Caos das Escalas de Trabalho com Inteligência Artificial",
-      "heroDescription": "Controle escalas, jornada, ponto e geolocalização em uma única plataforma. Projetado para operações que não podem parar.",
-      "heroBackgroundImageName": "beautiful-picture.jpg",
-      "sectionBackgroundImageName": "coffee-shadow.jpg",
+      "heroTitle": "Saia da planilha e publique escalas mensais com segurança",
+      "heroDescription": "Monte escalas 5x2, 6x1 e 12x36 com contadores, feriados, alertas e auditoria. Comece simples e evolua para ponto, banco de horas e IA explicável.",
+      "heroBackgroundImageName": "escala-saas-hero-dashboard.png",
+      "sectionBackgroundImageName": "escala-saas-relatorios-contadores.png",
       "primaryCtaLabel": "Começar Teste Grátis (14 dias)",
       "primaryCtaUrl": "/register",
       "secondaryCtaLabel": "Solicitar Demonstração",
       "secondaryCtaUrl": "/demo",
       "trialDescription": "14 dias de acesso total para você e seu time.",
       "aiTrialDescription": "IA Assistente: 7 dias ou 20 consultas gratuitas.",
-      "securityStatement": "Conformidade total com LGPD, Portaria 671 e suporte ao novo CNPJ Alfanumérico."
+      "securityStatement": "Backend como fonte da verdade, BFF para proteger tokens e trilha de consentimento LGPD. Recursos regulatórios avançados dependem de validação jurídica por operação.",
+      "vslTitle": "Escala: A Gestão Inteligente de Escalas que sua Empresa Precisa",
+      "vslVideoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      "vslScript": "[0:00 - 0:15] Gestor estressado olhando para uma planilha cheia de células coloridas e o celular vibrando com notificações do WhatsApp: 'Você reconhece essa cena? O fim do mês está chegando e você ainda está preso a uma planilha de escala que insiste em dar erro. E para piorar, o telefone não para de tocar com funcionários pedindo trocas.'\n[0:15 - 0:35] Animação elegante mostrando uma planilha de Excel sendo 'deletada' e a tela limpa e premium do dashboard do Escala surgindo: 'Gerenciar escalas de trabalho no Excel ou no papel não é apenas cansativo, é perigoso. Um único deslize com regras de DSR ou intervalo interjornada pode gerar um passivo trabalhista silencioso de milhares de reais.'\n[0:35 - 1:00] Demonstração da grade de escala preenchendo automaticamente com os badges PRESENCIAL e REMOTO e um alerta de compliance piscando em amarelo: 'Conheça o Escala. O SaaS B2B desenvolvido para simplificar sua operação. Com ele, você seleciona um template, importa seus funcionários e o sistema gera o mês inteiro de forma justa e correta. Nosso motor inteligente analisa a CLT em tempo real e avisa sobre quaisquer riscos antes de você publicar.'\n[1:00 - 1:30] Colaborador batendo ponto no celular dentro do raio verde (geofencing) e aceitando uma solicitação de troca com um clique: 'Seus colaboradores consultam a escala pelo celular, batem o ponto com geofencing seguro contra fraudes e solicitam trocas de plantão organizadas, que chegam para sua aprovação em segundos.'\n[1:30 - 2:00] Tela final com a logo do Escala e o botão de CTA grande e reluzente: 'Elimine o caos operacional e proteja sua empresa. Clique no link abaixo e comece seu teste grátis de 14 dias agora mesmo. Escala: a gestão inteligente que sua empresa precisa.'"
     },
     {
       "slug": "seguranca-e-facilities",
       "eyebrow": "Setor de Segurança",
-      "heroTitle": "Garanta a Cobertura de Postos em Tempo Real",
-      "heroDescription": "Validação por Geofencing e IP. Saiba exatamente quando e onde seu colaborador bateu o ponto.",
-      "heroBackgroundImageName": "what-s-inside-a-black-hole.jpg",
+      "heroTitle": "Cubra postos sem depender de planilhas e mensagens soltas",
+      "heroDescription": "Planeje escalas, acompanhe postos e qualifique o uso de geolocalização com consentimento e auditoria antes de escalar para operação crítica.",
+      "heroBackgroundImageName": "escala-saas-seguranca-facilities.png",
       "primaryCtaLabel": "Falar com Consultor",
       "primaryCtaUrl": "/contact?segment=security",
       "secondaryCtaLabel": "Ver Planos",
       "secondaryCtaUrl": "#pricing",
       "trialDescription": "Piloto assistido de 60 a 90 dias disponível para empresas estratégicas.",
       "aiTrialDescription": "Analise riscos de escala automaticamente.",
-      "securityStatement": "Segurança de dados e auditoria completa de acessos."
+      "securityStatement": "Segurança de dados, auditoria de acessos e regras operacionais validadas no backend."
     }
   ],
   "features": [
@@ -38,8 +41,8 @@
       "iconKey": "calendar"
     },
     {
-      "title": "Geofencing Avançado",
-      "description": "Registro de ponto validado por GPS e IP. Crie cercas digitais para seus postos de trabalho.",
+      "title": "Ponto web com geolocalização",
+      "description": "Registro básico com GPS, IP e device fingerprint, preparado para evoluir com consentimento e políticas por plano.",
       "category": "security",
       "iconKey": "map-pin"
     },
@@ -50,8 +53,8 @@
       "iconKey": "sparkles"
     },
     {
-      "title": "Novo CNPJ Alfanumérico",
-      "description": "Primeiro SaaS do Brasil preparado para o novo padrão de identificação da Receita Federal.",
+      "title": "Governança e auditoria",
+      "description": "BFF, consentimento, rastreio de campanha e trilhas de decisão para reduzir risco operacional.",
       "category": "security",
       "iconKey": "shield"
     }
@@ -142,7 +145,7 @@
       "title": "Geofencing: A prova de presença definitiva no B2B",
       "slug": "geofencing-prova-presenca",
       "description": "Por que hospitais e empresas de segurança estão abandonando o ponto físico.",
-      "imageName": "what-s-inside-a-black-hole.jpg"
+      "imageName": "escala-saas-seguranca-facilities.png"
     }
   ],
   "marketSegments": [
@@ -155,6 +158,117 @@
       "title": "Saúde e Plantões",
       "slug": "saude",
       "description": "Escalas 12x36 com visualização clara de cobertura por setor."
+    },
+    {
+      "title": "Segurança e Facilities",
+      "slug": "seguranca-facilities",
+      "description": "Controle postos, cobertura mínima e presença com trilha auditável."
+    },
+    {
+      "title": "Restaurantes e Varejo",
+      "slug": "restaurantes-varejo",
+      "description": "Saia do Excel em escalas 6x1 com folgas, feriados e contadores."
+    },
+    {
+      "title": "Igrejas e Voluntariado",
+      "slug": "igrejas",
+      "description": "Organize equipes recorrentes com escala simples, publicação clara e menos mensagens soltas."
+    }
+  ],
+  "testimonials": [
+    {
+      "title": "Menos ajuste manual no fechamento do mês",
+      "slug": "operacao-varejo-6x1",
+      "authorName": "Gestora de Operações",
+      "authorRole": "Rede de varejo com escala 6x1",
+      "content": "O maior ganho foi parar de conferir folga e feriado em várias abas de planilha. A equipe passou a revisar a escala por alerta e contador, não por tentativa e erro."
+    },
+    {
+      "title": "Trocas com histórico e menos ruído",
+      "slug": "facilities-trocas-auditaveis",
+      "authorName": "Coordenador de Facilities",
+      "authorRole": "Operação multiunidade",
+      "content": "Antes, parte das trocas ficava perdida em mensagens. O fluxo com solicitação, aceite e aprovação deixa claro quem pediu, quem aprovou e qual escala foi alterada."
+    },
+    {
+      "title": "Demo já chega com contexto comercial",
+      "slug": "clinica-demo-qualificada",
+      "authorName": "Responsável de RH",
+      "authorRole": "Clínica com plantões 12x36",
+      "content": "O formulário já direcionou a conversa para o template certo. Em vez de uma apresentação genérica, a demonstração começou pelo nosso problema real: plantão, feriado e cobertura mínima."
+    }
+  ],
+  "banners": [
+    {
+      "title": "Escalas mensais sem fórmula frágil",
+      "description": "Use templates 5x2, 6x1 e 12x36 com feriados, contadores e publicação segura.",
+      "imageName": "escala-saas-hero-dashboard.png"
+    },
+    {
+      "title": "Operações com postos e cobertura mínima",
+      "description": "Planeje segurança, facilities e logística com visão de cobertura e trilha auditável.",
+      "imageName": "escala-saas-seguranca-facilities.png"
+    }
+  ],
+  "announcements": [
+    {
+      "title": "Beta fechado para PMEs com escala mensal",
+      "slug": "beta-fechado-escala-mensal",
+      "content": "Estamos priorizando empresas que ainda controlam escala por Excel, WhatsApp ou conferência manual. O beta começa por geração mensal, feriados, contadores e alertas backend.",
+      "category": "update",
+      "imageName": "escala-saas-relatorios-contadores.png"
+    }
+  ],
+  "leadForms": [
+    {
+      "title": "Diagnóstico de escala mensal",
+      "slug": "diagnostico-escala-mensal",
+      "formId": "home-lead-capture",
+      "fields": [
+        { "name": "name", "label": "Nome", "required": true },
+        { "name": "email", "label": "Email corporativo", "required": true },
+        { "name": "phone", "label": "Celular", "required": true },
+        { "name": "companyName", "label": "Empresa", "required": true },
+        { "name": "employeeRange", "label": "Faixa de colaboradores", "required": true },
+        { "name": "companySegment", "label": "Segmento", "required": true }
+      ]
+    }
+  ],
+  "legalPages": [
+    {
+      "title": "Termos de Uso",
+      "slug": "terms",
+      "content": "## Termos de Uso\n\nEstes termos descrevem as condições de uso da plataforma SharedLink Escala em ambiente de demonstração, beta ou produção.\n\nA plataforma apoia gestão de escalas, campanhas e qualificação comercial. Regras trabalhistas críticas devem ser configuradas e validadas pela empresa contratante com apoio jurídico especializado quando aplicável.\n\nO uso da plataforma exige credenciais individuais, respeito aos perfis de acesso e registro correto de dados operacionais."
+    },
+    {
+      "title": "Política de Privacidade",
+      "slug": "privacy",
+      "content": "## Política de Privacidade\n\nTratamos dados pessoais conforme princípios de finalidade, necessidade, transparência, segurança e responsabilização.\n\nDados de leads são usados para qualificação comercial, atribuição de campanha, recomendação inicial de plano e contato autorizado. Dados de colaboradores devem ser minimizados e acessados apenas por perfis autorizados.\n\nRecursos como geolocalização exigem consentimento, política clara por tenant e retenção proporcional ao objetivo operacional."
+    },
+    {
+      "title": "Segurança e Governança",
+      "slug": "security",
+      "content": "## Segurança e Governança\n\nO frontend não acessa banco de dados diretamente. A aplicação usa backend/BFF como camada de proteção, reduzindo exposição de tokens e centralizando regras críticas.\n\nAlterações relevantes de escala, lead, consentimento e publicação devem gerar trilha de auditoria. Logs não devem conter dados sensíveis além do necessário para diagnóstico e conformidade."
+    }
+  ],
+  "emailTemplates": [
+    {
+      "title": "Ativação de Trial (Dia 1)",
+      "slug": "ativacao-trial-dia-1",
+      "subject": "🛠️ Como criar sua primeira escala em menos de 5 minutos (Passo a Passo)",
+      "body": "Olá, [Primeiro Nome], tudo bem?\n\nSeja muito bem-vindo ao Escala!\n\nSabemos que gerenciar a jornada de trabalho da equipe pode parecer um trabalho sem fim. Conflitos de folga, regras da CLT confusas e mensagens de última hora no WhatsApp que somem no meio da noite.\n\nNós criamos o Escala para colocar um fim nesse caos.\n\nHoje, queremos te ajudar a dar o primeiro passo. Preparamos templates de escalas prontos para o seu setor.\n\nAqui está o que você precisa fazer agora:\n1. Faça login na sua conta.\n2. Escolha o seu modelo de escala (5x2, 6x1 ou 12x36).\n3. Importe sua lista de colaboradores.\n4. O sistema irá preencher e validar a escala de folgas automaticamente para você.\n\nCaso o motor de regras encontre qualquer conflito trabalhista, você será avisado na hora, antes de publicar.\n\n👉 [Clique aqui para montar sua primeira escala]\n\nSe precisar de ajuda, basta responder a este e-mail. Nossa equipe de suporte está pronta para te guiar.\n\nForte abraço,\nEquipe Escala"
+    }
+  ],
+  "campaignPages": [
+    {
+      "title": "Meta Ads Clínicas e Varejo",
+      "slug": "meta-ads-clinicas-varejo",
+      "startDate": "2026-06-26T00:00:00Z",
+      "endDate": "2026-12-31T23:59:59Z",
+      "channel": "Meta Ads",
+      "adPrimaryText": "Você ainda perde o final de semana inteiro montando a escala de plantão da sua clínica no Excel? Um único erro de descanso interjornada ou DSR pode custar caro na justiça do trabalho. Com a plataforma Escala, você monta escalas mensais completas, distribui folgas automaticamente e valida as regras da CLT em tempo real. Saia da planilha hoje mesmo. 👉 Clique em 'Saiba Mais' e teste grátis por 14 dias.",
+      "adHeadline": "🚀 Chega de planilhas de escala confusas. Monte escalas em minutos.",
+      "adCta": "Cadastre-se"
     }
   ],
   "footer": {

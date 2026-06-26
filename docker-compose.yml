@@ -62,6 +62,7 @@ services:
       - ./Backend/cms-strapi/config:/opt/app/config
       - ./Backend/cms-strapi/src:/opt/app/src
       - ./Backend/cms-strapi/scripts:/opt/app/scripts
+      - ./Backend/cms-strapi/data:/opt/app/data
       - ./Backend/cms-strapi/public/uploads:/opt/app/public/uploads
     networks:
       - escala-network

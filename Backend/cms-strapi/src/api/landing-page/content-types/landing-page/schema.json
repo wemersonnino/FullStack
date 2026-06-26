@@ -207,6 +207,15 @@
       "relation": "oneToMany",
       "target": "api::cta-button.cta-button"
     },
+    "vslTitle": {
+      "type": "string"
+    },
+    "vslVideoUrl": {
+      "type": "string"
+    },
+    "vslScript": {
+      "type": "text"
+    },
     "seo": {
       "type": "component",
       "component": "shared.seo",

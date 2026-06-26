@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "email_template_contents",
+  "info": {
+    "singularName": "email-template-content",
+    "pluralName": "email-template-contents",
+    "displayName": "Email Template Content"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "body": {
+      "type": "richtext"
+    }
+  }
+}

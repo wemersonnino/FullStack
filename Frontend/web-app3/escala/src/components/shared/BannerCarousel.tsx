@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Banner as BannerType } from "@/interfaces/banner/banner.interface";
-import { Button } from "@/components/ui/button";
 
 interface BannerCarouselProps {
   banners: BannerType[];
@@ -31,7 +30,6 @@ export const BannerCarousel = ({
   const safeCurrent = current >= bannersWithImages.length ? 0 : current;
   const currentBanner = bannersWithImages[safeCurrent] ?? bannersWithImages[0];
   const imageUrl = currentBanner.image.url;
-  const buttonLink = currentBanner.button_link?.trim();
 
   return (
     <section className="relative h-[70vh] w-full overflow-hidden bg-background">
@@ -56,13 +54,8 @@ export const BannerCarousel = ({
             <h2 className="text-4xl font-bold drop-shadow-md">
               {currentBanner.title}
             </h2>
-            {currentBanner.subtitle && (
-              <p className="text-lg drop-shadow">{currentBanner.subtitle}</p>
-            )}
-            {buttonLink && (
-              <Button asChild className="mt-4">
-                <a href={buttonLink}>{currentBanner.button_text || "Saiba mais"}</a>
-              </Button>
+            {currentBanner.description && (
+              <p className="text-lg drop-shadow">{currentBanner.description}</p>
             )}
           </div>
         </motion.div>

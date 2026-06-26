@@ -14,8 +14,12 @@ import java.time.OffsetDateTime;
 public class LeadCaptureRequest {
     private String name;
     private String email;
+    private String phone;
     private String companyName;
+    private String employeeRange;
+    private String companySegment;
     private Boolean marketingConsentGranted;
+    private String consentVersion;
     private String source;
     private String utmSource;
     private String utmMedium;

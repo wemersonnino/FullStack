@@ -329,4 +329,39 @@ export const authOptions: AuthOptions = {
 };
 
 const authHandler = NextAuth(authOptions);
-export { authHandler as GET, authHandler as POST };
+
+const GET = async (request: Request, context: any) => {
+  const url = new URL(request.url);
+
+  // Intercepta a rota de sessão para não vazar o token do backend para o client-side
+  if (url.pathname.endsWith('/api/auth/session')) {
+    const response = await authHandler(request, context);
+    if (response && response.ok) {
+      try {
+        const sessionData = await response.json();
+        if (sessionData?.user?.token) {
+          delete sessionData.user.token;
+        }
+        return new Response(JSON.stringify(sessionData), {
+          status: response.status,
+          headers: response.headers,
+        });
+      } catch (e) {
+        // Retorna uma resposta segura caso a leitura do JSON falhe (ex: body vazio)
+        return new Response(JSON.stringify({}), {
+          status: response.status,
+          headers: response.headers,
+        });
+      }
+    }
+    return response;
+  }
+
+  return authHandler(request, context);
+};
+
+const POST = async (request: Request, context: any) => {
+  return authHandler(request, context);
+};
+
+export { GET, POST };
