@@ -43,5 +43,6 @@ export const API_ROUTES = {
   DASHBOARD_SUMMARY: '/api/bff/schedules/dashboard-summary',
   SCHEDULING_MONTH_CALENDAR: '/api/bff/scheduling/month-calendar',
   SCHEDULING_LEGENDS: '/api/bff/scheduling/legends',
+  SCHEDULING_HOLIDAYS: '/api/bff/scheduling/holidays',
   LEADS: '/api/bff/leads',
 };

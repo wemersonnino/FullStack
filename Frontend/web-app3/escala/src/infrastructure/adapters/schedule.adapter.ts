@@ -1,5 +1,12 @@
 import { ScheduleMapper } from "./mappers/schedule.mapper";
-import { MonthCalendar, ScheduleLegend, Shift, ShiftSwap } from "@/core/domain/models/schedule.model";
+import {
+  CreateScheduleHolidayInput,
+  MonthCalendar,
+  ScheduleHoliday,
+  ScheduleLegend,
+  Shift,
+  ShiftSwap,
+} from "@/core/domain/models/schedule.model";
 
 export class ScheduleBackendAdapter {
   private static baseUrl = '/api/bff';
@@ -59,6 +66,42 @@ export class ScheduleBackendAdapter {
       },
     });
     if (!response.ok) throw new Error("Failed to fetch scheduling legends");
+    return response.json();
+  }
+
+  static async listSchedulingHolidays(
+    token: string,
+    params: { year: number; unitId?: number }
+  ): Promise<ScheduleHoliday[]> {
+    const url = new URL(this.url('/scheduling/holidays'));
+    url.searchParams.set('year', String(params.year));
+    if (params.unitId !== undefined) {
+      url.searchParams.set('unitId', String(params.unitId));
+    }
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to fetch scheduling holidays");
+    return response.json();
+  }
+
+  static async createSchedulingHoliday(
+    token: string,
+    input: CreateScheduleHolidayInput
+  ): Promise<ScheduleHoliday> {
+    const response = await fetch(this.url('/scheduling/holidays'), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) throw new Error("Failed to create scheduling holiday");
     return response.json();
   }
 

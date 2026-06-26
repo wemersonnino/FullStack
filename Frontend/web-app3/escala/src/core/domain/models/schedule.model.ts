@@ -54,3 +54,20 @@ export interface ScheduleLegend {
   impact: ScheduleLegendImpact;
   plannedMinutes: number;
 }
+
+export type ScheduleHolidayType = 'NATIONAL' | 'STATE' | 'MUNICIPAL' | 'CUSTOM';
+
+export interface ScheduleHoliday {
+  id: number;
+  date: string;
+  name: string;
+  type: ScheduleHolidayType;
+  unitId?: number | null;
+}
+
+export interface CreateScheduleHolidayInput {
+  date: string;
+  name: string;
+  type: ScheduleHolidayType;
+  unitId?: number | null;
+}

@@ -278,6 +278,10 @@ public class OpenApiController {
         paths.put("/api/v1/schedules/dashboard-summary", pathGet(get("Escalas e Trocas", "Resumo do dashboard de escala", "Retorna indicadores do mes para dashboard de escala.", queryParamRequired("year", "Ano do resumo."), queryParamRequired("month", "Mes do resumo, de 1 a 12."))));
         paths.put("/api/v1/scheduling/month-calendar", pathGet(get("Escala Inteligente", "Gerar calendario mensal", "Gera os dias de um mes com marcacao de fim de semana e espaco para aplicacao de feriados por unidade.", queryParamRequired("year", "Ano do calendario."), queryParamRequired("month", "Mes do calendario, de 1 a 12."), queryParam("unitId", "ID da unidade operacional."), queryParam("timezone", "Timezone IANA. Padrao: America/Sao_Paulo."))));
         paths.put("/api/v1/scheduling/legends", pathGet(get("Escala Inteligente", "Listar legendas de escala", "Lista as legendas padrao da fundacao mensal com impacto operacional e minutos previstos.")));
+        paths.put("/api/v1/scheduling/holidays", path(
+                get("Escala Inteligente", "Listar feriados de escala", "Lista feriados configurados para a empresa no ano informado, incluindo feriados globais da empresa e feriados especificos da unidade.", queryParamRequired("year", "Ano dos feriados."), queryParam("unitId", "ID da unidade operacional.")),
+                post("Escala Inteligente", "Criar feriado de escala", "Cria um feriado nacional, estadual, municipal ou customizado para a empresa, opcionalmente restrito a uma unidade.", "HolidayRequest")
+        ));
 
         paths.put("/api/v1/check-in", pathPost(post("Ponto", "Registrar ponto", "Registra ponto do usuario autenticado validando geolocalizacao permitida e IP de origem.", "CheckInRequest")));
 
@@ -679,6 +683,12 @@ public class OpenApiController {
                 properties.put("endTime", Map.of("type", "string", "format", "time", "example", "17:00:00"));
                 properties.put("minEmployeesRequired", Map.of("type", "integer", "example", 2));
                 break;
+            case "HolidayRequest":
+                properties.put("date", Map.of("type", "string", "format", "date", "example", "2026-12-25"));
+                properties.put("name", Map.of("type", "string", "example", "Natal"));
+                properties.put("type", Map.of("type", "string", "enum", List.of("NATIONAL", "STATE", "MUNICIPAL", "CUSTOM"), "example", "NATIONAL"));
+                properties.put("unitId", Map.of("type", "integer", "format", "int64", "example", 1));
+                break;
             case "ChatbotWebhookRequest":
                 properties.put("senderEmail", Map.of("type", "string", "example", "colaborador@escala.local"));
                 properties.put("message", Map.of("type", "string", "example", "Preciso de uma troca para o meu plantão de amanhã"));
@@ -751,6 +761,9 @@ public class OpenApiController {
         }
         if (s.contains("legendas de escala")) {
             return "LegendResponse";
+        }
+        if (s.contains("feriado")) {
+            return "HolidayResponse";
         }
         if (s.contains("ponto") || s.contains("check-in")) {
             return "CheckInResponse";
