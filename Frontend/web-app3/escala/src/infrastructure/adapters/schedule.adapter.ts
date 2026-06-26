@@ -1,5 +1,5 @@
 import { ScheduleMapper } from "./mappers/schedule.mapper";
-import { MonthCalendar, Shift, ShiftSwap } from "@/core/domain/models/schedule.model";
+import { MonthCalendar, ScheduleLegend, Shift, ShiftSwap } from "@/core/domain/models/schedule.model";
 
 export class ScheduleBackendAdapter {
   private static baseUrl = '/api/bff';
@@ -48,6 +48,17 @@ export class ScheduleBackendAdapter {
       },
     });
     if (!response.ok) throw new Error("Failed to fetch month calendar");
+    return response.json();
+  }
+
+  static async listSchedulingLegends(token: string): Promise<ScheduleLegend[]> {
+    const response = await fetch(this.url('/scheduling/legends'), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to fetch scheduling legends");
     return response.json();
   }
 

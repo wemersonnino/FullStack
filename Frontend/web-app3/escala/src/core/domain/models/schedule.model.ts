@@ -45,3 +45,12 @@ export interface MonthCalendar {
   unitId?: number | null;
   days: MonthCalendarDay[];
 }
+
+export type ScheduleLegendImpact = 'WORKED' | 'REST' | 'ABSENCE' | 'NEUTRAL';
+
+export interface ScheduleLegend {
+  code: string;
+  label: string;
+  impact: ScheduleLegendImpact;
+  plannedMinutes: number;
+}
