@@ -1,5 +1,5 @@
 import { ScheduleMapper } from "./mappers/schedule.mapper";
-import { Shift, ShiftSwap } from "@/core/domain/models/schedule.model";
+import { MonthCalendar, Shift, ShiftSwap } from "@/core/domain/models/schedule.model";
 
 export class ScheduleBackendAdapter {
   private static baseUrl = '/api/bff';
@@ -25,6 +25,30 @@ export class ScheduleBackendAdapter {
     if (!response.ok) throw new Error("Failed to fetch shifts");
     const dtos = await response.json();
     return dtos.map((dto: any) => ScheduleMapper.shiftToDomain(dto));
+  }
+
+  static async getMonthCalendar(
+    token: string,
+    params: { year: number; month: number; unitId?: number; timezone?: string }
+  ): Promise<MonthCalendar> {
+    const url = new URL(this.url('/scheduling/month-calendar'));
+    url.searchParams.set('year', String(params.year));
+    url.searchParams.set('month', String(params.month));
+    if (params.unitId !== undefined) {
+      url.searchParams.set('unitId', String(params.unitId));
+    }
+    if (params.timezone) {
+      url.searchParams.set('timezone', params.timezone);
+    }
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to fetch month calendar");
+    return response.json();
   }
 
   static async createShift(shift: Partial<Shift>, token: string): Promise<Shift> {

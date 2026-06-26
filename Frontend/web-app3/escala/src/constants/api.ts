@@ -41,5 +41,6 @@ export const API_ROUTES = {
   SHIFT_SWAPS: '/api/bff/schedules/swap-requests',
   WORK_SCHEDULES: '/api/bff/schedules',
   DASHBOARD_SUMMARY: '/api/bff/schedules/dashboard-summary',
+  SCHEDULING_MONTH_CALENDAR: '/api/bff/scheduling/month-calendar',
   LEADS: '/api/bff/leads',
 };
