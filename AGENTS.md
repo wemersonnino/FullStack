@@ -12,6 +12,9 @@
 - O PostgreSQL roda em Docker e deve ter banco/usuario separados para Strapi e para o backend da aplicacao.
 - O Swagger/OpenAPI atual do backend nao usa Springdoc, pois `springdoc-openapi-starter-webmvc-ui:2.8.17` quebra em runtime com Spring Boot 4/Spring Framework 7. A solucao vigente usa `org.webjars:swagger-ui:5.32.2` e `OpenApiController` manual em `Backend/java-app1/demo/src/main/java/com/escala/authservice/controller/OpenApiController.java`.
 - O Swagger local deve responder em `http://localhost:8080/swagger-ui/index.html` e o JSON OpenAPI em `http://localhost:8080/v3/api-docs`.
+- O posicionamento de produto vigente esta documentado em `docs/Analise-Produto-Arquitetura-Concorrencia-Oceano-Azul.md`.
+- OKRs e roadmap atuais estao em `docs/okr.md` e `docs/roadmap.md`.
+- O plano de implementacao da gestao mensal inteligente de escalas esta em `docs/plano-implementacao-gestao-mensal-inteligente-escalas.md`.
 
 ## Arquitetura alvo
 
@@ -22,10 +25,11 @@
 - Ambientes: development, homolog e production via Spring profiles e variaveis de ambiente.
 - Frontend com rotas publicas e privadas, tema claro/escuro, menu publico com login/cadastro e dashboard privado.
 - NextAuth deve autenticar contra o Spring Boot. Strapi nao deve autenticar usuarios finais da aplicacao.
-- O backend e dono de login, JWT, roles, funcionarios, setores, projetos, escalas, trocas de escala e aprovacoes.
+- O backend e dono de login, JWT, roles, funcionarios, setores, projetos, escalas, trocas de escala, aprovacoes, ponto web, leads, billing, limites comerciais, auditoria e IA operacional.
 - O produto deve evoluir como um monolito modular orientado a dominio, usando arquitetura hexagonal/Clean Architecture no backend e organizacao por features no frontend.
 - A modularizacao deve refletir limites de negocio, nao apenas pastas por tipo tecnico.
 - O Next.js pode atuar como BFF usando Route Handlers em `app/api/...`, mascarando URLs internas do Spring Boot e agregando dados para o cliente quando fizer sentido.
+- A promessa vendavel inicial deve ser escala mensal correta para PMEs, com templates, feriados, contadores, alertas e publicacao auditavel. Ponto completo, banco de horas avancado, dimensionamento e IA devem evoluir por fases.
 
 ## Modularizacao por dominio
 
@@ -40,6 +44,8 @@ Contextos iniciais recomendados:
 - `negotiation`: solicitacoes de troca, compensacoes e maquina de estados de aprovacao.
 - `notification`: email, push, Slack, MS Teams e outros canais.
 - `audit`: trilha de auditoria, soft delete e rastreabilidade de alteracoes.
+- `commercial`: leads, campanhas, UTM/referrer, trial, planos, limites comerciais, billing e recomendacao de plano/template.
+- `content`: conteudo editorial vindo do Strapi, incluindo landing pages, menus, SEO, legal pages, artigos e formularios editoriais.
 
 No backend, preferir monolito modular com Spring Boot. Spring Modulith pode ser adotado gradualmente para reforcar isolamento entre modulos, eventos de dominio e verificacao de dependencias.
 
@@ -60,6 +66,10 @@ O backend oficial continua sendo `Backend/java-app1/demo`. A estrutura abaixo e 
 - O warning externo `sun.misc.Unsafe` aparece por Maven/Guava/Lombok em Java 25 e nao e codigo do projeto. Tratar como nao bloqueante enquanto build/testes passam.
 - O backend foi validado com `mvn test`, Docker Maven test e `docker compose up -d --build --force-recreate backend`.
 - Suite atual validada: `24` testes, `0` falhas, concentrados no dominio de escala. Ainda falta ampliar testes de integracao para autenticacao, JPA, JWT e endpoints.
+- Existem entidades e servicos para `MarketingLead`, `TimeRecord`, `OperationalCapacity`, `WorkPost`, `AiUsage`, `Subscription`, `Invoice`, `AuditLog`, `ManagementEdge`, `ManagerAssignment` e `ManagementClosure`.
+- `CheckInService` ja persiste ponto web basico em `TimeRecord`, com geolocalizacao, IP, device fingerprint e alternancia simples entre entrada/saida. Isso nao deve ser tratado como REP-P completo ou espelho de ponto assinado.
+- `MarketingLeadService` ja captura nome, email, empresa, consentimento, UTM, referrer, landing page e campanha. Ainda falta evoluir segmento, faixa de colaboradores, telefone normalizado, classificacao de email pessoal/corporativo e versao de consentimento.
+- `core/ai` possui `AiProviderPort`, `MockAiAdapter` e controle inicial de uso/limites. IA deve permanecer explicavel e validada por regras backend antes de qualquer efetivacao operacional.
 
 ### Documentacao OpenAPI atual
 
@@ -127,6 +137,16 @@ Encaixe funcional:
 
 O frontend principal continua sendo `Frontend/web-app3/escala`. A organizacao deve migrar gradualmente para uma divisao por features, inspirada em Feature-Sliced Design, mantendo componentes de UI independentes da regra de negocio.
 
+### Estado operacional atual do frontend
+
+- Versao atual: Next.js `16.2.6`, React `19.2.6`, TypeScript `5.9.3`, pnpm `10.33.3`.
+- Rotas publicas atuais incluem home, artigos, campanhas, landing pages segmentadas, contato, demo, login, cadastro, recuperacao de senha e convites.
+- Rotas privadas atuais incluem dashboard, escala, auditoria, marketing, empresas, setores, projetos, relatorios, ReBAC, time, aprendizado, configuracoes e perfil.
+- O BFF atual fica em `src/app/api/bff/...` e cobre auth, leads, check-in, escala, schedules, swap requests, relatorios, audit logs, empresas, funcionarios, organizacao, ReBAC, billing, IA, mensagens, stats e work posts.
+- `src/app/api/server/[...endpoint]/route.ts` existe como rota generica; preferir rotas BFF explicitas para fluxos de produto novos.
+- O arquivo `proxy.ts` e a fronteira correta para Next.js 16; nao criar `middleware.ts`.
+- O frontend ja depende de `@brazilian-utils/brazilian-utils`, que pode ser usado para validacoes/formatacoes brasileiras quando fizer sentido.
+
 Estrutura alvo:
 
 ```text
@@ -191,6 +211,7 @@ Encaixe funcional:
 - Acompanhamento presencial/remoto: `CalendarioEscala.tsx` renderiza dias com selos visuais usando Tailwind e shadcn/ui `Badge`, por exemplo um selo azul para `REMOTO` e outro padrao para `PRESENCIAL`.
 - Solicitacao de troca: a tela do funcionario usa `useSolicitarTroca`, que chama a API em `infrastructure/api` ou o BFF em `app/api/...` e trata erros de dominio retornados pelo Spring.
 - Gestao de escala: telas de gestor usam `useGestaoEscala` para definir escalas, visualizar capacidade, cobertura e aprovar/rejeitar solicitacoes.
+- Captura comercial: formularios publicos devem enviar dados para o BFF, que adiciona atribuicao UTM/referrer e repassa ao backend Spring Boot. Strapi define conteudo/editorial do formulario, mas nao deve persistir regra operacional do lead.
 
 ## Dominio de escala
 
@@ -207,6 +228,20 @@ Encaixe funcional:
 - A aprovacao de remoto/troca deve respeitar cobertura minima presencial por setor/projeto.
 - Feriados regionais, ferias, licencas e atestados devem bloquear ou sinalizar dias indisponiveis.
 - Alteracoes em escala devem gerar eventos de dominio para notificacao e auditoria.
+- A escala mensal inteligente deve evoluir para fluxo `rascunho -> validacao -> publicacao -> retificacao -> arquivamento`, com versionamento e ciencia explicita de alertas criticos antes de publicar.
+- Templates prioritarios: `5x2`, `6x1`, `12x36`; depois `4x2`, `6x2` e personalizado.
+- Legendas configuraveis devem cobrir, no minimo, trabalho, folga, descanso, ferias, atestado, falta, treinamento, curso, outros trabalhados e outros ausentes.
+- Feriados devem ser configuraveis por tenant/unidade, com tipos nacional, estadual, municipal e customizado. APIs externas como BrasilAPI ou bibliotecas utilitarias podem ajudar como fonte inicial, mas a regra final deve ser persistida e auditavel no backend.
+
+## Comercial, marketing e Strapi
+
+- O Strapi v5 em `Backend/cms-strapi` e fonte editorial para landing pages, campanhas, segmentos, artigos, menus, footer, SEO, legal pages, planos, FAQs e formularios editoriais.
+- Landing pages segmentadas vivem em `/[locale]/lp/[slug]`; campanhas em `/[locale]/campanhas/[slug]`.
+- UTM/referrer sao capturados pelo frontend/proxy e enviados ao backend em fluxos de lead/cadastro.
+- Leads operacionais devem ser persistidos no Spring Boot, nao no Strapi.
+- Nichos prioritarios PLG: igrejas, restaurantes, pequeno varejo, pequenas clinicas, tecnologia/suporte hibrido e facilities com poucos postos.
+- Nichos consultivos: seguranca patrimonial, clinicas/hospitais medios, transportadoras, centros de distribuicao, call centers e operacoes 24/7.
+- Mensagem central: sair da planilha e montar escala mensal correta com feriados, contadores, alertas e publicacao auditavel.
 
 ## Requisitos nao funcionais
 

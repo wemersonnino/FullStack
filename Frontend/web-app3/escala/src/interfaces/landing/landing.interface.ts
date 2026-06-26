@@ -58,6 +58,14 @@ export interface LandingCtaButton {
   location: 'hero' | 'pricing' | 'demo' | 'footer' | 'onboarding';
 }
 
+export interface LandingTestimonial {
+  id: number | string;
+  title: string;
+  authorName: string;
+  authorRole: string;
+  content: string;
+}
+
 export interface LandingInfoCard {
   id: number | string;
   title: string;
@@ -109,4 +117,7 @@ export interface LandingPageContent {
   pricingPlans: LandingPricingPlan[];
   faqs: LandingFaq[];
   ctaButtons: LandingCtaButton[];
+  vslTitle?: string;
+  vslVideoUrl?: string;
+  vslScript?: string;
 }

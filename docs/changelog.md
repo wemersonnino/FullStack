@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-06-26 - Copywriting Persuasivo, Expansão de Schemas e Seeding no Strapi v5
+
+### Adicionado
+- **Novas Coleções no Strapi:** Geradas as coleções `campaign-page` e `email-template-content` no CMS Strapi v5 usando o script gerador de coleções.
+- **Campos de VSL e Ads:** Expandidos os esquemas de `landing-page` (adicionados campos `vslTitle`, `vslVideoUrl`, `vslScript`) e `campaign-page` (adicionados campos `adPrimaryText`, `adHeadline`, `adCta`) para comportar textos persuasivos e scripts de vídeo.
+- **Seeding de Copywriting Completo:** Atualizado o script `seed-marketing-v3.js` para limpar e popular o banco de dados do Strapi com textos persuasivos para anúncios Meta Ads, e-mails sequenciais de trial (Dia 1) e o roteiro do vídeo de vendas (VSL). Executado com sucesso no container Docker do Strapi.
+- **Tipagem e Mapeamento Frontend:** Adicionados os campos VSL à interface `LandingPageContent` no frontend e atualizada a lógica de mapeamento DTO em `landing.dto.ts` para prover acesso tipado e estruturado a esses dados no Next.js.
+
+## 2026-06-26 - Ocultação Segura do JWT do Backend no Cliente (BFF Security)
+
+### Alterado
+- **Segurança do BFF (Prevenção de XSS e Roubo de Token):** Envelopados os handlers `GET`/`POST` do NextAuth em `route.ts` para interceptar chamadas ao `/api/auth/session` no lado do servidor e remover a propriedade `user.token` do payload JSON retornado ao navegador, mantendo o JWT do backend confidencial.
+- **Extração Segura via Cookie HTTP-only:** Atualizado o BFF `proxyBackend` para descriptografar o cookie de sessão do NextAuth (`next-auth.session-token`) usando `getToken` no servidor, injetando o JWT nos cabeçalhos enviados ao Spring Boot de forma transparente.
+- **Simplificação dos Cabeçalhos HTTP do Cliente:** Ajustado o interceptor `getRequestHeaders` para que chamadas client-side voltadas a endpoints `/api/bff` não adicionem o cabeçalho `Authorization` nem dependam de ler o token no navegador, permitindo que a autenticação flua apenas por cookies.
+- **Refatoração de Componentes e Hooks:** Componentes do cliente (`ThemeToggle.tsx` e `useAuth.ts`) foram refatorados para validar a existência da sessão através de `session?.user` em vez de inspecionar a chave `session?.user?.token`.
+
 ## 2026-06-18 - Segurança Multitenant, Otimização de Performance, Normalização 3NF e Cobertura Swagger
 
 ### Adicionado

@@ -47,6 +47,11 @@ const REQUIRED_COLLECTIONS = [
     where: {},
   },
   {
+    uid: 'api::testimonial.testimonial',
+    label: 'testimonials',
+    where: {},
+  },
+  {
     uid: 'api::footer.footer',
     label: 'footer',
     where: {},

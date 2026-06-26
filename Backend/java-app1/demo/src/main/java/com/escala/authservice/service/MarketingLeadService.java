@@ -2,6 +2,7 @@ package com.escala.authservice.service;
 
 import com.escala.authservice.dto.LeadCaptureRequest;
 import com.escala.authservice.dto.LeadCaptureResponse;
+import com.escala.authservice.core.commercial.domain.LeadQualification;
 import com.escala.authservice.entity.MarketingLead;
 import com.escala.authservice.repository.MarketingLeadRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import java.util.Locale;
 @Service
 @RequiredArgsConstructor
 public class MarketingLeadService {
-
     private final MarketingLeadRepository marketingLeadRepository;
 
     @Transactional
@@ -34,8 +34,13 @@ public class MarketingLeadService {
                 .name(saved.getName())
                 .createdAt(saved.getCreatedAt())
                 .marketingConsentGranted(saved.isMarketingConsentGranted())
+                .personalEmail(saved.isPersonalEmail())
+                .recommendedPlan(saved.getRecommendedPlan())
+                .recommendedTemplate(saved.getRecommendedTemplate())
                 .converted(saved.isConverted())
-                .message("Lead capturado com sucesso")
+                .message(saved.isPersonalEmail()
+                        ? "Lead capturado. Sinalizamos que o email parece pessoal para qualificar o contato."
+                        : "Lead capturado com sucesso")
                 .build();
     }
 
@@ -52,19 +57,38 @@ public class MarketingLeadService {
             throw new IllegalArgumentException("Nome do lead e obrigatorio");
         }
 
+        if (request.getCompanySegment() == null || request.getCompanySegment().isBlank()) {
+            throw new IllegalArgumentException("Segmento da empresa e obrigatorio");
+        }
+
+        if (request.getEmployeeRange() == null || request.getEmployeeRange().isBlank()) {
+            throw new IllegalArgumentException("Faixa de colaboradores e obrigatoria");
+        }
+
         if (!Boolean.TRUE.equals(request.getMarketingConsentGranted())) {
             throw new IllegalArgumentException("Consentimento de marketing e obrigatorio");
         }
     }
 
     private MarketingLead createNew(LeadCaptureRequest request, String email, OffsetDateTime now) {
+        String segment = normalize(request.getCompanySegment());
+        String employeeRange = normalize(request.getEmployeeRange());
+        LeadQualification qualification = LeadQualification.of(email, segment, employeeRange);
+
         return MarketingLead.builder()
                 .email(email)
                 .name(request.getName().trim())
+                .phone(normalizePhone(request.getPhone()))
                 .companyName(normalize(request.getCompanyName()))
+                .employeeRange(employeeRange)
+                .companySegment(segment)
                 .source(defaultString(request.getSource(), "LANDING_PAGE"))
-                .leadStatus("WARM")
+                .leadStatus(qualification.leadStatus())
                 .marketingConsentGranted(true)
+                .consentVersion(defaultString(request.getConsentVersion(), "marketing-consent-v1"))
+                .personalEmail(qualification.personalEmail())
+                .recommendedPlan(qualification.recommendedPlan())
+                .recommendedTemplate(qualification.recommendedTemplate())
                 .createdAt(now)
                 .lastLoginAt(now)
                 .utmSource(normalize(request.getUtmSource()))
@@ -79,11 +103,22 @@ public class MarketingLeadService {
     }
 
     private MarketingLead updateExisting(MarketingLead lead, LeadCaptureRequest request, OffsetDateTime now) {
+        String segment = normalize(request.getCompanySegment());
+        String employeeRange = normalize(request.getEmployeeRange());
+        LeadQualification qualification = LeadQualification.of(lead.getEmail(), segment, employeeRange);
+
         lead.setName(request.getName().trim());
+        lead.setPhone(normalizePhone(request.getPhone()));
         lead.setCompanyName(normalize(request.getCompanyName()));
+        lead.setEmployeeRange(employeeRange);
+        lead.setCompanySegment(segment);
         lead.setSource(defaultString(request.getSource(), defaultString(lead.getSource(), "LANDING_PAGE")));
-        lead.setLeadStatus(defaultString(lead.getLeadStatus(), "WARM"));
+        lead.setLeadStatus(qualification.leadStatus());
         lead.setMarketingConsentGranted(true);
+        lead.setConsentVersion(defaultString(request.getConsentVersion(), defaultString(lead.getConsentVersion(), "marketing-consent-v1")));
+        lead.setPersonalEmail(qualification.personalEmail());
+        lead.setRecommendedPlan(qualification.recommendedPlan());
+        lead.setRecommendedTemplate(qualification.recommendedTemplate());
         lead.setLastLoginAt(now);
         lead.setUtmSource(normalize(request.getUtmSource()));
         lead.setUtmMedium(normalize(request.getUtmMedium()));
@@ -108,4 +143,23 @@ public class MarketingLeadService {
     private String defaultString(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;
     }
+
+    private String normalizePhone(String value) {
+        String normalized = normalize(value);
+        if (normalized == null) {
+            return null;
+        }
+        String digits = normalized.replaceAll("\\D", "");
+        if (digits.isBlank()) {
+            return null;
+        }
+        if (digits.startsWith("55")) {
+            return "+" + digits;
+        }
+        if (digits.length() == 10 || digits.length() == 11) {
+            return "+55" + digits;
+        }
+        return normalized;
+    }
+
 }

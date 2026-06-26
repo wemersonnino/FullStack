@@ -1,7 +1,6 @@
 'use client';
 
-import { ClipboardList, Menu as MenuIcon, X } from 'lucide-react';
-import Image from 'next/image';
+import { Menu as MenuIcon, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { useSession } from 'next-auth/react';
 import { GlobalInterface } from '@/interfaces/global/global.interface';
 import { MenuItem } from '@/interfaces/menu/menu.interface';
+import { BrandLink } from '@/components/shared/BrandLink';
 
 type HeaderPublicProps = {
   global?: GlobalInterface | null;
@@ -37,29 +37,11 @@ export const HeaderPublic = ({ global, menuItems }: HeaderPublicProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
   const navLinks = getNavLinks(menuItems);
-  const siteName = global?.siteName || 'Escala SaaS';
-  const logo = global?.logo;
 
   return (
     <header className="fixed top-0 z-[100] w-full border-b bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-20 items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2 group">
-          {logo?.url ? (
-            <Image
-              src={logo.url}
-              alt={logo.alternativeText || siteName}
-              width={40}
-              height={40}
-              className="h-10 w-10 rounded-lg object-contain"
-              priority
-            />
-          ) : (
-            <div className="rounded-lg bg-primary p-1.5 transition-transform group-hover:rotate-12">
-              <ClipboardList className="h-6 w-6 text-primary-foreground" />
-            </div>
-          )}
-          <span className="text-xl font-black tracking-tighter text-primary">{siteName}</span>
-        </Link>
+        <BrandLink global={global} href="/" />
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">

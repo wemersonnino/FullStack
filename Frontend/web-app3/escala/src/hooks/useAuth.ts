@@ -169,7 +169,7 @@ export function useAuth() {
 
   // 🎨 Atualizar tema do usuário logado
   async function updateTheme(theme: ThemeEnum) {
-    if (!session?.user?.token) return
+    if (!session?.user) return
     try {
       setLoading(true)
       const res = await httpPost(`${API_ROUTES.UPDATE_USER_THEME}/${session.user.id}/theme`, { theme })

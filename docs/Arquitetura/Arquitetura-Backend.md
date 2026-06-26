@@ -57,8 +57,8 @@ O Swagger atual documenta `37` paths e `10` grupos. Mais detalhes em `docs/api/s
 ## Historico anterior
 
 > **Projeto:** Plataforma Escala (Estudo Full-Stack)
-> **Tecnologias:** Spring Boot 3.x + Java 21 + PostgreSQL + Docker
-> **Integrações:** NextAuth (Next.js), Strapi, .NET (módulos externos)
+> **Tecnologias atuais:** Spring Boot 4.1.0 + Java 25 + PostgreSQL + Docker
+> **Integracoes atuais:** NextAuth via frontend/BFF, Strapi como CMS editorial e servicos externos futuros quando necessarios.
 
 O conteudo abaixo e historico/conceitual e pode divergir do backend oficial atual. Ao implementar novas mudancas, priorizar `AGENTS.md`, `docs/decisoes-tecnicas.md`, `docs/api/swagger-openapi.md` e o codigo em `Backend/java-app1/demo`.
 
@@ -71,7 +71,7 @@ Construir uma **API REST segura e modular** para:
 - gerenciamento de usuários, roles e preferências,
 - integração com o front-end Next.js (NextAuth),
 - persistência em PostgreSQL,
-- futura comunicação com Strapi e .NET.
+- comunicação com Strapi apenas para conteudo/CMS quando necessario.
 
 ---
 
@@ -312,7 +312,7 @@ server:
 
 - **NextAuth Credentials Provider** chama `POST /auth/exchange`.
 - Recebe token e roles → adiciona no `session.user`.
-- Middleware (`middleware.ts`) usa o token para proteger rotas.
+- `proxy.ts` usa o token para proteger rotas e capturar contexto de rede/campanha.
 - Componente `<RequireRole>` filtra permissões no client.
 
 ---
@@ -321,10 +321,10 @@ server:
 
 |Sistema|Função|Endpoint base|
 |---|---|---|
-|**Strapi**|Conteúdo dinâmico (notícias, banners, blog)|`${NEXT_PUBLIC_STRAPI_API}`|
-|**.NET API**|Dados de relatórios, gráficos e calendários (iCal + date-fns)|`${NEXT_PUBLIC_DOTNET_API}`|
+|**Strapi**|Conteudo editorial, landing pages, menus, artigos, SEO e legal pages|`${NEXT_PUBLIC_STRAPI_API}`|
+|**Integracoes futuras**|Folha, ERP, mensageria, mapas, relatorios externos ou automacoes|Variavel propria por integracao|
 
-O backend Java pode agir como **API Gateway**, redirecionando chamadas autenticadas para Strapi e .NET.
+O backend Java pode orquestrar integracoes externas quando a regra operacional pertencer ao backend. O frontend deve usar BFF para chamadas protegidas.
 
 ---
 

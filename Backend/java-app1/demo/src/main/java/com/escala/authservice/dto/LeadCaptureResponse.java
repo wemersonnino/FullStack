@@ -17,6 +17,9 @@ public class LeadCaptureResponse {
     private String name;
     private OffsetDateTime createdAt;
     private boolean marketingConsentGranted;
+    private boolean personalEmail;
+    private String recommendedPlan;
+    private String recommendedTemplate;
     private boolean converted;
     private String message;
 }

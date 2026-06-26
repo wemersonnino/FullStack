@@ -380,6 +380,9 @@ export function mapLandingPage(data?: any): LandingPageContent {
     pricingPlans: pickArray(attrs.pricingPlans ?? entry.pricingPlans).map(asPricingPlan),
     faqs: pickArray(attrs.faqs ?? entry.faqs).map(asFaq).filter((item) => item.question && item.answer),
     ctaButtons: pickArray(attrs.ctaButtons ?? entry.ctaButtons).map(asCtaButton).filter((item) => item.label && item.url),
+    vslTitle: get('vslTitle', undefined),
+    vslVideoUrl: get('vslVideoUrl', undefined),
+    vslScript: get('vslScript', undefined),
   };
 
   // Garante que arrays nunca fiquem vazios se houver fallback disponível

@@ -3,12 +3,21 @@
 ## Arquitetura
 Este projeto segue rigorosamente a **Arquitetura Hexagonal (Ports and Adapters)** com um padrão de **BFF (Backend For Frontend)**.
 
+Arquivos de contexto e produto que devem orientar novas implementacoes:
+
+- `AGENTS.md`: contexto oficial do projeto e decisoes arquiteturais.
+- `docs/Analise-Produto-Arquitetura-Concorrencia-Oceano-Azul.md`: analise atual de produto, mercado, concorrencia, Oceano Azul, SWOT e 4Ps.
+- `docs/okr.md`: OKRs atuais do produto.
+- `docs/roadmap.md`: roadmap atual.
+- `docs/plano-implementacao-gestao-mensal-inteligente-escalas.md`: plano de implementacao da escala mensal inteligente.
+
 ### Inovações e Funcionalidades Premium
-- **Ponto por Geolocalização (Geofencing):** Implementado com validação cruzada (GPS + IP). O backend Java utiliza a fórmula de Haversine para garantir precisão e validação contra o raio permitido da empresa.
-- **Provisionamento SaaS Multi-tenant:** Sistema de Trial automático (14 dias) no primeiro login via Google SSO. Controle de limites de funcionários e acesso a features por plano (`TRIAL`, `ESSENTIAL`, `PROFESSIONAL`, `CRITICAL`).
+- **Ponto por Geolocalização (Geofencing):** Implementado como ponto web basico. O backend Java usa Haversine para validar a distancia contra o raio permitido da empresa e persiste `TimeRecord` com geolocalizacao, IP e device fingerprint. Isso ainda nao deve ser tratado como REP-P completo ou espelho de ponto assinado.
+- **Provisionamento SaaS Multi-tenant:** Ha base de trial, billing e controle de limites por plano (`TRIAL`, `ESSENTIAL`, `PROFESSIONAL`, `CRITICAL`), mas os fluxos comerciais ainda devem ser validados por fase.
 - **Gestão de Postos de Trabalho:** Cadastro e alocação de postos vinculados a projetos/contratos, permitindo controle de cobertura operacional.
 - **Integração de Mapas (Abstração Hexagonal):** O sistema utiliza uma camada de abstração para mapas. Atualmente integrado com **Leaflet/OpenStreetMap**, mas preparado para migração para **Google Maps SDK** sem alteração nos componentes de negócio.
-- **IA Assistente (Em implementação):** Motor de IA para análise de riscos de escala, sugestão de substitutos e resumos de folha, com controle de créditos por uso.
+- **IA Assistente (Em implementação):** Infraestrutura com porta/adaptador e mock para analise de riscos, sugestao de substitutos e resumos, com controle de creditos por uso. IA deve sugerir e explicar; validacao e efetivacao ficam no backend.
+- **Lead e campanhas:** `MarketingLead` ja captura nome, email, empresa, consentimento, UTM, referrer, landing e campanha. Ainda falta evoluir telefone, segmento, faixa de colaboradores, classificacao de email corporativo e versao de consentimento.
 
 ## Camadas do Frontend/BFF:
 1.  **Interface de Usuário (UI):** Responsável apenas por renderizar componentes e capturar interações. Consome o BFF via hooks ou chamadas diretas às rotas da API.
@@ -38,6 +47,7 @@ O sistema possui um motor dinâmico de marketing integrado ao Strapi v5:
 ### 3. Conteúdo Internacionalizado (i18n)
 - O frontend envia o cabeçalho de `locale` para o Strapi em todas as requisições.
 - As Landing Pages suportam versões em `pt-BR`, `en` e `es`.
+- Strapi e fonte editorial. Persistencia operacional de lead, trial, usuario, escala, ponto e billing deve continuar no backend Java.
 
 ## Estado Atual do Backend
 - **Versão:** Java 25 / Spring Boot 4.1.0.
@@ -45,14 +55,15 @@ O sistema possui um motor dinâmico de marketing integrado ao Strapi v5:
 - **Ponto:** Implementado `TimeRecord` com geofencing funcional e detecção inteligente de entrada/saída.
 - **Escalas:** Motor de regras `LaborRuleEngine` validando 12x36, descansos e conflitos.
 - **IA:** Infraestrutura de `AiProviderPort` com controle de créditos mensais.
-- **Auditoria e Segurança:** Isolamento rigoroso por `companyId` (Tenant) em todos os serviços e repositórios.
-- **Testes:** Validados via Maven, garantindo integridade das novas policies comerciais.
+- **Auditoria e Segurança:** Ha isolamento por `companyId` em varios fluxos e auditoria inicial. Novos endpoints devem reforcar isolamento tenant e evitar retorno direto de entidade JPA quando houver DTO apropriado.
+- **Testes:** Backend validado com `mvn test`, com 24 testes e 0 falhas concentrados no dominio de escala. Ainda falta ampliar integracao para autenticacao, JPA, JWT, ponto, leads e endpoints.
 
 ## Stack Tecnológica
 - **Frontend/BFF:** Next.js 16+ (TypeScript), Next-Auth, Tailwind CSS, Radix UI.
   - **Middleware (Next.js 16+):** Seguindo o novo padrão, o middleware é definido obrigatoriamente no arquivo `proxy.ts` na raiz do projeto, atuando como fronteira de rede e interceptor de requisições. NUNCA utilize `middleware.ts` nesta versão.
 - **Backend CMS:** Strapi v5 (Gestão de Conteúdo: Artigos, Banners, Menus, Footers).
 - **Backend Core (Principal):** `Backend/java-app1/demo`, Java Spring Boot (Gestão de Usuários, Roles, Permissões, Escalas, Batida de Ponto).
+- **OpenAPI:** Swagger atual e manual via WebJar e `OpenApiController`; nao reintroduzir Springdoc nesta branch sem nova validacao com Spring Boot 4/Spring Framework 7.
 
 ## Internacionalização (i18n)
 O sistema utiliza `next-intl` com suporte a múltiplos idiomas.

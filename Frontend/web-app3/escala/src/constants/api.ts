@@ -9,6 +9,8 @@ export const API_ROUTES = {
   MENU: `${baseUrl}/api/menus?populate=*`,
   CALENDAR: `${baseUrl}/api/calendar-events?populate=*`,
   ANNOUNCEMENTS: `${baseUrl}/api/announcements?populate=*`,
+  LEGAL_PAGES: `${baseUrl}/api/legal-pages?populate=*`,
+  LEAD_FORMS: `${baseUrl}/api/lead-forms?populate=*`,
   GLOBAL: `${baseUrl}/api/global?populate=*`,
   LANDING_PAGE:
     `${baseUrl}/api/landing-pages?` +
@@ -27,6 +29,7 @@ export const API_ROUTES = {
   PRICING_PLAN_CONTENTS: `${baseUrl}/api/pricing-plan-contents?filters[active][$eq]=true&sort=order:asc`,
   FAQS: `${baseUrl}/api/faqs?filters[active][$eq]=true&sort=order:asc`,
   CTA_BUTTONS: `${baseUrl}/api/cta-buttons?filters[active][$eq]=true&sort=order:asc`,
+  TESTIMONIALS: `${baseUrl}/api/testimonials?sort=updatedAt:desc`,
   AUTH_SERVICE: '/api/bff/auth',
   USERS: '/api/bff/users',
   UPDATE_USER_THEME: '/api/bff/users',

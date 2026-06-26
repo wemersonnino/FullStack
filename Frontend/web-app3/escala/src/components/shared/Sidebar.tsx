@@ -18,7 +18,6 @@ import {
   User,
   Users,
   ArrowLeftRight,
-  ClipboardList,
   UserPlus,
   BarChart4,
   Megaphone,
@@ -27,14 +26,17 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { MenuItem } from '@/interfaces/menu/menu.interface';
+import { GlobalInterface } from '@/interfaces/global/global.interface';
 import { cn, resolveAvatarUrl } from '@/lib/utils';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
+import { BrandLink } from '@/components/shared/BrandLink';
 
 interface SidebarProps {
   items: MenuItem[];
+  global?: GlobalInterface | null;
   user: {
     username?: string | null;
     email?: string | null;
@@ -94,12 +96,13 @@ const navigationGroups = [
   }
 ];
 
-export const Sidebar = ({ items, user }: SidebarProps) => {
+export const Sidebar = ({ items, global, user }: SidebarProps) => {
   const pathname = usePathname();
   const { logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const avatarSrc = resolveAvatarUrl(user);
+  void items;
 
   const filteredGroups = useMemo(() => {
     const userRoles = user.roles || [];
@@ -119,20 +122,10 @@ export const Sidebar = ({ items, user }: SidebarProps) => {
       {/* Logo Area */}
       <div className="flex h-20 items-center justify-between px-6 border-b bg-primary/5">
         {!collapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2 group">
-            <div className="rounded-lg bg-primary p-1.5 transition-transform group-hover:scale-110">
-               <ClipboardList className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div className="flex flex-col">
-                <span className="text-lg font-bold tracking-tight text-primary">ESCALA</span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80 leading-none">Plataforma SaaS</span>
-            </div>
-          </Link>
+          <BrandLink global={global} href="/dashboard" />
         )}
         {collapsed && (
-            <div className="mx-auto rounded-lg bg-primary p-1.5">
-               <ClipboardList className="h-6 w-6 text-primary-foreground" />
-            </div>
+          <BrandLink global={global} href="/dashboard" collapsed className="mx-auto" />
         )}
       </div>
 

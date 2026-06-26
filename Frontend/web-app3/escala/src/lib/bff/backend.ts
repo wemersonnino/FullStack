@@ -1,4 +1,5 @@
 import { getServerSession } from 'next-auth';
+import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { ENV } from '@/constants/env';
@@ -28,11 +29,23 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
   }
 
   if (options.authenticated !== false) {
-    const session = await getServerSession(authOptions);
+    let accessToken: string | undefined;
+
+    // 1. Tenta extrair o token do cookie (NextAuth) se houver requisição
+    if (options.request) {
+      const jwtToken = await getToken({ req: options.request as any, secret: process.env.NEXTAUTH_SECRET });
+      accessToken = typeof jwtToken?.accessToken === 'string' ? jwtToken.accessToken : undefined;
+    }
+
+    // 2. Fallback: tenta obter da sessão (necessário para Server Components e chamadas server-side)
+    if (!accessToken) {
+      const session = await getServerSession(authOptions);
+      accessToken = session?.user?.token;
+    }
+
+    // 3. Fallback: cabeçalho de Autorização tradicional
     const incomingAuthorization = options.request?.headers.get('authorization');
-    const authorization = session?.user?.token
-      ? `Bearer ${session.user.token}`
-      : incomingAuthorization;
+    const authorization = accessToken ? `Bearer ${accessToken}` : incomingAuthorization;
 
     if (!authorization) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

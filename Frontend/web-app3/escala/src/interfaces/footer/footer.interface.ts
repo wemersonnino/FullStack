@@ -1,6 +1,6 @@
 export interface FooterInterface {
   id: number;
-  logo: {
+  logo?: {
     url: string;
     alternativeText: string;
   };

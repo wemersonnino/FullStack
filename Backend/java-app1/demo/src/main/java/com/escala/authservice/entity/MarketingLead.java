@@ -27,7 +27,10 @@ public class MarketingLead {
 
     private String email;
     private String name;
+    private String phone;
     private String companyName;
+    private String employeeRange;
+    private String companySegment;
     private String source;
 
     @Column(name = "lead_status")
@@ -36,6 +39,16 @@ public class MarketingLead {
     @Column(name = "marketing_consent_granted", nullable = false)
     @Builder.Default
     private boolean marketingConsentGranted = false;
+
+    @Column(name = "consent_version")
+    private String consentVersion;
+
+    @Column(name = "personal_email", nullable = false)
+    @Builder.Default
+    private boolean personalEmail = false;
+
+    private String recommendedPlan;
+    private String recommendedTemplate;
 
     @Column(nullable = false)
     private OffsetDateTime createdAt;

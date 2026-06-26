@@ -5,9 +5,7 @@ export const Banner = ({ data }: { data?: BannerType }) => {
   const defaultImage = "/default-banner.svg";
   const imageUrl = data?.image?.url || defaultImage;
   const title = data?.title || "Bem-vindo à Plataforma Escala";
-  const subtitle = data?.subtitle || "Conteúdos, notícias e oportunidades.";
-  const buttonText = data?.button_text || "Saiba mais";
-  const buttonLink = data?.button_link?.trim();
+  const description = data?.description || "Conteúdos, notícias e oportunidades.";
 
   return (
     <section className="relative flex flex-col items-center justify-center text-center py-16 bg-gray-100">
@@ -19,15 +17,7 @@ export const Banner = ({ data }: { data?: BannerType }) => {
       />
       <div className="z-10 max-w-4xl space-y-4">
         <h2 className="text-4xl font-bold mb-4">{title}</h2>
-        <p className="text-lg mb-8">{subtitle}</p>
-        {buttonLink && (
-          <a
-            href={buttonLink}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
-          >
-            {buttonText}
-          </a>
-        )}
+        <p className="text-lg mb-8">{description}</p>
       </div>
     </section>
   );

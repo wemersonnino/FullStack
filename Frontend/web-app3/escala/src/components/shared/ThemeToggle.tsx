@@ -30,7 +30,7 @@ export const ThemeToggle = () => {
     setTheme(newTheme);
     setAppTheme(newTheme);
 
-    if (session?.user?.token) {
+    if (session?.user) {
       toast.promise(
         (async () => {
           await updateUserTheme(session.user.id, newTheme);

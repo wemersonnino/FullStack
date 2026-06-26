@@ -11,8 +11,12 @@ export interface CampaignAttribution {
 export interface LeadCapturePayload {
   name: string;
   email: string;
+  phone?: string;
   companyName?: string;
+  employeeRange?: string;
+  companySegment?: string;
   marketingConsentGranted: boolean;
+  consentVersion?: string;
   source?: string;
   landingPageSlug?: string;
   campaignSlug?: string;
@@ -24,6 +28,9 @@ export interface LeadCaptureResponse {
   name: string;
   createdAt: string;
   marketingConsentGranted: boolean;
+  personalEmail: boolean;
+  recommendedPlan?: string;
+  recommendedTemplate?: string;
   converted: boolean;
   message: string;
 }

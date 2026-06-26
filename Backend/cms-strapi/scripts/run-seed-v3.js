@@ -14,8 +14,12 @@ async function main() {
     app.log.level = 'error';
 
     await runSeedV3(app);
-    
-    await app.destroy();
+
+    try {
+      await app.destroy();
+    } catch (destroyError) {
+      console.warn('Seed V3 concluído; aviso ao encerrar Strapi:', destroyError.message);
+    }
     console.log('Seed V3 executado com sucesso.');
     process.exit(0);
   } catch (error) {

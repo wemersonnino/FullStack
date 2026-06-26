@@ -1,8 +1,8 @@
-# 🎨 Arquitetura do Front-End — Next.js 15 + TypeScript
+# 🎨 Arquitetura do Front-End — Next.js 16 + TypeScript
 
-> **Projeto:** Plataforma Escala (Estudo Full-Stack)
-> **Stack:** Next.js 15 + TypeScript + Tailwind 4 + NextAuth + next-themes + Zustand + Zod + Radix UI
-> **Objetivo:** construir um front-end modular, acessível e escalável, aplicando boas práticas e integração direta com o backend Java (OAuth2) e APIs externas (Strapi, .NET).
+> **Projeto:** Plataforma Escala
+> **Stack atual:** Next.js 16 + React 19 + TypeScript + Tailwind 4 + NextAuth + next-themes + Zustand + Zod + Radix UI
+> **Objetivo:** construir um front-end modular, acessivel e escalavel, consumindo o backend Spring Boot por BFF e o Strapi apenas para conteudo editorial.
 
 ---
 
@@ -140,7 +140,7 @@ return <HomeContent data={data} />
 2. NextAuth usa **CredentialsProvider** e chama a API Java `/auth/exchange`.
 3. API Java retorna `{ token, user: { id, name, roles, theme } }`.
 4. NextAuth salva token e roles no `session.user`.
-5. Middleware (`middleware.ts`) e `<RequireRole>` protegem as rotas.
+5. `proxy.ts` e `<RequireRole>` protegem as rotas.
 
 **Sessão Tipada:**
 
@@ -312,7 +312,7 @@ return <h1>{t('title')}</h1>
 
 - Strapi → conteúdo dinâmico (notícias, blog).
 
-- .NET → relatórios, calendários, gráficos.
+- Integracoes futuras → folha, ERP, mensageria, mapas ou automacoes quando necessario.
 
 
 Cada serviço terá seu **adapter** em `/services/`, ex:

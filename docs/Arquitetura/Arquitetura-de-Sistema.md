@@ -1,7 +1,7 @@
 # 🏗️ Arquitetura de Sistema — Escala Platform
 
 > **Projeto:** Plataforma Escala
-> **Escopo:** integração entre módulos Frontend (Next.js), Backend (Spring Boot), Banco de Dados (PostgreSQL), CMS (Strapi) e APIs .NET.
+> **Escopo:** integração entre módulos Frontend/BFF (Next.js), Backend (Spring Boot), Banco de Dados (PostgreSQL), CMS (Strapi) e integracoes externas futuras.
 > **Objetivo:** apresentar o fluxo completo de autenticação, comunicação e troca de dados no ecossistema da aplicação.
 
 ---
@@ -19,7 +19,7 @@ PostgreSQL (Banco de Dados)
 +----------------+
 | Serviços Externos |
 | • Strapi (CMS) |
-| • .NET APIs |
+| • Integrações futuras |
 +----------------+
 
 Cada módulo é independente, containerizado via **Docker Compose**, e comunica-se por HTTP/REST, autenticado por **JWT** e **NextAuth**.
@@ -31,11 +31,11 @@ Cada módulo é independente, containerizado via **Docker Compose**, e comunica-
 
 | Módulo | Tecnologia | Função |
 |--------|-------------|--------|
-| **Frontend** | Next.js 15 + TypeScript | Interface web (SSR/CSR), controle de acesso e tema |
-| **Backend** | Spring Boot 3 + Java 21 | API REST, autenticação OAuth2, orquestração de dados |
+| **Frontend** | Next.js 16 + React 19 + TypeScript | Interface web, BFF, controle de acesso e tema |
+| **Backend** | Spring Boot 4.1.0 + Java 25 | API REST, autenticacao JWT, dominio operacional e orquestracao |
 | **Banco de Dados** | PostgreSQL 15 | Persistência de usuários, roles, logs e preferências |
-| **CMS** | Strapi 5 | Gerenciamento de conteúdo (notícias, banners, eventos) |
-| **Serviços Externos** | .NET / C# | Módulos específicos (relatórios, calendários, gráficos) |
+| **CMS** | Strapi 5 | Conteudo editorial, landing pages, campanhas, menus, SEO e legal pages |
+| **Serviços Externos** | Futuras integracoes | Folha, ERP, mensageria, mapas ou automacoes quando necessario |
 | **Infraestrutura** | Docker + Compose | Contêinerização e rede local integrada |
 | **Monitoramento** | New Relic + Grafana | Observabilidade e métricas de desempenho |
 
@@ -99,15 +99,15 @@ graph LR
     A[Frontend Next.js] -->|NextAuth / Axios| B[API Java Spring Boot]
     B -->|JPA / Hibernate| C[PostgreSQL]
     B -->|HTTP REST| D[Strapi CMS]
-    B -->|HTTP REST| E[.NET APIs]
+    B -->|HTTP REST| E[Integracoes futuras]
     D -->|PostgreSQL ORM| C
-    E -->|Consulta / Cache| C
+    E -->|API externa / Webhook| B
 ```
 ### 🔗 Comunicação:
 
 - Todas as comunicações são **via HTTPS e Bearer Token**.
 
-- O backend Java atua como **API Gateway** para Strapi e .NET quando necessário.
+- O backend Java orquestra integracoes externas quando necessario, mantendo regras operacionais e persistencia no Spring Boot.
 
 ---
 
@@ -138,9 +138,8 @@ Na próxima sessão de login, o backend retorna `theme` dentro do payload do tok
 | Next.js  | Java API   | HTTPS REST  | NextAuth (JWT)  |
 | Java API | PostgreSQL | JDBC        | Driver oficial  |
 | Java API | Strapi     | HTTPS REST  | Bearer Token    |
-| Java API | .NET API   | HTTPS REST  | API Key / Token |
+| Java API | Integracoes futuras | HTTPS REST/Webhook | API Key / Token |
 | Strapi   | PostgreSQL | ORM interno | Nativo          |
-| .NET API | PostgreSQL | EF Core     | Nativo          |
 
 ---
 ## 📦 8. Docker Compose (Resumo da Orquestração)
@@ -207,11 +206,11 @@ services:
 ```mermaid
 graph TD
     A["Usuário / Browser"]
-    A -->|"HTTP / HTTPS"| B["Next.js 15 - Frontend"]
+    A -->|"HTTP / HTTPS"| B["Next.js 16 - Frontend/BFF"]
     B -->|"NextAuth + Axios"| C["API Java Spring Boot"]
     C -->|"JPA / JDBC"| D["PostgreSQL"]
     C -->|"REST"| E["Strapi CMS"]
-    C -->|"REST"| F[".NET Services"]
+    C -->|"REST"| F["Integracoes futuras"]
     E -->|"ORM"| D
     F -->|"Consulta / ETL"| D
     B -->|"GET"| E

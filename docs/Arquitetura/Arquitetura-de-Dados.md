@@ -1,7 +1,7 @@
 # 🧩 Arquitetura de Dados — PostgreSQL
 
 > **Projeto:** Plataforma Escala
-> **Objetivo:** projetar o modelo de dados relacional que servirá o backend (Java Spring Boot), o CMS (Strapi) e integrações (.NET).
+> **Objetivo:** projetar o modelo de dados relacional que servira o backend (Java Spring Boot), o CMS (Strapi) e integracoes externas futuras.
 > **Banco:** PostgreSQL 15 (rodando em container Docker)
 
 ---

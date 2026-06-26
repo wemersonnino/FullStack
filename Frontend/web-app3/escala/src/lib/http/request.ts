@@ -31,9 +31,13 @@ async function getAuthHeaders(options?: RequestOptions) {
 }
 
 async function getRequestHeaders(url: string, options?: RequestOptions) {
-  // Se for uma chamada client-side para /api/server, o browser envia os cookies automaticamente.
+  // Se for uma chamada client-side para /api/server ou /api/bff, o browser envia os cookies automaticamente.
   // Se for uma chamada server-side (ou se um token for explicitamente passado), precisamos do header.
-  if (url.startsWith('/api/server') && typeof window !== 'undefined' && !options?.authToken) {
+  if (
+    (url.startsWith('/api/server') || url.startsWith('/api/bff')) &&
+    typeof window !== 'undefined' &&
+    !options?.authToken
+  ) {
     return {};
   }
   return getAuthHeaders(options);
