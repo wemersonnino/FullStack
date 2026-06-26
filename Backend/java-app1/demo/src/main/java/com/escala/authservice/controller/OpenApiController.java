@@ -277,6 +277,7 @@ public class OpenApiController {
         paths.put("/api/v1/schedules/swap-requests/{id}/colleague-approval", pathPatch(patch("Escalas e Trocas", "Aprovar troca pelo colega", "Registra aceite do colega envolvido na troca de escala.", pathParam("id", "ID da solicitacao de troca."))));
         paths.put("/api/v1/schedules/dashboard-summary", pathGet(get("Escalas e Trocas", "Resumo do dashboard de escala", "Retorna indicadores do mes para dashboard de escala.", queryParamRequired("year", "Ano do resumo."), queryParamRequired("month", "Mes do resumo, de 1 a 12."))));
         paths.put("/api/v1/scheduling/month-calendar", pathGet(get("Escala Inteligente", "Gerar calendario mensal", "Gera os dias de um mes com marcacao de fim de semana e espaco para aplicacao de feriados por unidade.", queryParamRequired("year", "Ano do calendario."), queryParamRequired("month", "Mes do calendario, de 1 a 12."), queryParam("unitId", "ID da unidade operacional."), queryParam("timezone", "Timezone IANA. Padrao: America/Sao_Paulo."))));
+        paths.put("/api/v1/scheduling/legends", pathGet(get("Escala Inteligente", "Listar legendas de escala", "Lista as legendas padrao da fundacao mensal com impacto operacional e minutos previstos.")));
 
         paths.put("/api/v1/check-in", pathPost(post("Ponto", "Registrar ponto", "Registra ponto do usuario autenticado validando geolocalizacao permitida e IP de origem.", "CheckInRequest")));
 
@@ -747,6 +748,9 @@ public class OpenApiController {
         }
         if (s.contains("calendario mensal")) {
             return "MonthCalendarResponse";
+        }
+        if (s.contains("legendas de escala")) {
+            return "LegendResponse";
         }
         if (s.contains("ponto") || s.contains("check-in")) {
             return "CheckInResponse";

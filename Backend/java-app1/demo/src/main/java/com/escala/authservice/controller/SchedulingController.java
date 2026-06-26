@@ -2,6 +2,9 @@ package com.escala.authservice.controller;
 
 import com.escala.authservice.dto.scheduling.MonthCalendarDayResponse;
 import com.escala.authservice.dto.scheduling.MonthCalendarResponse;
+import com.escala.authservice.dto.scheduling.LegendResponse;
+import com.escala.authservice.scheduling.domain.monthly.LegendCatalogService;
+import com.escala.authservice.scheduling.domain.monthly.LegendCode;
 import com.escala.authservice.scheduling.domain.monthly.MonthlyCalendar;
 import com.escala.authservice.scheduling.domain.monthly.MonthlyCalendarDay;
 import com.escala.authservice.scheduling.domain.monthly.MonthlyCalendarService;
@@ -20,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SchedulingController {
     private final MonthlyCalendarService monthlyCalendarService;
+    private final LegendCatalogService legendCatalogService;
 
     @GetMapping("/month-calendar")
     public MonthCalendarResponse monthCalendar(
@@ -34,6 +38,13 @@ public class SchedulingController {
         } catch (DateTimeException exception) {
             throw new IllegalArgumentException("Ano, mes ou timezone invalidos para gerar calendario mensal", exception);
         }
+    }
+
+    @GetMapping("/legends")
+    public List<LegendResponse> legends() {
+        return legendCatalogService.listDefaultLegends().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     private MonthCalendarResponse toResponse(MonthlyCalendar calendar) {
@@ -53,6 +64,15 @@ public class SchedulingController {
                 day.holidayApplied(),
                 day.holidayApplied() ? day.holiday().name() : null,
                 day.holidayApplied() ? day.holiday().type().name() : null
+        );
+    }
+
+    private LegendResponse toResponse(LegendCode legend) {
+        return new LegendResponse(
+                legend.code(),
+                legend.label(),
+                legend.impact().name(),
+                legend.plannedHours().toMinutes()
         );
     }
 }
