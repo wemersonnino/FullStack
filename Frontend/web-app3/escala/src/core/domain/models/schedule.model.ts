@@ -29,3 +29,19 @@ export interface Schedule {
   month: number;
   shifts: Shift[];
 }
+
+export interface MonthCalendarDay {
+  date: string;
+  weekend: boolean;
+  holiday: boolean;
+  holidayName?: string | null;
+  holidayType?: string | null;
+}
+
+export interface MonthCalendar {
+  year: number;
+  month: number;
+  timezone: string;
+  unitId?: number | null;
+  days: MonthCalendarDay[];
+}
