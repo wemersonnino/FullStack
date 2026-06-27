@@ -1,5 +1,8 @@
 package com.escala.authservice.controller;
 
+import com.escala.authservice.dto.scheduling.CycleAssignmentResponse;
+import com.escala.authservice.dto.scheduling.CycleAssignmentsRequest;
+import com.escala.authservice.dto.scheduling.CycleCounterResponse;
 import com.escala.authservice.dto.scheduling.HolidayRequest;
 import com.escala.authservice.dto.scheduling.HolidayResponse;
 import com.escala.authservice.dto.scheduling.MonthCalendarDayResponse;
@@ -8,7 +11,9 @@ import com.escala.authservice.dto.scheduling.LegendResponse;
 import com.escala.authservice.dto.scheduling.ScheduleCycleRequest;
 import com.escala.authservice.dto.scheduling.ScheduleCycleResponse;
 import com.escala.authservice.entity.ScheduleCycle;
+import com.escala.authservice.entity.ScheduleCycleAssignment;
 import com.escala.authservice.entity.ScheduleHoliday;
+import com.escala.authservice.service.ScheduleCycleAssignmentService;
 import com.escala.authservice.service.ScheduleCycleService;
 import com.escala.authservice.service.ScheduleHolidayService;
 import com.escala.authservice.scheduling.domain.monthly.LegendCatalogService;
@@ -22,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +47,7 @@ public class SchedulingController {
     private final LegendCatalogService legendCatalogService;
     private final ScheduleHolidayService scheduleHolidayService;
     private final ScheduleCycleService scheduleCycleService;
+    private final ScheduleCycleAssignmentService scheduleCycleAssignmentService;
 
     @GetMapping("/month-calendar")
     public MonthCalendarResponse monthCalendar(
@@ -108,6 +115,35 @@ public class SchedulingController {
         return toResponse(scheduleCycleService.getCycle(authentication.getName(), id));
     }
 
+    @GetMapping("/cycles/{id}/assignments")
+    public List<CycleAssignmentResponse> assignments(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        return scheduleCycleAssignmentService.listAssignments(authentication.getName(), id).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @PatchMapping("/cycles/{id}/assignments")
+    public List<CycleAssignmentResponse> replaceAssignments(
+            @PathVariable UUID id,
+            @RequestBody CycleAssignmentsRequest request,
+            Authentication authentication
+    ) {
+        return scheduleCycleAssignmentService.replaceAssignments(authentication.getName(), id, request).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @GetMapping("/cycles/{id}/counters")
+    public List<CycleCounterResponse> counters(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        return scheduleCycleAssignmentService.calculateCounters(authentication.getName(), id);
+    }
+
     private MonthCalendarResponse toResponse(MonthlyCalendar calendar) {
         return new MonthCalendarResponse(
                 calendar.year(),
@@ -158,6 +194,20 @@ public class SchedulingController {
                 cycle.getBusinessVersion(),
                 cycle.getCreatedAt(),
                 cycle.getUpdatedAt()
+        );
+    }
+
+    private CycleAssignmentResponse toResponse(ScheduleCycleAssignment assignment) {
+        return new CycleAssignmentResponse(
+                assignment.getPublicId().toString(),
+                assignment.getEmployee().getId(),
+                assignment.getEmployee().getFullName(),
+                assignment.getAssignmentDate(),
+                assignment.getLegendCode(),
+                assignment.getLegendLabel(),
+                assignment.getLegendImpact(),
+                assignment.getPlannedMinutes(),
+                assignment.getModality().name()
         );
     }
 }

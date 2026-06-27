@@ -92,3 +92,36 @@ export interface CreateScheduleCycleInput {
   unitId?: number | null;
   timezone?: string;
 }
+
+export interface ScheduleCycleAssignment {
+  id: string;
+  employeeId: number;
+  employeeName: string;
+  date: string;
+  legendCode: string;
+  legendLabel: string;
+  legendImpact: ScheduleLegendImpact;
+  plannedMinutes: number;
+  modality: 'PRESENCIAL' | 'REMOTO';
+}
+
+export interface ScheduleCycleAssignmentInput {
+  employeeId: number;
+  date: string;
+  legendCode: string;
+  modality?: 'PRESENCIAL' | 'REMOTO';
+}
+
+export interface ReplaceScheduleCycleAssignmentsInput {
+  assignments: ScheduleCycleAssignmentInput[];
+}
+
+export interface ScheduleCycleCounter {
+  employeeId: number;
+  employeeName: string;
+  workedDays: number;
+  restDays: number;
+  absenceDays: number;
+  neutralDays: number;
+  plannedMinutes: number;
+}

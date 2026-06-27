@@ -4,8 +4,11 @@ import {
   CreateScheduleHolidayInput,
   MonthCalendar,
   ScheduleCycle,
+  ScheduleCycleAssignment,
+  ScheduleCycleCounter,
   ScheduleHoliday,
   ScheduleLegend,
+  ReplaceScheduleCycleAssignmentsInput,
   Shift,
   ShiftSwap,
 } from "@/core/domain/models/schedule.model";
@@ -128,6 +131,45 @@ export class ScheduleBackendAdapter {
       },
     });
     if (!response.ok) throw new Error("Failed to fetch schedule cycle");
+    return response.json();
+  }
+
+  static async listScheduleCycleAssignments(token: string, cycleId: string): Promise<ScheduleCycleAssignment[]> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/assignments`), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to fetch schedule cycle assignments");
+    return response.json();
+  }
+
+  static async replaceScheduleCycleAssignments(
+    token: string,
+    cycleId: string,
+    input: ReplaceScheduleCycleAssignmentsInput
+  ): Promise<ScheduleCycleAssignment[]> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/assignments`), {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) throw new Error("Failed to replace schedule cycle assignments");
+    return response.json();
+  }
+
+  static async listScheduleCycleCounters(token: string, cycleId: string): Promise<ScheduleCycleCounter[]> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/counters`), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to fetch schedule cycle counters");
     return response.json();
   }
 
