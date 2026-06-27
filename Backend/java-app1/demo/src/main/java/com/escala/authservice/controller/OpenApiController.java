@@ -292,6 +292,8 @@ public class OpenApiController {
                 null
         ));
         paths.put("/api/v1/scheduling/cycles/{id}/counters", pathGet(get("Escala Inteligente", "Calcular contadores do ciclo", "Calcula dias trabalhados, descansos, ausencias, neutros e minutos previstos por colaborador no ciclo.", pathParam("id", "UUID publico do ciclo mensal."))));
+        paths.put("/api/v1/scheduling/cycles/{id}/validate", pathPost(post("Escala Inteligente", "Validar ciclo mensal de escala", "Calcula alertas de validacao do ciclo mensal, incluindo ciclo vazio, excesso de dias trabalhados consecutivos e trabalho planejado em fim de semana ou feriado.", null, pathParam("id", "UUID publico do ciclo mensal."))));
+        paths.put("/api/v1/scheduling/cycles/{id}/alerts", pathGet(get("Escala Inteligente", "Listar alertas do ciclo", "Lista os alertas calculados para o ciclo mensal usando as atribuicoes atuais.", pathParam("id", "UUID publico do ciclo mensal."))));
 
         paths.put("/api/v1/check-in", pathPost(post("Ponto", "Registrar ponto", "Registra ponto do usuario autenticado validando geolocalizacao permitida e IP de origem.", "CheckInRequest")));
 
@@ -803,6 +805,9 @@ public class OpenApiController {
         }
         if (s.contains("contadores do ciclo")) {
             return "CycleCounterResponse";
+        }
+        if (s.contains("alertas do ciclo") || s.contains("validar ciclo")) {
+            return "CycleValidationAlertResponse";
         }
         if (s.contains("ponto") || s.contains("check-in")) {
             return "CheckInResponse";

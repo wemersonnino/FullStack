@@ -8,6 +8,7 @@ import {
   ScheduleCycleCounter,
   ScheduleHoliday,
   ScheduleLegend,
+  ScheduleValidationAlert,
   ReplaceScheduleCycleAssignmentsInput,
   Shift,
   ShiftSwap,
@@ -170,6 +171,29 @@ export class ScheduleBackendAdapter {
       },
     });
     if (!response.ok) throw new Error("Failed to fetch schedule cycle counters");
+    return response.json();
+  }
+
+  static async validateScheduleCycle(token: string, cycleId: string): Promise<ScheduleValidationAlert[]> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/validate`), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to validate schedule cycle");
+    return response.json();
+  }
+
+  static async listScheduleCycleAlerts(token: string, cycleId: string): Promise<ScheduleValidationAlert[]> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/alerts`), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to fetch schedule cycle alerts");
     return response.json();
   }
 

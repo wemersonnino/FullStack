@@ -125,3 +125,15 @@ export interface ScheduleCycleCounter {
   neutralDays: number;
   plannedMinutes: number;
 }
+
+export type ScheduleValidationSeverity = 'CRITICAL' | 'WARNING' | 'INFO';
+
+export interface ScheduleValidationAlert {
+  id: string;
+  severity: ScheduleValidationSeverity;
+  ruleCode: string;
+  message: string;
+  employeeId?: number | null;
+  employeeName?: string | null;
+  date?: string | null;
+}

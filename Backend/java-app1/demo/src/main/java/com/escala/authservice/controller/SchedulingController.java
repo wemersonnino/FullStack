@@ -3,6 +3,7 @@ package com.escala.authservice.controller;
 import com.escala.authservice.dto.scheduling.CycleAssignmentResponse;
 import com.escala.authservice.dto.scheduling.CycleAssignmentsRequest;
 import com.escala.authservice.dto.scheduling.CycleCounterResponse;
+import com.escala.authservice.dto.scheduling.CycleValidationAlertResponse;
 import com.escala.authservice.dto.scheduling.HolidayRequest;
 import com.escala.authservice.dto.scheduling.HolidayResponse;
 import com.escala.authservice.dto.scheduling.MonthCalendarDayResponse;
@@ -15,6 +16,7 @@ import com.escala.authservice.entity.ScheduleCycleAssignment;
 import com.escala.authservice.entity.ScheduleHoliday;
 import com.escala.authservice.service.ScheduleCycleAssignmentService;
 import com.escala.authservice.service.ScheduleCycleService;
+import com.escala.authservice.service.ScheduleCycleValidationService;
 import com.escala.authservice.service.ScheduleHolidayService;
 import com.escala.authservice.scheduling.domain.monthly.LegendCatalogService;
 import com.escala.authservice.scheduling.domain.monthly.LegendCode;
@@ -48,6 +50,7 @@ public class SchedulingController {
     private final ScheduleHolidayService scheduleHolidayService;
     private final ScheduleCycleService scheduleCycleService;
     private final ScheduleCycleAssignmentService scheduleCycleAssignmentService;
+    private final ScheduleCycleValidationService scheduleCycleValidationService;
 
     @GetMapping("/month-calendar")
     public MonthCalendarResponse monthCalendar(
@@ -142,6 +145,22 @@ public class SchedulingController {
             Authentication authentication
     ) {
         return scheduleCycleAssignmentService.calculateCounters(authentication.getName(), id);
+    }
+
+    @PostMapping("/cycles/{id}/validate")
+    public List<CycleValidationAlertResponse> validateCycle(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        return scheduleCycleValidationService.validateCycle(authentication.getName(), id);
+    }
+
+    @GetMapping("/cycles/{id}/alerts")
+    public List<CycleValidationAlertResponse> alerts(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        return scheduleCycleValidationService.validateCycle(authentication.getName(), id);
     }
 
     private MonthCalendarResponse toResponse(MonthlyCalendar calendar) {
