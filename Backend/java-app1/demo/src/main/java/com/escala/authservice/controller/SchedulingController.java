@@ -5,7 +5,11 @@ import com.escala.authservice.dto.scheduling.HolidayResponse;
 import com.escala.authservice.dto.scheduling.MonthCalendarDayResponse;
 import com.escala.authservice.dto.scheduling.MonthCalendarResponse;
 import com.escala.authservice.dto.scheduling.LegendResponse;
+import com.escala.authservice.dto.scheduling.ScheduleCycleRequest;
+import com.escala.authservice.dto.scheduling.ScheduleCycleResponse;
+import com.escala.authservice.entity.ScheduleCycle;
 import com.escala.authservice.entity.ScheduleHoliday;
+import com.escala.authservice.service.ScheduleCycleService;
 import com.escala.authservice.service.ScheduleHolidayService;
 import com.escala.authservice.scheduling.domain.monthly.LegendCatalogService;
 import com.escala.authservice.scheduling.domain.monthly.LegendCode;
@@ -17,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +39,7 @@ public class SchedulingController {
     private final MonthlyCalendarService monthlyCalendarService;
     private final LegendCatalogService legendCatalogService;
     private final ScheduleHolidayService scheduleHolidayService;
+    private final ScheduleCycleService scheduleCycleService;
 
     @GetMapping("/month-calendar")
     public MonthCalendarResponse monthCalendar(
@@ -84,6 +90,23 @@ public class SchedulingController {
                 .toList();
     }
 
+    @PostMapping("/cycles")
+    public ResponseEntity<ScheduleCycleResponse> createCycle(
+            @RequestBody ScheduleCycleRequest request,
+            Authentication authentication
+    ) {
+        ScheduleCycle cycle = scheduleCycleService.createCycle(authentication.getName(), request);
+        return ResponseEntity.ok(toResponse(cycle));
+    }
+
+    @GetMapping("/cycles/{id}")
+    public ScheduleCycleResponse cycle(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        return toResponse(scheduleCycleService.getCycle(authentication.getName(), id));
+    }
+
     private MonthCalendarResponse toResponse(MonthlyCalendar calendar) {
         return new MonthCalendarResponse(
                 calendar.year(),
@@ -120,6 +143,20 @@ public class SchedulingController {
                 holiday.getName(),
                 holiday.getType().name(),
                 holiday.getUnitId()
+        );
+    }
+
+    private ScheduleCycleResponse toResponse(ScheduleCycle cycle) {
+        return new ScheduleCycleResponse(
+                cycle.getId(),
+                cycle.getYear(),
+                cycle.getMonth(),
+                cycle.getUnitId(),
+                cycle.getTimezone(),
+                cycle.getStatus().name(),
+                cycle.getBusinessVersion(),
+                cycle.getCreatedAt(),
+                cycle.getUpdatedAt()
         );
     }
 }

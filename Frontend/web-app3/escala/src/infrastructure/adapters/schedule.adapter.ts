@@ -1,7 +1,9 @@
 import { ScheduleMapper } from "./mappers/schedule.mapper";
 import {
+  CreateScheduleCycleInput,
   CreateScheduleHolidayInput,
   MonthCalendar,
+  ScheduleCycle,
   ScheduleHoliday,
   ScheduleLegend,
   Shift,
@@ -102,6 +104,30 @@ export class ScheduleBackendAdapter {
       body: JSON.stringify(input),
     });
     if (!response.ok) throw new Error("Failed to create scheduling holiday");
+    return response.json();
+  }
+
+  static async createScheduleCycle(token: string, input: CreateScheduleCycleInput): Promise<ScheduleCycle> {
+    const response = await fetch(this.url('/scheduling/cycles'), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) throw new Error("Failed to create schedule cycle");
+    return response.json();
+  }
+
+  static async getScheduleCycle(token: string, id: number | string): Promise<ScheduleCycle> {
+    const response = await fetch(this.url(`/scheduling/cycles/${id}`), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to fetch schedule cycle");
     return response.json();
   }
 

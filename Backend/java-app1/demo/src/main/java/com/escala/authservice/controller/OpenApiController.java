@@ -282,6 +282,8 @@ public class OpenApiController {
                 get("Escala Inteligente", "Listar feriados de escala", "Lista feriados configurados para a empresa no ano informado, incluindo feriados globais da empresa e feriados especificos da unidade.", queryParamRequired("year", "Ano dos feriados."), queryParam("unitId", "ID da unidade operacional.")),
                 post("Escala Inteligente", "Criar feriado de escala", "Cria um feriado nacional, estadual, municipal ou customizado para a empresa, opcionalmente restrito a uma unidade.", "HolidayRequest")
         ));
+        paths.put("/api/v1/scheduling/cycles", pathPost(post("Escala Inteligente", "Criar ciclo mensal de escala", "Cria um ciclo mensal em rascunho para a empresa e unidade informadas, evitando duplicidade de ciclo ativo no mesmo periodo.", "ScheduleCycleRequest")));
+        paths.put("/api/v1/scheduling/cycles/{id}", pathGet(get("Escala Inteligente", "Buscar ciclo mensal de escala", "Retorna um ciclo mensal de escala da empresa do usuario autenticado.", pathParam("id", "ID do ciclo mensal."))));
 
         paths.put("/api/v1/check-in", pathPost(post("Ponto", "Registrar ponto", "Registra ponto do usuario autenticado validando geolocalizacao permitida e IP de origem.", "CheckInRequest")));
 
@@ -689,6 +691,12 @@ public class OpenApiController {
                 properties.put("type", Map.of("type", "string", "enum", List.of("NATIONAL", "STATE", "MUNICIPAL", "CUSTOM"), "example", "NATIONAL"));
                 properties.put("unitId", Map.of("type", "integer", "format", "int64", "example", 1));
                 break;
+            case "ScheduleCycleRequest":
+                properties.put("year", Map.of("type", "integer", "example", 2026));
+                properties.put("month", Map.of("type", "integer", "minimum", 1, "maximum", 12, "example", 6));
+                properties.put("unitId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("timezone", Map.of("type", "string", "example", "America/Sao_Paulo"));
+                break;
             case "ChatbotWebhookRequest":
                 properties.put("senderEmail", Map.of("type", "string", "example", "colaborador@escala.local"));
                 properties.put("message", Map.of("type", "string", "example", "Preciso de uma troca para o meu plantão de amanhã"));
@@ -764,6 +772,9 @@ public class OpenApiController {
         }
         if (s.contains("feriado")) {
             return "HolidayResponse";
+        }
+        if (s.contains("ciclo mensal")) {
+            return "ScheduleCycleResponse";
         }
         if (s.contains("ponto") || s.contains("check-in")) {
             return "CheckInResponse";

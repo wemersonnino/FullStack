@@ -1,0 +1,107 @@
+package com.escala.authservice.service;
+
+import com.escala.authservice.dto.scheduling.ScheduleCycleRequest;
+import com.escala.authservice.entity.Company;
+import com.escala.authservice.entity.ScheduleCycle;
+import com.escala.authservice.entity.ScheduleCycleStatus;
+import com.escala.authservice.entity.User;
+import com.escala.authservice.repository.ScheduleCycleRepository;
+import com.escala.authservice.repository.UserRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class ScheduleCycleServiceTest {
+    @Mock
+    private ScheduleCycleRepository scheduleCycleRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private ScheduleCycleService service;
+
+    @Test
+    void criaCicloMensalEmRascunhoParaEmpresaDoUsuario() {
+        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(scheduleCycleRepository.findActiveForPeriod(1L, 10L, 2026, 6, ScheduleCycleStatus.ARQUIVADO))
+                .thenReturn(Optional.empty());
+        when(scheduleCycleRepository.save(any(ScheduleCycle.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ScheduleCycle cycle = service.createCycle(
+                "admin@escala.local",
+                new ScheduleCycleRequest(2026, 6, 10L, "America/Sao_Paulo")
+        );
+
+        ArgumentCaptor<ScheduleCycle> captor = ArgumentCaptor.forClass(ScheduleCycle.class);
+        verify(scheduleCycleRepository).save(captor.capture());
+        assertEquals(1L, captor.getValue().getCompany().getId());
+        assertEquals(ScheduleCycleStatus.RASCUNHO, cycle.getStatus());
+        assertEquals(1, cycle.getBusinessVersion());
+        assertEquals("America/Sao_Paulo", cycle.getTimezone());
+    }
+
+    @Test
+    void usaTimezonePadraoQuandoNaoInformado() {
+        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(scheduleCycleRepository.findActiveForPeriod(1L, null, 2026, 7, ScheduleCycleStatus.ARQUIVADO))
+                .thenReturn(Optional.empty());
+        when(scheduleCycleRepository.save(any(ScheduleCycle.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ScheduleCycle cycle = service.createCycle("admin@escala.local", new ScheduleCycleRequest(2026, 7, null, " "));
+
+        assertEquals("America/Sao_Paulo", cycle.getTimezone());
+    }
+
+    @Test
+    void rejeitaCicloDuplicadoAtivoNoMesmoPeriodo() {
+        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(scheduleCycleRepository.findActiveForPeriod(1L, 10L, 2026, 6, ScheduleCycleStatus.ARQUIVADO))
+                .thenReturn(Optional.of(ScheduleCycle.builder().id(99L).build()));
+
+        assertThrows(IllegalStateException.class, () -> service.createCycle(
+                "admin@escala.local",
+                new ScheduleCycleRequest(2026, 6, 10L, "America/Sao_Paulo")
+        ));
+    }
+
+    @Test
+    void buscaCicloSomenteNaEmpresaDoUsuario() {
+        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        ScheduleCycle existing = ScheduleCycle.builder().id(5L).year(2026).month(6).build();
+        when(scheduleCycleRepository.findByCompanyIdAndId(1L, 5L)).thenReturn(Optional.of(existing));
+
+        ScheduleCycle cycle = service.getCycle("admin@escala.local", 5L);
+
+        assertEquals(5L, cycle.getId());
+    }
+
+    @Test
+    void rejeitaMesInvalido() {
+        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+
+        assertThrows(IllegalArgumentException.class, () -> service.createCycle(
+                "admin@escala.local",
+                new ScheduleCycleRequest(2026, 13, null, "America/Sao_Paulo")
+        ));
+    }
+
+    private User requester() {
+        return User.builder()
+                .email("admin@escala.local")
+                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .build();
+    }
+}
