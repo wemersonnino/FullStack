@@ -3,7 +3,7 @@ package com.escala.authservice.dto.scheduling;
 import java.time.OffsetDateTime;
 
 public record ScheduleCycleResponse(
-        Long id,
+        String id,
         int year,
         int month,
         Long unitId,

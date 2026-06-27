@@ -75,7 +75,7 @@ export interface CreateScheduleHolidayInput {
 export type ScheduleCycleStatus = 'RASCUNHO' | 'EM_VALIDACAO' | 'PUBLICADO' | 'RETIFICADO' | 'ARQUIVADO';
 
 export interface ScheduleCycle {
-  id: number;
+  id: string;
   year: number;
   month: number;
   unitId?: number | null;

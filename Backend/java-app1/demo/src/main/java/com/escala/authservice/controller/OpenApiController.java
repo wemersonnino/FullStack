@@ -283,7 +283,7 @@ public class OpenApiController {
                 post("Escala Inteligente", "Criar feriado de escala", "Cria um feriado nacional, estadual, municipal ou customizado para a empresa, opcionalmente restrito a uma unidade.", "HolidayRequest")
         ));
         paths.put("/api/v1/scheduling/cycles", pathPost(post("Escala Inteligente", "Criar ciclo mensal de escala", "Cria um ciclo mensal em rascunho para a empresa e unidade informadas, evitando duplicidade de ciclo ativo no mesmo periodo.", "ScheduleCycleRequest")));
-        paths.put("/api/v1/scheduling/cycles/{id}", pathGet(get("Escala Inteligente", "Buscar ciclo mensal de escala", "Retorna um ciclo mensal de escala da empresa do usuario autenticado.", pathParam("id", "ID do ciclo mensal."))));
+        paths.put("/api/v1/scheduling/cycles/{id}", pathGet(get("Escala Inteligente", "Buscar ciclo mensal de escala", "Retorna um ciclo mensal de escala da empresa do usuario autenticado usando o UUID publico do ciclo.", pathParam("id", "UUID publico do ciclo mensal."))));
 
         paths.put("/api/v1/check-in", pathPost(post("Ponto", "Registrar ponto", "Registra ponto do usuario autenticado validando geolocalizacao permitida e IP de origem.", "CheckInRequest")));
 

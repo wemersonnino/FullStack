@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -24,6 +25,10 @@ public class ScheduleCycle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true, updatable = false)
+    @Builder.Default
+    private UUID publicId = UUID.randomUUID();
 
     @ManyToOne(optional = false)
     private Company company;
@@ -59,6 +64,9 @@ public class ScheduleCycle {
 
     @PrePersist
     void prePersist() {
+        if (publicId == null) {
+            publicId = UUID.randomUUID();
+        }
         OffsetDateTime now = OffsetDateTime.now();
         createdAt = now;
         updatedAt = now;

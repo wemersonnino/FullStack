@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,6 +52,7 @@ class ScheduleCycleServiceTest {
         assertEquals(ScheduleCycleStatus.RASCUNHO, cycle.getStatus());
         assertEquals(1, cycle.getBusinessVersion());
         assertEquals("America/Sao_Paulo", cycle.getTimezone());
+        assertEquals(captor.getValue().getPublicId(), cycle.getPublicId());
     }
 
     @Test
@@ -80,12 +82,13 @@ class ScheduleCycleServiceTest {
     @Test
     void buscaCicloSomenteNaEmpresaDoUsuario() {
         when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
-        ScheduleCycle existing = ScheduleCycle.builder().id(5L).year(2026).month(6).build();
-        when(scheduleCycleRepository.findByCompanyIdAndId(1L, 5L)).thenReturn(Optional.of(existing));
+        UUID publicId = UUID.randomUUID();
+        ScheduleCycle existing = ScheduleCycle.builder().id(5L).publicId(publicId).year(2026).month(6).build();
+        when(scheduleCycleRepository.findByCompanyIdAndPublicId(1L, publicId)).thenReturn(Optional.of(existing));
 
-        ScheduleCycle cycle = service.getCycle("admin@escala.local", 5L);
+        ScheduleCycle cycle = service.getCycle("admin@escala.local", publicId);
 
-        assertEquals(5L, cycle.getId());
+        assertEquals(publicId, cycle.getPublicId());
     }
 
     @Test

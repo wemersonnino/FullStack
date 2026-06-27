@@ -7,15 +7,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ScheduleCycleRepository extends JpaRepository<ScheduleCycle, Long> {
     @Query("""
             select cycle
             from ScheduleCycle cycle
             where cycle.company.id = :companyId
-              and cycle.id = :id
+              and cycle.publicId = :publicId
             """)
-    Optional<ScheduleCycle> findByCompanyIdAndId(@Param("companyId") Long companyId, @Param("id") Long id);
+    Optional<ScheduleCycle> findByCompanyIdAndPublicId(
+            @Param("companyId") Long companyId,
+            @Param("publicId") UUID publicId
+    );
 
     @Query("""
             select cycle

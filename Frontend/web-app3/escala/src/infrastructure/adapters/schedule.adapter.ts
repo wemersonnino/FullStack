@@ -120,7 +120,7 @@ export class ScheduleBackendAdapter {
     return response.json();
   }
 
-  static async getScheduleCycle(token: string, id: number | string): Promise<ScheduleCycle> {
+  static async getScheduleCycle(token: string, id: string): Promise<ScheduleCycle> {
     const response = await fetch(this.url(`/scheduling/cycles/${id}`), {
       headers: {
         Authorization: `Bearer ${token}`,

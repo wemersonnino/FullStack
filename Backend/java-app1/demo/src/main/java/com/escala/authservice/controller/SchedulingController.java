@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/scheduling")
@@ -101,7 +102,7 @@ public class SchedulingController {
 
     @GetMapping("/cycles/{id}")
     public ScheduleCycleResponse cycle(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             Authentication authentication
     ) {
         return toResponse(scheduleCycleService.getCycle(authentication.getName(), id));
@@ -148,7 +149,7 @@ public class SchedulingController {
 
     private ScheduleCycleResponse toResponse(ScheduleCycle cycle) {
         return new ScheduleCycleResponse(
-                cycle.getId(),
+                cycle.getPublicId().toString(),
                 cycle.getYear(),
                 cycle.getMonth(),
                 cycle.getUnitId(),

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DateTimeException;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -53,9 +54,9 @@ public class ScheduleCycleService {
         return scheduleCycleRepository.save(cycle);
     }
 
-    public ScheduleCycle getCycle(String email, Long id) {
+    public ScheduleCycle getCycle(String email, UUID publicId) {
         User requester = getRequester(email);
-        return scheduleCycleRepository.findByCompanyIdAndId(requester.getCompany().getId(), id)
+        return scheduleCycleRepository.findByCompanyIdAndPublicId(requester.getCompany().getId(), publicId)
                 .orElseThrow(() -> new IllegalArgumentException("Ciclo de escala nao encontrado"));
     }
 
