@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LegendCatalogService {
@@ -22,5 +23,15 @@ public class LegendCatalogService {
 
     public List<LegendCode> listDefaultLegends() {
         return DEFAULT_LEGENDS;
+    }
+
+    public Optional<LegendCode> findByCode(String code) {
+        if (code == null || code.isBlank()) {
+            return Optional.empty();
+        }
+        String normalizedCode = code.trim().toUpperCase();
+        return DEFAULT_LEGENDS.stream()
+                .filter(legend -> legend.code().equals(normalizedCode))
+                .findFirst();
     }
 }
