@@ -37,10 +37,28 @@ public class EmployeeService {
         return employeeRepository.findByCompanyId(company.getId(), pageable);
     }
 
+    private void checkEmployeeAdmin(String requesterEmail, Company company) {
+        com.escala.authservice.entity.User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario requisitante nao encontrado"));
+        
+        boolean isSystemAdmin = requester.getRoles().stream().anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isAdminOrOwner = isSystemAdmin || requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        
+        if (!isAdminOrOwner) {
+            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores ou donos podem gerenciar funcionarios");
+        }
+        
+        if (!isSystemAdmin && (company == null || !company.getId().equals(requester.getCompany().getId()))) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a gerenciar funcionarios de outra empresa");
+        }
+    }
+
     public Employee create(String requesterEmail, EmployeeRequest request) {
         Company company = getRequesterCompany(requesterEmail);
-        int currentCount = (int) employeeRepository.countByActiveTrueAndCompanyId(company.getId());
+        checkEmployeeAdmin(requesterEmail, company);
         
+        int currentCount = (int) employeeRepository.countByActiveTrueAndCompanyId(company.getId());
         if (!checkPlanLimitUseCase.canAddEmployee(company.getPlanType(), currentCount)) {
             throw new IllegalStateException("Limite de funcionários atingido para o plano atual: " + company.getPlanType() + ". Faça upgrade do seu plano.");
         }
@@ -56,28 +74,22 @@ public class EmployeeService {
     }
 
     public Employee update(String requesterEmail, UUID id, EmployeeRequest request) {
-        Company company = getRequesterCompany(requesterEmail);
         Employee employee = employeeRepository.findById(id).orElseThrow();
-        
-        if (employee.getCompany() == null || !employee.getCompany().getId().equals(company.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar funcionario de outra empresa");
-        }
+        checkEmployeeAdmin(requesterEmail, employee.getCompany());
 
         employee.setFullName(request.getFullName());
         employee.setEmail(request.getEmail());
         if (request.getActive() != null) employee.setActive(request.getActive());
+        
+        Company company = getRequesterCompany(requesterEmail);
         employee.setSector(resolveSector(company, request.getSectorId()));
         employee.setProject(resolveProject(company, request.getProjectId()));
         return employeeRepository.save(employee);
     }
 
     public void remove(String requesterEmail, UUID id) {
-        Company company = getRequesterCompany(requesterEmail);
         Employee employee = employeeRepository.findById(id).orElseThrow();
-        
-        if (employee.getCompany() == null || !employee.getCompany().getId().equals(company.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a remover funcionario de outra empresa");
-        }
+        checkEmployeeAdmin(requesterEmail, employee.getCompany());
 
         employee.setActive(false);
         employeeRepository.save(employee);
