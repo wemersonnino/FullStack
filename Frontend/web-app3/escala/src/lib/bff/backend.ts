@@ -43,14 +43,10 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
       accessToken = session?.user?.token;
     }
 
-    // 3. Fallback: cabeçalho de Autorização tradicional
-    const incomingAuthorization = options.request?.headers.get('authorization');
-    const authorization = accessToken ? `Bearer ${accessToken}` : incomingAuthorization;
-
-    if (!authorization) {
+    if (!accessToken) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-    headers.Authorization = authorization;
+    headers.Authorization = `Bearer ${accessToken}`;
   }
 
   let body: BodyInit | undefined;

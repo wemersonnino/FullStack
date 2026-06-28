@@ -7,8 +7,8 @@ interface CompanyState {
   isLoading: boolean;
   fetchCompanies: () => Promise<void>;
   addCompany: (payload: any) => Promise<boolean>;
-  editCompany: (id: number, payload: any) => Promise<boolean>;
-  removeCompany: (id: number) => Promise<boolean>;
+  editCompany: (id: string, payload: any) => Promise<boolean>;
+  removeCompany: (id: string) => Promise<boolean>;
 }
 
 export const useCompanyStore = create<CompanyState>((set, get) => ({

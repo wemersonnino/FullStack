@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
+import java.util.UUID;
 import java.util.List;
 import java.util.Map;
 
@@ -292,6 +293,11 @@ public class OpenApiController {
                 null
         ));
         paths.put("/api/v1/scheduling/cycles/{id}/counters", pathGet(get("Escala Inteligente", "Calcular contadores do ciclo", "Calcula dias trabalhados, descansos, ausencias, neutros e minutos previstos por colaborador no ciclo.", pathParam("id", "UUID publico do ciclo mensal."))));
+        paths.put("/api/v1/scheduling/cycles/{id}/validate", pathPost(post("Escala Inteligente", "Validar ciclo mensal de escala", "Calcula alertas de validacao do ciclo mensal, incluindo ciclo vazio, excesso de dias trabalhados consecutivos e trabalho planejado em fim de semana ou feriado.", null, pathParam("id", "UUID publico do ciclo mensal."))));
+        paths.put("/api/v1/scheduling/cycles/{id}/alerts", pathGet(get("Escala Inteligente", "Listar alertas do ciclo", "Lista os alertas calculados para o ciclo mensal usando as atribuicoes atuais.", pathParam("id", "UUID publico do ciclo mensal."))));
+        paths.put("/api/v1/scheduling/cycles/{id}/alerts/{alertId}/acknowledge", pathPost(post("Escala Inteligente", "Registrar ciencia de alerta", "Registra ou atualiza ciencia do usuario autenticado sobre um alerta calculado do ciclo mensal.", "AcknowledgeValidationAlertRequest", pathParam("id", "UUID publico do ciclo mensal."), pathParam("alertId", "UUID calculado do alerta."))));
+        paths.put("/api/v1/scheduling/cycles/{id}/publish", pathPost(post("Escala Inteligente", "Publicar ciclo mensal de escala", "Publica o ciclo mensal quando nao houver alertas criticos pendentes de ciencia.", null, pathParam("id", "UUID publico do ciclo mensal."))));
+        paths.put("/api/v1/scheduling/cycles/{id}/archive", pathPost(post("Escala Inteligente", "Arquivar ciclo mensal de escala", "Arquiva um ciclo mensal publicado ou retificado, preservando historico e liberando novo ciclo ativo para o mesmo periodo.", null, pathParam("id", "UUID publico do ciclo mensal."))));
 
         paths.put("/api/v1/check-in", pathPost(post("Ponto", "Registrar ponto", "Registra ponto do usuario autenticado validando geolocalizacao permitida e IP de origem.", "CheckInRequest")));
 
@@ -582,17 +588,17 @@ public class OpenApiController {
                 properties.put("active", Map.of("type", "boolean", "example", true));
                 break;
             case "AiContextRequest":
-                properties.put("employeeId", Map.of("type", "integer", "format", "int64", "example", 1));
-                properties.put("shiftId", Map.of("type", "integer", "format", "int64", "example", 101));
+                properties.put("employeeId", uuidSchema());
+                properties.put("shiftId", uuidSchema());
                 properties.put("date", Map.of("type", "string", "format", "date", "example", "2026-06-25"));
-                properties.put("sectorId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("sectorId", uuidSchema());
                 break;
             case "WorkPostRequest":
                 properties.put("name", Map.of("type", "string", "example", "Posto de Recepção"));
                 properties.put("description", Map.of("type", "string", "example", "Guarita de entrada do bloco A"));
                 properties.put("project", Map.of(
                     "type", "object",
-                    "properties", Map.of("id", Map.of("type", "integer", "format", "int64", "example", 1))
+                    "properties", Map.of("id", uuidSchema())
                 ));
                 break;
             case "GenerateScheduleRequest":
@@ -602,7 +608,7 @@ public class OpenApiController {
                 properties.put("endTime", Map.of("type", "string", "format", "time", "example", "17:00:00"));
                 properties.put("workMode", Map.of("type", "string", "example", "PRESENCIAL"));
                 properties.put("maxPresentialPerDay", Map.of("type", "integer", "example", 10));
-                properties.put("employeeIds", Map.of("type", "array", "items", Map.of("type", "integer"), "example", List.of(1, 2, 3)));
+                properties.put("employeeIds", Map.of("type", "array", "items", uuidSchema(), "example", List.of("11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222")));
                 break;
             case "CheckInRequest":
                 properties.put("latitude", Map.of("type", "number", "format", "double", "example", -23.55052));
@@ -611,37 +617,37 @@ public class OpenApiController {
                 properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 break;
             case "EscalaRequest":
-                properties.put("employeeId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("employeeId", uuidSchema());
                 properties.put("dates", Map.of("type", "array", "items", Map.of("type", "string", "format", "date"), "example", List.of("2026-06-20", "2026-06-21")));
                 properties.put("startTime", Map.of("type", "string", "format", "time", "example", "08:00:00"));
                 properties.put("endTime", Map.of("type", "string", "format", "time", "example", "17:00:00"));
                 properties.put("workMode", Map.of("type", "string", "enum", List.of("PRESENCIAL", "REMOTO"), "example", "PRESENCIAL"));
                 properties.put("padraoEscala", Map.of("type", "string", "enum", List.of("COMUM", "SEIS_X_UM", "CINCO_X_DOIS", "DOZE_X_TRINTA_E_SEIS"), "example", "COMUM"));
                 properties.put("notes", Map.of("type", "string", "example", "Escala do plantão"));
-                properties.put("sectorId", Map.of("type", "integer", "format", "int64", "example", 1));
-                properties.put("projectId", Map.of("type", "integer", "format", "int64", "example", 1));
-                properties.put("companyId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("sectorId", uuidSchema());
+                properties.put("projectId", uuidSchema());
+                properties.put("companyId", uuidSchema());
                 break;
             case "ManagerAssignmentRequest":
-                properties.put("managerUserId", Map.of("type", "integer", "format", "int64", "example", 2));
+                properties.put("managerUserId", uuidSchema());
                 properties.put("scopeType", Map.of("type", "string", "enum", List.of("COMPANY", "SECTOR", "PROJECT", "WORK_POST", "TEAM", "EMPLOYEE"), "example", "SECTOR"));
-                properties.put("scopeId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("scopeId", uuidSchema());
                 properties.put("roleLevel", Map.of("type", "string", "enum", List.of("OWNER", "ADMIN", "MANAGER_DIRETOR", "MANAGER_GERENTE", "MANAGER_COORDENADOR", "MANAGER_SUPERVISOR"), "example", "MANAGER_GERENTE"));
                 properties.put("startsAt", Map.of("type", "string", "format", "date-time", "example", "2026-06-24T08:00:00"));
                 properties.put("endsAt", Map.of("type", "string", "format", "date-time", "example", "2026-12-31T18:00:00"));
                 properties.put("active", Map.of("type", "boolean", "example", true));
                 break;
             case "ManagementEdgeRequest":
-                properties.put("parentUserId", Map.of("type", "integer", "format", "int64", "example", 2));
-                properties.put("childUserId", Map.of("type", "integer", "format", "int64", "example", 3));
+                properties.put("parentUserId", uuidSchema());
+                properties.put("childUserId", uuidSchema());
                 properties.put("relationType", Map.of("type", "string", "example", "REPORTS_TO"));
                 properties.put("startsAt", Map.of("type", "string", "format", "date-time", "example", "2026-06-24T08:00:00"));
                 properties.put("endsAt", Map.of("type", "string", "format", "date-time", "example", "2026-12-31T18:00:00"));
                 properties.put("active", Map.of("type", "boolean", "example", true));
                 break;
             case "CreateShiftSwapRequest":
-                properties.put("requesterId", Map.of("type", "integer", "format", "int64", "example", 1));
-                properties.put("originalShiftId", Map.of("type", "integer", "format", "int64", "example", 101));
+                properties.put("requesterId", uuidSchema());
+                properties.put("originalShiftId", uuidSchema());
                 properties.put("compensationDate", Map.of("type", "string", "format", "date", "example", "2026-06-25"));
                 properties.put("comments", Map.of("type", "string", "example", "Necessidade pessoal"));
                 break;
@@ -654,8 +660,8 @@ public class OpenApiController {
                 properties.put("fullName", Map.of("type", "string", "example", "João Silva"));
                 properties.put("email", Map.of("type", "string", "example", "joao.silva@empresa.com"));
                 properties.put("active", Map.of("type", "boolean", "example", true));
-                properties.put("sectorId", Map.of("type", "integer", "format", "int64", "example", 1));
-                properties.put("projectId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("sectorId", uuidSchema());
+                properties.put("projectId", uuidSchema());
                 break;
             case "CompanyRequest":
                 properties.put("name", Map.of("type", "string", "example", "Minha Empresa LTDA"));
@@ -676,7 +682,7 @@ public class OpenApiController {
                 properties.put("cancelUrl", Map.of("type", "string", "example", "http://localhost:3000/cancel"));
                 break;
             case "MessageRequest":
-                properties.put("receiverId", Map.of("type", "integer", "format", "int64", "example", 2));
+                properties.put("receiverId", uuidSchema());
                 properties.put("type", Map.of("type", "string", "enum", List.of("PERMISSION_REQUEST", "SHIFT_SWAP", "MESSAGE", "CHAT"), "example", "PERMISSION_REQUEST"));
                 properties.put("title", Map.of("type", "string", "example", "Solicitação de Acesso"));
                 properties.put("content", Map.of("type", "string", "example", "Solicito permissão para gerenciar a escala do setor UTI."));
@@ -686,7 +692,7 @@ public class OpenApiController {
                 properties.put("decision", Map.of("type", "string", "enum", List.of("APPROVED", "REJECTED"), "example", "APPROVED"));
                 break;
             case "OperationalCapacityRequest":
-                properties.put("targetId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("targetId", uuidSchema());
                 properties.put("targetType", Map.of("type", "string", "enum", List.of("SECTOR", "WORK_POST"), "example", "SECTOR"));
                 properties.put("dayOfWeek", Map.of("type", "integer", "minimum", 1, "maximum", 7, "example", 1));
                 properties.put("startTime", Map.of("type", "string", "format", "time", "example", "08:00:00"));
@@ -697,12 +703,12 @@ public class OpenApiController {
                 properties.put("date", Map.of("type", "string", "format", "date", "example", "2026-12-25"));
                 properties.put("name", Map.of("type", "string", "example", "Natal"));
                 properties.put("type", Map.of("type", "string", "enum", List.of("NATIONAL", "STATE", "MUNICIPAL", "CUSTOM"), "example", "NATIONAL"));
-                properties.put("unitId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("unitId", uuidSchema());
                 break;
             case "ScheduleCycleRequest":
                 properties.put("year", Map.of("type", "integer", "example", 2026));
                 properties.put("month", Map.of("type", "integer", "minimum", 1, "maximum", 12, "example", 6));
-                properties.put("unitId", Map.of("type", "integer", "format", "int64", "example", 1));
+                properties.put("unitId", uuidSchema());
                 properties.put("timezone", Map.of("type", "string", "example", "America/Sao_Paulo"));
                 break;
             case "CycleAssignmentsRequest":
@@ -711,13 +717,16 @@ public class OpenApiController {
                         "items", Map.of(
                                 "type", "object",
                                 "properties", Map.of(
-                                        "employeeId", Map.of("type", "integer", "format", "int64", "example", 1),
+                                        "employeeId", Map.of("type", "string", "format", "uuid", "example", "11111111-1111-1111-1111-111111111111"),
                                         "date", Map.of("type", "string", "format", "date", "example", "2026-06-01"),
                                         "legendCode", Map.of("type", "string", "example", "T"),
                                         "modality", Map.of("type", "string", "enum", List.of("PRESENCIAL", "REMOTO"), "example", "PRESENCIAL")
                                 )
                         )
                 ));
+                break;
+            case "AcknowledgeValidationAlertRequest":
+                properties.put("reason", Map.of("type", "string", "example", "Ciente do risco e cobertura confirmada pela operacao."));
                 break;
             case "ChatbotWebhookRequest":
                 properties.put("senderEmail", Map.of("type", "string", "example", "colaborador@escala.local"));
@@ -804,6 +813,12 @@ public class OpenApiController {
         if (s.contains("contadores do ciclo")) {
             return "CycleCounterResponse";
         }
+        if (s.contains("alertas do ciclo") || s.contains("validar ciclo")) {
+            return "CycleValidationAlertResponse";
+        }
+        if (s.contains("ciencia de alerta")) {
+            return "ValidationAcknowledgementResponse";
+        }
         if (s.contains("ponto") || s.contains("check-in")) {
             return "CheckInResponse";
         }
@@ -848,14 +863,14 @@ public class OpenApiController {
                 properties.put("user", Map.of(
                     "type", "object",
                     "properties", Map.of(
-                        "id", Map.of("type", "integer", "example", 1),
+                        "id", uuidSchema(),
                         "username", Map.of("type", "string", "example", "admin"),
                         "email", Map.of("type", "string", "example", "admin@escala.local")
                     )
                 ));
                 break;
             case "UserResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
                 properties.put("username", Map.of("type", "string", "example", "admin"));
                 properties.put("email", Map.of("type", "string", "example", "admin@escala.local"));
                 properties.put("roles", Map.of("type", "array", "items", Map.of("type", "string"), "example", List.of("ADMIN")));
@@ -864,15 +879,15 @@ public class OpenApiController {
                 properties.put("active", Map.of("type", "boolean", "example", true));
                 break;
             case "EmployeeResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
                 properties.put("fullName", Map.of("type", "string", "example", "João Silva"));
                 properties.put("email", Map.of("type", "string", "example", "joao.silva@empresa.com"));
                 properties.put("active", Map.of("type", "boolean", "example", true));
-                properties.put("sectorId", Map.of("type", "integer", "example", 1));
-                properties.put("projectId", Map.of("type", "integer", "example", 1));
+                properties.put("sectorId", uuidSchema());
+                properties.put("projectId", uuidSchema());
                 break;
             case "CompanyResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
                 properties.put("name", Map.of("type", "string", "example", "Minha Empresa LTDA"));
                 properties.put("cnpj", Map.of("type", "string", "example", "12.345.678/0001-90"));
                 properties.put("active", Map.of("type", "boolean", "example", true));
@@ -880,26 +895,26 @@ public class OpenApiController {
                 properties.put("allowedRadius", Map.of("type", "integer", "example", 100));
                 break;
             case "SectorResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
                 properties.put("name", Map.of("type", "string", "example", "UTI Pediátrica"));
                 properties.put("description", Map.of("type", "string", "example", "Ala intensiva"));
                 properties.put("maxSeats", Map.of("type", "integer", "example", 5));
                 break;
             case "ProjectResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
                 properties.put("name", Map.of("type", "string", "example", "Plantão Noturno HGB"));
                 properties.put("description", Map.of("type", "string", "example", "Ala HGB"));
                 properties.put("active", Map.of("type", "boolean", "example", true));
                 break;
             case "WorkPostResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
                 properties.put("name", Map.of("type", "string", "example", "Posto Recepção"));
                 properties.put("description", Map.of("type", "string", "example", "Guarita bloco A"));
                 break;
             case "MessageResponse":
-                properties.put("id", Map.of("type", "integer", "example", 10));
-                properties.put("senderId", Map.of("type", "integer", "example", 1));
-                properties.put("receiverId", Map.of("type", "integer", "example", 2));
+                properties.put("id", uuidSchema());
+                properties.put("senderId", uuidSchema());
+                properties.put("receiverId", uuidSchema());
                 properties.put("type", Map.of("type", "string", "example", "PERMISSION_REQUEST"));
                 properties.put("title", Map.of("type", "string", "example", "Solicitação"));
                 properties.put("content", Map.of("type", "string", "example", "Permissão para escala."));
@@ -907,8 +922,8 @@ public class OpenApiController {
                 properties.put("metadata", Map.of("type", "string", "example", "{}"));
                 break;
             case "OperationalCapacityResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
-                properties.put("targetId", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
+                properties.put("targetId", uuidSchema());
                 properties.put("targetType", Map.of("type", "string", "example", "SECTOR"));
                 properties.put("dayOfWeek", Map.of("type", "integer", "example", 1));
                 properties.put("startTime", Map.of("type", "string", "example", "08:00:00"));
@@ -919,22 +934,22 @@ public class OpenApiController {
                 properties.put("message", Map.of("type", "string", "example", "Ponto registrado com sucesso dentro da área permitida"));
                 break;
             case "EscalaResponse":
-                properties.put("id", Map.of("type", "integer", "example", 101));
-                properties.put("employeeId", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
+                properties.put("employeeId", uuidSchema());
                 properties.put("shiftDate", Map.of("type", "string", "example", "2026-06-20"));
                 properties.put("startTime", Map.of("type", "string", "example", "08:00:00"));
                 properties.put("endTime", Map.of("type", "string", "example", "17:00:00"));
                 properties.put("workMode", Map.of("type", "string", "example", "PRESENCIAL"));
                 properties.put("padraoEscala", Map.of("type", "string", "example", "COMUM"));
                 properties.put("notes", Map.of("type", "string", "example", "Plantão"));
-                properties.put("sectorId", Map.of("type", "integer", "example", 1));
-                properties.put("projectId", Map.of("type", "integer", "example", 1));
+                properties.put("sectorId", uuidSchema());
+                properties.put("projectId", uuidSchema());
                 properties.put("version", Map.of("type", "integer", "example", 0));
                 break;
             case "ShiftSwapResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
-                properties.put("requesterId", Map.of("type", "integer", "example", 1));
-                properties.put("originalShiftId", Map.of("type", "integer", "example", 101));
+                properties.put("id", uuidSchema());
+                properties.put("requesterId", uuidSchema());
+                properties.put("originalShiftId", uuidSchema());
                 properties.put("compensationDate", Map.of("type", "string", "example", "2026-06-25"));
                 properties.put("comments", Map.of("type", "string", "example", "Troca"));
                 properties.put("status", Map.of("type", "string", "example", "SOLICITADO"));
@@ -943,13 +958,13 @@ public class OpenApiController {
                 properties.put("url", Map.of("type", "string", "example", "https://checkout.stripe.com/..."));
                 break;
             case "SubscriptionResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
                 properties.put("status", Map.of("type", "string", "example", "ACTIVE"));
                 properties.put("planType", Map.of("type", "string", "example", "TRIAL"));
                 properties.put("stripeSubscriptionId", Map.of("type", "string", "example", "sub_123"));
                 break;
             case "LearningProgressResponse":
-                properties.put("id", Map.of("type", "integer", "example", 1));
+                properties.put("id", uuidSchema());
                 properties.put("module", Map.of("type", "string", "example", "Treinamento"));
                 properties.put("topic", Map.of("type", "string", "example", "escala"));
                 properties.put("completed", Map.of("type", "boolean", "example", true));
@@ -970,6 +985,68 @@ public class OpenApiController {
                 properties.put("response", Map.of("type", "string", "example", "Olá! Analisamos a mensagem..."));
                 properties.put("suggestions", Map.of("type", "array", "items", Map.of("type", "string"), "example", List.of("João Silva (joao@escala.local)")));
                 break;
+            case "HolidayResponse":
+                properties.put("id", Map.of("type", "string", "format", "uuid", "example", "22222222-2222-2222-2222-222222222222"));
+                properties.put("date", Map.of("type", "string", "format", "date", "example", "2026-12-25"));
+                properties.put("name", Map.of("type", "string", "example", "Natal"));
+                properties.put("type", Map.of("type", "string", "example", "NATIONAL"));
+                properties.put("unitId", uuidSchema());
+                break;
+            case "ScheduleCycleResponse":
+                properties.put("id", Map.of("type", "string", "format", "uuid", "example", "33333333-3333-3333-3333-333333333333"));
+                properties.put("year", Map.of("type", "integer", "example", 2026));
+                properties.put("month", Map.of("type", "integer", "example", 6));
+                properties.put("unitId", uuidSchema());
+                properties.put("timezone", Map.of("type", "string", "example", "America/Sao_Paulo"));
+                properties.put("status", Map.of("type", "string", "example", "PUBLICADO"));
+                properties.put("businessVersion", Map.of("type", "integer", "example", 1));
+                properties.put("publishedAt", Map.of("type", "string", "format", "date-time"));
+                properties.put("publishedBy", Map.of("type", "string", "example", "admin@escala.local"));
+                properties.put("archivedAt", Map.of("type", "string", "format", "date-time"));
+                properties.put("archivedBy", Map.of("type", "string", "example", "admin@escala.local"));
+                properties.put("createdAt", Map.of("type", "string", "format", "date-time"));
+                properties.put("updatedAt", Map.of("type", "string", "format", "date-time"));
+                break;
+            case "CycleAssignmentResponse":
+                properties.put("id", Map.of("type", "string", "format", "uuid", "example", "44444444-4444-4444-4444-444444444444"));
+                properties.put("employeeId", Map.of("type", "string", "format", "uuid", "example", "11111111-1111-1111-1111-111111111111"));
+                properties.put("employeeName", Map.of("type", "string", "example", "Ana Silva"));
+                properties.put("date", Map.of("type", "string", "format", "date", "example", "2026-06-01"));
+                properties.put("legendCode", Map.of("type", "string", "example", "T"));
+                properties.put("legendLabel", Map.of("type", "string", "example", "Trabalho"));
+                properties.put("legendImpact", Map.of("type", "string", "example", "WORKED"));
+                properties.put("plannedMinutes", Map.of("type", "integer", "example", 480));
+                properties.put("modality", Map.of("type", "string", "example", "PRESENCIAL"));
+                break;
+            case "CycleCounterResponse":
+                properties.put("employeeId", Map.of("type", "string", "format", "uuid", "example", "11111111-1111-1111-1111-111111111111"));
+                properties.put("employeeName", Map.of("type", "string", "example", "Ana Silva"));
+                properties.put("workedDays", Map.of("type", "integer", "example", 20));
+                properties.put("restDays", Map.of("type", "integer", "example", 8));
+                properties.put("absenceDays", Map.of("type", "integer", "example", 1));
+                properties.put("neutralDays", Map.of("type", "integer", "example", 1));
+                properties.put("plannedMinutes", Map.of("type", "integer", "example", 9600));
+                break;
+            case "CycleValidationAlertResponse":
+                properties.put("id", Map.of("type", "string", "format", "uuid", "example", "55555555-5555-5555-5555-555555555555"));
+                properties.put("severity", Map.of("type", "string", "example", "WARNING"));
+                properties.put("ruleCode", Map.of("type", "string", "example", "WEEKEND_WORK"));
+                properties.put("message", Map.of("type", "string", "example", "Funcionario possui trabalho planejado em fim de semana"));
+                properties.put("employeeId", Map.of("type", "string", "format", "uuid", "example", "11111111-1111-1111-1111-111111111111"));
+                properties.put("employeeName", Map.of("type", "string", "example", "Ana Silva"));
+                properties.put("date", Map.of("type", "string", "format", "date", "example", "2026-06-06"));
+                properties.put("acknowledged", Map.of("type", "boolean", "example", false));
+                properties.put("acknowledgedAt", Map.of("type", "string", "format", "date-time"));
+                break;
+            case "ValidationAcknowledgementResponse":
+                properties.put("id", Map.of("type", "string", "format", "uuid", "example", "66666666-6666-6666-6666-666666666666"));
+                properties.put("alertId", Map.of("type", "string", "format", "uuid", "example", "55555555-5555-5555-5555-555555555555"));
+                properties.put("ruleCode", Map.of("type", "string", "example", "WEEKEND_WORK"));
+                properties.put("severity", Map.of("type", "string", "example", "WARNING"));
+                properties.put("acknowledgedBy", Map.of("type", "string", "example", "admin@escala.local"));
+                properties.put("reason", Map.of("type", "string", "example", "Ciente do risco e cobertura confirmada."));
+                properties.put("acknowledgedAt", Map.of("type", "string", "format", "date-time"));
+                break;
             default:
                 schema.put("description", "Retorno " + responseName + ". Consulte os DTOs/Entities Java do backend.");
                 return schema;
@@ -989,6 +1066,14 @@ public class OpenApiController {
 
     private Map<String, Object> queryParamRequired(String name, String description) {
         return parameter(name, "query", description, true);
+    }
+
+    private Map<String, Object> uuidSchema() {
+        return Map.of(
+                "type", "string",
+                "format", "uuid",
+                "example", "11111111-1111-1111-1111-111111111111"
+        );
     }
 
     private Map<String, Object> parameter(String name, String in, String description, boolean required) {

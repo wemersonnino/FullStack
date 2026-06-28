@@ -37,8 +37,8 @@ function mapToCalendarEscala(escala: Escala): LegacyEscala {
   const remoto = escala.remoto ?? false;
 
   return {
-    id: Number(escala.id),
-    usuarioId: Number(escala.usuarioId),
+    id: String(escala.id),
+    usuarioId: String(escala.usuarioId),
     nomeUsuario: escala.nomeUsuario,
     avatarUrl: escala.avatarUrl ?? undefined,
     cargo: escala.cargo ?? undefined,

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/companies")
@@ -21,7 +22,7 @@ public class CompanyController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CompanyResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<CompanyResponse> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(CompanyResponse.from(companyService.findById(id)));
     }
 
@@ -31,12 +32,12 @@ public class CompanyController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CompanyResponse> update(@PathVariable Long id, @RequestBody CompanyRequest request) {
+    public ResponseEntity<CompanyResponse> update(@PathVariable UUID id, @RequestBody CompanyRequest request) {
         return ResponseEntity.ok(CompanyResponse.from(companyService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         companyService.delete(id);
         return ResponseEntity.ok().build();
     }

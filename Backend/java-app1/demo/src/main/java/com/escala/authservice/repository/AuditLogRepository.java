@@ -8,9 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 import java.util.Optional;
 
-public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
+public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
     @Query("""
             select a from AuditLog a
             where a.company.id = :companyId
@@ -20,16 +21,16 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
             order by a.createdAt desc
             """)
     Page<AuditLog> searchByCompany(
-            @Param("companyId") Long companyId,
+            @Param("companyId") UUID companyId,
             @Param("actor") String actor,
             @Param("action") String action,
             @Param("entityType") String entityType,
             Pageable pageable
     );
 
-    long countByCompanyIdAndCreatedAtBetween(Long companyId, OffsetDateTime start, OffsetDateTime end);
+    long countByCompanyIdAndCreatedAtBetween(UUID companyId, OffsetDateTime start, OffsetDateTime end);
 
-    long countByCompanyId(Long companyId);
+    long countByCompanyId(UUID companyId);
 
-    Optional<AuditLog> findFirstByCompanyIdOrderByCreatedAtDesc(Long companyId);
+    Optional<AuditLog> findFirstByCompanyIdOrderByCreatedAtDesc(UUID companyId);
 }

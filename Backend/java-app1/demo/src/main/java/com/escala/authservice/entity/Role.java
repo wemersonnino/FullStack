@@ -1,6 +1,9 @@
 package com.escala.authservice.entity;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,8 +18,9 @@ import lombok.NoArgsConstructor;
 public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private String name;

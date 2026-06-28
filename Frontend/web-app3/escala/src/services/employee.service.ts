@@ -2,21 +2,21 @@ import { API_ROUTES } from '@/constants/api';
 import { httpDelete, httpGet, httpPost, httpPut } from '@/lib/http/request';
 
 export type Employee = {
-  id: number;
+  id: string;
   fullName: string;
   email: string;
   active: boolean;
-  sector?: { id: number; name: string };
-  project?: { id: number; name: string };
-  user?: { id: number; username: string; email: string };
+  sector?: { id: string; name: string };
+  project?: { id: string; name: string };
+  user?: { id: string; username: string; email: string };
 };
 
 export type EmployeePayload = {
   fullName: string;
   email: string;
   active?: boolean;
-  sectorId?: number;
-  projectId?: number;
+  sectorId?: string;
+  projectId?: string;
 };
 
 export async function getEmployees(authToken?: string) {
@@ -27,10 +27,10 @@ export async function createEmployee(payload: EmployeePayload) {
   return httpPost<Employee>(API_ROUTES.EMPLOYEES, payload);
 }
 
-export async function updateEmployee(id: number, payload: EmployeePayload) {
+export async function updateEmployee(id: string, payload: EmployeePayload) {
   return httpPut<Employee>(`${API_ROUTES.EMPLOYEES}/${id}`, payload);
 }
 
-export async function removeEmployee(id: number) {
+export async function removeEmployee(id: string) {
   return httpDelete<void>(`${API_ROUTES.EMPLOYEES}/${id}`);
 }

@@ -47,7 +47,7 @@ export class MessageBackendAdapter {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
-        receiverId: message.receiverId ? parseInt(message.receiverId) : null,
+        receiverId: message.receiverId || null,
         type: message.type,
         title: message.title,
         content: message.content,

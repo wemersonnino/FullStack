@@ -7,12 +7,13 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     List<Employee> findByActiveTrueOrderByFullNameAsc();
-    List<Employee> findByActiveTrueAndProjectIdOrderByFullNameAsc(Long projectId);
-    List<Employee> findByActiveTrueAndSectorIdOrderByFullNameAsc(Long sectorId);
-    List<Employee> findByActiveTrueAndCompanyIdOrderByFullNameAsc(Long companyId);
+    List<Employee> findByActiveTrueAndProjectIdOrderByFullNameAsc(UUID projectId);
+    List<Employee> findByActiveTrueAndSectorIdOrderByFullNameAsc(UUID sectorId);
+    List<Employee> findByActiveTrueAndCompanyIdOrderByFullNameAsc(UUID companyId);
     @Query("""
             select e
             from Employee e
@@ -28,18 +29,19 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             order by e.fullName asc
             """)
     List<Employee> findSchedulableEmployees(
-            @Param("companyId") Long companyId,
-            @Param("projectId") Long projectId,
-            @Param("sectorId") Long sectorId,
+            @Param("companyId") UUID companyId,
+            @Param("projectId") UUID projectId,
+            @Param("sectorId") UUID sectorId,
             @Param("query") String query
     );
 
     long countByActiveTrue();
-    long countByActiveTrueAndCompanyId(Long companyId);
+    long countByActiveTrueAndCompanyId(UUID companyId);
     Optional<Employee> findByEmail(String email);
     Optional<Employee> findByUserEmail(String email);
     Optional<Employee> findByEmailAndCompanySlug(String email, String companySlug);
     Optional<Employee> findByUserEmailAndCompanySlug(String email, String companySlug);
-    List<Employee> findByCompanyId(Long companyId);
-    List<Employee> findByIdInAndActiveTrueAndCompanyId(List<Long> ids, Long companyId);
+    List<Employee> findByCompanyId(UUID companyId);
+    List<Employee> findByIdInAndActiveTrueAndCompanyId(List<UUID> ids, UUID companyId);
+    Optional<Employee> findByPublicIdAndCompanyId(UUID publicId, UUID companyId);
 }

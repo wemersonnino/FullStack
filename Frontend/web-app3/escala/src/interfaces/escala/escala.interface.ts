@@ -1,6 +1,6 @@
 export interface Escala {
-  id: number;
-  usuarioId: number;
+  id: string;
+  usuarioId: string;
   nomeUsuario: string;
   avatarUrl?: string;
   cargo?: string;
@@ -19,19 +19,19 @@ export interface Escala {
 }
 
 export interface EscalaRequest {
-  employeeId: number;
+  employeeId: string;
   dates: string[];
   startTime: string;
   endTime: string;
   workMode: 'PRESENCIAL' | 'REMOTO';
   notes?: string;
-  companyId?: number;
-  sectorId?: number;
-  projectId?: number;
+  companyId?: string;
+  sectorId?: string;
+  projectId?: string;
 }
 
 export interface UsuarioEscala {
-  id: number;
+  id: string;
   nome: string;
   username?: string;
   email: string;
@@ -42,7 +42,7 @@ export interface UsuarioEscala {
   telefone?: string;
   remoto?: boolean;
   tipoVinculo?: string;
-  empresaId?: number;
-  setorId?: number;
-  projetoId?: number;
+  empresaId?: string;
+  setorId?: string;
+  projetoId?: string;
 }

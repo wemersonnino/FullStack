@@ -1,11 +1,13 @@
 package com.escala.authservice.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "operational_capacities")
@@ -15,11 +17,12 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class OperationalCapacity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
+    private UUID id;
 
     @Column(nullable = false)
-    private Long targetId; // ID do Setor ou Posto de Trabalho
+    private UUID targetId; // ID do Setor ou Posto de Trabalho
 
     @Column(nullable = false)
     private String targetType; // "SECTOR" ou "WORK_POST"

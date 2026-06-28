@@ -21,8 +21,7 @@ api.interceptors.response.use(
       signOut({ callbackUrl: '/login' });
     }
 
-    const wrappedError = new Error(error.message, { cause: error });
-    return Promise.reject(wrappedError);
+    return Promise.reject(error);
   }
 );
 

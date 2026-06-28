@@ -26,7 +26,7 @@ import { UserProfile } from '@/core/domain/models/user.model';
 
 type ScopeOption = {
   type: ManagerScopeType;
-  id: number;
+  id: string;
   label: string;
 };
 
@@ -54,9 +54,9 @@ export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOpti
     setSubmitting(true);
     try {
       await RebacService.createAssignment(token, {
-        managerUserId: Number(formData.get('managerUserId')),
+        managerUserId: formData.get('managerUserId')?.toString() || '',
         scopeType,
-        scopeId: Number(formData.get('scopeId')),
+        scopeId: formData.get('scopeId')?.toString() || '',
         roleLevel: formData.get('roleLevel') as ManagerRoleLevel,
         startsAt: formData.get('startsAt')?.toString() || undefined,
         endsAt: formData.get('endsAt')?.toString() || undefined,
@@ -148,8 +148,8 @@ export function EdgeForm({ token, users }: RebacAdminActionsProps) {
     setSubmitting(true);
     try {
       await RebacService.createEdge(token, {
-        parentUserId: Number(formData.get('parentUserId')),
-        childUserId: Number(formData.get('childUserId')),
+        parentUserId: formData.get('parentUserId')?.toString() || '',
+        childUserId: formData.get('childUserId')?.toString() || '',
         relationType: formData.get('relationType')?.toString() || 'REPORTS_TO',
         startsAt: formData.get('startsAt')?.toString() || undefined,
         endsAt: formData.get('endsAt')?.toString() || undefined,
@@ -211,7 +211,7 @@ export function EdgeForm({ token, users }: RebacAdminActionsProps) {
   );
 }
 
-export function DeleteAssignmentButton({ token, id }: { token: string; id: number }) {
+export function DeleteAssignmentButton({ token, id }: { token: string; id: string }) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -232,7 +232,7 @@ export function DeleteAssignmentButton({ token, id }: { token: string; id: numbe
   );
 }
 
-export function DeleteEdgeButton({ token, id }: { token: string; id: number }) {
+export function DeleteEdgeButton({ token, id }: { token: string; id: string }) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 

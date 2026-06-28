@@ -1,9 +1,11 @@
 package com.escala.authservice.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.*;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "contact_messages")
@@ -14,8 +16,9 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class ContactMessageEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
+    private UUID id;
     
     private String name;
     private String email;

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.Optional;
 
 @Component
@@ -36,19 +37,19 @@ public class LearningProgressPersistenceAdapter implements LearningProgressOutpu
     }
 
     @Override
-    public List<LearningProgress> findByUserId(Long userId) {
+    public List<LearningProgress> findByUserId(UUID userId) {
         return repository.findByUserId(userId).stream()
                 .map(this::toDomain)
                 .toList();
     }
 
     @Override
-    public Optional<LearningProgress> findById(Long id) {
+    public Optional<LearningProgress> findById(UUID id) {
         return repository.findById(id).map(this::toDomain);
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(UUID id) {
         repository.deleteById(id);
     }
 

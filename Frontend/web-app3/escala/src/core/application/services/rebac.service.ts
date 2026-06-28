@@ -18,7 +18,7 @@ export class RebacService {
     return RebacBackendAdapter.createAssignment(token, payload);
   }
 
-  static deleteAssignment(token: string, id: number) {
+  static deleteAssignment(token: string, id: string) {
     return RebacBackendAdapter.deleteAssignment(token, id);
   }
 
@@ -30,7 +30,7 @@ export class RebacService {
     return RebacBackendAdapter.createEdge(token, payload);
   }
 
-  static deleteEdge(token: string, id: number) {
+  static deleteEdge(token: string, id: string) {
     return RebacBackendAdapter.deleteEdge(token, id);
   }
 

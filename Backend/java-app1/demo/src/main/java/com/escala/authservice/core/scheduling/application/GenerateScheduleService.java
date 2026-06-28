@@ -13,6 +13,7 @@ import com.escala.authservice.scheduling.domain.policy.LaborRuleEngine;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ public class GenerateScheduleService {
     private final EmployeeOutputPort employeeOutputPort;
     private final LaborRuleEngine laborRuleEngine = new LaborRuleEngine();
 
-    public List<WorkShiftDomain> generate(GenerateScheduleRequest request, Long companyId) {
+    public List<WorkShiftDomain> generate(GenerateScheduleRequest request, UUID companyId) {
         YearMonth yearMonth = YearMonth.of(request.getYear(), request.getMonth());
         List<Employee> employees = resolveEmployees(request, companyId);
         
@@ -31,7 +32,7 @@ public class GenerateScheduleService {
             throw new IllegalStateException("Não há funcionários ativos para gerar escala");
         }
 
-        List<Long> employeeIds = employees.stream().map(Employee::getId).toList();
+        List<UUID> employeeIds = employees.stream().map(Employee::getId).toList();
         
         // Pre-load logic (Moved from Service to here)
         List<WorkShiftDomain> preloaded = workShiftOutputPort.findByCompanyAndPeriod(
@@ -40,10 +41,10 @@ public class GenerateScheduleService {
                 yearMonth.atEndOfMonth().plusDays(7)
         );
 
-        Map<Long, List<WorkShiftDomain>> preloadedMap = preloaded.stream()
+        Map<UUID, List<WorkShiftDomain>> preloadedMap = preloaded.stream()
                 .collect(Collectors.groupingBy(WorkShiftDomain::getEmployeeId));
 
-        Map<Long, Integer> allocationCount = employees.stream()
+        Map<UUID, Integer> allocationCount = employees.stream()
                 .collect(Collectors.toMap(Employee::getId, employee -> 0));
         
         Set<String> existingEmployeeDates = preloaded.stream()
@@ -51,7 +52,7 @@ public class GenerateScheduleService {
                 .map(ws -> ws.getEmployeeId() + ":" + ws.getShiftDate())
                 .collect(Collectors.toSet());
 
-        Long previousEmployeeId = null;
+        UUID previousEmployeeId = null;
         List<WorkShiftDomain> generated = new ArrayList<>();
 
         for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
@@ -87,14 +88,14 @@ public class GenerateScheduleService {
         return generated;
     }
 
-    private List<Employee> resolveEmployees(GenerateScheduleRequest request, Long companyId) {
+    private List<Employee> resolveEmployees(GenerateScheduleRequest request, UUID companyId) {
         if (request.getEmployeeIds() == null || request.getEmployeeIds().isEmpty()) {
             return employeeOutputPort.findActiveByCompany(companyId);
         }
         return employeeOutputPort.findByIdsAndActive(request.getEmployeeIds(), companyId);
     }
 
-    private Employee selectEmployee(List<Employee> employees, Map<Long, Integer> allocationCount, Long previousEmployeeId) {
+    private Employee selectEmployee(List<Employee> employees, Map<UUID, Integer> allocationCount, UUID previousEmployeeId) {
         return employees.stream()
                 .filter(e -> employees.size() == 1 || !Objects.equals(e.getId(), previousEmployeeId))
                 .min(Comparator.comparing((Employee e) -> allocationCount.getOrDefault(e.getId(), 0))
@@ -103,7 +104,7 @@ public class GenerateScheduleService {
     }
 
     private void validateLaborRules(Employee employee, LocalDate date, GenerateScheduleRequest request, 
-                                    List<WorkShiftDomain> inMemory, Map<Long, List<WorkShiftDomain>> preloaded) {
+                                    List<WorkShiftDomain> inMemory, Map<UUID, List<WorkShiftDomain>> preloaded) {
         JornadaPlanejada jornada = new JornadaPlanejada(employee.getId(), date, request.getStartTime(), request.getEndTime(), PadraoEscala.COMUM);
         
         List<JornadaPlanejada> relacionadas = new ArrayList<>();

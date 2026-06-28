@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 public class ReportService {
     private final EmployeeRepository employeeRepository;
 
-    public List<PayrollReportItem> generatePayrollReport(Long companyId, String month) {
+    public List<PayrollReportItem> generatePayrollReport(UUID companyId, String month) {
         List<Employee> employees = employeeRepository.findByCompanyId(companyId);
 
         return employees.stream().map(emp -> PayrollReportItem.builder()

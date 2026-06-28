@@ -1,11 +1,13 @@
 package com.escala.authservice.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ai_usage_logs")
@@ -15,8 +17,9 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class AiUsage {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
+    private UUID id;
 
     @ManyToOne(optional = false)
     private User user;

@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/learning-progress")
@@ -38,7 +39,7 @@ public class LearningProgressController {
     }
 
     @PatchMapping("/{id}/complete")
-    public ResponseEntity<Void> complete(@PathVariable Long id) {
+    public ResponseEntity<Void> complete(@PathVariable UUID id) {
         learningProgressService.markAsCompleted(id);
         return ResponseEntity.ok().build();
     }

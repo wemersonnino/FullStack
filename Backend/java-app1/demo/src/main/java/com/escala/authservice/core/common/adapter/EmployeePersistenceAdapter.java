@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -14,12 +15,12 @@ public class EmployeePersistenceAdapter implements EmployeeOutputPort {
     private final EmployeeRepository repository;
 
     @Override
-    public List<Employee> findActiveByCompany(Long companyId) {
+    public List<Employee> findActiveByCompany(UUID companyId) {
         return repository.findByActiveTrueAndCompanyIdOrderByFullNameAsc(companyId);
     }
 
     @Override
-    public List<Employee> findByIdsAndActive(List<Long> ids, Long companyId) {
+    public List<Employee> findByIdsAndActive(List<UUID> ids, UUID companyId) {
         return repository.findByIdInAndActiveTrueAndCompanyId(ids, companyId);
     }
 }

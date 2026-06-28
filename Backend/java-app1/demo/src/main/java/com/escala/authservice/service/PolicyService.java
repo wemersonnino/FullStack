@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.Objects;
 import java.util.Set;
 
@@ -50,10 +51,10 @@ public class PolicyService {
                 .orElse(0);
     }
 
-    public List<Long> managedSectorIds(User user) {
-        Long companyId = user.getCompany().getId();
-        Long userId = user.getId();
-        List<Long> explicit = managerAssignmentRepository
+    public List<UUID> managedSectorIds(User user) {
+        UUID companyId = user.getCompany().getId();
+        UUID userId = user.getId();
+        List<UUID> explicit = managerAssignmentRepository
                 .findByCompanyIdAndManagerIdAndActiveTrue(companyId, userId)
                 .stream()
                 .filter(assignment -> assignment.getScopeType() == ManagerScopeType.SECTOR)
@@ -88,7 +89,7 @@ public class PolicyService {
         throw new AccessDeniedException("Nao autorizado a gerir este funcionario");
     }
 
-    public void requireCanAccessSector(User user, Long sectorId) {
+    public void requireCanAccessSector(User user, UUID sectorId) {
         if (sectorId == null || !isScopedManagerOnly(user)) return;
         if (!managedSectorIds(user).contains(sectorId)) {
             throw new AccessDeniedException("Nao autorizado a gerir este setor");

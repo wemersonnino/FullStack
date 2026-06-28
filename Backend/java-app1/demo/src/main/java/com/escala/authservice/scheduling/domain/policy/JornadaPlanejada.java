@@ -3,12 +3,13 @@ package com.escala.authservice.scheduling.domain.policy;
 import com.escala.authservice.scheduling.domain.enums.PadraoEscala;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public record JornadaPlanejada(
-        Long funcionarioId,
+        UUID funcionarioId,
         LocalDate data,
         LocalTime inicio,
         LocalTime fim,
@@ -16,7 +17,7 @@ public record JornadaPlanejada(
         Duration intervaloIntrajornada
 ) {
     public JornadaPlanejada(
-            Long funcionarioId,
+            UUID funcionarioId,
             LocalDate data,
             LocalTime inicio,
             LocalTime fim,

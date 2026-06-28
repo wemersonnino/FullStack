@@ -3,17 +3,18 @@ package com.escala.authservice.scheduling.domain.model;
 import com.escala.authservice.scheduling.domain.exception.TrocaInvalidaException;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.Objects;
 
 public class SolicitacaoTrocaEscala {
-    private final Long solicitanteId;
-    private final Long donoEscalaId;
+    private final UUID solicitanteId;
+    private final UUID donoEscalaId;
     private final LocalDate dataEscalaOriginal;
     private final LocalDate dataCompensacao;
 
     public SolicitacaoTrocaEscala(
-            Long solicitanteId,
-            Long donoEscalaId,
+            UUID solicitanteId,
+            UUID donoEscalaId,
             LocalDate dataEscalaOriginal,
             LocalDate dataCompensacao
     ) {

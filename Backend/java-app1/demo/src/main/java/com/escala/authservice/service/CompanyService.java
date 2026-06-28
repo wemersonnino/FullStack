@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 import java.util.List;
 
 @Service
@@ -21,7 +22,7 @@ public class CompanyService {
         return companyRepository.findAll();
     }
 
-    public Company findById(Long id) {
+    public Company findById(UUID id) {
         return companyRepository.findById(id).orElseThrow();
     }
 
@@ -32,7 +33,7 @@ public class CompanyService {
         return companyRepository.findById(domain.getId()).orElseThrow();
     }
 
-    public boolean existsBySlugAndIdNot(String slug, Long id) {
+    public boolean existsBySlugAndIdNot(String slug, UUID id) {
         return companyRepository.existsBySlugAndIdNot(slug, id);
     }
 
@@ -55,7 +56,7 @@ public class CompanyService {
         return companyRepository.findById(savedDomain.getId()).orElseThrow();
     }
 
-    public Company update(Long id, CompanyRequest request) {
+    public Company update(UUID id, CompanyRequest request) {
         Company company = findById(id);
         company.setName(request.getName());
         company.setCnpj(request.getCnpj());
@@ -85,7 +86,7 @@ public class CompanyService {
         return companyRepository.save(company);
     }
 
-    public void delete(Long id) {
+    public void delete(UUID id) {
         companyRepository.deleteById(id);
     }
 }

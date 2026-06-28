@@ -51,7 +51,7 @@ export class RebacBackendAdapter {
     return this.parse(response, 'Falha ao criar manager assignment');
   }
 
-  static async deleteAssignment(token: string, id: number): Promise<void> {
+  static async deleteAssignment(token: string, id: string): Promise<void> {
     const response = await fetch(this.url(`/manager-assignments/${id}`), {
       method: 'DELETE',
       headers: this.headers(token),
@@ -76,7 +76,7 @@ export class RebacBackendAdapter {
     return this.parse(response, 'Falha ao criar management edge');
   }
 
-  static async deleteEdge(token: string, id: number): Promise<void> {
+  static async deleteEdge(token: string, id: string): Promise<void> {
     const response = await fetch(this.url(`/management-edges/${id}`), {
       method: 'DELETE',
       headers: this.headers(token),

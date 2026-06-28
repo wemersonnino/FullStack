@@ -6,12 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Data
 @Builder
 public class UserResponse {
-    private Long id;
+    private UUID id;
     private String username;
     private String email;
     private Set<String> roles;
@@ -28,7 +29,7 @@ public class UserResponse {
     private String position;
     private String function;
     private boolean active;
-    private Long companyId;
+    private UUID companyId;
     private String companyName;
     private String companySlug;
 

@@ -45,14 +45,14 @@ export default async function RebacAdminPage() {
 
   const scopeOptions = [
     ...(currentUser?.company?.id
-      ? [{ type: 'COMPANY' as ManagerScopeType, id: Number(currentUser.company.id), label: currentUser.company.name ?? 'Empresa atual' }]
+      ? [{ type: 'COMPANY' as ManagerScopeType, id: String(currentUser.company.id), label: currentUser.company.name ?? 'Empresa atual' }]
       : []),
-    ...sectors.map((sector) => ({ type: 'SECTOR' as ManagerScopeType, id: Number(sector.id), label: sector.name })),
-    ...projects.map((project) => ({ type: 'PROJECT' as ManagerScopeType, id: Number(project.id), label: project.name })),
+    ...sectors.map((sector) => ({ type: 'SECTOR' as ManagerScopeType, id: String(sector.id), label: sector.name })),
+    ...projects.map((project) => ({ type: 'PROJECT' as ManagerScopeType, id: String(project.id), label: project.name })),
     ...workPosts
       .filter((workPost) => workPost.id)
-      .map((workPost) => ({ type: 'WORK_POST' as ManagerScopeType, id: Number(workPost.id), label: workPost.name })),
-    ...users.map((user) => ({ type: 'EMPLOYEE' as ManagerScopeType, id: Number(user.id), label: user.username || user.email })),
+      .map((workPost) => ({ type: 'WORK_POST' as ManagerScopeType, id: String(workPost.id), label: workPost.name })),
+    ...users.map((user) => ({ type: 'EMPLOYEE' as ManagerScopeType, id: String(user.id), label: user.username || user.email })),
   ];
 
   return (

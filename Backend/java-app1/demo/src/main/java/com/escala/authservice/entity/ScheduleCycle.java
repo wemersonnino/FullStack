@@ -1,6 +1,7 @@
 package com.escala.authservice.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,8 +24,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ScheduleCycle {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
+    private UUID id;
 
     @Column(nullable = false, unique = true, updatable = false)
     @Builder.Default
@@ -33,7 +35,7 @@ public class ScheduleCycle {
     @ManyToOne(optional = false)
     private Company company;
 
-    private Long unitId;
+    private UUID unitId;
 
     @Column(nullable = false)
     private int year;
@@ -52,6 +54,16 @@ public class ScheduleCycle {
     @Column(nullable = false)
     @Builder.Default
     private int businessVersion = 1;
+
+    private OffsetDateTime publishedAt;
+
+    @ManyToOne
+    private User publishedBy;
+
+    private OffsetDateTime archivedAt;
+
+    @ManyToOne
+    private User archivedBy;
 
     @Column(nullable = false)
     private OffsetDateTime createdAt;

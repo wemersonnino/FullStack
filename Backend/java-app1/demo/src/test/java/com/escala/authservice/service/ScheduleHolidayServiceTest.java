@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,17 +48,17 @@ class ScheduleHolidayServiceTest {
                 LocalDate.of(2026, 12, 25),
                 " Natal ",
                 HolidayType.NATIONAL,
-                10L
+                new UUID(0L, 10L)
         );
 
         ScheduleHoliday holiday = service.createHoliday("admin@escala.local", request);
 
         ArgumentCaptor<ScheduleHoliday> captor = ArgumentCaptor.forClass(ScheduleHoliday.class);
         verify(scheduleHolidayRepository).save(captor.capture());
-        assertEquals(1L, captor.getValue().getCompany().getId());
+        assertEquals(new UUID(0L, 1L), captor.getValue().getCompany().getId());
         assertEquals("Natal", holiday.getName());
         assertEquals(HolidayType.NATIONAL, holiday.getType());
-        assertEquals(10L, holiday.getUnitId());
+        assertEquals(new UUID(0L, 10L), holiday.getUnitId());
     }
 
     @Test
@@ -75,16 +76,16 @@ class ScheduleHolidayServiceTest {
                 .holidayDate(LocalDate.of(2026, 6, 4))
                 .name("Corpus Christi")
                 .type(HolidayType.MUNICIPAL)
-                .unitId(10L)
+                .unitId(new UUID(0L, 10L))
                 .build();
         when(scheduleHolidayRepository.findApplicable(
-                1L,
+                new UUID(0L, 1L),
                 LocalDate.of(2026, 6, 1),
                 LocalDate.of(2026, 6, 30),
-                10L
+                new UUID(0L, 10L)
         )).thenReturn(List.of(holiday));
 
-        List<Holiday> holidays = service.listDomainHolidaysForMonth("admin@escala.local", 2026, 6, 10L);
+        List<Holiday> holidays = service.listDomainHolidaysForMonth("admin@escala.local", 2026, 6, new UUID(0L, 10L));
 
         assertEquals(1, holidays.size());
         assertEquals(LocalDate.of(2026, 6, 4), holidays.getFirst().date());
@@ -95,7 +96,7 @@ class ScheduleHolidayServiceTest {
     private User requester() {
         return User.builder()
                 .email("admin@escala.local")
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .build();
     }
 }

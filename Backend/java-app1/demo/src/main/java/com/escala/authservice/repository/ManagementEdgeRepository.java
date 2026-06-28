@@ -4,8 +4,9 @@ import com.escala.authservice.entity.ManagementEdge;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface ManagementEdgeRepository extends JpaRepository<ManagementEdge, Long> {
-    List<ManagementEdge> findByCompanyIdOrderByParentUsernameAscChildUsernameAsc(Long companyId);
-    List<ManagementEdge> findByCompanyIdAndActiveTrue(Long companyId);
+public interface ManagementEdgeRepository extends JpaRepository<ManagementEdge, UUID> {
+    List<ManagementEdge> findByCompanyIdOrderByParentUsernameAscChildUsernameAsc(UUID companyId);
+    List<ManagementEdge> findByCompanyIdAndActiveTrue(UUID companyId);
 }

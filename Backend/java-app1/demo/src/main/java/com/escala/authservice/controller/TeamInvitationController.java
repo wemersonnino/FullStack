@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/team/invitations")
@@ -38,7 +39,7 @@ public class TeamInvitationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancel(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Void> cancel(Authentication authentication, @PathVariable UUID id) {
         invitationService.cancel(authentication.getName(), id);
         return ResponseEntity.ok().build();
     }

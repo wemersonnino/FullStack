@@ -1,7 +1,7 @@
 import { httpGet, httpPost } from "@/lib/http/request";
 
 export interface Subscription {
-  id: number;
+  id: string;
   stripeSubscriptionId: string;
   status: string;
   planType: string;

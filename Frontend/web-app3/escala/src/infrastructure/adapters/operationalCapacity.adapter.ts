@@ -28,7 +28,7 @@ export class OperationalCapacityBackendAdapter {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        targetId: parseInt(capacity.targetId),
+        targetId: capacity.targetId,
         targetType: capacity.targetType,
         dayOfWeek: capacity.dayOfWeek,
         startTime: capacity.startTime,

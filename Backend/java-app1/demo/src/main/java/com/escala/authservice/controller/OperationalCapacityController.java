@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/operational-capacities")
@@ -25,7 +26,7 @@ public class OperationalCapacityController {
     @GetMapping("/target")
     public ResponseEntity<List<OperationalCapacity>> listByTarget(
             Authentication authentication,
-            @RequestParam Long targetId,
+            @RequestParam UUID targetId,
             @RequestParam String targetType
     ) {
         return ResponseEntity.ok(operationalCapacityService.listByTarget(authentication.getName(), targetId, targetType));
@@ -42,7 +43,7 @@ public class OperationalCapacityController {
     @PutMapping("/{id}")
     public ResponseEntity<OperationalCapacity> updateCapacity(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody OperationalCapacityRequest request
     ) {
         return ResponseEntity.ok(operationalCapacityService.updateCapacity(authentication.getName(), id, request));
@@ -51,7 +52,7 @@ public class OperationalCapacityController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCapacity(
             Authentication authentication,
-            @PathVariable Long id
+            @PathVariable UUID id
     ) {
         operationalCapacityService.deleteCapacity(authentication.getName(), id);
         return ResponseEntity.ok().build();

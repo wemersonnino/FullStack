@@ -7,16 +7,17 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 public class ManagerAssignmentResponse {
-    private Long id;
-    private Long managerUserId;
+    private UUID id;
+    private UUID managerUserId;
     private String managerName;
     private String managerEmail;
     private ManagerScopeType scopeType;
-    private Long scopeId;
+    private UUID scopeId;
     private ManagerRoleLevel roleLevel;
     private int levelWeight;
     private OffsetDateTime startsAt;

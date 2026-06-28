@@ -1,12 +1,14 @@
 package com.escala.authservice.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -23,8 +25,9 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class ShiftSwapRequest {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
+    private UUID id;
 
     @ManyToOne(optional = false)
     private Employee requester;

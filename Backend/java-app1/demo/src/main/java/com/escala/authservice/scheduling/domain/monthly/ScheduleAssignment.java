@@ -3,10 +3,11 @@ package com.escala.authservice.scheduling.domain.monthly;
 import com.escala.authservice.scheduling.domain.enums.ModalidadeTrabalho;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.Objects;
 
 public record ScheduleAssignment(
-        Long employeeId,
+        UUID employeeId,
         LocalDate date,
         LegendCode legend,
         ModalidadeTrabalho modality

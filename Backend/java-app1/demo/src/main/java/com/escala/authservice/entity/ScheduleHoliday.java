@@ -2,12 +2,14 @@ package com.escala.authservice.entity;
 
 import com.escala.authservice.scheduling.domain.monthly.HolidayType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -23,13 +25,18 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ScheduleHoliday {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
+    private UUID id;
+
+    @Column(nullable = false, unique = true, updatable = false)
+    @Builder.Default
+    private UUID publicId = UUID.randomUUID();
 
     @ManyToOne(optional = false)
     private Company company;
 
-    private Long unitId;
+    private UUID unitId;
 
     @Column(nullable = false)
     private LocalDate holidayDate;
@@ -43,4 +50,11 @@ public class ScheduleHoliday {
 
     @Version
     private Long version;
+
+    @PrePersist
+    void prePersist() {
+        if (publicId == null) {
+            publicId = UUID.randomUUID();
+        }
+    }
 }

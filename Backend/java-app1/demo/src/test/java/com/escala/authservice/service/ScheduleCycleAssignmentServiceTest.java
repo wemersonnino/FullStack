@@ -61,22 +61,24 @@ class ScheduleCycleAssignmentServiceTest {
     @Test
     void substituiAtribuicoesDoCicloEmRascunho() {
         UUID cyclePublicId = UUID.randomUUID();
+        UUID employeePublicId = UUID.randomUUID();
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.RASCUNHO);
+        Employee employee = employee(new UUID(0L, 10L), employeePublicId, "Ana");
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
-        when(employeeRepository.findById(10L)).thenReturn(Optional.of(employee(10L, "Ana")));
+        when(employeeRepository.findByPublicIdAndCompanyId(employeePublicId, new UUID(0L, 1L))).thenReturn(Optional.of(employee));
         when(assignmentRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<ScheduleCycleAssignment> assignments = service.replaceAssignments(
                 "admin@escala.local",
                 cyclePublicId,
                 new CycleAssignmentsRequest(List.of(
-                        new CycleAssignmentItemRequest(10L, LocalDate.of(2026, 6, 1), "T", ModalidadeTrabalho.REMOTO)
+                        new CycleAssignmentItemRequest(employeePublicId, LocalDate.of(2026, 6, 1), "T", ModalidadeTrabalho.REMOTO)
                 ))
         );
 
-        ArgumentCaptor<Long> cycleIdCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<UUID> cycleIdCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(assignmentRepository).deleteByCycleId(cycleIdCaptor.capture());
-        assertEquals(5L, cycleIdCaptor.getValue());
+        assertEquals(new UUID(0L, 5L), cycleIdCaptor.getValue());
         assertEquals(1, assignments.size());
         assertEquals("T", assignments.getFirst().getLegendCode());
         assertEquals("Trabalho", assignments.getFirst().getLegendLabel());
@@ -87,12 +89,13 @@ class ScheduleCycleAssignmentServiceTest {
     @Test
     void rejeitaAtribuicaoDuplicadaParaMesmoFuncionarioEDia() {
         UUID cyclePublicId = UUID.randomUUID();
+        UUID employeePublicId = UUID.randomUUID();
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId))
                 .thenReturn(cycle(cyclePublicId, ScheduleCycleStatus.RASCUNHO));
 
         CycleAssignmentsRequest request = new CycleAssignmentsRequest(List.of(
-                new CycleAssignmentItemRequest(10L, LocalDate.of(2026, 6, 1), "T", null),
-                new CycleAssignmentItemRequest(10L, LocalDate.of(2026, 6, 1), "F", null)
+                new CycleAssignmentItemRequest(employeePublicId, LocalDate.of(2026, 6, 1), "T", null),
+                new CycleAssignmentItemRequest(employeePublicId, LocalDate.of(2026, 6, 1), "F", null)
         ));
 
         assertThrows(IllegalArgumentException.class, () -> service.replaceAssignments(
@@ -105,10 +108,11 @@ class ScheduleCycleAssignmentServiceTest {
     @Test
     void calculaContadoresDoCiclo() {
         UUID cyclePublicId = UUID.randomUUID();
+        UUID employeePublicId = UUID.randomUUID();
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.RASCUNHO);
-        Employee employee = employee(10L, "Ana");
+        Employee employee = employee(new UUID(0L, 10L), employeePublicId, "Ana");
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
-        when(assignmentRepository.findByCycleIdOrderByAssignmentDateAscEmployeeFullNameAsc(5L)).thenReturn(List.of(
+        when(assignmentRepository.findByCycleIdOrderByAssignmentDateAscEmployeeFullNameAsc(new UUID(0L, 5L))).thenReturn(List.of(
                 assignment(cycle, employee, LocalDate.of(2026, 6, 1), "T", "Trabalho", "WORKED", 480),
                 assignment(cycle, employee, LocalDate.of(2026, 6, 2), "F", "Folga", "REST", 0),
                 assignment(cycle, employee, LocalDate.of(2026, 6, 3), "AT", "Atestado", "ABSENCE", 0)
@@ -118,7 +122,7 @@ class ScheduleCycleAssignmentServiceTest {
 
         assertEquals(1, counters.size());
         CycleCounterResponse counter = counters.getFirst();
-        assertEquals(10L, counter.employeeId());
+        assertEquals(employeePublicId.toString(), counter.employeeId());
         assertEquals("Ana", counter.employeeName());
         assertEquals(1, counter.workedDays());
         assertEquals(1, counter.restDays());
@@ -128,9 +132,9 @@ class ScheduleCycleAssignmentServiceTest {
 
     private ScheduleCycle cycle(UUID publicId, ScheduleCycleStatus status) {
         return ScheduleCycle.builder()
-                .id(5L)
+                .id(new UUID(0L, 5L))
                 .publicId(publicId)
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .year(2026)
                 .month(6)
                 .timezone("America/Sao_Paulo")
@@ -138,13 +142,14 @@ class ScheduleCycleAssignmentServiceTest {
                 .build();
     }
 
-    private Employee employee(Long id, String name) {
+    private Employee employee(UUID id, UUID publicId, String name) {
         return Employee.builder()
                 .id(id)
+                .publicId(publicId)
                 .fullName(name)
                 .email(name.toLowerCase() + "@escala.local")
                 .active(true)
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .build();
     }
 

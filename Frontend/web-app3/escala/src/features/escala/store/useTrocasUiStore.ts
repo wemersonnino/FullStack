@@ -5,10 +5,10 @@ import { create } from 'zustand/react';
 type TrocasUiState = {
   requestDialogOpen: boolean;
   detailsDialogOpen: boolean;
-  selectedSwapId?: number;
+  selectedSwapId?: string;
   openRequestDialog: () => void;
   closeRequestDialog: () => void;
-  openDetailsDialog: (swapId: number) => void;
+  openDetailsDialog: (swapId: string) => void;
   closeDetailsDialog: () => void;
 };
 

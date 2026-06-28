@@ -2,16 +2,16 @@ import { API_ROUTES } from '@/constants/api';
 import { httpDelete, httpGet, httpPatch, httpPost } from '@/lib/http/request';
 
 export type Sector = {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   maxSeats?: number | null;
-  managerId?: number | null;
+  managerId?: string | null;
   managerName?: string | null;
 };
 
 export type Project = {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   active: boolean;
@@ -21,7 +21,7 @@ export type OrganizationPayload = {
   name: string;
   description?: string;
   maxSeats?: number | null;
-  managerId?: number | null;
+  managerId?: string | null;
   active?: boolean;
 };
 
@@ -33,11 +33,11 @@ export async function createSector(payload: OrganizationPayload) {
   return httpPost<Sector>(API_ROUTES.SECTORS, payload);
 }
 
-export async function updateSector(id: number, payload: Partial<OrganizationPayload>) {
+export async function updateSector(id: string, payload: Partial<OrganizationPayload>) {
   return httpPatch<Sector>(`${API_ROUTES.SECTORS}/${id}`, payload);
 }
 
-export async function deleteSector(id: number) {
+export async function deleteSector(id: string) {
   return httpDelete(`${API_ROUTES.SECTORS}/${id}`);
 }
 
@@ -49,10 +49,10 @@ export async function createProject(payload: OrganizationPayload) {
   return httpPost<Project>(API_ROUTES.PROJECTS, payload);
 }
 
-export async function updateProject(id: number, payload: Partial<OrganizationPayload>) {
+export async function updateProject(id: string, payload: Partial<OrganizationPayload>) {
   return httpPatch<Project>(`${API_ROUTES.PROJECTS}/${id}`, payload);
 }
 
-export async function deleteProject(id: number) {
+export async function deleteProject(id: string) {
   return httpDelete(`${API_ROUTES.PROJECTS}/${id}`);
 }

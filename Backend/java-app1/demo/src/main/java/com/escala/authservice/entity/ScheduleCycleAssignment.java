@@ -2,6 +2,7 @@ package com.escala.authservice.entity;
 
 import com.escala.authservice.scheduling.domain.enums.ModalidadeTrabalho;
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,8 +31,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ScheduleCycleAssignment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
+    private UUID id;
 
     @Column(nullable = false, unique = true, updatable = false)
     @Builder.Default

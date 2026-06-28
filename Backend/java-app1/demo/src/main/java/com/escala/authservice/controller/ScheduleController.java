@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/schedules")
@@ -46,12 +47,12 @@ public class ScheduleController {
     }
 
     @PatchMapping("/swap-requests/{id}/decision")
-    public ResponseEntity<ShiftSwapRequest> decideSwap(@PathVariable Long id, @RequestBody DecideShiftSwapRequest request, Authentication authentication) {
+    public ResponseEntity<ShiftSwapRequest> decideSwap(@PathVariable UUID id, @RequestBody DecideShiftSwapRequest request, Authentication authentication) {
         return ResponseEntity.ok(scheduleService.decideSwap(id, request, authentication.getName()));
     }
 
     @PatchMapping("/swap-requests/{id}/colleague-approval")
-    public ResponseEntity<ShiftSwapRequest> approveByColleague(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<ShiftSwapRequest> approveByColleague(@PathVariable UUID id, Authentication authentication) {
         return ResponseEntity.ok(scheduleService.approveByColleague(id, authentication.getName()));
     }
 

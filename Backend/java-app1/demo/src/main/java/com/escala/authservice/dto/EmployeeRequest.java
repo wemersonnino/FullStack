@@ -1,5 +1,7 @@
 package com.escala.authservice.dto;
 
+import java.util.UUID;
+
 import lombok.Data;
 
 @Data
@@ -7,6 +9,6 @@ public class EmployeeRequest {
     private String fullName;
     private String email;
     private Boolean active;
-    private Long sectorId;
-    private Long projectId;
+    private UUID sectorId;
+    private UUID projectId;
 }

@@ -14,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
@@ -37,7 +38,7 @@ public class AuditLogQueryService {
 
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(1, Math.min(size, MAX_PAGE_SIZE));
-        Long companyId = requester.getCompany().getId();
+        UUID companyId = requester.getCompany().getId();
 
         Page<AuditLog> result = auditLogRepository.searchByCompany(
                 companyId,
@@ -57,7 +58,7 @@ public class AuditLogQueryService {
                 .build();
     }
 
-    private AuditSummaryResponse summary(Long companyId) {
+    private AuditSummaryResponse summary(UUID companyId) {
         ZoneId zone = ZoneId.systemDefault();
         OffsetDateTime start = LocalDate.now(zone).atStartOfDay(zone).toOffsetDateTime();
         OffsetDateTime end = start.plusDays(1);

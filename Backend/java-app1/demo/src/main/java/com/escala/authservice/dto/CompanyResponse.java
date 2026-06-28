@@ -1,5 +1,7 @@
 package com.escala.authservice.dto;
 
+import java.util.UUID;
+
 import com.escala.authservice.entity.Company;
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +9,7 @@ import lombok.Data;
 @Data
 @Builder
 public class CompanyResponse {
-    private Long id;
+    private UUID id;
     private String name;
     private String slug;
     private String cnpj;

@@ -67,7 +67,7 @@ function getCompanyAddress(company?: Company | null) {
   };
 }
 
-export function CompanyForm({ companyId }: { companyId?: number }) {
+export function CompanyForm({ companyId }: { companyId?: string }) {
   const router = useRouter();
   const { companies, addCompany, editCompany } = useCompanyStore();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);

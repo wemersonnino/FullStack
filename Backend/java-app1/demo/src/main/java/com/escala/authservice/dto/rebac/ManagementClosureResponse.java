@@ -1,5 +1,7 @@
 package com.escala.authservice.dto.rebac;
 
+import java.util.UUID;
+
 import com.escala.authservice.entity.ManagementClosure;
 import lombok.Builder;
 import lombok.Data;
@@ -7,10 +9,10 @@ import lombok.Data;
 @Data
 @Builder
 public class ManagementClosureResponse {
-    private Long id;
-    private Long ancestorUserId;
+    private UUID id;
+    private UUID ancestorUserId;
     private String ancestorName;
-    private Long descendantUserId;
+    private UUID descendantUserId;
     private String descendantName;
     private int depth;
     private int maxWeightPath;

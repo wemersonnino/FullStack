@@ -114,7 +114,7 @@ export function ProjectManagement() {
     }
   }
 
-  async function onDelete(id: number) {
+  async function onDelete(id: string) {
     if (confirm('Tem certeza que deseja excluir este projeto?')) {
       try {
         await deleteProject(id);

@@ -18,7 +18,7 @@ export class OrganizationMapper {
       name: domain.name,
       description: domain.description,
       active: domain.active,
-      managerId: domain.managerId ? parseInt(domain.managerId) : undefined,
+      managerId: domain.managerId || undefined,
       maxSeats: domain.maxSeats,
     };
   }
@@ -38,7 +38,7 @@ export class OrganizationMapper {
       name: domain.name,
       description: domain.description,
       active: domain.active,
-      sectorId: domain.sectorId ? parseInt(domain.sectorId) : undefined,
+      sectorId: domain.sectorId || undefined,
     };
   }
 }

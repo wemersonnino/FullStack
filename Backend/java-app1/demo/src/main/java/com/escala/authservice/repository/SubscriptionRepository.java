@@ -3,8 +3,9 @@ package com.escala.authservice.repository;
 import com.escala.authservice.entity.Subscription;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
-    Optional<Subscription> findByCompanyId(Long companyId);
+public interface SubscriptionRepository extends JpaRepository<Subscription, UUID> {
+    Optional<Subscription> findByCompanyId(UUID companyId);
     Optional<Subscription> findByStripeSubscriptionId(String stripeSubscriptionId);
 }

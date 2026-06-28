@@ -5,6 +5,7 @@ import com.escala.authservice.core.learning.port.out.LearningProgressOutputPort;
 import lombok.RequiredArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -18,11 +19,11 @@ public class LearningProgressService {
         return outputPort.save(progress);
     }
 
-    public List<LearningProgress> getUserProgress(Long userId) {
+    public List<LearningProgress> getUserProgress(UUID userId) {
         return outputPort.findByUserId(userId);
     }
 
-    public void markAsCompleted(Long id) {
+    public void markAsCompleted(UUID id) {
         outputPort.findById(id).ifPresent(p -> {
             p.setCompleted(true);
             p.setCompletionDate(OffsetDateTime.now());

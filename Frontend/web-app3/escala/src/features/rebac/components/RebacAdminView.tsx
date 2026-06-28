@@ -29,7 +29,7 @@ import {
 
 type ScopeOption = {
   type: ManagerScopeType;
-  id: number;
+  id: string;
   label: string;
 };
 
@@ -52,7 +52,7 @@ function formatDate(value?: string | null) {
   }).format(new Date(value));
 }
 
-function scopeLabel(scopeOptions: ScopeOption[], type: ManagerScopeType, id: number) {
+function scopeLabel(scopeOptions: ScopeOption[], type: ManagerScopeType, id: string) {
   return scopeOptions.find((item) => item.type === type && item.id === id)?.label ?? `${type} #${id}`;
 }
 

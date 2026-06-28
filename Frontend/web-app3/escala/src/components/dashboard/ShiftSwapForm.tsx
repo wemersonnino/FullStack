@@ -62,7 +62,7 @@ export const ShiftSwapForm = ({ shifts }: ShiftSwapFormProps) => {
   const onSubmit = async (data: ShiftSwapSchemaType) => {
     try {
       const result = await submit({
-        originalShiftId: Number(data.originalShift),
+        originalShiftId: data.originalShift,
         compensationDate: data.compensationRequired ? data.compensationDate : undefined,
         comments: data.comments,
       });

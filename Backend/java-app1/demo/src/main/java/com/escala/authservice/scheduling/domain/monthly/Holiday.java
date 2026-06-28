@@ -1,13 +1,14 @@
 package com.escala.authservice.scheduling.domain.monthly;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.Objects;
 
 public record Holiday(
         LocalDate date,
         String name,
         HolidayType type,
-        Long unitId
+        UUID unitId
 ) {
     public Holiday {
         Objects.requireNonNull(date, "date is required");
@@ -17,7 +18,7 @@ public record Holiday(
         }
     }
 
-    public boolean appliesTo(Long requestedUnitId) {
+    public boolean appliesTo(UUID requestedUnitId) {
         return unitId == null || Objects.equals(unitId, requestedUnitId);
     }
 }

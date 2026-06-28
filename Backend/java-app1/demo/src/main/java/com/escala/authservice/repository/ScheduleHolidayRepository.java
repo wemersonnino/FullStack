@@ -6,9 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.List;
 
-public interface ScheduleHolidayRepository extends JpaRepository<ScheduleHoliday, Long> {
+public interface ScheduleHolidayRepository extends JpaRepository<ScheduleHoliday, UUID> {
     @Query("""
             select holiday
             from ScheduleHoliday holiday
@@ -18,9 +19,9 @@ public interface ScheduleHolidayRepository extends JpaRepository<ScheduleHoliday
             order by holiday.holidayDate asc, holiday.name asc
             """)
     List<ScheduleHoliday> findApplicable(
-            @Param("companyId") Long companyId,
+            @Param("companyId") UUID companyId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
-            @Param("unitId") Long unitId
+            @Param("unitId") UUID unitId
     );
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.Set;
+import java.util.UUID;
 import java.time.OffsetDateTime;
 
 @Data
@@ -20,7 +21,7 @@ public class AuthenticationResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class UserDto {
-        private Long id;
+        private UUID id;
         private String username;
         private String email;
         private Set<String> roles;
@@ -36,7 +37,7 @@ public class AuthenticationResponse {
         private String state;
         private String position;
         private String function;
-        private Long companyId;
+        private UUID companyId;
         private String companySlug;
         private String companyName;
         private String companyTheme;

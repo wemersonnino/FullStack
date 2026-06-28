@@ -193,7 +193,7 @@ export function TrocasTurnoActions({ shifts, swaps, canManage }: TrocasTurnoActi
   );
 }
 
-export function TrocasTurnoDetailsButton({ swapId }: { swapId: number }) {
+export function TrocasTurnoDetailsButton({ swapId }: { swapId: string }) {
   const openDetailsDialog = useTrocasUiStore((state) => state.openDetailsDialog);
 
   return (

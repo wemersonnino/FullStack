@@ -111,7 +111,7 @@ export function SectorManagement() {
     }
   }
 
-  async function onDelete(id: number) {
+  async function onDelete(id: string) {
     if (confirm('Tem certeza que deseja excluir este setor?')) {
       try {
         await deleteSector(id);

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public record CycleAssignmentResponse(
         String id,
-        Long employeeId,
+        String employeeId,
         String employeeName,
         LocalDate date,
         String legendCode,

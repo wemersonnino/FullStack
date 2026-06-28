@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.util.*;
@@ -52,7 +53,7 @@ public class ScheduleService {
         
         YearMonth yearMonth = YearMonth.of(year, month);
         if (policyService.isScopedManagerOnly(user)) {
-            List<Long> sectorIds = policyService.managedSectorIds(user);
+            List<UUID> sectorIds = policyService.managedSectorIds(user);
             if (sectorIds.isEmpty()) {
                 return Collections.emptyList();
             }
@@ -71,7 +72,7 @@ public class ScheduleService {
         );
     }
 
-    public List<EscalaResponse> listEscalas(LocalDate inicio, LocalDate fim, Long usuarioId, Long setorId, Long projetoId, String userEmail) {
+    public List<EscalaResponse> listEscalas(LocalDate inicio, LocalDate fim, UUID usuarioId, UUID setorId, UUID projetoId, String userEmail) {
         Company company = resolveCompany(userEmail);
         User user = userRepository.findByEmail(userEmail).orElseThrow();
         
@@ -79,7 +80,7 @@ public class ScheduleService {
         LocalDate end = fim == null ? YearMonth.from(start).atEndOfMonth() : fim;
 
         if (policyService.isScopedManagerOnly(user)) {
-            List<Long> sectorIds = policyService.managedSectorIds(user);
+            List<UUID> sectorIds = policyService.managedSectorIds(user);
             if (sectorIds.isEmpty()) {
                 return Collections.emptyList();
             }
@@ -171,7 +172,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public EscalaResponse updateEscala(Long id, EscalaRequest request, String userEmail) {
+    public EscalaResponse updateEscala(UUID id, EscalaRequest request, String userEmail) {
         Company company = resolveCompany(userEmail);
         User user = userRepository.findByEmail(userEmail).orElseThrow();
         policyService.requireCanManageSchedules(user);
@@ -215,7 +216,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void cancelEscala(Long id, String userEmail) {
+    public void cancelEscala(UUID id, String userEmail) {
         Company company = resolveCompany(userEmail);
         User user = userRepository.findByEmail(userEmail).orElseThrow();
         policyService.requireCanManageSchedules(user);
@@ -227,13 +228,13 @@ public class ScheduleService {
         auditLogService.record(userEmail, "SHIFT_CANCELLED", "WorkShift", id, "Escala cancelada");
     }
 
-    public List<UsuarioEscalaResponse> usuariosEscalaveis(Long projectId, Long sectorId, Long companyId, String query, String userEmail) {
+    public List<UsuarioEscalaResponse> usuariosEscalaveis(UUID projectId, UUID sectorId, UUID companyId, String query, String userEmail) {
         Company myCompany = resolveCompany(userEmail);
         User user = userRepository.findByEmail(userEmail).orElseThrow();
         
-        Long finalSectorId = sectorId;
+        UUID finalSectorId = sectorId;
         if (policyService.isScopedManagerOnly(user)) {
-            List<Long> sectorIds = policyService.managedSectorIds(user);
+            List<UUID> sectorIds = policyService.managedSectorIds(user);
             if (sectorIds.isEmpty()) {
                 return Collections.emptyList();
             }
@@ -255,7 +256,7 @@ public class ScheduleService {
                 .toList();
     }
 
-    public UsuarioEscalaResponse usuarioEscalavel(Long id, String userEmail) {
+    public UsuarioEscalaResponse usuarioEscalavel(UUID id, String userEmail) {
         Company company = resolveCompany(userEmail);
         Employee employee = employeeRepository.findById(id).orElseThrow();
         if (!Objects.equals(employee.getCompany().getId(), company.getId())) {
@@ -343,7 +344,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public ShiftSwapRequest decideSwap(Long id, DecideShiftSwapRequest request, String userEmail) {
+    public ShiftSwapRequest decideSwap(UUID id, DecideShiftSwapRequest request, String userEmail) {
         Company company = resolveCompany(userEmail);
         ShiftSwapRequest swap = shiftSwapRequestRepository.findById(id).orElseThrow();
         
@@ -396,7 +397,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public ShiftSwapRequest approveByColleague(Long id, String userEmail) {
+    public ShiftSwapRequest approveByColleague(UUID id, String userEmail) {
         Company company = resolveCompany(userEmail);
         ShiftSwapRequest swap = shiftSwapRequestRepository.findById(id).orElseThrow();
         
@@ -428,14 +429,14 @@ public class ScheduleService {
                 .orElseThrow();
     }
 
-    private List<Employee> resolveEmployees(GenerateScheduleRequest request, Long companyId) {
+    private List<Employee> resolveEmployees(GenerateScheduleRequest request, UUID companyId) {
         if (request.getEmployeeIds() == null || request.getEmployeeIds().isEmpty()) {
             return employeeRepository.findByActiveTrueAndCompanyIdOrderByFullNameAsc(companyId);
         }
         return employeeRepository.findByIdInAndActiveTrueAndCompanyId(request.getEmployeeIds(), companyId);
     }
 
-    private void validateDailyCapacity(GenerateScheduleRequest request, LocalDate date, Long companyId, Map<LocalDate, Long> preloadedCounts) {
+    private void validateDailyCapacity(GenerateScheduleRequest request, LocalDate date, UUID companyId, Map<LocalDate, Long> preloadedCounts) {
         if (request.getWorkMode() != WorkMode.PRESENCIAL || request.getMaxPresentialPerDay() == null) {
             return;
         }
@@ -447,7 +448,7 @@ public class ScheduleService {
         }
     }
 
-    private void validateSectorCapacity(Employee employee, EscalaRequest request, LocalDate date, WorkMode workMode, Long ignoredShiftId, Long companyId) {
+    private void validateSectorCapacity(Employee employee, EscalaRequest request, LocalDate date, WorkMode workMode, UUID ignoredShiftId, UUID companyId) {
         if (workMode != WorkMode.PRESENCIAL) {
             return;
         }
@@ -507,11 +508,11 @@ public class ScheduleService {
         return query.trim().toLowerCase(Locale.ROOT);
     }
 
-    private String employeeDateKey(Long employeeId, LocalDate date) {
+    private String employeeDateKey(UUID employeeId, LocalDate date) {
         return employeeId + ":" + date;
     }
 
-    private Employee selectEmployee(List<Employee> employees, Map<Long, Integer> allocationCount, Long previousEmployeeId) {
+    private Employee selectEmployee(List<Employee> employees, Map<UUID, Integer> allocationCount, UUID previousEmployeeId) {
         return employees.stream()
                 .filter(employee -> employees.size() == 1 || !Objects.equals(employee.getId(), previousEmployeeId))
                 .min(Comparator
@@ -526,9 +527,9 @@ public class ScheduleService {
             java.time.LocalTime startTime,
             java.time.LocalTime endTime,
             PadraoEscala padraoEscala,
-            Long ignoredShiftId,
+            UUID ignoredShiftId,
             List<WorkShift> inMemoryShifts,
-            Map<Long, List<WorkShift>> preloadedRelacionadasMap
+            Map<UUID, List<WorkShift>> preloadedRelacionadasMap
     ) {
         JornadaPlanejada jornada = new JornadaPlanejada(
                 employee.getId(),

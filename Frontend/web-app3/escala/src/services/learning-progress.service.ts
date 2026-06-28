@@ -3,7 +3,7 @@ import { httpGet, httpPatch, httpPost } from '@/lib/http/request';
 const BASE_URL = '/api/bff/learning-progress';
 
 export type LearningProgress = {
-  id: number;
+  id: string;
   module: string;
   topic: string;
   completed: boolean;
@@ -25,6 +25,6 @@ export async function createLearningProgress(payload: LearningProgressPayload) {
   return httpPost<LearningProgress>(BASE_URL, payload, { throwOnError: true });
 }
 
-export async function completeLearningProgress(id: number) {
+export async function completeLearningProgress(id: string) {
   return httpPatch<void>(`${BASE_URL}/${id}/complete`, {}, { throwOnError: true });
 }

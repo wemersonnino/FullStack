@@ -1,8 +1,10 @@
 package com.escala.authservice.controller;
 
+import com.escala.authservice.dto.scheduling.AcknowledgeValidationAlertRequest;
 import com.escala.authservice.dto.scheduling.CycleAssignmentResponse;
 import com.escala.authservice.dto.scheduling.CycleAssignmentsRequest;
 import com.escala.authservice.dto.scheduling.CycleCounterResponse;
+import com.escala.authservice.dto.scheduling.CycleValidationAlertResponse;
 import com.escala.authservice.dto.scheduling.HolidayRequest;
 import com.escala.authservice.dto.scheduling.HolidayResponse;
 import com.escala.authservice.dto.scheduling.MonthCalendarDayResponse;
@@ -10,12 +12,17 @@ import com.escala.authservice.dto.scheduling.MonthCalendarResponse;
 import com.escala.authservice.dto.scheduling.LegendResponse;
 import com.escala.authservice.dto.scheduling.ScheduleCycleRequest;
 import com.escala.authservice.dto.scheduling.ScheduleCycleResponse;
+import com.escala.authservice.dto.scheduling.ValidationAcknowledgementResponse;
 import com.escala.authservice.entity.ScheduleCycle;
 import com.escala.authservice.entity.ScheduleCycleAssignment;
 import com.escala.authservice.entity.ScheduleHoliday;
+import com.escala.authservice.entity.ScheduleValidationAcknowledgement;
 import com.escala.authservice.service.ScheduleCycleAssignmentService;
+import com.escala.authservice.service.ScheduleCyclePublicationService;
 import com.escala.authservice.service.ScheduleCycleService;
+import com.escala.authservice.service.ScheduleCycleValidationService;
 import com.escala.authservice.service.ScheduleHolidayService;
+import com.escala.authservice.service.ScheduleValidationAcknowledgementService;
 import com.escala.authservice.scheduling.domain.monthly.LegendCatalogService;
 import com.escala.authservice.scheduling.domain.monthly.LegendCode;
 import com.escala.authservice.scheduling.domain.monthly.Holiday;
@@ -48,12 +55,15 @@ public class SchedulingController {
     private final ScheduleHolidayService scheduleHolidayService;
     private final ScheduleCycleService scheduleCycleService;
     private final ScheduleCycleAssignmentService scheduleCycleAssignmentService;
+    private final ScheduleCycleValidationService scheduleCycleValidationService;
+    private final ScheduleValidationAcknowledgementService scheduleValidationAcknowledgementService;
+    private final ScheduleCyclePublicationService scheduleCyclePublicationService;
 
     @GetMapping("/month-calendar")
     public MonthCalendarResponse monthCalendar(
             @RequestParam int year,
             @RequestParam int month,
-            @RequestParam(required = false) Long unitId,
+            @RequestParam(required = false) UUID unitId,
             @RequestParam(defaultValue = "America/Sao_Paulo") String timezone,
             Authentication authentication
     ) {
@@ -74,7 +84,7 @@ public class SchedulingController {
     @GetMapping("/holidays")
     public List<HolidayResponse> holidays(
             @RequestParam int year,
-            @RequestParam(required = false) Long unitId,
+            @RequestParam(required = false) UUID unitId,
             Authentication authentication
     ) {
         return scheduleHolidayService.listHolidays(authentication.getName(), year, unitId).stream()
@@ -144,6 +154,53 @@ public class SchedulingController {
         return scheduleCycleAssignmentService.calculateCounters(authentication.getName(), id);
     }
 
+    @PostMapping("/cycles/{id}/validate")
+    public List<CycleValidationAlertResponse> validateCycle(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        return scheduleCycleValidationService.validateCycle(authentication.getName(), id);
+    }
+
+    @GetMapping("/cycles/{id}/alerts")
+    public List<CycleValidationAlertResponse> alerts(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        return scheduleCycleValidationService.validateCycle(authentication.getName(), id);
+    }
+
+    @PostMapping("/cycles/{id}/alerts/{alertId}/acknowledge")
+    public ValidationAcknowledgementResponse acknowledgeAlert(
+            @PathVariable UUID id,
+            @PathVariable String alertId,
+            @RequestBody(required = false) AcknowledgeValidationAlertRequest request,
+            Authentication authentication
+    ) {
+        return toResponse(scheduleValidationAcknowledgementService.acknowledge(
+                authentication.getName(),
+                id,
+                alertId,
+                request
+        ));
+    }
+
+    @PostMapping("/cycles/{id}/publish")
+    public ScheduleCycleResponse publishCycle(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        return toResponse(scheduleCyclePublicationService.publish(authentication.getName(), id));
+    }
+
+    @PostMapping("/cycles/{id}/archive")
+    public ScheduleCycleResponse archiveCycle(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        return toResponse(scheduleCyclePublicationService.archive(authentication.getName(), id));
+    }
+
     private MonthCalendarResponse toResponse(MonthlyCalendar calendar) {
         return new MonthCalendarResponse(
                 calendar.year(),
@@ -175,7 +232,7 @@ public class SchedulingController {
 
     private HolidayResponse toResponse(ScheduleHoliday holiday) {
         return new HolidayResponse(
-                holiday.getId(),
+                holiday.getPublicId().toString(),
                 holiday.getHolidayDate(),
                 holiday.getName(),
                 holiday.getType().name(),
@@ -192,6 +249,10 @@ public class SchedulingController {
                 cycle.getTimezone(),
                 cycle.getStatus().name(),
                 cycle.getBusinessVersion(),
+                cycle.getPublishedAt(),
+                cycle.getPublishedBy() == null ? null : cycle.getPublishedBy().getEmail(),
+                cycle.getArchivedAt(),
+                cycle.getArchivedBy() == null ? null : cycle.getArchivedBy().getEmail(),
                 cycle.getCreatedAt(),
                 cycle.getUpdatedAt()
         );
@@ -200,7 +261,7 @@ public class SchedulingController {
     private CycleAssignmentResponse toResponse(ScheduleCycleAssignment assignment) {
         return new CycleAssignmentResponse(
                 assignment.getPublicId().toString(),
-                assignment.getEmployee().getId(),
+                assignment.getEmployee().getPublicId().toString(),
                 assignment.getEmployee().getFullName(),
                 assignment.getAssignmentDate(),
                 assignment.getLegendCode(),
@@ -208,6 +269,18 @@ public class SchedulingController {
                 assignment.getLegendImpact(),
                 assignment.getPlannedMinutes(),
                 assignment.getModality().name()
+        );
+    }
+
+    private ValidationAcknowledgementResponse toResponse(ScheduleValidationAcknowledgement acknowledgement) {
+        return new ValidationAcknowledgementResponse(
+                acknowledgement.getPublicId().toString(),
+                acknowledgement.getAlertId(),
+                acknowledgement.getRuleCode(),
+                acknowledgement.getSeverity(),
+                acknowledgement.getAcknowledgedBy().getEmail(),
+                acknowledgement.getReason(),
+                acknowledgement.getAcknowledgedAt()
         );
     }
 }

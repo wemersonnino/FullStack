@@ -3,6 +3,7 @@ package com.escala.authservice.scheduling.domain.monthly;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -33,14 +34,14 @@ class MonthlyCalendarServiceTest {
     @Test
     void aplicaFeriadoGlobalEEspecificoDaUnidade() {
         Holiday nacional = new Holiday(LocalDate.of(2026, 6, 4), "Corpus Christi", HolidayType.NATIONAL, null);
-        Holiday unidade = new Holiday(LocalDate.of(2026, 6, 15), "Aniversario da unidade", HolidayType.CUSTOM, 10L);
-        Holiday outraUnidade = new Holiday(LocalDate.of(2026, 6, 16), "Outra unidade", HolidayType.CUSTOM, 20L);
+        Holiday unidade = new Holiday(LocalDate.of(2026, 6, 15), "Aniversario da unidade", HolidayType.CUSTOM, new UUID(0L, 10L));
+        Holiday outraUnidade = new Holiday(LocalDate.of(2026, 6, 16), "Outra unidade", HolidayType.CUSTOM, new UUID(0L, 20L));
 
         MonthlyCalendar calendar = service.generate(
                 2026,
                 6,
                 ZoneId.of("America/Sao_Paulo"),
-                10L,
+                new UUID(0L, 10L),
                 List.of(nacional, unidade, outraUnidade)
         );
 

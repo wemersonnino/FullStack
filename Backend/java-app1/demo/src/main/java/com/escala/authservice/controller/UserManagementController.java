@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.Map;
 
 @RestController
@@ -49,7 +50,7 @@ public class UserManagementController {
     @PostMapping("/{id}/roles")
     public ResponseEntity<UserResponse> grantRole(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody RoleChangeRequest request
     ) {
         return ResponseEntity.ok(UserResponse.from(userManagementService.grantRole(authentication.getName(), id, request)));
@@ -58,7 +59,7 @@ public class UserManagementController {
     @DeleteMapping("/{id}/roles")
     public ResponseEntity<UserResponse> revokeRole(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody RoleChangeRequest request
     ) {
         return ResponseEntity.ok(UserResponse.from(userManagementService.revokeRole(authentication.getName(), id, request)));
@@ -67,7 +68,7 @@ public class UserManagementController {
     @PatchMapping("/{id}/theme")
     public ResponseEntity<UserResponse> updateTheme(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody Map<String, String> body
     ) {
         return ResponseEntity.ok(UserResponse.from(userManagementService.updateTheme(authentication.getName(), id, body.getOrDefault("theme", "system"))));

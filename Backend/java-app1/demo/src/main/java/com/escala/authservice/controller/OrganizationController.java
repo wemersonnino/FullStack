@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/organization")
@@ -31,14 +32,14 @@ public class OrganizationController {
     @PutMapping("/sectors/{id}")
     public ResponseEntity<Sector> updateSector(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody SectorRequest request
     ) {
         return ResponseEntity.ok(organizationService.updateSector(authentication.getName(), id, request));
     }
 
     @DeleteMapping("/sectors/{id}")
-    public ResponseEntity<Void> deleteSector(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Void> deleteSector(Authentication authentication, @PathVariable UUID id) {
         organizationService.deleteSector(authentication.getName(), id);
         return ResponseEntity.ok().build();
     }
@@ -56,14 +57,14 @@ public class OrganizationController {
     @PutMapping("/projects/{id}")
     public ResponseEntity<Project> updateProject(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody ProjectRequest request
     ) {
         return ResponseEntity.ok(organizationService.updateProject(authentication.getName(), id, request));
     }
 
     @DeleteMapping("/projects/{id}")
-    public ResponseEntity<Void> deleteProject(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Void> deleteProject(Authentication authentication, @PathVariable UUID id) {
         organizationService.deleteProject(authentication.getName(), id);
         return ResponseEntity.ok().build();
     }

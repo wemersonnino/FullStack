@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.List;
 
 @Component
@@ -20,12 +21,12 @@ public class SchedulingPersistenceAdapter implements WorkShiftOutputPort {
 
     @Override
     public void saveAll(List<WorkShiftDomain> shifts) {
-        List<Long> employeeIds = shifts.stream()
+        List<UUID> employeeIds = shifts.stream()
                 .map(WorkShiftDomain::getEmployeeId)
                 .distinct()
                 .toList();
 
-        java.util.Map<Long, Employee> employeeMap = employeeRepository.findAllById(employeeIds).stream()
+        java.util.Map<UUID, Employee> employeeMap = employeeRepository.findAllById(employeeIds).stream()
                 .collect(java.util.stream.Collectors.toMap(Employee::getId, e -> e));
 
         List<WorkShift> entities = shifts.stream()
@@ -55,7 +56,7 @@ public class SchedulingPersistenceAdapter implements WorkShiftOutputPort {
     }
 
     @Override
-    public List<WorkShiftDomain> findByCompanyAndPeriod(Long companyId, LocalDate start, LocalDate end) {
+    public List<WorkShiftDomain> findByCompanyAndPeriod(UUID companyId, LocalDate start, LocalDate end) {
         return workShiftRepository.findByEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(companyId, start, end)
                 .stream()
                 .map(this::toDomain)
@@ -63,7 +64,7 @@ public class SchedulingPersistenceAdapter implements WorkShiftOutputPort {
     }
 
     @Override
-    public boolean existsByEmployeeAndDate(Long employeeId, LocalDate date) {
+    public boolean existsByEmployeeAndDate(UUID employeeId, LocalDate date) {
         return workShiftRepository.existsByEmployeeIdAndShiftDate(employeeId, date);
     }
 

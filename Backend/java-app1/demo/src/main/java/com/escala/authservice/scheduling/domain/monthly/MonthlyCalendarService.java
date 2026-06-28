@@ -3,6 +3,7 @@ package com.escala.authservice.scheduling.domain.monthly;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
+import java.util.UUID;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
@@ -16,7 +17,7 @@ import java.util.stream.IntStream;
 @Service
 public class MonthlyCalendarService {
 
-    public MonthlyCalendar generate(int year, int month, ZoneId timezone, Long unitId, List<Holiday> holidays) {
+    public MonthlyCalendar generate(int year, int month, ZoneId timezone, UUID unitId, List<Holiday> holidays) {
         YearMonth yearMonth = YearMonth.of(year, month);
         Map<LocalDate, Holiday> holidaysByDate = holidaysForUnit(holidays, unitId);
 
@@ -30,7 +31,7 @@ public class MonthlyCalendarService {
         return new MonthlyCalendar(year, month, timezone, unitId, days);
     }
 
-    private Map<LocalDate, Holiday> holidaysForUnit(List<Holiday> holidays, Long unitId) {
+    private Map<LocalDate, Holiday> holidaysForUnit(List<Holiday> holidays, UUID unitId) {
         List<Holiday> safeHolidays = holidays == null ? List.of() : holidays;
         return safeHolidays.stream()
                 .filter(holiday -> holiday.appliesTo(unitId))

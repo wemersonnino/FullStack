@@ -190,14 +190,14 @@ export function EscalaUserEditModal(props: EscalaUserEditModalProps) {
         await props.onSave(payload, escala?.id);
       } else {
         const payload: EscalaRequest = {
-          employeeId: Number(selectedUser.id),
+          employeeId: selectedUser.id,
           dates: values.dates.map((date) => format(date, 'yyyy-MM-dd')),
           startTime: values.startTime,
           endTime: values.endTime,
           workMode: values.workMode,
           notes: values.notes,
-          projectId: selectedProjectId ? Number(selectedProjectId) : undefined,
-          sectorId: selectedSectorId ? Number(selectedSectorId) : undefined,
+          projectId: selectedProjectId || undefined,
+          sectorId: selectedSectorId || undefined,
         };
 
         await createEscalas(payload);

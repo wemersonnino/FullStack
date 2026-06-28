@@ -24,12 +24,12 @@ export type ManagerScopeTypeOption = {
 };
 
 export type ManagerAssignment = {
-  id: number;
-  managerUserId: number;
+  id: string;
+  managerUserId: string;
   managerName: string;
   managerEmail: string;
   scopeType: ManagerScopeType;
-  scopeId: number;
+  scopeId: string;
   roleLevel: ManagerRoleLevel;
   levelWeight: number;
   startsAt?: string | null;
@@ -38,11 +38,11 @@ export type ManagerAssignment = {
 };
 
 export type ManagementEdge = {
-  id: number;
-  parentUserId: number;
+  id: string;
+  parentUserId: string;
   parentName: string;
   parentEmail: string;
-  childUserId: number;
+  childUserId: string;
   childName: string;
   childEmail: string;
   relationType: string;
@@ -52,11 +52,11 @@ export type ManagementEdge = {
 };
 
 export type ManagementClosure = {
-  id: number;
-  ancestorUserId: number;
+  id: string;
+  ancestorUserId: string;
   ancestorName: string;
   ancestorEmail: string;
-  descendantUserId: number;
+  descendantUserId: string;
   descendantName: string;
   descendantEmail: string;
   depth: number;
@@ -64,9 +64,9 @@ export type ManagementClosure = {
 };
 
 export type ManagerAssignmentPayload = {
-  managerUserId: number;
+  managerUserId: string;
   scopeType: ManagerScopeType;
-  scopeId: number;
+  scopeId: string;
   roleLevel?: ManagerRoleLevel;
   startsAt?: string;
   endsAt?: string;
@@ -74,8 +74,8 @@ export type ManagerAssignmentPayload = {
 };
 
 export type ManagementEdgePayload = {
-  parentUserId: number;
-  childUserId: number;
+  parentUserId: string;
+  childUserId: string;
   relationType?: string;
   startsAt?: string;
   endsAt?: string;

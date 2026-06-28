@@ -1,5 +1,7 @@
 package com.escala.authservice.controller;
 
+import java.util.UUID;
+
 import com.escala.authservice.core.billing.usecase.BillingService;
 import com.escala.authservice.entity.SubscriptionStatus;
 import com.stripe.exception.SignatureVerificationException;
@@ -68,7 +70,7 @@ public class StripeWebhookController {
         String stripeSubscriptionId = session.getSubscription();
         String stripeCustomerId = session.getCustomer();
         String planType = session.getMetadata().get("planType");
-        Long companyId = Long.parseLong(session.getMetadata().get("companyId"));
+        UUID companyId = UUID.fromString(session.getMetadata().get("companyId"));
 
         billingService.updateSubscriptionStatus(
                 stripeSubscriptionId,
@@ -84,7 +86,7 @@ public class StripeWebhookController {
         String stripeCustomerId = stripeSubscription.getCustomer();
         SubscriptionStatus status = mapStripeStatus(stripeSubscription.getStatus());
         String planType = stripeSubscription.getMetadata().get("planType");
-        Long companyId = Long.parseLong(stripeSubscription.getMetadata().get("companyId"));
+        UUID companyId = UUID.fromString(stripeSubscription.getMetadata().get("companyId"));
 
         billingService.updateSubscriptionStatus(
                 stripeSubscriptionId,
