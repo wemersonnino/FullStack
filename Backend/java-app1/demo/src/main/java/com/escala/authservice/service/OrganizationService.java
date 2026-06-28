@@ -38,7 +38,7 @@ public class OrganizationService {
             throw new IllegalArgumentException("Empresa nao encontrada");
         }
         boolean isAdminOrOwner = requester.getRoles().stream()
-                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER") || r.getName().equals("SYSTEM_ADMIN"));
         if (isAdminOrOwner) {
             return sectorRepository.findByCompanyId(company.getId(), pageable);
         } else {
@@ -58,7 +58,9 @@ public class OrganizationService {
         if (company == null) {
             throw new IllegalArgumentException("Empresa nao encontrada");
         }
-        boolean isAdminOrOwner = requester.getRoles().stream()
+        boolean isSystemAdmin = requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isAdminOrOwner = isSystemAdmin || requester.getRoles().stream()
                 .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
         if (!isAdminOrOwner) {
             throw new AccessDeniedException("Apenas administradores e donos podem criar setores");
@@ -66,6 +68,9 @@ public class OrganizationService {
         User manager = null;
         if (request.getManagerId() != null) {
             manager = userRepository.findById(request.getManagerId()).orElse(null);
+            if (manager != null && !isSystemAdmin && (manager.getCompany() == null || !manager.getCompany().getId().equals(company.getId()))) {
+                throw new AccessDeniedException("O gerente do setor deve pertencer a mesma empresa");
+            }
         }
         return sectorRepository.save(Sector.builder()
                 .name(request.getName())
@@ -83,18 +88,23 @@ public class OrganizationService {
         if (company == null) {
             throw new IllegalArgumentException("Empresa nao encontrada");
         }
-        boolean isAdminOrOwner = requester.getRoles().stream()
+        boolean isSystemAdmin = requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isAdminOrOwner = isSystemAdmin || requester.getRoles().stream()
                 .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
         if (!isAdminOrOwner) {
             throw new AccessDeniedException("Apenas administradores e donos podem alterar setores");
         }
         Sector sector = sectorRepository.findById(id).orElseThrow();
-        if (sector.getCompany() == null || !sector.getCompany().getId().equals(company.getId())) {
+        if (!isSystemAdmin && (sector.getCompany() == null || !sector.getCompany().getId().equals(company.getId()))) {
             throw new AccessDeniedException("Nao autorizado a alterar setor de outra empresa");
         }
         User manager = null;
         if (request.getManagerId() != null) {
             manager = userRepository.findById(request.getManagerId()).orElse(null);
+            if (manager != null && !isSystemAdmin && (manager.getCompany() == null || !manager.getCompany().getId().equals(company.getId()))) {
+                throw new AccessDeniedException("O gerente do setor deve pertencer a mesma empresa");
+            }
         }
         sector.setName(request.getName());
         sector.setDescription(request.getDescription());
@@ -110,13 +120,15 @@ public class OrganizationService {
         if (company == null) {
             throw new IllegalArgumentException("Empresa nao encontrada");
         }
-        boolean isAdminOrOwner = requester.getRoles().stream()
+        boolean isSystemAdmin = requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isAdminOrOwner = isSystemAdmin || requester.getRoles().stream()
                 .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
         if (!isAdminOrOwner) {
             throw new AccessDeniedException("Apenas administradores e donos podem excluir setores");
         }
         Sector sector = sectorRepository.findById(id).orElseThrow();
-        if (sector.getCompany() == null || !sector.getCompany().getId().equals(company.getId())) {
+        if (!isSystemAdmin && (sector.getCompany() == null || !sector.getCompany().getId().equals(company.getId()))) {
             throw new AccessDeniedException("Nao autorizado a excluir setor de outra empresa");
         }
         sectorRepository.delete(sector);
@@ -128,7 +140,19 @@ public class OrganizationService {
     }
 
     public Project createProject(String requesterEmail, ProjectRequest request) {
-        Company company = getRequesterCompany(requesterEmail);
+        User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        Company company = requester.getCompany();
+        if (company == null) {
+            throw new IllegalArgumentException("Empresa nao encontrada");
+        }
+        boolean isSystemAdmin = requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isAdminOrOwner = isSystemAdmin || requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        if (!isAdminOrOwner) {
+            throw new AccessDeniedException("Apenas administradores e donos podem criar projetos");
+        }
         return projectRepository.save(Project.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -138,9 +162,21 @@ public class OrganizationService {
     }
 
     public Project updateProject(String requesterEmail, UUID id, ProjectRequest request) {
-        Company company = getRequesterCompany(requesterEmail);
+        User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        Company company = requester.getCompany();
+        if (company == null) {
+            throw new IllegalArgumentException("Empresa nao encontrada");
+        }
+        boolean isSystemAdmin = requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isAdminOrOwner = isSystemAdmin || requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        if (!isAdminOrOwner) {
+            throw new AccessDeniedException("Apenas administradores e donos podem alterar projetos");
+        }
         Project project = projectRepository.findById(id).orElseThrow();
-        if (project.getCompany() == null || !project.getCompany().getId().equals(company.getId())) {
+        if (!isSystemAdmin && (project.getCompany() == null || !project.getCompany().getId().equals(company.getId()))) {
             throw new AccessDeniedException("Nao autorizado a alterar projeto de outra empresa");
         }
         project.setName(request.getName());
@@ -152,9 +188,21 @@ public class OrganizationService {
     }
 
     public void deleteProject(String requesterEmail, UUID id) {
-        Company company = getRequesterCompany(requesterEmail);
+        User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        Company company = requester.getCompany();
+        if (company == null) {
+            throw new IllegalArgumentException("Empresa nao encontrada");
+        }
+        boolean isSystemAdmin = requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isAdminOrOwner = isSystemAdmin || requester.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        if (!isAdminOrOwner) {
+            throw new AccessDeniedException("Apenas administradores e donos podem excluir projetos");
+        }
         Project project = projectRepository.findById(id).orElseThrow();
-        if (project.getCompany() == null || !project.getCompany().getId().equals(company.getId())) {
+        if (!isSystemAdmin && (project.getCompany() == null || !project.getCompany().getId().equals(company.getId()))) {
             throw new AccessDeniedException("Nao autorizado a excluir projeto de outra empresa");
         }
         projectRepository.delete(project);
