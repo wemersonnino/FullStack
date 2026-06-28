@@ -65,7 +65,7 @@ public class ScheduleCycleAssignmentService {
 
     public List<CycleCounterResponse> calculateCounters(String email, UUID cyclePublicId) {
         List<ScheduleCycleAssignment> assignments = listAssignments(email, cyclePublicId);
-        Map<Long, Employee> employees = new HashMap<>();
+        Map<UUID, Employee> employees = new HashMap<>();
         assignments.forEach(assignment -> employees.put(
                 assignment.getEmployee().getId(),
                 assignment.getEmployee()
@@ -155,7 +155,7 @@ public class ScheduleCycleAssignmentService {
         );
     }
 
-    private CycleCounterResponse toResponse(ScheduleCounterSnapshot counter, Map<Long, Employee> employees) {
+    private CycleCounterResponse toResponse(ScheduleCounterSnapshot counter, Map<UUID, Employee> employees) {
         Employee employee = employees.get(counter.employeeId());
         return new CycleCounterResponse(
                 employee == null ? null : employee.getPublicId().toString(),

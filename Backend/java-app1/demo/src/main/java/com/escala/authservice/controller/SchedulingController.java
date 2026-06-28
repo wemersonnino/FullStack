@@ -63,7 +63,7 @@ public class SchedulingController {
     public MonthCalendarResponse monthCalendar(
             @RequestParam int year,
             @RequestParam int month,
-            @RequestParam(required = false) Long unitId,
+            @RequestParam(required = false) UUID unitId,
             @RequestParam(defaultValue = "America/Sao_Paulo") String timezone,
             Authentication authentication
     ) {
@@ -84,7 +84,7 @@ public class SchedulingController {
     @GetMapping("/holidays")
     public List<HolidayResponse> holidays(
             @RequestParam int year,
-            @RequestParam(required = false) Long unitId,
+            @RequestParam(required = false) UUID unitId,
             Authentication authentication
     ) {
         return scheduleHolidayService.listHolidays(authentication.getName(), year, unitId).stream()

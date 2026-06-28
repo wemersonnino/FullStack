@@ -93,10 +93,10 @@ export function adaptUsuarioEscalaDtoToUsuarioEscala(dto: AnyRecord): UsuarioEsc
 
 export function adaptCriarEscalaPayloadToDto(payload: CriarEscalaPayload) {
   return {
-    employeeId: Number(payload.usuarioId),
-    companyId: payload.empresaId ? Number(payload.empresaId) : undefined,
-    sectorId: payload.setorId ? Number(payload.setorId) : undefined,
-    projectId: payload.projetoId ? Number(payload.projetoId) : undefined,
+    employeeId: payload.usuarioId,
+    companyId: payload.empresaId || undefined,
+    sectorId: payload.setorId || undefined,
+    projectId: payload.projetoId || undefined,
     dates: payload.datas,
     startTime: payload.horarioInicio,
     endTime: payload.horarioFim,
@@ -111,10 +111,10 @@ export function adaptCriarEscalaPayloadToDto(payload: CriarEscalaPayload) {
 
 export function adaptAtualizarEscalaPayloadToDto(payload: AtualizarEscalaPayload) {
   return {
-    employeeId: payload.usuarioId ? Number(payload.usuarioId) : undefined,
-    companyId: payload.empresaId ? Number(payload.empresaId) : undefined,
-    sectorId: payload.setorId ? Number(payload.setorId) : undefined,
-    projectId: payload.projetoId ? Number(payload.projetoId) : undefined,
+    employeeId: payload.usuarioId || undefined,
+    companyId: payload.empresaId || undefined,
+    sectorId: payload.setorId || undefined,
+    projectId: payload.projetoId || undefined,
     dates: payload.datas,
     startTime: payload.horarioInicio,
     endTime: payload.horarioFim,

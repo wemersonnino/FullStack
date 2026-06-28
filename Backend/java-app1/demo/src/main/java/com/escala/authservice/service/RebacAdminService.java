@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +58,7 @@ public class RebacAdminService {
     }
 
     @Transactional
-    public void deleteAssignment(String requesterEmail, Long id) {
+    public void deleteAssignment(String requesterEmail, UUID id) {
         User requester = requireOwnerOrAdmin(requesterEmail);
         ManagerAssignment assignment = managerAssignmentRepository.findById(id).orElseThrow();
         requireSameCompany(requester, assignment.getCompany());
@@ -100,7 +101,7 @@ public class RebacAdminService {
     }
 
     @Transactional
-    public void deleteEdge(String requesterEmail, Long id) {
+    public void deleteEdge(String requesterEmail, UUID id) {
         User requester = requireOwnerOrAdmin(requesterEmail);
         ManagementEdge edge = managementEdgeRepository.findById(id).orElseThrow();
         requireSameCompany(requester, edge.getCompany());
@@ -119,16 +120,16 @@ public class RebacAdminService {
     @Transactional
     public List<ManagementClosureResponse> recalculateClosure(String requesterEmail) {
         User requester = requireOwnerOrAdmin(requesterEmail);
-        Long companyId = requester.getCompany().getId();
+        UUID companyId = requester.getCompany().getId();
         List<User> users = userRepository.findByCompanyId(companyId);
         List<ManagementEdge> edges = managementEdgeRepository.findByCompanyIdAndActiveTrue(companyId);
 
-        Map<Long, User> userById = new HashMap<>();
+        Map<UUID, User> userById = new HashMap<>();
         for (User user : users) {
             userById.put(user.getId(), user);
         }
 
-        Map<Long, List<Long>> childrenByParent = new HashMap<>();
+        Map<UUID, List<UUID>> childrenByParent = new HashMap<>();
         for (ManagementEdge edge : edges) {
             childrenByParent.computeIfAbsent(edge.getParent().getId(), ignored -> new ArrayList<>()).add(edge.getChild().getId());
         }
@@ -139,18 +140,18 @@ public class RebacAdminService {
         for (User ancestor : users) {
             closures.add(buildClosure(requester.getCompany(), ancestor, ancestor, 0));
             Deque<PathNode> stack = new ArrayDeque<>();
-            for (Long childId : childrenByParent.getOrDefault(ancestor.getId(), List.of())) {
+            for (UUID childId : childrenByParent.getOrDefault(ancestor.getId(), List.of())) {
                 stack.push(new PathNode(childId, 1));
             }
 
-            Set<Long> visited = new HashSet<>();
+            Set<UUID> visited = new HashSet<>();
             while (!stack.isEmpty()) {
                 PathNode node = stack.pop();
                 if (!visited.add(node.userId())) continue;
                 User descendant = userById.get(node.userId());
                 if (descendant == null) continue;
                 closures.add(buildClosure(requester.getCompany(), ancestor, descendant, node.depth()));
-                for (Long childId : childrenByParent.getOrDefault(node.userId(), List.of())) {
+                for (UUID childId : childrenByParent.getOrDefault(node.userId(), List.of())) {
                     stack.push(new PathNode(childId, node.depth() + 1));
                 }
             }
@@ -181,7 +182,7 @@ public class RebacAdminService {
         return requester;
     }
 
-    private User requireCompanyUser(User requester, Long userId) {
+    private User requireCompanyUser(User requester, UUID userId) {
         User user = userRepository.findById(Objects.requireNonNull(userId, "userId obrigatorio")).orElseThrow();
         requireSameCompany(requester, user.getCompany());
         return user;
@@ -208,5 +209,5 @@ public class RebacAdminService {
                 .orElse(ManagerRoleLevel.MANAGER_SUPERVISOR);
     }
 
-    private record PathNode(Long userId, int depth) {}
+    private record PathNode(UUID userId, int depth) {}
 }

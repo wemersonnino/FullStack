@@ -6,15 +6,16 @@ import com.escala.authservice.entity.MessageType;
 import lombok.Builder;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 public class MessageResponse {
-    private Long id;
-    private Long senderId;
+    private UUID id;
+    private UUID senderId;
     private String senderName;
     private String senderEmail;
-    private Long receiverId;
+    private UUID receiverId;
     private String receiverName;
     private String receiverEmail;
     private MessageType type;

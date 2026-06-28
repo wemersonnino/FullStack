@@ -19,7 +19,7 @@ export function validateShiftSwapRequest(draft: ShiftSwapRequestDraft, available
     throw new Error('Selecione a escala original.');
   }
 
-  const shift = availableShifts.find((item) => item.id === Number(draft.originalShiftId));
+  const shift = availableShifts.find((item) => item.id === draft.originalShiftId);
   if (!shift) {
     throw new Error('A escala selecionada não está disponível para troca.');
   }

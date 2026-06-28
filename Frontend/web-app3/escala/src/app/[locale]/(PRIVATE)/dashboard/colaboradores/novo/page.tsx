@@ -65,8 +65,8 @@ export default function NovoColaboradorPage() {
         fullName: fullName.trim(),
         email: email.trim(),
         active,
-        sectorId: sectorId === NONE_VALUE ? undefined : Number(sectorId),
-        projectId: projectId === NONE_VALUE ? undefined : Number(projectId),
+        sectorId: sectorId === NONE_VALUE ? undefined : sectorId,
+        projectId: projectId === NONE_VALUE ? undefined : projectId,
       });
 
       if (!employee) {

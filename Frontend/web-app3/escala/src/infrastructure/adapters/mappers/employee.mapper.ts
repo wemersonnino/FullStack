@@ -28,8 +28,8 @@ export class EmployeeMapper {
       fullName: domain.fullName,
       email: domain.email,
       active: domain.active,
-      sectorId: domain.sector?.id ? parseInt(domain.sector.id) : undefined,
-      projectId: domain.project?.id ? parseInt(domain.project.id) : undefined,
+      sectorId: domain.sector?.id || undefined,
+      projectId: domain.project?.id || undefined,
     };
   }
 }

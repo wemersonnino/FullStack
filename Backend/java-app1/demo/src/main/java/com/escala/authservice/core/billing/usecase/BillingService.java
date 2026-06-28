@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class BillingService {
     private final CompanyRepository companyRepository;
 
     @Transactional
-    public String createCheckoutSession(Long companyId, String planType, String successUrl, String cancelUrl) {
+    public String createCheckoutSession(UUID companyId, String planType, String successUrl, String cancelUrl) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new IllegalArgumentException("Empresa nao encontrada"));
 
@@ -29,7 +30,7 @@ public class BillingService {
     }
 
     @Transactional
-    public void updateSubscriptionStatus(String stripeSubscriptionId, String stripeCustomerId, SubscriptionStatus status, String planType, Long companyId) {
+    public void updateSubscriptionStatus(String stripeSubscriptionId, String stripeCustomerId, SubscriptionStatus status, String planType, UUID companyId) {
         Subscription subscription = subscriptionRepository.findByStripeSubscriptionId(stripeSubscriptionId)
                 .orElseGet(() -> {
                     Company company = companyRepository.findById(companyId)
@@ -55,7 +56,7 @@ public class BillingService {
     }
 
     @Transactional
-    public void cancelSubscription(Long companyId) {
+    public void cancelSubscription(UUID companyId) {
         Subscription subscription = subscriptionRepository.findByCompanyId(companyId)
                 .orElseThrow(() -> new IllegalArgumentException("Assinatura nao encontrada"));
 
@@ -68,7 +69,7 @@ public class BillingService {
         companyRepository.save(company);
     }
     
-    public Optional<Subscription> getSubscription(Long companyId) {
+    public Optional<Subscription> getSubscription(UUID companyId) {
         return subscriptionRepository.findByCompanyId(companyId);
     }
 }

@@ -3,6 +3,7 @@ package com.escala.authservice.scheduling.domain.monthly;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ public class MonthlyCounterCalculator {
 
     public List<ScheduleCounterSnapshot> calculate(List<ScheduleAssignment> assignments) {
         List<ScheduleAssignment> safeAssignments = assignments == null ? List.of() : assignments;
-        Map<Long, List<ScheduleAssignment>> byEmployee = safeAssignments.stream()
+        Map<UUID, List<ScheduleAssignment>> byEmployee = safeAssignments.stream()
                 .collect(Collectors.groupingBy(ScheduleAssignment::employeeId));
 
         return byEmployee.entrySet().stream()
@@ -22,7 +23,7 @@ public class MonthlyCounterCalculator {
                 .toList();
     }
 
-    private ScheduleCounterSnapshot calculateForEmployee(Long employeeId, List<ScheduleAssignment> assignments) {
+    private ScheduleCounterSnapshot calculateForEmployee(UUID employeeId, List<ScheduleAssignment> assignments) {
         int workedDays = count(assignments, LegendImpact.WORKED);
         int restDays = count(assignments, LegendImpact.REST);
         int absenceDays = count(assignments, LegendImpact.ABSENCE);

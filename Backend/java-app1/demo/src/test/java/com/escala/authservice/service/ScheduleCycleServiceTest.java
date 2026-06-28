@@ -37,18 +37,18 @@ class ScheduleCycleServiceTest {
     @Test
     void criaCicloMensalEmRascunhoParaEmpresaDoUsuario() {
         when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
-        when(scheduleCycleRepository.findActiveForPeriod(1L, 10L, 2026, 6, ScheduleCycleStatus.ARQUIVADO))
+        when(scheduleCycleRepository.findActiveForPeriod(new UUID(0L, 1L), new UUID(0L, 10L), 2026, 6, ScheduleCycleStatus.ARQUIVADO))
                 .thenReturn(Optional.empty());
         when(scheduleCycleRepository.save(any(ScheduleCycle.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ScheduleCycle cycle = service.createCycle(
                 "admin@escala.local",
-                new ScheduleCycleRequest(2026, 6, 10L, "America/Sao_Paulo")
+                new ScheduleCycleRequest(2026, 6, new UUID(0L, 10L), "America/Sao_Paulo")
         );
 
         ArgumentCaptor<ScheduleCycle> captor = ArgumentCaptor.forClass(ScheduleCycle.class);
         verify(scheduleCycleRepository).save(captor.capture());
-        assertEquals(1L, captor.getValue().getCompany().getId());
+        assertEquals(new UUID(0L, 1L), captor.getValue().getCompany().getId());
         assertEquals(ScheduleCycleStatus.RASCUNHO, cycle.getStatus());
         assertEquals(1, cycle.getBusinessVersion());
         assertEquals("America/Sao_Paulo", cycle.getTimezone());
@@ -58,7 +58,7 @@ class ScheduleCycleServiceTest {
     @Test
     void usaTimezonePadraoQuandoNaoInformado() {
         when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
-        when(scheduleCycleRepository.findActiveForPeriod(1L, null, 2026, 7, ScheduleCycleStatus.ARQUIVADO))
+        when(scheduleCycleRepository.findActiveForPeriod(new UUID(0L, 1L), null, 2026, 7, ScheduleCycleStatus.ARQUIVADO))
                 .thenReturn(Optional.empty());
         when(scheduleCycleRepository.save(any(ScheduleCycle.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -70,12 +70,12 @@ class ScheduleCycleServiceTest {
     @Test
     void rejeitaCicloDuplicadoAtivoNoMesmoPeriodo() {
         when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
-        when(scheduleCycleRepository.findActiveForPeriod(1L, 10L, 2026, 6, ScheduleCycleStatus.ARQUIVADO))
-                .thenReturn(Optional.of(ScheduleCycle.builder().id(99L).build()));
+        when(scheduleCycleRepository.findActiveForPeriod(new UUID(0L, 1L), new UUID(0L, 10L), 2026, 6, ScheduleCycleStatus.ARQUIVADO))
+                .thenReturn(Optional.of(ScheduleCycle.builder().id(new UUID(0L, 99L)).build()));
 
         assertThrows(IllegalStateException.class, () -> service.createCycle(
                 "admin@escala.local",
-                new ScheduleCycleRequest(2026, 6, 10L, "America/Sao_Paulo")
+                new ScheduleCycleRequest(2026, 6, new UUID(0L, 10L), "America/Sao_Paulo")
         ));
     }
 
@@ -83,8 +83,8 @@ class ScheduleCycleServiceTest {
     void buscaCicloSomenteNaEmpresaDoUsuario() {
         when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
         UUID publicId = UUID.randomUUID();
-        ScheduleCycle existing = ScheduleCycle.builder().id(5L).publicId(publicId).year(2026).month(6).build();
-        when(scheduleCycleRepository.findByCompanyIdAndPublicId(1L, publicId)).thenReturn(Optional.of(existing));
+        ScheduleCycle existing = ScheduleCycle.builder().id(new UUID(0L, 5L)).publicId(publicId).year(2026).month(6).build();
+        when(scheduleCycleRepository.findByCompanyIdAndPublicId(new UUID(0L, 1L), publicId)).thenReturn(Optional.of(existing));
 
         ScheduleCycle cycle = service.getCycle("admin@escala.local", publicId);
 
@@ -104,7 +104,7 @@ class ScheduleCycleServiceTest {
     private User requester() {
         return User.builder()
                 .email("admin@escala.local")
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .build();
     }
 }

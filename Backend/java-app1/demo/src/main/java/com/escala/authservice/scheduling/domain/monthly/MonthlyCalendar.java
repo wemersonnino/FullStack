@@ -1,6 +1,7 @@
 package com.escala.authservice.scheduling.domain.monthly;
 
 import java.time.YearMonth;
+import java.util.UUID;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
@@ -9,7 +10,7 @@ public record MonthlyCalendar(
         int year,
         int month,
         ZoneId timezone,
-        Long unitId,
+        UUID unitId,
         List<MonthlyCalendarDay> days
 ) {
     public MonthlyCalendar {

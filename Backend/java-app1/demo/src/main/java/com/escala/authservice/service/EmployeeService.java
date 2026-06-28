@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +55,7 @@ public class EmployeeService {
                 .build());
     }
 
-    public Employee update(String requesterEmail, Long id, EmployeeRequest request) {
+    public Employee update(String requesterEmail, UUID id, EmployeeRequest request) {
         Company company = getRequesterCompany(requesterEmail);
         Employee employee = employeeRepository.findById(id).orElseThrow();
         
@@ -70,7 +71,7 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
-    public void remove(String requesterEmail, Long id) {
+    public void remove(String requesterEmail, UUID id) {
         Company company = getRequesterCompany(requesterEmail);
         Employee employee = employeeRepository.findById(id).orElseThrow();
         
@@ -82,11 +83,11 @@ public class EmployeeService {
         employeeRepository.save(employee);
     }
 
-    private Sector resolveSector(Long id) {
+    private Sector resolveSector(UUID id) {
         return id == null ? null : sectorRepository.findById(id).orElseThrow();
     }
 
-    private Project resolveProject(Long id) {
+    private Project resolveProject(UUID id) {
         return id == null ? null : projectRepository.findById(id).orElseThrow();
     }
 }

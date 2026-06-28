@@ -5,10 +5,11 @@ import com.escala.authservice.entity.ManagerScopeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface ManagerAssignmentRepository extends JpaRepository<ManagerAssignment, Long> {
-    List<ManagerAssignment> findByCompanyIdOrderByManagerUsernameAscScopeTypeAscScopeIdAsc(Long companyId);
-    List<ManagerAssignment> findByCompanyIdAndManagerIdAndActiveTrue(Long companyId, Long managerId);
-    boolean existsByCompanyIdAndManagerIdAndActiveTrue(Long companyId, Long managerId);
-    boolean existsByCompanyIdAndManagerIdAndScopeTypeAndScopeIdAndActiveTrue(Long companyId, Long managerId, ManagerScopeType scopeType, Long scopeId);
+public interface ManagerAssignmentRepository extends JpaRepository<ManagerAssignment, UUID> {
+    List<ManagerAssignment> findByCompanyIdOrderByManagerUsernameAscScopeTypeAscScopeIdAsc(UUID companyId);
+    List<ManagerAssignment> findByCompanyIdAndManagerIdAndActiveTrue(UUID companyId, UUID managerId);
+    boolean existsByCompanyIdAndManagerIdAndActiveTrue(UUID companyId, UUID managerId);
+    boolean existsByCompanyIdAndManagerIdAndScopeTypeAndScopeIdAndActiveTrue(UUID companyId, UUID managerId, ManagerScopeType scopeType, UUID scopeId);
 }

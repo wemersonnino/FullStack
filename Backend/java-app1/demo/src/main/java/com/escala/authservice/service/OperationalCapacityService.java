@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.Objects;
 
 @Service
@@ -31,7 +32,7 @@ public class OperationalCapacityService {
         return operationalCapacityRepository.findByCompanyId(requester.getCompany().getId());
     }
 
-    public List<OperationalCapacity> listByTarget(String email, Long targetId, String targetType) {
+    public List<OperationalCapacity> listByTarget(String email, UUID targetId, String targetType) {
         User requester = getRequester(email);
         List<OperationalCapacity> capacities = operationalCapacityRepository.findByTargetIdAndTargetType(targetId, targetType);
         return capacities.stream()
@@ -58,7 +59,7 @@ public class OperationalCapacityService {
     }
 
     @Transactional
-    public OperationalCapacity updateCapacity(String email, Long id, OperationalCapacityRequest request) {
+    public OperationalCapacity updateCapacity(String email, UUID id, OperationalCapacityRequest request) {
         User requester = getRequester(email);
         OperationalCapacity capacity = operationalCapacityRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Capacidade operacional nao encontrada"));
@@ -78,7 +79,7 @@ public class OperationalCapacityService {
     }
 
     @Transactional
-    public void deleteCapacity(String email, Long id) {
+    public void deleteCapacity(String email, UUID id) {
         User requester = getRequester(email);
         OperationalCapacity capacity = operationalCapacityRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Capacidade operacional nao encontrada"));

@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +88,7 @@ public class UserManagementService {
         userRepository.save(user);
     }
 
-    public User grantRole(String requesterEmail, Long userId, RoleChangeRequest request) {
+    public User grantRole(String requesterEmail, UUID userId, RoleChangeRequest request) {
         User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
         
@@ -101,7 +102,7 @@ public class UserManagementService {
         return userRepository.save(user);
     }
 
-    public User revokeRole(String requesterEmail, Long userId, RoleChangeRequest request) {
+    public User revokeRole(String requesterEmail, UUID userId, RoleChangeRequest request) {
         User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
         
@@ -113,7 +114,7 @@ public class UserManagementService {
         return userRepository.save(user);
     }
 
-    public User updateTheme(String requesterEmail, Long userId, String theme) {
+    public User updateTheme(String requesterEmail, UUID userId, String theme) {
         User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
         

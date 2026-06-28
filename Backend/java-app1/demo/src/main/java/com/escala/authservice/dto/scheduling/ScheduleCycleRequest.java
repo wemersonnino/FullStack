@@ -1,9 +1,11 @@
 package com.escala.authservice.dto.scheduling;
 
+import java.util.UUID;
+
 public record ScheduleCycleRequest(
         int year,
         int month,
-        Long unitId,
+        UUID unitId,
         String timezone
 ) {
 }

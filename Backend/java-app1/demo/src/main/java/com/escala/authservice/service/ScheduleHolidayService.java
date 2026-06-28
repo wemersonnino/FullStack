@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -22,14 +23,14 @@ public class ScheduleHolidayService {
     private final ScheduleHolidayRepository scheduleHolidayRepository;
     private final UserRepository userRepository;
 
-    public List<ScheduleHoliday> listHolidays(String email, int year, Long unitId) {
+    public List<ScheduleHoliday> listHolidays(String email, int year, UUID unitId) {
         User requester = getRequester(email);
         LocalDate startDate = LocalDate.of(year, 1, 1);
         LocalDate endDate = LocalDate.of(year, 12, 31);
         return scheduleHolidayRepository.findApplicable(requester.getCompany().getId(), startDate, endDate, unitId);
     }
 
-    public List<Holiday> listDomainHolidaysForMonth(String email, int year, int month, Long unitId) {
+    public List<Holiday> listDomainHolidaysForMonth(String email, int year, int month, UUID unitId) {
         User requester = getRequester(email);
         YearMonth yearMonth = YearMonth.of(year, month);
         return scheduleHolidayRepository.findApplicable(

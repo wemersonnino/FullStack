@@ -1,5 +1,5 @@
 export interface Shift {
-  id: number;
+  id: string;
   documentId: string;
   date: string;
   workMode?: 'presencial' | 'remoto';

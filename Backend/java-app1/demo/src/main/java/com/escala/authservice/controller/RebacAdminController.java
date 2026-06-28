@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class RebacAdminController {
     }
 
     @DeleteMapping("/manager-assignments/{id}")
-    public ResponseEntity<Map<String, Boolean>> deleteAssignment(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Map<String, Boolean>> deleteAssignment(Authentication authentication, @PathVariable UUID id) {
         rebacAdminService.deleteAssignment(authentication.getName(), id);
         return ResponseEntity.ok(Map.of("deleted", true));
     }
@@ -46,7 +47,7 @@ public class RebacAdminController {
     }
 
     @DeleteMapping("/management-edges/{id}")
-    public ResponseEntity<Map<String, Boolean>> deleteEdge(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Map<String, Boolean>> deleteEdge(Authentication authentication, @PathVariable UUID id) {
         rebacAdminService.deleteEdge(authentication.getName(), id);
         return ResponseEntity.ok(Map.of("deleted", true));
     }

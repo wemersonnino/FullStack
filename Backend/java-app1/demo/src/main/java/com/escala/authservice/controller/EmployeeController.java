@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/employees")
@@ -29,14 +30,14 @@ public class EmployeeController {
     @PutMapping("/{id}")
     public ResponseEntity<Employee> update(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody EmployeeRequest request
     ) {
         return ResponseEntity.ok(employeeService.update(authentication.getName(), id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remove(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Void> remove(Authentication authentication, @PathVariable UUID id) {
         employeeService.remove(authentication.getName(), id);
         return ResponseEntity.noContent().build();
     }

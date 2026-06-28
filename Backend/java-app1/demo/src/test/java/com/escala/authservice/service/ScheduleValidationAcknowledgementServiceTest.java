@@ -52,7 +52,7 @@ class ScheduleValidationAcknowledgementServiceTest {
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
         when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester));
         when(validationService.validateCycle("admin@escala.local", cyclePublicId)).thenReturn(List.of(alert));
-        when(acknowledgementRepository.findByCycleIdAndAlertId(5L, "alert-1")).thenReturn(Optional.empty());
+        when(acknowledgementRepository.findByCycleIdAndAlertId(new UUID(0L, 5L), "alert-1")).thenReturn(Optional.empty());
         when(acknowledgementRepository.save(any(ScheduleValidationAcknowledgement.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -104,7 +104,7 @@ class ScheduleValidationAcknowledgementServiceTest {
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
         when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester));
         when(validationService.validateCycle("admin@escala.local", cyclePublicId)).thenReturn(List.of(alert));
-        when(acknowledgementRepository.findByCycleIdAndAlertId(5L, "alert-1")).thenReturn(Optional.of(existing));
+        when(acknowledgementRepository.findByCycleIdAndAlertId(new UUID(0L, 5L), "alert-1")).thenReturn(Optional.of(existing));
         when(acknowledgementRepository.save(any(ScheduleValidationAcknowledgement.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -120,9 +120,9 @@ class ScheduleValidationAcknowledgementServiceTest {
 
     private ScheduleCycle cycle(UUID publicId) {
         return ScheduleCycle.builder()
-                .id(5L)
+                .id(new UUID(0L, 5L))
                 .publicId(publicId)
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .year(2026)
                 .month(6)
                 .timezone("America/Sao_Paulo")
@@ -131,10 +131,10 @@ class ScheduleValidationAcknowledgementServiceTest {
 
     private User requester() {
         return User.builder()
-                .id(9L)
+                .id(new UUID(0L, 9L))
                 .email("admin@escala.local")
                 .username("admin")
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .build();
     }
 

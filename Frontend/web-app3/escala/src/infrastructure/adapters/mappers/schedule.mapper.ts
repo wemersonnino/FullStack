@@ -43,7 +43,7 @@ export class ScheduleMapper {
 
   static swapToDto(domain: Partial<ShiftSwap>): any {
     return {
-      originalShiftId: domain.originalShift?.id ? parseInt(domain.originalShift.id) : undefined,
+      originalShiftId: domain.originalShift?.id || undefined,
       compensationDate: domain.compensationDate,
       comments: domain.comments,
     };

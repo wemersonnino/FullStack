@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ScheduleCycleRepository extends JpaRepository<ScheduleCycle, Long> {
+public interface ScheduleCycleRepository extends JpaRepository<ScheduleCycle, UUID> {
     @Query("""
             select cycle
             from ScheduleCycle cycle
@@ -17,7 +17,7 @@ public interface ScheduleCycleRepository extends JpaRepository<ScheduleCycle, Lo
               and cycle.publicId = :publicId
             """)
     Optional<ScheduleCycle> findByCompanyIdAndPublicId(
-            @Param("companyId") Long companyId,
+            @Param("companyId") UUID companyId,
             @Param("publicId") UUID publicId
     );
 
@@ -31,8 +31,8 @@ public interface ScheduleCycleRepository extends JpaRepository<ScheduleCycle, Lo
               and cycle.status <> :archivedStatus
             """)
     Optional<ScheduleCycle> findActiveForPeriod(
-            @Param("companyId") Long companyId,
-            @Param("unitId") Long unitId,
+            @Param("companyId") UUID companyId,
+            @Param("unitId") UUID unitId,
             @Param("year") int year,
             @Param("month") int month,
             @Param("archivedStatus") ScheduleCycleStatus archivedStatus

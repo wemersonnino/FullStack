@@ -2,7 +2,7 @@ import { Shift } from './shift.interface';
 import { User } from '../user/user.interface';
 
 export interface ShiftSwap {
-  id: number;
+  id: string;
   documentId: string;
   compensationRequired: boolean;
   compensationDate?: string;

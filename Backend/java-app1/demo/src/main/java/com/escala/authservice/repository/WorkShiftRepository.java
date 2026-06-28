@@ -7,12 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.List;
 
-public interface WorkShiftRepository extends JpaRepository<WorkShift, Long> {
-    List<WorkShift> findByEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(Long companyId, LocalDate start, LocalDate end);
-    List<WorkShift> findByEmployeeCompanyIdAndEmployeeSectorIdInAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(Long companyId, List<Long> sectorIds, LocalDate start, LocalDate end);
-    List<WorkShift> findByEmployeeIdAndEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(Long employeeId, Long companyId, LocalDate start, LocalDate end);
+public interface WorkShiftRepository extends JpaRepository<WorkShift, UUID> {
+    List<WorkShift> findByEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(UUID companyId, LocalDate start, LocalDate end);
+    List<WorkShift> findByEmployeeCompanyIdAndEmployeeSectorIdInAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(UUID companyId, List<UUID> sectorIds, LocalDate start, LocalDate end);
+    List<WorkShift> findByEmployeeIdAndEmployeeCompanyIdAndShiftDateBetweenOrderByShiftDateAscStartTimeAsc(UUID employeeId, UUID companyId, LocalDate start, LocalDate end);
     @Query("""
             select ws
             from WorkShift ws
@@ -24,12 +25,12 @@ public interface WorkShiftRepository extends JpaRepository<WorkShift, Long> {
             order by ws.shiftDate asc, ws.startTime asc
             """)
     List<WorkShift> findEscalas(
-            @Param("companyId") Long companyId,
+            @Param("companyId") UUID companyId,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end,
-            @Param("employeeId") Long employeeId,
-            @Param("sectorId") Long sectorId,
-            @Param("projectId") Long projectId
+            @Param("employeeId") UUID employeeId,
+            @Param("sectorId") UUID sectorId,
+            @Param("projectId") UUID projectId
     );
 
     @Query("""
@@ -43,11 +44,11 @@ public interface WorkShiftRepository extends JpaRepository<WorkShift, Long> {
             order by ws.shiftDate asc, ws.startTime asc
             """)
     List<WorkShift> findRelatedActiveShiftsForLaborRules(
-            @Param("employeeId") Long employeeId,
-            @Param("companyId") Long companyId,
+            @Param("employeeId") UUID employeeId,
+            @Param("companyId") UUID companyId,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end,
-            @Param("ignoredShiftId") Long ignoredShiftId
+            @Param("ignoredShiftId") UUID ignoredShiftId
     );
 
     @Query("""
@@ -60,17 +61,17 @@ public interface WorkShiftRepository extends JpaRepository<WorkShift, Long> {
             order by ws.shiftDate asc, ws.startTime asc
             """)
     List<WorkShift> findRelatedActiveShiftsForLaborRulesInBatch(
-            @Param("employeeIds") List<Long> employeeIds,
-            @Param("companyId") Long companyId,
+            @Param("employeeIds") List<UUID> employeeIds,
+            @Param("companyId") UUID companyId,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end
     );
 
-    List<WorkShift> findByEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(Long companyId, LocalDate shiftDate);
-    List<WorkShift> findByEmployeeIdAndEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(Long employeeId, Long companyId, LocalDate shiftDate);
-    boolean existsByEmployeeIdAndShiftDate(Long employeeId, LocalDate shiftDate);
-    long countByEmployeeCompanyIdAndShiftDateBetween(Long companyId, LocalDate start, LocalDate end);
-    long countByEmployeeCompanyIdAndShiftDateAndWorkMode(Long companyId, LocalDate shiftDate, WorkMode workMode);
+    List<WorkShift> findByEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(UUID companyId, LocalDate shiftDate);
+    List<WorkShift> findByEmployeeIdAndEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(UUID employeeId, UUID companyId, LocalDate shiftDate);
+    boolean existsByEmployeeIdAndShiftDate(UUID employeeId, LocalDate shiftDate);
+    long countByEmployeeCompanyIdAndShiftDateBetween(UUID companyId, LocalDate start, LocalDate end);
+    long countByEmployeeCompanyIdAndShiftDateAndWorkMode(UUID companyId, LocalDate shiftDate, WorkMode workMode);
 
     @Query("""
             select ws.shiftDate, count(ws)
@@ -82,12 +83,12 @@ public interface WorkShiftRepository extends JpaRepository<WorkShift, Long> {
             group by ws.shiftDate
             """)
     List<Object[]> countByEmployeeCompanyIdAndShiftDateBetweenAndWorkModeGroupByShiftDate(
-            @Param("companyId") Long companyId,
+            @Param("companyId") UUID companyId,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end,
             @Param("workMode") WorkMode workMode
     );
 
-    long countByEmployeeCompanyIdAndShiftDateAndWorkModeAndEmployeeSectorId(Long companyId, LocalDate shiftDate, WorkMode workMode, Long sectorId);
-    long countByEmployeeCompanyIdAndShiftDateAndWorkModeAndEmployeeSectorIdAndIdNot(Long companyId, LocalDate shiftDate, WorkMode workMode, Long sectorId, Long id);
+    long countByEmployeeCompanyIdAndShiftDateAndWorkModeAndEmployeeSectorId(UUID companyId, LocalDate shiftDate, WorkMode workMode, UUID sectorId);
+    long countByEmployeeCompanyIdAndShiftDateAndWorkModeAndEmployeeSectorIdAndIdNot(UUID companyId, LocalDate shiftDate, WorkMode workMode, UUID sectorId, UUID id);
 }

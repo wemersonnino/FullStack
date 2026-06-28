@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.LocalTime;
 
 @Entity
@@ -26,8 +27,8 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class WorkShift {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(optional = false)
     private Employee employee;

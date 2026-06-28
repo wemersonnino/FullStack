@@ -3,6 +3,7 @@ package com.escala.authservice.dto;
 import lombok.Data;
 
 import java.time.LocalTime;
+import java.util.UUID;
 import java.util.List;
 import com.escala.authservice.entity.WorkMode;
 
@@ -14,5 +15,5 @@ public class GenerateScheduleRequest {
     private LocalTime endTime = LocalTime.of(17, 0);
     private WorkMode workMode = WorkMode.PRESENCIAL;
     private Integer maxPresentialPerDay;
-    private List<Long> employeeIds;
+    private List<UUID> employeeIds;
 }

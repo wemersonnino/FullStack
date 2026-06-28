@@ -4,6 +4,7 @@ import com.escala.authservice.scheduling.domain.enums.PadraoEscala;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -121,7 +122,7 @@ class LaborRuleEngineTest {
     @Test
     void rejeitaIntervaloIntrajornadaMenorQueMinimoParaJornadaAcimaDeSeisHoras() {
         JornadaPlanejada jornada = new JornadaPlanejada(
-                1L,
+                new UUID(0L, 1L),
                 segunda,
                 LocalTime.of(8, 0),
                 LocalTime.of(16, 0),
@@ -137,7 +138,7 @@ class LaborRuleEngineTest {
     @Test
     void rejeitaIntervaloIntrajornadaMaiorQueMaximoParaJornadaAcimaDeSeisHoras() {
         JornadaPlanejada jornada = new JornadaPlanejada(
-                1L,
+                new UUID(0L, 1L),
                 segunda,
                 LocalTime.of(8, 0),
                 LocalTime.of(16, 0),
@@ -153,7 +154,7 @@ class LaborRuleEngineTest {
     @Test
     void rejeitaIntervaloIntrajornadaMenorQueQuinzeMinutosParaJornadaEntreQuatroESeisHoras() {
         JornadaPlanejada jornada = new JornadaPlanejada(
-                1L,
+                new UUID(0L, 1L),
                 segunda,
                 LocalTime.of(8, 0),
                 LocalTime.of(13, 0),
@@ -196,7 +197,7 @@ class LaborRuleEngineTest {
     @Test
     void rejeitaDozePorTrintaESeisSemConfiguracaoFormal() {
         JornadaPlanejada jornada = new JornadaPlanejada(
-                1L,
+                new UUID(0L, 1L),
                 segunda,
                 LocalTime.of(7, 0),
                 LocalTime.of(19, 0),
@@ -219,7 +220,7 @@ class LaborRuleEngineTest {
         );
         LaborRuleEngine engineConfigurado = new LaborRuleEngine(parametros);
         JornadaPlanejada jornada = new JornadaPlanejada(
-                1L,
+                new UUID(0L, 1L),
                 segunda,
                 LocalTime.of(7, 0),
                 LocalTime.of(19, 0),
@@ -242,14 +243,14 @@ class LaborRuleEngineTest {
         );
         LaborRuleEngine engineConfigurado = new LaborRuleEngine(parametros);
         JornadaPlanejada anterior = new JornadaPlanejada(
-                1L,
+                new UUID(0L, 1L),
                 segunda,
                 LocalTime.of(7, 0),
                 LocalTime.of(19, 0),
                 PadraoEscala.DOZE_X_TRINTA_E_SEIS
         );
         JornadaPlanejada proxima = new JornadaPlanejada(
-                1L,
+                new UUID(0L, 1L),
                 segunda.plusDays(1),
                 LocalTime.of(19, 0),
                 LocalTime.of(7, 0),
@@ -303,10 +304,10 @@ class LaborRuleEngineTest {
     }
 
     private JornadaPlanejada jornada(LocalDate data, LocalTime inicio, LocalTime fim) {
-        return new JornadaPlanejada(1L, data, inicio, fim, PadraoEscala.COMUM);
+        return new JornadaPlanejada(new UUID(0L, 1L), data, inicio, fim, PadraoEscala.COMUM);
     }
 
     private JornadaPlanejada jornada(LocalDate data, LocalTime inicio, LocalTime fim, PadraoEscala padrao) {
-        return new JornadaPlanejada(1L, data, inicio, fim, padrao);
+        return new JornadaPlanejada(new UUID(0L, 1L), data, inicio, fim, padrao);
     }
 }

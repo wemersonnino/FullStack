@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -23,8 +24,8 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class ShiftSwapRequest {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(optional = false)
     private Employee requester;

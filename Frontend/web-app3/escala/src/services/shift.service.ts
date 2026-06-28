@@ -5,13 +5,13 @@ import { ShiftSwap } from '@/interfaces/shift/shift-swap.interface';
 import { WorkSchedule } from '@/interfaces/shift/work-schedule.interface';
 
 type BackendEmployee = {
-  id: number;
+  id: string;
   fullName: string;
   email: string;
 };
 
 type BackendShift = {
-  id: number;
+  id: string;
   employee: BackendEmployee;
   shiftDate: string;
   startTime: string;
@@ -22,7 +22,7 @@ type BackendShift = {
 };
 
 type BackendShiftSwap = {
-  id: number;
+  id: string;
   requester?: BackendEmployee;
   originalShift?: BackendShift;
   compensationDate?: string;
@@ -119,7 +119,7 @@ export async function createShiftSwap(data: Partial<ShiftSwap>): Promise<ShiftSw
   return response ? mapBackendShiftSwap(response) : null;
 }
 
-export async function updateShiftSwapStatus(id: number, status: 'approved' | 'rejected', adminComments?: string): Promise<ShiftSwap | null> {
+export async function updateShiftSwapStatus(id: string, status: 'approved' | 'rejected', adminComments?: string): Promise<ShiftSwap | null> {
   const response = await httpPatch<BackendShiftSwap>(
     `${API_ROUTES.SHIFT_SWAPS}/${id}/decision`,
     {

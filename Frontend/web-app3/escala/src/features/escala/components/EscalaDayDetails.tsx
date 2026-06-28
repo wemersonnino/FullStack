@@ -209,7 +209,7 @@ export function EscalaDayDetails({ date, escalas, isOpen, onClose, isAdmin }: Es
             <div className="flex-1">
 	              <WorkScheduleModal 
 	                schedules={[{
-	                  id: 1,
+                  id: 'local-default',
 	                  documentId: 'local-default',
 	                  active: true,
 	                  fixedDays: 'Segunda a Sexta',

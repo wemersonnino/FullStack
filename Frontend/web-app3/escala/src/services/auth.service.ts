@@ -3,12 +3,12 @@ import { httpPost } from '@/lib/http/request';
 import { ThemeEnum } from '@/interfaces/enums/theme.enum';
 
 export type BackendAuthUser = {
-  id: number;
+  id: string;
   username: string;
   email: string;
   roles: string[];
   theme: ThemeEnum;
-  companyId?: number;
+  companyId?: string;
   companySlug?: string;
   companyName?: string;
   companyTheme?: string;

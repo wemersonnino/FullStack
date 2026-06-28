@@ -23,8 +23,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ScheduleCycle {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, unique = true, updatable = false)
     @Builder.Default
@@ -33,7 +33,7 @@ public class ScheduleCycle {
     @ManyToOne(optional = false)
     private Company company;
 
-    private Long unitId;
+    private UUID unitId;
 
     @Column(nullable = false)
     private int year;

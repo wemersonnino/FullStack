@@ -3,7 +3,7 @@ import { httpDelete, httpGet, httpPost, httpPut } from '@/lib/http/request';
 const BASE_URL = '/api/bff/companies';
 
 export interface Company {
-  id: number;
+  id: string;
   name: string;
   cnpj: string;
   logo?: { url?: string } | null;
@@ -34,7 +34,7 @@ export async function getCompanies(): Promise<Company[]> {
   return response || [];
 }
 
-export async function getCompany(id: number | string): Promise<Company | null> {
+export async function getCompany(id: string | string): Promise<Company | null> {
   return await httpGet<Company>(`${BASE_URL}/${id}`);
 }
 
@@ -42,11 +42,11 @@ export async function createCompany(data: Partial<Company>): Promise<Company | n
   return await httpPost<Company>(BASE_URL, data);
 }
 
-export async function updateCompany(id: number | string, data: Partial<Company>): Promise<Company | null> {
+export async function updateCompany(id: string | string, data: Partial<Company>): Promise<Company | null> {
   return await httpPut<Company>(`${BASE_URL}/${id}`, data);
 }
 
-export async function deleteCompany(id: number | string): Promise<boolean> {
+export async function deleteCompany(id: string | string): Promise<boolean> {
   const response = await httpDelete(`${BASE_URL}/${id}`);
   return !!response;
 }

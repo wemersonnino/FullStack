@@ -5,14 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 public class ManagementEdgeResponse {
-    private Long id;
-    private Long parentUserId;
+    private UUID id;
+    private UUID parentUserId;
     private String parentName;
-    private Long childUserId;
+    private UUID childUserId;
     private String childName;
     private String relationType;
     private OffsetDateTime startsAt;

@@ -1,5 +1,5 @@
 export type AuditLog = {
-  id: number;
+  id: string;
   actor: string;
   action: string;
   entityType: string;

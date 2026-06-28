@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -22,8 +23,8 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class ManagerAssignment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
@@ -38,7 +39,7 @@ public class ManagerAssignment {
     private ManagerScopeType scopeType;
 
     @Column(nullable = false)
-    private Long scopeId;
+    private UUID scopeId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

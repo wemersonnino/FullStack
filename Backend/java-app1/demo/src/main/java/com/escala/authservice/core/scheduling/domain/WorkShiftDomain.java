@@ -7,14 +7,15 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.LocalTime;
 
 @Data
 @Builder
 public class WorkShiftDomain {
-    private Long id;
-    private Long employeeId;
-    private Long companyId;
+    private UUID id;
+    private UUID employeeId;
+    private UUID companyId;
     private LocalDate shiftDate;
     private LocalTime startTime;
     private LocalTime endTime;

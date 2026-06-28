@@ -24,8 +24,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ScheduleHoliday {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, unique = true, updatable = false)
     @Builder.Default
@@ -34,7 +34,7 @@ public class ScheduleHoliday {
     @ManyToOne(optional = false)
     private Company company;
 
-    private Long unitId;
+    private UUID unitId;
 
     @Column(nullable = false)
     private LocalDate holidayDate;

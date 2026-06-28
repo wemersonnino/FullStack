@@ -2,7 +2,7 @@ import { ShiftSwap } from '@/interfaces/shift/shift-swap.interface';
 import { createShiftSwap } from '@/services/shift.service';
 
 export type SubmitShiftSwapRequest = {
-  originalShiftId: number;
+  originalShiftId: string;
   compensationDate?: string;
   comments?: string;
 };

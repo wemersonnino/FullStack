@@ -66,7 +66,7 @@ public class TeamInvitationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found or expired"));
     }
 
-    public void cancel(String userEmail, Long invitationId) {
+    public void cancel(String userEmail, UUID invitationId) {
         User user = userRepository.findByEmail(userEmail).orElseThrow();
         TeamInvitation invitation = invitationRepository.findById(invitationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found"));

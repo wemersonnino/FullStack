@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.List;
 import java.util.Objects;
 
@@ -62,7 +63,7 @@ public class MessageService {
     }
 
     @Transactional
-    public Message decide(Long id, String decision, String deciderEmail) {
+    public Message decide(UUID id, String decision, String deciderEmail) {
         User decider = getRequester(deciderEmail);
         Message message = messageRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Mensagem nao encontrada"));
@@ -87,8 +88,8 @@ public class MessageService {
                 try {
                     String meta = message.getMetadata();
                     if (meta != null) {
-                        Long employeeId = parseLongFromMetadata(meta, "employeeId");
-                        Long sectorId = parseLongFromMetadata(meta, "sectorId");
+                        UUID employeeId = parseUuidFromMetadata(meta, "employeeId");
+                        UUID sectorId = parseUuidFromMetadata(meta, "sectorId");
                         if (employeeId != null && sectorId != null) {
                             Employee employee = employeeRepository.findById(employeeId).orElseThrow();
                             Sector sector = sectorRepository.findById(sectorId).orElseThrow();
@@ -105,8 +106,8 @@ public class MessageService {
                 try {
                     String meta = message.getMetadata();
                     if (meta != null) {
-                        Long shiftId1 = parseLongFromMetadata(meta, "shiftId1");
-                        Long shiftId2 = parseLongFromMetadata(meta, "shiftId2");
+                        UUID shiftId1 = parseUuidFromMetadata(meta, "shiftId1");
+                        UUID shiftId2 = parseUuidFromMetadata(meta, "shiftId2");
                         if (shiftId1 != null && shiftId2 != null) {
                             WorkShift shift1 = workShiftRepository.findById(shiftId1).orElseThrow();
                             WorkShift shift2 = workShiftRepository.findById(shiftId2).orElseThrow();
@@ -135,19 +136,19 @@ public class MessageService {
         return messageRepository.save(message);
     }
 
-    private Long parseLongFromMetadata(String metadata, String key) {
+    private UUID parseUuidFromMetadata(String metadata, String key) {
         if (metadata == null) return null;
-        String pattern = "\"" + key + "\"\\s*:\\s*\"?(\\d+)\"?";
+        String pattern = "\"" + key + "\"\\s*:\\s*\"?([0-9a-fA-F-]{36})\"?";
         java.util.regex.Pattern r = java.util.regex.Pattern.compile(pattern);
         java.util.regex.Matcher m = r.matcher(metadata);
         if (m.find()) {
-            return Long.parseLong(m.group(1));
+            return UUID.fromString(m.group(1));
         }
-        pattern = key + "\\s*:\\s*(\\d+)";
+        pattern = key + "\\s*:\\s*([0-9a-fA-F-]{36})";
         r = java.util.regex.Pattern.compile(pattern);
         m = r.matcher(metadata);
         if (m.find()) {
-            return Long.parseLong(m.group(1));
+            return UUID.fromString(m.group(1));
         }
         return null;
     }

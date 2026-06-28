@@ -1,5 +1,7 @@
 package com.escala.authservice.dto.escala;
 
+import java.util.UUID;
+
 import com.escala.authservice.entity.Employee;
 import lombok.Builder;
 import lombok.Data;
@@ -7,18 +9,18 @@ import lombok.Data;
 @Data
 @Builder
 public class UsuarioEscalaResponse {
-    private Long id;
+    private UUID id;
     private String fullName;
     private String username;
     private String email;
     private String role;
     private String cargo;
     private String departamento;
-    private Long sectorId;
+    private UUID sectorId;
     private String sector;
-    private Long projectId;
+    private UUID projectId;
     private String project;
-    private Long companyId;
+    private UUID companyId;
     private String company;
     private Boolean remoto;
     private String tipoVinculo;

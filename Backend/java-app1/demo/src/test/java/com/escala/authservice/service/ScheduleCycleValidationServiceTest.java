@@ -56,7 +56,7 @@ class ScheduleCycleValidationServiceTest {
         UUID cyclePublicId = UUID.randomUUID();
         ScheduleCycle cycle = cycle(cyclePublicId);
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
-        when(assignmentRepository.findByCycleIdOrderByAssignmentDateAscEmployeeFullNameAsc(5L)).thenReturn(List.of());
+        when(assignmentRepository.findByCycleIdOrderByAssignmentDateAscEmployeeFullNameAsc(new UUID(0L, 5L))).thenReturn(List.of());
 
         List<CycleValidationAlertResponse> alerts = service.validateCycle("admin@escala.local", cyclePublicId);
 
@@ -71,7 +71,7 @@ class ScheduleCycleValidationServiceTest {
         ScheduleCycle cycle = cycle(cyclePublicId);
         Employee employee = employee();
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
-        when(assignmentRepository.findByCycleIdOrderByAssignmentDateAscEmployeeFullNameAsc(5L)).thenReturn(List.of(
+        when(assignmentRepository.findByCycleIdOrderByAssignmentDateAscEmployeeFullNameAsc(new UUID(0L, 5L))).thenReturn(List.of(
                 worked(cycle, employee, 1),
                 worked(cycle, employee, 2),
                 worked(cycle, employee, 3),
@@ -80,7 +80,7 @@ class ScheduleCycleValidationServiceTest {
                 worked(cycle, employee, 6),
                 worked(cycle, employee, 7)
         ));
-        when(holidayRepository.findApplicable(1L, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30), 10L))
+        when(holidayRepository.findApplicable(new UUID(0L, 1L), LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30), new UUID(0L, 10L)))
                 .thenReturn(List.of());
 
         List<CycleValidationAlertResponse> alerts = service.validateCycle("admin@escala.local", cyclePublicId);
@@ -94,16 +94,16 @@ class ScheduleCycleValidationServiceTest {
         ScheduleCycle cycle = cycle(cyclePublicId);
         Employee employee = employee();
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
-        when(assignmentRepository.findByCycleIdOrderByAssignmentDateAscEmployeeFullNameAsc(5L)).thenReturn(List.of(
+        when(assignmentRepository.findByCycleIdOrderByAssignmentDateAscEmployeeFullNameAsc(new UUID(0L, 5L))).thenReturn(List.of(
                 worked(cycle, employee, 6),
                 worked(cycle, employee, 15)
         ));
-        when(holidayRepository.findApplicable(1L, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30), 10L))
+        when(holidayRepository.findApplicable(new UUID(0L, 1L), LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 30), new UUID(0L, 10L)))
                 .thenReturn(List.of(ScheduleHoliday.builder()
                         .holidayDate(LocalDate.of(2026, 6, 15))
                         .name("Feriado customizado")
                         .type(HolidayType.CUSTOM)
-                        .unitId(10L)
+                        .unitId(new UUID(0L, 10L))
                         .build()));
 
         List<CycleValidationAlertResponse> alerts = service.validateCycle("admin@escala.local", cyclePublicId);
@@ -114,10 +114,10 @@ class ScheduleCycleValidationServiceTest {
 
     private ScheduleCycle cycle(UUID publicId) {
         return ScheduleCycle.builder()
-                .id(5L)
+                .id(new UUID(0L, 5L))
                 .publicId(publicId)
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
-                .unitId(10L)
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
+                .unitId(new UUID(0L, 10L))
                 .year(2026)
                 .month(6)
                 .timezone("America/Sao_Paulo")
@@ -126,10 +126,10 @@ class ScheduleCycleValidationServiceTest {
 
     private Employee employee() {
         return Employee.builder()
-                .id(20L)
+                .id(new UUID(0L, 20L))
                 .fullName("Ana")
                 .email("ana@escala.local")
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .build();
     }
 

@@ -138,9 +138,9 @@ class ScheduleCyclePublicationServiceTest {
 
     private ScheduleCycle cycle(UUID publicId, ScheduleCycleStatus status) {
         return ScheduleCycle.builder()
-                .id(5L)
+                .id(new UUID(0L, 5L))
                 .publicId(publicId)
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .year(2026)
                 .month(6)
                 .timezone("America/Sao_Paulo")
@@ -150,10 +150,10 @@ class ScheduleCyclePublicationServiceTest {
 
     private User requester() {
         return User.builder()
-                .id(9L)
+                .id(new UUID(0L, 9L))
                 .email("admin@escala.local")
                 .username("admin")
-                .company(Company.builder().id(1L).name("Escala Demo").slug("escala-demo").build())
+                .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .build();
     }
 }

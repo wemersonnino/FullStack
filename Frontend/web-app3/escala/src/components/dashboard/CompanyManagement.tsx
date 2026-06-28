@@ -190,7 +190,7 @@ export function CompanyManagement() {
     }
   }
 
-  async function onDelete(id: number) {
+  async function onDelete(id: string) {
     if (confirm('Tem certeza que deseja excluir esta empresa?')) {
       await removeCompany(id);
     }

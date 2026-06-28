@@ -6,13 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.LocalTime;
 
 @Data
 @Builder
 public class EscalaResponse {
-    private Long id;
-    private Long employeeId;
+    private UUID id;
+    private UUID employeeId;
     private String employeeName;
     private String email;
     private LocalDate shiftDate;
@@ -21,11 +22,11 @@ public class EscalaResponse {
     private String status;
     private String workMode;
     private String notes;
-    private Long sectorId;
+    private UUID sectorId;
     private String sector;
-    private Long projectId;
+    private UUID projectId;
     private String project;
-    private Long companyId;
+    private UUID companyId;
     private String company;
     private Long version;
 

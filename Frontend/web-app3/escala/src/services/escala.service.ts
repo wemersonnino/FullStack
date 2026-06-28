@@ -16,20 +16,20 @@ type UsuarioEscalaDto = Partial<UsuarioEscala> & {
     avatarUrl?: string;
   };
   sector?: {
-    id?: number;
+    id?: string;
     name?: string;
     nome?: string;
   };
   setor?: {
-    id?: number;
+    id?: string;
     name?: string;
     nome?: string;
   };
   project?: {
-    id?: number;
+    id?: string;
   };
   projeto?: {
-    id?: number;
+    id?: string;
   };
 };
 
@@ -38,7 +38,7 @@ function normalizeUsuarioEscala(dto: UsuarioEscalaDto): UsuarioEscala {
   const project = dto.project ?? dto.projeto;
 
   return {
-    id: Number(dto.id ?? 0),
+    id: String(dto.id ?? ''),
     nome: dto.nome ?? dto.fullName ?? dto.name ?? dto.user?.username ?? dto.username ?? 'Funcionário',
     username: dto.username ?? dto.user?.username,
     email: dto.email ?? dto.user?.email ?? '',
@@ -65,9 +65,9 @@ export async function getMinhasEscalas(inicio?: string, fim?: string): Promise<E
 export async function getEscalas(filters: {
   inicio?: string;
   fim?: string;
-  usuarioId?: number;
-  setorId?: number;
-  projetoId?: number;
+  usuarioId?: string;
+  setorId?: string;
+  projetoId?: string;
 }): Promise<Escala[]> {
   const params = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
@@ -85,19 +85,19 @@ export async function createEscalas(data: EscalaRequest): Promise<Escala[]> {
   return escalas || [];
 }
 
-export async function updateEscala(id: number, data: Partial<EscalaRequest>): Promise<Escala | null> {
+export async function updateEscala(id: string, data: Partial<EscalaRequest>): Promise<Escala | null> {
   return await httpPut<Escala>(`${BASE_URL}/${id}`, data);
 }
 
-export async function cancelEscala(id: number): Promise<boolean> {
+export async function cancelEscala(id: string): Promise<boolean> {
   const result = await httpDelete<{ deleted: boolean }>(`${BASE_URL}/${id}`);
   return !!result?.deleted;
 }
 
 export async function getUsuariosEscalaveis(filters: {
-  projetoId?: number;
-  setorId?: number;
-  empresaId?: number;
+  projetoId?: string;
+  setorId?: string;
+  empresaId?: string;
   q?: string;
 }): Promise<UsuarioEscala[]> {
   const params = new URLSearchParams();
@@ -108,7 +108,7 @@ export async function getUsuariosEscalaveis(filters: {
   return Array.isArray(data) ? data.map(normalizeUsuarioEscala) : [];
 }
 
-export async function getUsuarioEscalavel(id: number): Promise<UsuarioEscala | null> {
+export async function getUsuarioEscalavel(id: string): Promise<UsuarioEscala | null> {
   const data = await httpGet<UsuarioEscalaDto>(`${BASE_URL}/usuarios/${id}`);
   return data ? normalizeUsuarioEscala(data) : null;
 }

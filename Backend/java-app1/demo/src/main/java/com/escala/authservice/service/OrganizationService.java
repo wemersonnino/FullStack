@@ -14,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +76,7 @@ public class OrganizationService {
                 .build());
     }
 
-    public Sector updateSector(String requesterEmail, Long id, SectorRequest request) {
+    public Sector updateSector(String requesterEmail, UUID id, SectorRequest request) {
         User requester = userRepository.findByEmail(requesterEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
         Company company = requester.getCompany();
@@ -102,7 +103,7 @@ public class OrganizationService {
         return sectorRepository.save(sector);
     }
 
-    public void deleteSector(String requesterEmail, Long id) {
+    public void deleteSector(String requesterEmail, UUID id) {
         User requester = userRepository.findByEmail(requesterEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
         Company company = requester.getCompany();
@@ -136,7 +137,7 @@ public class OrganizationService {
                 .build());
     }
 
-    public Project updateProject(String requesterEmail, Long id, ProjectRequest request) {
+    public Project updateProject(String requesterEmail, UUID id, ProjectRequest request) {
         Company company = getRequesterCompany(requesterEmail);
         Project project = projectRepository.findById(id).orElseThrow();
         if (project.getCompany() == null || !project.getCompany().getId().equals(company.getId())) {
@@ -150,7 +151,7 @@ public class OrganizationService {
         return projectRepository.save(project);
     }
 
-    public void deleteProject(String requesterEmail, Long id) {
+    public void deleteProject(String requesterEmail, UUID id) {
         Company company = getRequesterCompany(requesterEmail);
         Project project = projectRepository.findById(id).orElseThrow();
         if (project.getCompany() == null || !project.getCompany().getId().equals(company.getId())) {

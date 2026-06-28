@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.util.List;
 import java.util.Map;
 
@@ -35,9 +36,9 @@ public class EscalaController {
             Authentication authentication,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
-            @RequestParam(required = false) Long usuarioId,
-            @RequestParam(required = false) Long setorId,
-            @RequestParam(required = false) Long projetoId
+            @RequestParam(required = false) UUID usuarioId,
+            @RequestParam(required = false) UUID setorId,
+            @RequestParam(required = false) UUID projetoId
     ) {
         requireAdmin(authentication);
         return scheduleService.listEscalas(inicio, fim, usuarioId, setorId, projetoId, authentication.getName());
@@ -60,7 +61,7 @@ public class EscalaController {
     @PutMapping("/{id}")
     public ResponseEntity<EscalaResponse> atualizar(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody EscalaRequest request
     ) {
         requireAdmin(authentication);
@@ -68,7 +69,7 @@ public class EscalaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Boolean>> remover(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Map<String, Boolean>> remover(Authentication authentication, @PathVariable UUID id) {
         requireAdmin(authentication);
         scheduleService.cancelEscala(id, authentication.getName());
         return ResponseEntity.ok(Map.of("deleted", true));
@@ -77,9 +78,9 @@ public class EscalaController {
     @GetMapping("/usuarios")
     public List<UsuarioEscalaResponse> usuarios(
             Authentication authentication,
-            @RequestParam(required = false) Long projetoId,
-            @RequestParam(required = false) Long setorId,
-            @RequestParam(required = false) Long empresaId,
+            @RequestParam(required = false) UUID projetoId,
+            @RequestParam(required = false) UUID setorId,
+            @RequestParam(required = false) UUID empresaId,
             @RequestParam(required = false, name = "q") String query
     ) {
         requireAdmin(authentication);
@@ -87,7 +88,7 @@ public class EscalaController {
     }
 
     @GetMapping("/usuarios/{id}")
-    public UsuarioEscalaResponse usuario(Authentication authentication, @PathVariable Long id) {
+    public UsuarioEscalaResponse usuario(Authentication authentication, @PathVariable UUID id) {
         requireAdmin(authentication);
         return scheduleService.usuarioEscalavel(id, authentication.getName());
     }

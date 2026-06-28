@@ -24,7 +24,7 @@ export function LearningProgressPanel({ initialItems }: LearningProgressPanelPro
   const [topic, setTopic] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
-  const [completingId, setCompletingId] = useState<number | null>(null);
+  const [completingId, setCompletingId] = useState<string | null>(null);
 
   const completedCount = items.filter((item) => item.completed).length;
 

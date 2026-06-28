@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/messages")
@@ -54,7 +55,7 @@ public class MessageController {
     @PatchMapping("/{id}/decision")
     public ResponseEntity<MessageResponse> decideMessage(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody MessageDecisionRequest request
     ) {
         Message decided = messageService.decide(id, request.getDecision(), authentication.getName());

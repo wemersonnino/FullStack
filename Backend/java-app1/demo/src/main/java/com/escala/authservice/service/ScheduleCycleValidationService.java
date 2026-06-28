@@ -101,7 +101,7 @@ public class ScheduleCycleValidationService {
     }
 
     private List<CycleValidationAlertResponse> validateConsecutiveWorkedDays(List<ScheduleCycleAssignment> assignments) {
-        Map<Long, List<ScheduleCycleAssignment>> byEmployee = assignments.stream()
+        Map<UUID, List<ScheduleCycleAssignment>> byEmployee = assignments.stream()
                 .collect(Collectors.groupingBy(assignment -> assignment.getEmployee().getId()));
 
         List<CycleValidationAlertResponse> alerts = new ArrayList<>();
