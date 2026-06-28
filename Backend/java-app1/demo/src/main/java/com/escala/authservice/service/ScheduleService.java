@@ -268,6 +268,8 @@ public class ScheduleService {
     @Transactional
     public List<WorkShift> generateMonth(GenerateScheduleRequest request, String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        policyService.requireCanManageSchedules(user);
         
         // Delegar para o Core Hexagonal (Lógica de Negócio Pura)
         var generated = generateScheduleUseCase.generate(request, company.getId());
@@ -346,9 +348,13 @@ public class ScheduleService {
     @Transactional
     public ShiftSwapRequest decideSwap(UUID id, DecideShiftSwapRequest request, String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        policyService.requireCanManageSchedules(user);
+        
         ShiftSwapRequest swap = shiftSwapRequestRepository.findById(id).orElseThrow();
         
-        if (!Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
+        boolean isSystemAdmin = user.getRoles() != null && user.getRoles().stream().map(Role::getName).anyMatch(r -> r.equals("SYSTEM_ADMIN"));
+        if (!isSystemAdmin && !Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
              throw new org.springframework.security.access.AccessDeniedException("Nao autorizado");
         }
 
@@ -399,10 +405,16 @@ public class ScheduleService {
     @Transactional
     public ShiftSwapRequest approveByColleague(UUID id, String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
         ShiftSwapRequest swap = shiftSwapRequestRepository.findById(id).orElseThrow();
         
-        if (!Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
+        boolean isSystemAdmin = user.getRoles() != null && user.getRoles().stream().map(Role::getName).anyMatch(r -> r.equals("SYSTEM_ADMIN"));
+        if (!isSystemAdmin && !Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
              throw new org.springframework.security.access.AccessDeniedException("Nao autorizado");
+        }
+
+        if (!isSystemAdmin && Objects.equals(swap.getRequester().getEmail(), userEmail)) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao e permitido ao solicitante aprovar a propria troca como colega");
         }
 
         FluxoTrocaEscala fluxo = new FluxoTrocaEscala(toDomainStatus(swap.getStatus()));
