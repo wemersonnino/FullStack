@@ -24,6 +24,9 @@ public class CheckInService {
     private final CheckPlanLimitUseCase checkPlanLimitUseCase;
 
     public void validateAndRegister(String userEmail, CheckInRequest request, String ipAddress) {
+        if (request == null || request.getLatitude() == null || request.getLongitude() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coordenadas de geolocalização do check-in são obrigatórias");
+        }
         User user = userRepository.findByEmail(userEmail).orElseThrow();
         Company company = user.getCompany();
 

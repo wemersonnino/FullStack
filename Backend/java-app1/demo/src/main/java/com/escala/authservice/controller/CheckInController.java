@@ -22,7 +22,19 @@ public class CheckInController {
             @RequestBody CheckInRequest request,
             HttpServletRequest servletRequest
     ) {
-        String ipAddress = servletRequest.getRemoteAddr();
+        String ipAddress = servletRequest.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = servletRequest.getHeader("Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = servletRequest.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = servletRequest.getRemoteAddr();
+        } else {
+            ipAddress = ipAddress.split(",")[0].trim();
+        }
+        
         checkInService.validateAndRegister(authentication.getName(), request, ipAddress);
         
         return ResponseEntity.ok(Map.of("message", "Ponto registrado com sucesso dentro da área permitida"));
