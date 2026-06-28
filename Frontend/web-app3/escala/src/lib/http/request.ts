@@ -80,7 +80,9 @@ export async function httpGet<T = any>(
     const res = await api.get<T>(resolveUrl(url), { params, headers });
     return res.data;
   } catch (err) {
-    console.error(`[GET] ${url}`, err);
+    const message = getHttpErrorMessage(err, `Erro ao buscar dados de ${url}`);
+    if (options?.throwOnError) throw new Error(message, { cause: err });
+    console.warn(`[GET] ${url}: ${message}`);
     return null;
   }
 }
