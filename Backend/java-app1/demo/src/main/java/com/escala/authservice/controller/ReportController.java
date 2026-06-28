@@ -26,6 +26,18 @@ public class ReportController {
             @RequestParam String month
     ) {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow();
+        
+        boolean isSystemAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isAdminOrOwner = isSystemAdmin || user.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        if (!isAdminOrOwner) {
+            throw new org.springframework.security.access.AccessDeniedException("Acesso negado: Apenas administradores podem visualizar relatorios de folha");
+        }
+        
+        if (user.getCompany() == null) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Usuario nao esta vinculado a uma empresa");
+        }
+        
         return reportService.generatePayrollReport(user.getCompany().getId(), month);
     }
 
@@ -35,6 +47,18 @@ public class ReportController {
             @RequestParam String month
     ) {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow();
+        
+        boolean isSystemAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isAdminOrOwner = isSystemAdmin || user.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
+        if (!isAdminOrOwner) {
+            throw new org.springframework.security.access.AccessDeniedException("Acesso negado: Apenas administradores podem exportar relatorios de folha");
+        }
+        
+        if (user.getCompany() == null) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Usuario nao esta vinculado a uma empresa");
+        }
+        
         List<PayrollReportItem> report = reportService.generatePayrollReport(user.getCompany().getId(), month);
         String csv = reportService.exportToCsv(report);
 

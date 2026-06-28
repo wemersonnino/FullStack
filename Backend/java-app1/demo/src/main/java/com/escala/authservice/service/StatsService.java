@@ -32,7 +32,20 @@ public class StatsService {
     }
 
     public DashboardSummaryResponse getSummary(int year, int month, String userEmail) {
-        Company company = resolveCompany(userEmail);
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        
+        boolean isSystemAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals("SYSTEM_ADMIN"));
+        boolean isManagerOrAdmin = isSystemAdmin || user.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER") || r.getName().equals("MANAGER") || r.getName().startsWith("MANAGER_"));
+        if (!isManagerOrAdmin) {
+            throw new org.springframework.security.access.AccessDeniedException("Acesso negado: Apenas gestores podem acessar as estatisticas do dashboard");
+        }
+        
+        Company company = user.getCompany();
+        if (company == null) {
+            throw new IllegalArgumentException("Usuario nao esta vinculado a uma empresa");
+        }
+        
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate start = yearMonth.atDay(1);
         LocalDate end = yearMonth.atEndOfMonth();
