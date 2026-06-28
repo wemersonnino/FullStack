@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(
@@ -26,6 +27,10 @@ public class ScheduleHoliday {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true, updatable = false)
+    @Builder.Default
+    private UUID publicId = UUID.randomUUID();
+
     @ManyToOne(optional = false)
     private Company company;
 
@@ -43,4 +48,11 @@ public class ScheduleHoliday {
 
     @Version
     private Long version;
+
+    @PrePersist
+    void prePersist() {
+        if (publicId == null) {
+            publicId = UUID.randomUUID();
+        }
+    }
 }

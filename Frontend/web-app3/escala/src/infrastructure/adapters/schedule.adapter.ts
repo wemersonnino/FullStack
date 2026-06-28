@@ -1,5 +1,6 @@
 import { ScheduleMapper } from "./mappers/schedule.mapper";
 import {
+  AcknowledgeValidationAlertInput,
   CreateScheduleCycleInput,
   CreateScheduleHolidayInput,
   MonthCalendar,
@@ -8,6 +9,8 @@ import {
   ScheduleCycleCounter,
   ScheduleHoliday,
   ScheduleLegend,
+  ScheduleValidationAlert,
+  ValidationAcknowledgement,
   ReplaceScheduleCycleAssignmentsInput,
   Shift,
   ShiftSwap,
@@ -170,6 +173,71 @@ export class ScheduleBackendAdapter {
       },
     });
     if (!response.ok) throw new Error("Failed to fetch schedule cycle counters");
+    return response.json();
+  }
+
+  static async validateScheduleCycle(token: string, cycleId: string): Promise<ScheduleValidationAlert[]> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/validate`), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to validate schedule cycle");
+    return response.json();
+  }
+
+  static async listScheduleCycleAlerts(token: string, cycleId: string): Promise<ScheduleValidationAlert[]> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/alerts`), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to fetch schedule cycle alerts");
+    return response.json();
+  }
+
+  static async acknowledgeScheduleCycleAlert(
+    token: string,
+    cycleId: string,
+    alertId: string,
+    input: AcknowledgeValidationAlertInput = {}
+  ): Promise<ValidationAcknowledgement> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/alerts/${alertId}/acknowledge`), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) throw new Error("Failed to acknowledge schedule cycle alert");
+    return response.json();
+  }
+
+  static async publishScheduleCycle(token: string, cycleId: string): Promise<ScheduleCycle> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/publish`), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to publish schedule cycle");
+    return response.json();
+  }
+
+  static async archiveScheduleCycle(token: string, cycleId: string): Promise<ScheduleCycle> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/archive`), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to archive schedule cycle");
     return response.json();
   }
 
