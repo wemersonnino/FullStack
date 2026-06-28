@@ -49,8 +49,8 @@ public class EmployeeService {
                 .fullName(request.getFullName())
                 .email(request.getEmail())
                 .active(request.getActive() == null || request.getActive())
-                .sector(resolveSector(request.getSectorId()))
-                .project(resolveProject(request.getProjectId()))
+                .sector(resolveSector(company, request.getSectorId()))
+                .project(resolveProject(company, request.getProjectId()))
                 .company(company)
                 .build());
     }
@@ -66,8 +66,8 @@ public class EmployeeService {
         employee.setFullName(request.getFullName());
         employee.setEmail(request.getEmail());
         if (request.getActive() != null) employee.setActive(request.getActive());
-        employee.setSector(resolveSector(request.getSectorId()));
-        employee.setProject(resolveProject(request.getProjectId()));
+        employee.setSector(resolveSector(company, request.getSectorId()));
+        employee.setProject(resolveProject(company, request.getProjectId()));
         return employeeRepository.save(employee);
     }
 
@@ -83,11 +83,21 @@ public class EmployeeService {
         employeeRepository.save(employee);
     }
 
-    private Sector resolveSector(UUID id) {
-        return id == null ? null : sectorRepository.findById(id).orElseThrow();
+    private Sector resolveSector(Company company, UUID id) {
+        if (id == null) return null;
+        Sector sector = sectorRepository.findById(id).orElseThrow();
+        if (sector.getCompany() == null || !sector.getCompany().getId().equals(company.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Setor nao pertence a empresa do requisitante");
+        }
+        return sector;
     }
 
-    private Project resolveProject(UUID id) {
-        return id == null ? null : projectRepository.findById(id).orElseThrow();
+    private Project resolveProject(Company company, UUID id) {
+        if (id == null) return null;
+        Project project = projectRepository.findById(id).orElseThrow();
+        if (project.getCompany() == null || !project.getCompany().getId().equals(company.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Projeto nao pertence a empresa do requisitante");
+        }
+        return project;
     }
 }

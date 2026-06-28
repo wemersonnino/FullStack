@@ -70,6 +70,7 @@ public class CheckInService {
         // 4. Salvar registro
         TimeRecord record = TimeRecord.builder()
                 .user(user)
+                .company(company)
                 .recordTime(now)
                 .type(nextType)
                 .ipAddress(ipAddress)

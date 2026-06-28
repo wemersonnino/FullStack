@@ -14,7 +14,8 @@ import java.util.UUID;
         name = "time_records",
         indexes = {
                 @Index(name = "idx_time_records_user_time", columnList = "user_id, recordTime"),
-                @Index(name = "idx_time_records_type_time", columnList = "type, recordTime")
+                @Index(name = "idx_time_records_type_time", columnList = "type, recordTime"),
+                @Index(name = "idx_time_records_company_user_time", columnList = "company_id, user_id, recordTime DESC")
         }
 )
 @Data
@@ -29,6 +30,9 @@ public class TimeRecord {
 
     @ManyToOne(optional = false)
     private User user;
+
+    @ManyToOne(optional = false)
+    private Company company;
 
     @Column(nullable = false)
     private OffsetDateTime recordTime;
