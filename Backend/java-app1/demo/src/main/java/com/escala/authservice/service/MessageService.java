@@ -45,6 +45,9 @@ public class MessageService {
         User receiver = null;
         if (request.getReceiver() != null && request.getReceiver().getId() != null) {
             receiver = userRepository.findById(request.getReceiver().getId()).orElse(null);
+            if (receiver != null && (receiver.getCompany() == null || !receiver.getCompany().getId().equals(sender.getCompany().getId()))) {
+                throw new org.springframework.security.access.AccessDeniedException("Nao autorizado: Destinatario pertence a outra empresa");
+            }
         }
 
         Message message = Message.builder()
