@@ -96,6 +96,10 @@ public class UserManagementService {
             throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar roles de usuario de outra empresa");
         }
 
+        if ("SYSTEM_ADMIN".equalsIgnoreCase(request.getRoleName())) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao e permitido gerenciar o papel de SYSTEM_ADMIN via API");
+        }
+
         Role role = roleRepository.findByName(request.getRoleName())
                 .orElseGet(() -> roleRepository.save(Role.builder().name(request.getRoleName()).build()));
         user.getRoles().add(role);
@@ -108,6 +112,10 @@ public class UserManagementService {
         
         if (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId())) {
             throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar roles de usuario de outra empresa");
+        }
+
+        if ("SYSTEM_ADMIN".equalsIgnoreCase(request.getRoleName())) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao e permitido gerenciar o papel de SYSTEM_ADMIN via API");
         }
 
         user.getRoles().removeIf(role -> role.getName().equals(request.getRoleName()));
