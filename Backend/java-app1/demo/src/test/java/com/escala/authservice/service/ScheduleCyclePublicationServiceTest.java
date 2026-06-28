@@ -85,6 +85,44 @@ class ScheduleCyclePublicationServiceTest {
     }
 
     @Test
+    void abreRetificacaoDeCicloPublicadoIncrementandoVersao() {
+        UUID cyclePublicId = UUID.randomUUID();
+        ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.PUBLICADO);
+        cycle.setBusinessVersion(2);
+        when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
+        when(scheduleCycleRepository.save(any(ScheduleCycle.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ScheduleCycle rectified = service.rectify("admin@escala.local", cyclePublicId);
+
+        assertEquals(ScheduleCycleStatus.RETIFICADO, rectified.getStatus());
+        assertEquals(3, rectified.getBusinessVersion());
+    }
+
+    @Test
+    void retificacaoJaRetificadaEIdempotente() {
+        UUID cyclePublicId = UUID.randomUUID();
+        ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.RETIFICADO);
+        cycle.setBusinessVersion(2);
+        when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
+
+        ScheduleCycle rectified = service.rectify("admin@escala.local", cyclePublicId);
+
+        assertEquals(ScheduleCycleStatus.RETIFICADO, rectified.getStatus());
+        assertEquals(2, rectified.getBusinessVersion());
+        verify(scheduleCycleRepository, never()).save(any());
+    }
+
+    @Test
+    void bloqueiaRetificacaoDeRascunho() {
+        UUID cyclePublicId = UUID.randomUUID();
+        when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId))
+                .thenReturn(cycle(cyclePublicId, ScheduleCycleStatus.RASCUNHO));
+
+        assertThrows(IllegalStateException.class, () -> service.rectify("admin@escala.local", cyclePublicId));
+        verify(scheduleCycleRepository, never()).save(any());
+    }
+
+    @Test
     void arquivaCicloPublicado() {
         UUID cyclePublicId = UUID.randomUUID();
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.PUBLICADO);

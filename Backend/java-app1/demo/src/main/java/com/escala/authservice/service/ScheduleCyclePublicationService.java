@@ -48,6 +48,21 @@ public class ScheduleCyclePublicationService {
     }
 
     @Transactional
+    public ScheduleCycle rectify(String email, UUID cyclePublicId) {
+        ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
+        if (cycle.getStatus() == ScheduleCycleStatus.RETIFICADO) {
+            return cycle;
+        }
+        if (cycle.getStatus() != ScheduleCycleStatus.PUBLICADO) {
+            throw new IllegalStateException("Somente ciclos publicados podem entrar em retificacao");
+        }
+
+        cycle.setStatus(ScheduleCycleStatus.RETIFICADO);
+        cycle.setBusinessVersion(cycle.getBusinessVersion() + 1);
+        return scheduleCycleRepository.save(cycle);
+    }
+
+    @Transactional
     public ScheduleCycle archive(String email, UUID cyclePublicId) {
         ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
         if (cycle.getStatus() == ScheduleCycleStatus.ARQUIVADO) {
