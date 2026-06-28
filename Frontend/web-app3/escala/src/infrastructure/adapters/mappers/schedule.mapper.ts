@@ -22,7 +22,7 @@ export class ScheduleMapper {
       endTime: domain.endTime,
       workMode: domain.workMode?.toUpperCase(),
       notes: domain.notes,
-      employeeId: domain.employeeId ? parseInt(domain.employeeId) : undefined,
+      employeeId: domain.employeeId || undefined,
     };
   }
 

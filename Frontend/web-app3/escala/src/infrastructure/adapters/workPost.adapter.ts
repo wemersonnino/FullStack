@@ -42,7 +42,7 @@ export class WorkPostBackendAdapter {
       body: JSON.stringify({
         name: workPost.name,
         description: workPost.description,
-        project: workPost.projectId ? { id: parseInt(workPost.projectId) } : null,
+        project: workPost.projectId ? { id: workPost.projectId } : null,
       }),
     });
     if (!response.ok) throw new Error("Failed to create work post");

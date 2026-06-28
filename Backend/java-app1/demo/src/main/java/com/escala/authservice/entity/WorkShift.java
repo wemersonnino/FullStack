@@ -2,6 +2,7 @@ package com.escala.authservice.entity;
 
 import com.escala.authservice.scheduling.domain.enums.PadraoEscala;
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,7 +28,8 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class WorkShift {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
     private UUID id;
 
     @ManyToOne(optional = false)

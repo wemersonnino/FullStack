@@ -3,6 +3,7 @@ package com.escala.authservice.entity;
 import java.util.UUID;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ManagementClosure {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    @GeneratedValue
     private UUID id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
