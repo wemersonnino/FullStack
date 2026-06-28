@@ -258,3 +258,12 @@ Encaixe funcional:
 - Os arquivos em `docs/` sao a fonte conceitual do projeto.
 - Quando houver divergencia entre codigo e docs, preservar a intencao dos docs e evoluir o codigo gradualmente.
 - A modularizacao descrita neste arquivo e diretriz de evolucao. Mudancas devem ser incrementais, mantendo endpoints existentes funcionando enquanto o codigo migra para os limites de dominio.
+
+## Diretrizes de Seguranca, LGPD e Controle de Acessos
+
+- **Isolamento Multi-tenant (company_id):** Todos os controllers e queries do Spring Boot que expõem ou alteram dados devem realizar a verificação explícita do `companyId` associado ao usuário autenticado, nunca permitindo cross-tenant leaks.
+- **Armazenamento de Senhas:** Exigir comprimento mínimo de 8 caracteres e criptografar sempre usando BCrypt no backend.
+- **Proteção do Spring Actuator:** Somente `/actuator/health` é público para verificação de status. Todos os outros endpoints do Actuator (ex: `metrics`, `prometheus`) devem requerer autenticação ou ser restritos à rede privada de monitoramento.
+- **Integridade da Auditoria:** Operações de auditoria e logs no banco de dados devem ser persistidos via append-only, sendo proibida a deleção física ou atualização desses dados.
+- **Cookies & Headers:** Configurar cabeçalhos HSTS, Content Security Policy (CSP), X-Frame-Options e SameSite nos cookies para proteção do Frontend contra XSS, CSRF e clickjacking.
+

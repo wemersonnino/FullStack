@@ -33,6 +33,9 @@ public class AuthenticationService {
 
     public AuthenticationResponse register(RegisterRequest request) {
         recaptchaService.verifyIfProduction(request.getRecaptchaToken());
+        if (request.getPassword() == null || request.getPassword().length() < 8) {
+            throw new IllegalArgumentException("A senha deve ter no minimo 8 caracteres");
+        }
         
         // Se companyName for fornecido, cria uma nova empresa (Fluxo SaaS Self-Service)
         // Caso contrário, tenta resolver pelo slug (Fluxo de Convite/Empresa Existente)
@@ -136,7 +139,10 @@ public class AuthenticationService {
     @Transactional
     public AuthenticationResponse resetPassword(ResetPasswordRequest request) {
         recaptchaService.verifyIfProduction(request.getRecaptchaToken());
-        if (request.getPassword() == null || !request.getPassword().equals(request.getPasswordConfirmation())) {
+        if (request.getPassword() == null || request.getPassword().length() < 8) {
+            throw new IllegalArgumentException("A senha deve ter no minimo 8 caracteres");
+        }
+        if (!request.getPassword().equals(request.getPasswordConfirmation())) {
             throw new IllegalArgumentException("Confirmacao de senha invalida");
         }
 

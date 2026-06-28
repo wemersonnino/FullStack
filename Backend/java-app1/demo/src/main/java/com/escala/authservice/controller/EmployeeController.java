@@ -18,22 +18,27 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @GetMapping
-    public List<Employee> list(Authentication authentication) {
-        return employeeService.list(authentication.getName());
+    public org.springframework.data.domain.Page<com.escala.authservice.dto.EmployeeResponse> list(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return employeeService.list(authentication.getName(), pageable).map(com.escala.authservice.dto.EmployeeResponse::from);
     }
 
     @PostMapping
-    public ResponseEntity<Employee> create(Authentication authentication, @RequestBody EmployeeRequest request) {
-        return ResponseEntity.ok(employeeService.create(authentication.getName(), request));
+    public ResponseEntity<com.escala.authservice.dto.EmployeeResponse> create(Authentication authentication, @RequestBody EmployeeRequest request) {
+        return ResponseEntity.ok(com.escala.authservice.dto.EmployeeResponse.from(employeeService.create(authentication.getName(), request)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> update(
+    public ResponseEntity<com.escala.authservice.dto.EmployeeResponse> update(
             Authentication authentication,
             @PathVariable UUID id,
             @RequestBody EmployeeRequest request
     ) {
-        return ResponseEntity.ok(employeeService.update(authentication.getName(), id, request));
+        return ResponseEntity.ok(com.escala.authservice.dto.EmployeeResponse.from(employeeService.update(authentication.getName(), id, request)));
     }
 
     @DeleteMapping("/{id}")

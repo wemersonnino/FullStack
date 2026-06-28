@@ -23,12 +23,16 @@ public class MessageController {
     private final MessageService messageService;
 
     @GetMapping
-    public ResponseEntity<List<MessageResponse>> getMessages(
+    public ResponseEntity<org.springframework.data.domain.Page<MessageResponse>> getMessages(
             Authentication authentication,
-            @RequestParam(required = false) MessageStatus status
+            @RequestParam(required = false) MessageStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
     ) {
-        List<Message> messages = messageService.listMessages(authentication.getName(), status);
-        List<MessageResponse> response = messages.stream().map(MessageResponse::from).toList();
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        org.springframework.data.domain.Page<MessageResponse> response = messageService
+                .listMessages(authentication.getName(), status, pageable)
+                .map(MessageResponse::from);
         return ResponseEntity.ok(response);
     }
 

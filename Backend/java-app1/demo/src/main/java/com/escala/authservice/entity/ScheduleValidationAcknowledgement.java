@@ -20,7 +20,8 @@ import java.util.UUID;
                 )
         },
         indexes = {
-                @Index(name = "idx_schedule_validation_ack_cycle", columnList = "cycle_id")
+                @Index(name = "idx_schedule_validation_ack_cycle", columnList = "cycle_id"),
+                @Index(name = "idx_schedule_validation_ack_cycle_rule", columnList = "cycle_id, severity, ruleCode")
         }
 )
 @Data

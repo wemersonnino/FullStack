@@ -23,9 +23,9 @@ public class UserManagementService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<User> list(String requesterEmail) {
+    public org.springframework.data.domain.Page<User> list(String requesterEmail, org.springframework.data.domain.Pageable pageable) {
         User requester = currentUser(requesterEmail);
-        return userRepository.findByCompanyId(requester.getCompany().getId());
+        return userRepository.findByCompanyId(requester.getCompany().getId(), pageable);
     }
 
     public User currentUser(String email) {
