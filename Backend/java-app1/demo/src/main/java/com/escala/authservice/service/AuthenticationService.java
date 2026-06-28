@@ -6,6 +6,7 @@ import com.escala.authservice.entity.*;
 import com.escala.authservice.repository.MarketingLeadRepository;
 import com.escala.authservice.repository.PasswordResetTokenRepository;
 import com.escala.authservice.repository.RoleRepository;
+import com.escala.authservice.repository.TeamInvitationRepository;
 import com.escala.authservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,7 @@ public class AuthenticationService {
     private final RecaptchaService recaptchaService;
     private final GoogleIdentityService googleIdentityService;
     private final com.escala.authservice.core.auth.port.in.AuthenticationUseCase authenticationUseCase;
+    private final TeamInvitationRepository teamInvitationRepository;
 
     public AuthenticationResponse register(RegisterRequest request) {
         recaptchaService.verifyIfProduction(request.getRecaptchaToken());
@@ -40,13 +42,24 @@ public class AuthenticationService {
         // Se companyName for fornecido, cria uma nova empresa (Fluxo SaaS Self-Service)
         // Caso contrário, tenta resolver pelo slug (Fluxo de Convite/Empresa Existente)
         Company company;
+        String roleName;
         if (request.getCompanyName() != null && !request.getCompanyName().isBlank()) {
             company = companyService.create(com.escala.authservice.dto.CompanyRequest.builder()
                     .name(request.getCompanyName())
                     .active(true)
                     .build());
+            roleName = "OWNER";
         } else {
             company = companyService.resolve(request.getCompanySlug());
+            // Validar convite ativo para o e-mail nesta empresa
+            TeamInvitation invitation = teamInvitationRepository.findByEmailAndCompanyId(request.getEmail().trim().toLowerCase(), company.getId())
+                    .filter(inv -> inv.isActive() && inv.getExpiresAt().isAfter(java.time.OffsetDateTime.now()))
+                    .orElseThrow(() -> new IllegalArgumentException("Nao ha nenhum convite ativo para este e-mail nesta empresa"));
+            
+            // Consumir o convite
+            invitation.setActive(false);
+            teamInvitationRepository.save(invitation);
+            roleName = invitation.getRoleName() != null ? invitation.getRoleName() : "USER";
         }
 
         repository.findByEmailAndCompanySlug(request.getEmail(), company.getSlug())
@@ -54,8 +67,6 @@ public class AuthenticationService {
                     throw new IllegalArgumentException("Email ja cadastrado para esta empresa");
                 });
         
-        // Se criou uma empresa, o primeiro usuário é OWNER, senão é USER
-        String roleName = (request.getCompanyName() != null && !request.getCompanyName().isBlank()) ? "OWNER" : "USER";
         Role userRole = roleRepository.findByName(roleName)
                 .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
 
