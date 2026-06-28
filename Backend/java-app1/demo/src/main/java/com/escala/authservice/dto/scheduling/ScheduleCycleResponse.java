@@ -10,6 +10,10 @@ public record ScheduleCycleResponse(
         String timezone,
         String status,
         int businessVersion,
+        OffsetDateTime publishedAt,
+        String publishedBy,
+        OffsetDateTime archivedAt,
+        String archivedBy,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {

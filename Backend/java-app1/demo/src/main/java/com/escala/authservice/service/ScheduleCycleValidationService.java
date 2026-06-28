@@ -4,8 +4,10 @@ import com.escala.authservice.dto.scheduling.CycleValidationAlertResponse;
 import com.escala.authservice.entity.ScheduleCycle;
 import com.escala.authservice.entity.ScheduleCycleAssignment;
 import com.escala.authservice.entity.ScheduleHoliday;
+import com.escala.authservice.entity.ScheduleValidationAcknowledgement;
 import com.escala.authservice.repository.ScheduleCycleAssignmentRepository;
 import com.escala.authservice.repository.ScheduleHolidayRepository;
+import com.escala.authservice.repository.ScheduleValidationAcknowledgementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ public class ScheduleCycleValidationService {
     private final ScheduleCycleService scheduleCycleService;
     private final ScheduleCycleAssignmentRepository assignmentRepository;
     private final ScheduleHolidayRepository holidayRepository;
+    private final ScheduleValidationAcknowledgementRepository acknowledgementRepository;
 
     public List<CycleValidationAlertResponse> validateCycle(String email, UUID cyclePublicId) {
         ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
@@ -34,7 +37,7 @@ public class ScheduleCycleValidationService {
         List<CycleValidationAlertResponse> alerts = new ArrayList<>();
         if (assignments.isEmpty()) {
             alerts.add(alert("CRITICAL", "EMPTY_CYCLE", "Ciclo mensal nao possui atribuicoes", null, null, null));
-            return alerts;
+            return withAcknowledgements(cycle, alerts);
         }
 
         List<ScheduleHoliday> holidays = holidayRepository.findApplicable(
@@ -52,11 +55,48 @@ public class ScheduleCycleValidationService {
         alerts.addAll(validateConsecutiveWorkedDays(assignments));
         alerts.addAll(validateWeekendAndHolidayWork(assignments, holidaysByDate));
 
-        return alerts.stream()
+        return withAcknowledgements(cycle, alerts).stream()
                 .sorted(Comparator
                         .comparing(CycleValidationAlertResponse::severity)
                         .thenComparing(alert -> alert.date() == null ? LocalDate.MIN : alert.date())
                         .thenComparing(alert -> alert.employeeName() == null ? "" : alert.employeeName()))
+                .toList();
+    }
+
+    private List<CycleValidationAlertResponse> withAcknowledgements(
+            ScheduleCycle cycle,
+            List<CycleValidationAlertResponse> alerts
+    ) {
+        if (alerts.isEmpty()) {
+            return alerts;
+        }
+        List<String> alertIds = alerts.stream().map(CycleValidationAlertResponse::id).toList();
+        Map<String, ScheduleValidationAcknowledgement> acknowledgementsByAlertId =
+                acknowledgementRepository.findByCycleIdAndAlertIdIn(cycle.getId(), alertIds).stream()
+                        .collect(Collectors.toMap(
+                                ScheduleValidationAcknowledgement::getAlertId,
+                                acknowledgement -> acknowledgement,
+                                (first, second) -> first
+                        ));
+
+        return alerts.stream()
+                .map(alert -> {
+                    ScheduleValidationAcknowledgement acknowledgement = acknowledgementsByAlertId.get(alert.id());
+                    if (acknowledgement == null) {
+                        return alert;
+                    }
+                    return new CycleValidationAlertResponse(
+                            alert.id(),
+                            alert.severity(),
+                            alert.ruleCode(),
+                            alert.message(),
+                            alert.employeeId(),
+                            alert.employeeName(),
+                            alert.date(),
+                            true,
+                            acknowledgement.getAcknowledgedAt()
+                    );
+                })
                 .toList();
     }
 
@@ -81,7 +121,7 @@ public class ScheduleCycleValidationService {
                             "CRITICAL",
                             "MAX_CONSECUTIVE_WORK_DAYS",
                             "Funcionario possui mais de seis dias trabalhados consecutivos",
-                            assignment.getEmployee().getId(),
+                            assignment.getEmployee().getPublicId().toString(),
                             assignment.getEmployee().getFullName(),
                             assignment.getAssignmentDate()
                     ));
@@ -109,7 +149,7 @@ public class ScheduleCycleValidationService {
                             "WARNING",
                             rule,
                             message,
-                            assignment.getEmployee().getId(),
+                            assignment.getEmployee().getPublicId().toString(),
                             assignment.getEmployee().getFullName(),
                             assignment.getAssignmentDate()
                     );
@@ -125,7 +165,7 @@ public class ScheduleCycleValidationService {
             String severity,
             String ruleCode,
             String message,
-            Long employeeId,
+            String employeeId,
             String employeeName,
             LocalDate date
     ) {
@@ -137,7 +177,9 @@ public class ScheduleCycleValidationService {
                 message,
                 employeeId,
                 employeeName,
-                date
+                date,
+                false,
+                null
         );
     }
 }

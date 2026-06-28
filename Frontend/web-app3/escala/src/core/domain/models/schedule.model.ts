@@ -58,7 +58,7 @@ export interface ScheduleLegend {
 export type ScheduleHolidayType = 'NATIONAL' | 'STATE' | 'MUNICIPAL' | 'CUSTOM';
 
 export interface ScheduleHoliday {
-  id: number;
+  id: string;
   date: string;
   name: string;
   type: ScheduleHolidayType;
@@ -82,6 +82,10 @@ export interface ScheduleCycle {
   timezone: string;
   status: ScheduleCycleStatus;
   businessVersion: number;
+  publishedAt?: string | null;
+  publishedBy?: string | null;
+  archivedAt?: string | null;
+  archivedBy?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -95,7 +99,7 @@ export interface CreateScheduleCycleInput {
 
 export interface ScheduleCycleAssignment {
   id: string;
-  employeeId: number;
+  employeeId: string;
   employeeName: string;
   date: string;
   legendCode: string;
@@ -106,7 +110,7 @@ export interface ScheduleCycleAssignment {
 }
 
 export interface ScheduleCycleAssignmentInput {
-  employeeId: number;
+  employeeId: string;
   date: string;
   legendCode: string;
   modality?: 'PRESENCIAL' | 'REMOTO';
@@ -117,7 +121,7 @@ export interface ReplaceScheduleCycleAssignmentsInput {
 }
 
 export interface ScheduleCycleCounter {
-  employeeId: number;
+  employeeId: string;
   employeeName: string;
   workedDays: number;
   restDays: number;
@@ -133,7 +137,23 @@ export interface ScheduleValidationAlert {
   severity: ScheduleValidationSeverity;
   ruleCode: string;
   message: string;
-  employeeId?: number | null;
+  employeeId?: string | null;
   employeeName?: string | null;
   date?: string | null;
+  acknowledged: boolean;
+  acknowledgedAt?: string | null;
+}
+
+export interface AcknowledgeValidationAlertInput {
+  reason?: string;
+}
+
+export interface ValidationAcknowledgement {
+  id: string;
+  alertId: string;
+  ruleCode: string;
+  severity: ScheduleValidationSeverity;
+  acknowledgedBy: string;
+  reason?: string | null;
+  acknowledgedAt: string;
 }

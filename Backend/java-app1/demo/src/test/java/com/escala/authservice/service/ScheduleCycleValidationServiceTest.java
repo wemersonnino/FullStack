@@ -8,6 +8,7 @@ import com.escala.authservice.entity.ScheduleCycleAssignment;
 import com.escala.authservice.entity.ScheduleHoliday;
 import com.escala.authservice.repository.ScheduleCycleAssignmentRepository;
 import com.escala.authservice.repository.ScheduleHolidayRepository;
+import com.escala.authservice.repository.ScheduleValidationAcknowledgementRepository;
 import com.escala.authservice.scheduling.domain.enums.ModalidadeTrabalho;
 import com.escala.authservice.scheduling.domain.monthly.HolidayType;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +36,19 @@ class ScheduleCycleValidationServiceTest {
     @Mock
     private ScheduleHolidayRepository holidayRepository;
 
+    @Mock
+    private ScheduleValidationAcknowledgementRepository acknowledgementRepository;
+
     private ScheduleCycleValidationService service;
 
     @BeforeEach
     void setUp() {
-        service = new ScheduleCycleValidationService(scheduleCycleService, assignmentRepository, holidayRepository);
+        service = new ScheduleCycleValidationService(
+                scheduleCycleService,
+                assignmentRepository,
+                holidayRepository,
+                acknowledgementRepository
+        );
     }
 
     @Test

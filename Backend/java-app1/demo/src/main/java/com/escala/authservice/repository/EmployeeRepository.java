@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByActiveTrueOrderByFullNameAsc();
@@ -42,4 +43,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     Optional<Employee> findByUserEmailAndCompanySlug(String email, String companySlug);
     List<Employee> findByCompanyId(Long companyId);
     List<Employee> findByIdInAndActiveTrueAndCompanyId(List<Long> ids, Long companyId);
+    Optional<Employee> findByPublicIdAndCompanyId(UUID publicId, Long companyId);
 }

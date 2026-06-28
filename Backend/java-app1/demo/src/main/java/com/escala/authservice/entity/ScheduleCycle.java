@@ -53,6 +53,16 @@ public class ScheduleCycle {
     @Builder.Default
     private int businessVersion = 1;
 
+    private OffsetDateTime publishedAt;
+
+    @ManyToOne
+    private User publishedBy;
+
+    private OffsetDateTime archivedAt;
+
+    @ManyToOne
+    private User archivedBy;
+
     @Column(nullable = false)
     private OffsetDateTime createdAt;
 

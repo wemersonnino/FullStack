@@ -65,10 +65,10 @@ public class ScheduleCycleAssignmentService {
 
     public List<CycleCounterResponse> calculateCounters(String email, UUID cyclePublicId) {
         List<ScheduleCycleAssignment> assignments = listAssignments(email, cyclePublicId);
-        Map<Long, String> employeeNames = new HashMap<>();
-        assignments.forEach(assignment -> employeeNames.put(
+        Map<Long, Employee> employees = new HashMap<>();
+        assignments.forEach(assignment -> employees.put(
                 assignment.getEmployee().getId(),
-                assignment.getEmployee().getFullName()
+                assignment.getEmployee()
         ));
 
         List<com.escala.authservice.scheduling.domain.monthly.ScheduleAssignment> domainAssignments =
@@ -77,7 +77,7 @@ public class ScheduleCycleAssignmentService {
                         .toList();
 
         return monthlyCounterCalculator.calculate(domainAssignments).stream()
-                .map(counter -> toResponse(counter, employeeNames))
+                .map(counter -> toResponse(counter, employees))
                 .toList();
     }
 
@@ -88,7 +88,7 @@ public class ScheduleCycleAssignmentService {
             CycleAssignmentItemRequest item
     ) {
         validateItem(item, cycleMonth, employeeDateKeys);
-        Employee employee = employeeRepository.findById(item.employeeId())
+        Employee employee = employeeRepository.findByPublicIdAndCompanyId(item.employeeId(), cycle.getCompany().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Funcionario da atribuicao nao encontrado"));
         if (!Objects.equals(employee.getCompany().getId(), cycle.getCompany().getId()) || !employee.isActive()) {
             throw new IllegalArgumentException("Funcionario da atribuicao nao pertence a empresa do ciclo ou esta inativo");
@@ -155,10 +155,11 @@ public class ScheduleCycleAssignmentService {
         );
     }
 
-    private CycleCounterResponse toResponse(ScheduleCounterSnapshot counter, Map<Long, String> employeeNames) {
+    private CycleCounterResponse toResponse(ScheduleCounterSnapshot counter, Map<Long, Employee> employees) {
+        Employee employee = employees.get(counter.employeeId());
         return new CycleCounterResponse(
-                counter.employeeId(),
-                employeeNames.get(counter.employeeId()),
+                employee == null ? null : employee.getPublicId().toString(),
+                employee == null ? null : employee.getFullName(),
                 counter.workedDays(),
                 counter.restDays(),
                 counter.absenceDays(),
