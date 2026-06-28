@@ -102,6 +102,6 @@ public class EscalaController {
     private boolean isAdmin(Authentication authentication) {
         return authentication != null && authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(role -> role.equals("ADMIN") || role.equals("OWNER") || role.equals("MANAGER") || role.startsWith("MANAGER_"));
+                .anyMatch(role -> role.equals("ADMIN") || role.equals("OWNER") || role.equals("SYSTEM_ADMIN") || role.equals("MANAGER") || role.startsWith("MANAGER_"));
     }
 }

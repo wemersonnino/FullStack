@@ -24,7 +24,7 @@ public class PolicyService {
         Set<Role> roles = user.getRoles();
         return roles != null && roles.stream()
                 .map(Role::getName)
-                .anyMatch(role -> role.equals("OWNER") || role.equals("ADMIN"));
+                .anyMatch(role -> role.equals("OWNER") || role.equals("ADMIN") || role.equals("SYSTEM_ADMIN"));
     }
 
     public boolean isManager(User user) {
@@ -79,9 +79,14 @@ public class PolicyService {
     }
 
     public void requireCanAccessEmployee(User user, Employee employee) {
-        if (!sameCompany(user, employee)) {
+        boolean isSystemAdmin = user.getRoles() != null && user.getRoles().stream()
+                .map(Role::getName)
+                .anyMatch(role -> role.equals("SYSTEM_ADMIN"));
+        
+        if (!isSystemAdmin && !sameCompany(user, employee)) {
             throw new AccessDeniedException("Funcionario nao pertence a sua empresa");
         }
+        if (isSystemAdmin) return;
         if (!isScopedManagerOnly(user)) return;
         if (employee.getSector() != null && managedSectorIds(user).contains(employee.getSector().getId())) return;
         if (employee.getUser() != null && managementClosureRepository.existsByCompanyIdAndAncestorIdAndDescendantId(
@@ -97,7 +102,11 @@ public class PolicyService {
     }
 
     public void requireCanAccessShift(User user, WorkShift shift) {
-        if (!Objects.equals(shift.getEmployee().getCompany().getId(), user.getCompany().getId())) {
+        boolean isSystemAdmin = user.getRoles() != null && user.getRoles().stream()
+                .map(Role::getName)
+                .anyMatch(role -> role.equals("SYSTEM_ADMIN"));
+        
+        if (!isSystemAdmin && !Objects.equals(shift.getEmployee().getCompany().getId(), user.getCompany().getId())) {
             throw new AccessDeniedException("Escala nao pertence a sua empresa");
         }
         requireCanAccessEmployee(user, shift.getEmployee());
