@@ -50,4 +50,19 @@ public class HexagonalConfig {
     ) {
         return new GenerateScheduleService(workShiftOutputPort, employeeOutputPort);
     }
+
+    @Bean
+    public com.escala.authservice.scheduling.domain.monthly.MonthlyCalendarService monthlyCalendarService() {
+        return new com.escala.authservice.scheduling.domain.monthly.MonthlyCalendarService();
+    }
+
+    @Bean
+    public com.escala.authservice.scheduling.domain.monthly.LegendCatalogService legendCatalogService() {
+        return new com.escala.authservice.scheduling.domain.monthly.LegendCatalogService();
+    }
+
+    @Bean
+    public com.escala.authservice.scheduling.domain.monthly.MonthlyCounterCalculator monthlyCounterCalculator() {
+        return new com.escala.authservice.scheduling.domain.monthly.MonthlyCounterCalculator();
+    }
 }

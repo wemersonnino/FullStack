@@ -9,5 +9,7 @@ import java.util.UUID;
 public interface MessageRepository extends JpaRepository<Message, UUID> {
     List<Message> findByCompanyId(UUID companyId);
     List<Message> findByReceiverEmailAndCompanyIdOrderByCreatedAtDesc(String email, UUID companyId);
+    org.springframework.data.domain.Page<Message> findByReceiverEmailAndCompanyIdOrderByCreatedAtDesc(String email, UUID companyId, org.springframework.data.domain.Pageable pageable);
     List<Message> findByReceiverEmailAndStatusAndCompanyIdOrderByCreatedAtDesc(String email, MessageStatus status, UUID companyId);
+    org.springframework.data.domain.Page<Message> findByReceiverEmailAndStatusAndCompanyIdOrderByCreatedAtDesc(String email, MessageStatus status, UUID companyId, org.springframework.data.domain.Pageable pageable);
 }

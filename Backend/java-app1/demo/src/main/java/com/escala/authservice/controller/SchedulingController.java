@@ -193,6 +193,14 @@ public class SchedulingController {
         return toResponse(scheduleCyclePublicationService.publish(authentication.getName(), id));
     }
 
+    @PostMapping("/cycles/{id}/rectify")
+    public ScheduleCycleResponse rectifyCycle(
+            @PathVariable UUID id,
+            Authentication authentication
+    ) {
+        return toResponse(scheduleCyclePublicationService.rectify(authentication.getName(), id));
+    }
+
     @PostMapping("/cycles/{id}/archive")
     public ScheduleCycleResponse archiveCycle(
             @PathVariable UUID id,

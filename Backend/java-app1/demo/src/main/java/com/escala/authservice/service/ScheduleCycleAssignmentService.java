@@ -99,6 +99,7 @@ public class ScheduleCycleAssignmentService {
 
         return ScheduleCycleAssignment.builder()
                 .cycle(cycle)
+                .company(cycle.getCompany())
                 .employee(employee)
                 .assignmentDate(item.date())
                 .legendCode(legend.code())
@@ -133,8 +134,10 @@ public class ScheduleCycleAssignmentService {
     }
 
     private void ensureEditable(ScheduleCycle cycle) {
-        if (cycle.getStatus() != ScheduleCycleStatus.RASCUNHO && cycle.getStatus() != ScheduleCycleStatus.EM_VALIDACAO) {
-            throw new IllegalStateException("Somente ciclos em rascunho ou validacao podem receber atribuicoes");
+        if (cycle.getStatus() != ScheduleCycleStatus.RASCUNHO
+                && cycle.getStatus() != ScheduleCycleStatus.EM_VALIDACAO
+                && cycle.getStatus() != ScheduleCycleStatus.RETIFICADO) {
+            throw new IllegalStateException("Somente ciclos em rascunho, validacao ou retificacao podem receber atribuicoes");
         }
     }
 

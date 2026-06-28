@@ -229,6 +229,18 @@ export class ScheduleBackendAdapter {
     return response.json();
   }
 
+  static async rectifyScheduleCycle(token: string, cycleId: string): Promise<ScheduleCycle> {
+    const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/rectify`), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error("Failed to rectify schedule cycle");
+    return response.json();
+  }
+
   static async archiveScheduleCycle(token: string, cycleId: string): Promise<ScheduleCycle> {
     const response = await fetch(this.url(`/scheduling/cycles/${cycleId}/archive`), {
       method: 'POST',

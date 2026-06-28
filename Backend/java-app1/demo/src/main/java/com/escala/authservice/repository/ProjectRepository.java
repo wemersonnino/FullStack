@@ -11,4 +11,5 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     long countByActiveTrueAndCompanyId(UUID companyId);
     List<Project> findByActiveTrueAndCompanyId(UUID companyId);
     List<Project> findByCompanyId(UUID companyId);
+    org.springframework.data.domain.Page<Project> findByCompanyId(UUID companyId, org.springframework.data.domain.Pageable pageable);
 }

@@ -21,8 +21,13 @@ public class UserManagementController {
     private final UserManagementService userManagementService;
 
     @GetMapping
-    public List<UserResponse> list(Authentication authentication) {
-        return userManagementService.list(authentication.getName()).stream().map(UserResponse::from).toList();
+    public org.springframework.data.domain.Page<UserResponse> list(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return userManagementService.list(authentication.getName(), pageable).map(UserResponse::from);
     }
 
     @GetMapping("/me")

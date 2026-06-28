@@ -20,22 +20,27 @@ public class OrganizationController {
     private final OrganizationService organizationService;
 
     @GetMapping("/sectors")
-    public List<Sector> sectors(Authentication authentication) {
-        return organizationService.sectors(authentication.getName());
+    public org.springframework.data.domain.Page<com.escala.authservice.dto.SectorResponse> sectors(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return organizationService.sectors(authentication.getName(), pageable).map(com.escala.authservice.dto.SectorResponse::from);
     }
 
     @PostMapping("/sectors")
-    public ResponseEntity<Sector> createSector(Authentication authentication, @RequestBody SectorRequest request) {
-        return ResponseEntity.ok(organizationService.createSector(authentication.getName(), request));
+    public ResponseEntity<com.escala.authservice.dto.SectorResponse> createSector(Authentication authentication, @RequestBody SectorRequest request) {
+        return ResponseEntity.ok(com.escala.authservice.dto.SectorResponse.from(organizationService.createSector(authentication.getName(), request)));
     }
 
     @PutMapping("/sectors/{id}")
-    public ResponseEntity<Sector> updateSector(
+    public ResponseEntity<com.escala.authservice.dto.SectorResponse> updateSector(
             Authentication authentication,
             @PathVariable UUID id,
             @RequestBody SectorRequest request
     ) {
-        return ResponseEntity.ok(organizationService.updateSector(authentication.getName(), id, request));
+        return ResponseEntity.ok(com.escala.authservice.dto.SectorResponse.from(organizationService.updateSector(authentication.getName(), id, request)));
     }
 
     @DeleteMapping("/sectors/{id}")
@@ -45,22 +50,27 @@ public class OrganizationController {
     }
 
     @GetMapping("/projects")
-    public List<Project> projects(Authentication authentication) {
-        return organizationService.projects(authentication.getName());
+    public org.springframework.data.domain.Page<com.escala.authservice.dto.ProjectResponse> projects(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return organizationService.projects(authentication.getName(), pageable).map(com.escala.authservice.dto.ProjectResponse::from);
     }
 
     @PostMapping("/projects")
-    public ResponseEntity<Project> createProject(Authentication authentication, @RequestBody ProjectRequest request) {
-        return ResponseEntity.ok(organizationService.createProject(authentication.getName(), request));
+    public ResponseEntity<com.escala.authservice.dto.ProjectResponse> createProject(Authentication authentication, @RequestBody ProjectRequest request) {
+        return ResponseEntity.ok(com.escala.authservice.dto.ProjectResponse.from(organizationService.createProject(authentication.getName(), request)));
     }
 
     @PutMapping("/projects/{id}")
-    public ResponseEntity<Project> updateProject(
+    public ResponseEntity<com.escala.authservice.dto.ProjectResponse> updateProject(
             Authentication authentication,
             @PathVariable UUID id,
             @RequestBody ProjectRequest request
     ) {
-        return ResponseEntity.ok(organizationService.updateProject(authentication.getName(), id, request));
+        return ResponseEntity.ok(com.escala.authservice.dto.ProjectResponse.from(organizationService.updateProject(authentication.getName(), id, request)));
     }
 
     @DeleteMapping("/projects/{id}")

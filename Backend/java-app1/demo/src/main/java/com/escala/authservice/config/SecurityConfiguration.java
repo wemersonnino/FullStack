@@ -49,7 +49,8 @@ public class SecurityConfiguration {
                             .requestMatchers("/api/v1/auth/**").permitAll()
                             .requestMatchers("/api/v1/public/**").permitAll()
                             .requestMatchers("/api/v1/billing/webhook").permitAll()
-                            .requestMatchers("/actuator/health").permitAll();
+                            .requestMatchers("/actuator/health").permitAll()
+                            .requestMatchers("/actuator/metrics", "/actuator/prometheus").hasAuthority("ADMIN");
 
                     if (openApiEnabled) {
                         auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll();

@@ -87,6 +87,43 @@ class ScheduleCycleAssignmentServiceTest {
     }
 
     @Test
+    void permiteSubstituirAtribuicoesDeCicloEmRetificacao() {
+        UUID cyclePublicId = UUID.randomUUID();
+        UUID employeePublicId = UUID.randomUUID();
+        ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.RETIFICADO);
+        Employee employee = employee(new UUID(0L, 10L), employeePublicId, "Ana");
+        when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
+        when(employeeRepository.findByPublicIdAndCompanyId(employeePublicId, new UUID(0L, 1L))).thenReturn(Optional.of(employee));
+        when(assignmentRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<ScheduleCycleAssignment> assignments = service.replaceAssignments(
+                "admin@escala.local",
+                cyclePublicId,
+                new CycleAssignmentsRequest(List.of(
+                        new CycleAssignmentItemRequest(employeePublicId, LocalDate.of(2026, 6, 1), "T", null)
+                ))
+        );
+
+        assertEquals(1, assignments.size());
+        verify(assignmentRepository).deleteByCycleId(new UUID(0L, 5L));
+    }
+
+    @Test
+    void bloqueiaSubstituicaoDeAtribuicoesDeCicloPublicado() {
+        UUID cyclePublicId = UUID.randomUUID();
+        when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId))
+                .thenReturn(cycle(cyclePublicId, ScheduleCycleStatus.PUBLICADO));
+
+        CycleAssignmentsRequest request = new CycleAssignmentsRequest(List.of());
+
+        assertThrows(IllegalStateException.class, () -> service.replaceAssignments(
+                "admin@escala.local",
+                cyclePublicId,
+                request
+        ));
+    }
+
+    @Test
     void rejeitaAtribuicaoDuplicadaParaMesmoFuncionarioEDia() {
         UUID cyclePublicId = UUID.randomUUID();
         UUID employeePublicId = UUID.randomUUID();
