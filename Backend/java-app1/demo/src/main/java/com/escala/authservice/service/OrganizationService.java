@@ -30,7 +30,7 @@ public class OrganizationService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario requisitante ou empresa nao encontrados"));
     }
 
-    public List<Sector> sectors(String requesterEmail) {
+    public org.springframework.data.domain.Page<Sector> sectors(String requesterEmail, org.springframework.data.domain.Pageable pageable) {
         User requester = userRepository.findByEmail(requesterEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
         Company company = requester.getCompany();
@@ -40,14 +40,14 @@ public class OrganizationService {
         boolean isAdminOrOwner = requester.getRoles().stream()
                 .anyMatch(r -> r.getName().equals("ADMIN") || r.getName().equals("OWNER"));
         if (isAdminOrOwner) {
-            return sectorRepository.findByCompanyId(company.getId());
+            return sectorRepository.findByCompanyId(company.getId(), pageable);
         } else {
             boolean isManager = requester.getRoles().stream()
                     .anyMatch(r -> r.getName().startsWith("MANAGER"));
             if (isManager) {
-                return sectorRepository.findByCompanyIdAndManagerEmail(company.getId(), requesterEmail);
+                return sectorRepository.findByCompanyIdAndManagerEmail(company.getId(), requesterEmail, pageable);
             }
-            return java.util.Collections.emptyList();
+            return org.springframework.data.domain.Page.empty();
         }
     }
 
@@ -122,9 +122,9 @@ public class OrganizationService {
         sectorRepository.delete(sector);
     }
 
-    public List<Project> projects(String requesterEmail) {
+    public org.springframework.data.domain.Page<Project> projects(String requesterEmail, org.springframework.data.domain.Pageable pageable) {
         Company company = getRequesterCompany(requesterEmail);
-        return projectRepository.findByCompanyId(company.getId());
+        return projectRepository.findByCompanyId(company.getId(), pageable);
     }
 
     public Project createProject(String requesterEmail, ProjectRequest request) {

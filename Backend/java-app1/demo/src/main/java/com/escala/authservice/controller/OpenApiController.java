@@ -160,7 +160,7 @@ public class OpenApiController {
         paths.put("/api/v1/learning-progress/{id}/complete", pathPatch(patch("Usuarios", "Marcar como concluído", "Atualiza um item de aprendizado existente para o estado concluído.", pathParam("id", "ID do registro."))));
 
         paths.put("/api/v1/users", path(
-                get("Usuarios", "Listar usuarios", "Lista usuarios cadastrados para administracao."),
+                get("Usuarios", "Listar usuarios", "Lista usuarios cadastrados para administracao.", queryParam("page", "Pagina (zero-based)."), queryParam("size", "Tamanho da pagina.")),
                 null,
                 null,
                 null,
@@ -196,7 +196,7 @@ public class OpenApiController {
         ));
 
         paths.put("/api/v1/employees", path(
-                get("Funcionarios", "Listar funcionarios", "Lista funcionarios cadastrados para escalas, ponto e relatorios."),
+                get("Funcionarios", "Listar funcionarios", "Lista funcionarios cadastrados para escalas, ponto e relatorios.", queryParam("page", "Pagina (zero-based)."), queryParam("size", "Tamanho da pagina.")),
                 post("Funcionarios", "Criar funcionario", "Cadastra funcionario e seus vinculos operacionais.", "EmployeeRequest")
         ));
         paths.put("/api/v1/employees/{id}", path(
@@ -208,7 +208,7 @@ public class OpenApiController {
         ));
 
         paths.put("/api/v1/organization/sectors", path(
-                get("Organizacao", "Listar setores", "Lista setores usados para agrupamento, cobertura e filtros de escala."),
+                get("Organizacao", "Listar setores", "Lista setores usados para agrupamento, cobertura e filtros de escala.", queryParam("page", "Pagina (zero-based)."), queryParam("size", "Tamanho da pagina.")),
                 post("Organizacao", "Criar setor", "Cria setor organizacional para vinculo de funcionarios e projetos.", "SectorRequest")
         ));
         paths.put("/api/v1/organization/sectors/{id}", path(
@@ -219,7 +219,7 @@ public class OpenApiController {
                 delete("Organizacao", "Excluir setor", "Exclui setor quando nao houver bloqueios de relacionamento.", pathParam("id", "ID do setor."))
         ));
         paths.put("/api/v1/organization/projects", path(
-                get("Organizacao", "Listar projetos", "Lista projetos usados para alocacao, filtros e cobertura de escala."),
+                get("Organizacao", "Listar projetos", "Lista projetos usados para alocacao, filtros e cobertura de escala.", queryParam("page", "Pagina (zero-based)."), queryParam("size", "Tamanho da pagina.")),
                 post("Organizacao", "Criar projeto", "Cria projeto vinculado a operacao da empresa.", "ProjectRequest")
         ));
         paths.put("/api/v1/organization/projects/{id}", path(
@@ -325,7 +325,7 @@ public class OpenApiController {
 
         // Mensageria e Notificações (ReBAC)
         paths.put("/api/v1/messages", path(
-                get("Mensageria", "Listar mensagens", "Retorna mensagens e solicitacoes recebidas ou enviadas pelo usuario autenticado, opcionalmente filtrando por status.", queryParam("status", "Status da mensagem (PENDING, APPROVED, REJECTED, READ).")),
+                get("Mensageria", "Listar mensagens", "Retorna mensagens e solicitacoes recebidas ou enviadas pelo usuario autenticado, opcionalmente filtrando por status.", queryParam("status", "Status da mensagem (PENDING, APPROVED, REJECTED, READ)."), queryParam("page", "Pagina (zero-based)."), queryParam("size", "Tamanho da pagina.")),
                 post("Mensageria", "Criar/Enviar mensagem", "Envia uma mensagem ou cria uma solicitacao de decisao.", "MessageRequest")
         ));
         paths.put("/api/v1/messages/{id}/decision", pathPatch(patch("Mensageria", "Decidir solicitacao", "Aprova ou rejeita uma solicitacao pendente (por exemplo, troca de escala ou permissao).", "MessageDecisionRequest", pathParam("id", "ID da mensagem/solicitacao."))));

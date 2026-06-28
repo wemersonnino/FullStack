@@ -42,6 +42,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Optional<Employee> findByEmailAndCompanySlug(String email, String companySlug);
     Optional<Employee> findByUserEmailAndCompanySlug(String email, String companySlug);
     List<Employee> findByCompanyId(UUID companyId);
+    org.springframework.data.domain.Page<Employee> findByCompanyId(UUID companyId, org.springframework.data.domain.Pageable pageable);
     List<Employee> findByIdInAndActiveTrueAndCompanyId(List<UUID> ids, UUID companyId);
     Optional<Employee> findByPublicIdAndCompanyId(UUID publicId, UUID companyId);
 }

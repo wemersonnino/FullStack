@@ -1,12 +1,9 @@
 package com.escala.authservice.scheduling.domain.monthly;
 
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
-@Service
 public class LegendCatalogService {
     private static final List<LegendCode> DEFAULT_LEGENDS = List.of(
             new LegendCode("T", "Trabalho", LegendImpact.WORKED, Duration.ofHours(8)),

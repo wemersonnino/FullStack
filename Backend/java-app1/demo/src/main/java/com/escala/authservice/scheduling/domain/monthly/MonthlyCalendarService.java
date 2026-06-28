@@ -1,7 +1,5 @@
 package com.escala.authservice.scheduling.domain.monthly;
 
-import org.springframework.stereotype.Service;
-
 import java.time.DayOfWeek;
 import java.util.UUID;
 import java.time.LocalDate;
@@ -14,7 +12,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Service
 public class MonthlyCalendarService {
 
     public MonthlyCalendar generate(int year, int month, ZoneId timezone, UUID unitId, List<Holiday> holidays) {

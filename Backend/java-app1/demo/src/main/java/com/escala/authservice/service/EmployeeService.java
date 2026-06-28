@@ -32,9 +32,9 @@ public class EmployeeService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario requisitante ou empresa nao encontrados"));
     }
 
-    public List<Employee> list(String requesterEmail) {
+    public org.springframework.data.domain.Page<Employee> list(String requesterEmail, org.springframework.data.domain.Pageable pageable) {
         Company company = getRequesterCompany(requesterEmail);
-        return employeeRepository.findByCompanyId(company.getId());
+        return employeeRepository.findByCompanyId(company.getId(), pageable);
     }
 
     public Employee create(String requesterEmail, EmployeeRequest request) {

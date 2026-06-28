@@ -8,6 +8,8 @@ import java.util.UUID;
 
 public interface SectorRepository extends JpaRepository<Sector, UUID> {
     List<Sector> findByCompanyId(UUID companyId);
+    org.springframework.data.domain.Page<Sector> findByCompanyId(UUID companyId, org.springframework.data.domain.Pageable pageable);
     List<Sector> findByManagerEmail(String email);
     List<Sector> findByCompanyIdAndManagerEmail(UUID companyId, String email);
+    org.springframework.data.domain.Page<Sector> findByCompanyIdAndManagerEmail(UUID companyId, String email, org.springframework.data.domain.Pageable pageable);
 }

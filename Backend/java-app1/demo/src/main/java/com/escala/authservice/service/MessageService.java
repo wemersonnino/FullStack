@@ -28,14 +28,14 @@ public class MessageService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
     }
 
-    public List<Message> listMessages(String email, MessageStatus status) {
+    public org.springframework.data.domain.Page<Message> listMessages(String email, MessageStatus status, org.springframework.data.domain.Pageable pageable) {
         User requester = getRequester(email);
         if (status != null) {
             return messageRepository.findByReceiverEmailAndStatusAndCompanyIdOrderByCreatedAtDesc(
-                    email, status, requester.getCompany().getId());
+                    email, status, requester.getCompany().getId(), pageable);
         }
         return messageRepository.findByReceiverEmailAndCompanyIdOrderByCreatedAtDesc(
-                email, requester.getCompany().getId());
+                email, requester.getCompany().getId(), pageable);
     }
 
     @Transactional

@@ -99,6 +99,7 @@ public class ScheduleCycleAssignmentService {
 
         return ScheduleCycleAssignment.builder()
                 .cycle(cycle)
+                .company(cycle.getCompany())
                 .employee(employee)
                 .assignmentDate(item.date())
                 .legendCode(legend.code())

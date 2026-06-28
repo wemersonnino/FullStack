@@ -22,7 +22,8 @@ import java.util.UUID;
         },
         indexes = {
                 @Index(name = "idx_schedule_cycle_assignments_cycle_date", columnList = "cycle_id, assignmentDate"),
-                @Index(name = "idx_schedule_cycle_assignments_public_id", columnList = "publicId")
+                @Index(name = "idx_schedule_cycle_assignments_public_id", columnList = "publicId"),
+                @Index(name = "idx_schedule_cycle_assignments_company_employee_date", columnList = "company_id, employee_id, assignmentDate")
         }
 )
 @Data
@@ -41,6 +42,9 @@ public class ScheduleCycleAssignment {
 
     @ManyToOne(optional = false)
     private ScheduleCycle cycle;
+
+    @ManyToOne(optional = false)
+    private Company company;
 
     @ManyToOne(optional = false)
     private Employee employee;

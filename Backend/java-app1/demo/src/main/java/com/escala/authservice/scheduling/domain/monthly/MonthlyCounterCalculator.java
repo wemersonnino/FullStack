@@ -1,7 +1,5 @@
 package com.escala.authservice.scheduling.domain.monthly;
 
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.util.UUID;
 import java.util.Comparator;
@@ -9,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
 public class MonthlyCounterCalculator {
 
     public List<ScheduleCounterSnapshot> calculate(List<ScheduleAssignment> assignments) {
