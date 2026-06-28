@@ -37,11 +37,27 @@ public class CompanyService {
         return companyRepository.existsBySlugAndIdNot(slug, id);
     }
 
+    private String sanitize(String input) {
+        if (input == null) return null;
+        return input.replaceAll("<[^>]*>", "").trim();
+    }
+
+    private String validateAndCleanCnpj(String cnpj) {
+        if (cnpj == null || cnpj.isBlank()) return null;
+        String cleaned = cnpj.replaceAll("[.\\-/\\s]", "").trim().toUpperCase();
+        if (!cleaned.matches("^[A-Z0-9]{12}[0-9]{2}$")) {
+            throw new IllegalArgumentException("Formato de CNPJ invalido. O CNPJ deve possuir 14 caracteres (formato numerico ou alfanumerico com digitos verificadores numericos)");
+        }
+        return cleaned;
+    }
+
     public Company create(CompanyRequest request) {
+        String cleanCnpj = validateAndCleanCnpj(request.getCnpj());
+        
         // Mapear DTO -> Domain
         var domain = com.escala.authservice.core.company.domain.CompanyDomain.builder()
-                .name(request.getName())
-                .cnpj(request.getCnpj())
+                .name(sanitize(request.getName()))
+                .cnpj(cleanCnpj)
                 .active(request.getActive() == null || request.getActive())
                 .planType(request.getPlanType() != null ? request.getPlanType() : "TRIAL")
                 .trialExpiresAt(request.getTrialExpiresAt() != null ? request.getTrialExpiresAt() : OffsetDateTime.now().plusDays(14))
@@ -58,22 +74,25 @@ public class CompanyService {
 
     public Company update(UUID id, CompanyRequest request) {
         Company company = findById(id);
-        company.setName(request.getName());
-        company.setCnpj(request.getCnpj());
-        company.setLogoUrl(request.getLogoUrl());
+        
+        String cleanCnpj = validateAndCleanCnpj(request.getCnpj());
+        
+        company.setName(sanitize(request.getName()));
+        company.setCnpj(cleanCnpj);
+        company.setLogoUrl(sanitize(request.getLogoUrl()));
         company.setLatitude(request.getLatitude());
         company.setLongitude(request.getLongitude());
         if (request.getAllowedRadius() != null) {
             company.setAllowedRadius(request.getAllowedRadius());
         }
-        company.setAddress(request.getAddress());
-        company.setCep(request.getCep());
-        company.setStreet(request.getStreet());
-        company.setNumber(request.getNumber());
-        company.setComplement(request.getComplement());
-        company.setNeighborhood(request.getNeighborhood());
-        company.setCity(request.getCity());
-        company.setState(request.getState());
+        company.setAddress(sanitize(request.getAddress()));
+        company.setCep(sanitize(request.getCep()));
+        company.setStreet(sanitize(request.getStreet()));
+        company.setNumber(sanitize(request.getNumber()));
+        company.setComplement(sanitize(request.getComplement()));
+        company.setNeighborhood(sanitize(request.getNeighborhood()));
+        company.setCity(sanitize(request.getCity()));
+        company.setState(sanitize(request.getState()));
         if (request.getActive() != null) {
             company.setActive(request.getActive());
         }
