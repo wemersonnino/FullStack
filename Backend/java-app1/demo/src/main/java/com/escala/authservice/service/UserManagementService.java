@@ -88,15 +88,32 @@ public class UserManagementService {
         userRepository.save(user);
     }
 
+    private boolean hasRole(User user, String roleName) {
+        if (user == null || user.getRoles() == null) return false;
+        return user.getRoles().stream().anyMatch(r -> r.getName().equalsIgnoreCase(roleName));
+    }
+
     public User grantRole(String requesterEmail, UUID userId, RoleChangeRequest request) {
         User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
         
-        if (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId())) {
+        boolean requesterIsSystemAdmin = hasRole(requester, "SYSTEM_ADMIN");
+        boolean requesterIsAdminOrOwner = requesterIsSystemAdmin || hasRole(requester, "ADMIN") || hasRole(requester, "OWNER");
+        
+        if (!requesterIsAdminOrOwner) {
+            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores ou donos podem gerenciar papeis de usuarios");
+        }
+
+        if (!requesterIsSystemAdmin && (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId()))) {
             throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar roles de usuario de outra empresa");
         }
 
-        if ("SYSTEM_ADMIN".equalsIgnoreCase(request.getRoleName())) {
+        boolean targetIsSystemAdmin = hasRole(user, "SYSTEM_ADMIN");
+        if (targetIsSystemAdmin && !requesterIsSystemAdmin) {
+            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores do sistema podem alterar roles de um SYSTEM_ADMIN");
+        }
+
+        if ("SYSTEM_ADMIN".equalsIgnoreCase(request.getRoleName()) && !requesterIsSystemAdmin) {
             throw new org.springframework.security.access.AccessDeniedException("Nao e permitido gerenciar o papel de SYSTEM_ADMIN via API");
         }
 
@@ -110,11 +127,23 @@ public class UserManagementService {
         User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
         
-        if (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId())) {
+        boolean requesterIsSystemAdmin = hasRole(requester, "SYSTEM_ADMIN");
+        boolean requesterIsAdminOrOwner = requesterIsSystemAdmin || hasRole(requester, "ADMIN") || hasRole(requester, "OWNER");
+        
+        if (!requesterIsAdminOrOwner) {
+            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores ou donos podem gerenciar papeis de usuarios");
+        }
+
+        if (!requesterIsSystemAdmin && (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId()))) {
             throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar roles de usuario de outra empresa");
         }
 
-        if ("SYSTEM_ADMIN".equalsIgnoreCase(request.getRoleName())) {
+        boolean targetIsSystemAdmin = hasRole(user, "SYSTEM_ADMIN");
+        if (targetIsSystemAdmin && !requesterIsSystemAdmin) {
+            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores do sistema podem revogar roles de um SYSTEM_ADMIN");
+        }
+
+        if ("SYSTEM_ADMIN".equalsIgnoreCase(request.getRoleName()) && !requesterIsSystemAdmin) {
             throw new org.springframework.security.access.AccessDeniedException("Nao e permitido gerenciar o papel de SYSTEM_ADMIN via API");
         }
 
@@ -126,8 +155,21 @@ public class UserManagementService {
         User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
         
-        if (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId())) {
+        boolean requesterIsSystemAdmin = hasRole(requester, "SYSTEM_ADMIN");
+        if (!requesterIsSystemAdmin && (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId()))) {
             throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar tema de usuario de outra empresa");
+        }
+
+        boolean isSelf = user.getId().equals(requester.getId());
+        boolean requesterIsAdminOrOwner = requesterIsSystemAdmin || hasRole(requester, "ADMIN") || hasRole(requester, "OWNER");
+        
+        if (!isSelf && !requesterIsAdminOrOwner) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar o tema de outro usuario");
+        }
+
+        boolean targetIsSystemAdmin = hasRole(user, "SYSTEM_ADMIN");
+        if (targetIsSystemAdmin && !requesterIsSystemAdmin) {
+            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores do sistema podem alterar dados de um SYSTEM_ADMIN");
         }
 
         user.setTheme(theme);
