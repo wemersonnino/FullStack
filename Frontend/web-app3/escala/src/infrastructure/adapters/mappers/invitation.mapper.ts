@@ -5,9 +5,10 @@ export class InvitationMapper {
     return {
       id: dto.id?.toString() || "",
       email: dto.email || "",
-      token: dto.token || "",
       roleName: dto.roleName || "",
       companyName: dto.companyName || "",
+      companySlug: dto.companySlug || "",
+      inviteUrl: dto.inviteUrl || undefined,
       expiresAt: dto.expiresAt || "",
       acceptedAt: dto.acceptedAt,
       active: !!dto.active,

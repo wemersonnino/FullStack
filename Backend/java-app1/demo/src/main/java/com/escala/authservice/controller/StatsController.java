@@ -21,7 +21,7 @@ public class StatsController {
     }
 
     @GetMapping("/marketing")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'OWNER', 'MARKETING')")
+    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
     public MarketingStatsResponse getMarketingStats() {
         return statsService.getMarketingStats();
     }

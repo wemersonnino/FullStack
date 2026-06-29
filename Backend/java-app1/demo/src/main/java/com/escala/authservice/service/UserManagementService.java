@@ -14,22 +14,33 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserManagementService {
+    private static final Set<String> ALLOWED_THEMES = Set.of("light", "dark", "system");
+    private static final Set<String> MANAGEABLE_ROLES = Set.of("USER", "MANAGER", "ADMIN", "OWNER");
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CurrentUserService currentUserService;
+    private final PolicyService policyService;
 
     public org.springframework.data.domain.Page<User> list(String requesterEmail, org.springframework.data.domain.Pageable pageable) {
         User requester = currentUser(requesterEmail);
+        policyService.requireOwnerOrAdmin(requester, "Apenas administradores ou donos podem listar usuarios");
+        if (policyService.isSystemAdmin(requester)) {
+            return userRepository.findAll(pageable);
+        }
         return userRepository.findByCompanyId(requester.getCompany().getId(), pageable);
     }
 
     public User currentUser(String email) {
-        return userRepository.findByEmail(email).orElseThrow();
+        return currentUserService.requireCurrentUser(email);
     }
 
     public User updateCurrentUser(String currentEmail, UpdateCurrentUserRequest request) {
@@ -41,13 +52,19 @@ public class UserManagementService {
         if (username.isBlank() || email.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username and email are required");
         }
+        if (userRepository.existsByCompanyIdAndUsernameIgnoreCaseAndIdNot(user.getCompany().getId(), username, user.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists in this company");
+        }
+        if (userRepository.existsByEmailIgnoreCaseAndIdNot(email, user.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
+        }
 
         user.setUsername(username);
         user.setEmail(email);
 
         String theme = request.getTheme();
         if (theme != null && !theme.isBlank()) {
-            user.setTheme(theme);
+            user.setTheme(normalizeTheme(theme));
         }
 
         if (request.getAvatarUrl() != null) {
@@ -83,6 +100,9 @@ public class UserManagementService {
         if (request.getNewPassword().length() < 8) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must have at least 8 characters");
         }
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be different from current password");
+        }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
@@ -96,6 +116,7 @@ public class UserManagementService {
     public User grantRole(String requesterEmail, UUID userId, RoleChangeRequest request) {
         User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
+        String roleName = normalizeRole(request.getRoleName());
         
         boolean requesterIsSystemAdmin = hasRole(requester, "SYSTEM_ADMIN");
         boolean requesterIsAdminOrOwner = requesterIsSystemAdmin || hasRole(requester, "ADMIN") || hasRole(requester, "OWNER");
@@ -113,12 +134,18 @@ public class UserManagementService {
             throw new org.springframework.security.access.AccessDeniedException("Apenas administradores do sistema podem alterar roles de um SYSTEM_ADMIN");
         }
 
-        if ("SYSTEM_ADMIN".equalsIgnoreCase(request.getRoleName()) && !requesterIsSystemAdmin) {
+        if (!MANAGEABLE_ROLES.contains(roleName)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role not allowed");
+        }
+        if ("SYSTEM_ADMIN".equalsIgnoreCase(roleName) && !requesterIsSystemAdmin) {
             throw new org.springframework.security.access.AccessDeniedException("Nao e permitido gerenciar o papel de SYSTEM_ADMIN via API");
         }
+        if (("OWNER".equals(roleName) || "ADMIN".equals(roleName)) && !policyService.isOwner(requester)) {
+            throw new org.springframework.security.access.AccessDeniedException("Apenas owners podem conceder OWNER ou ADMIN");
+        }
 
-        Role role = roleRepository.findByName(request.getRoleName())
-                .orElseGet(() -> roleRepository.save(Role.builder().name(request.getRoleName()).build()));
+        Role role = roleRepository.findByName(roleName)
+                .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
         user.getRoles().add(role);
         return userRepository.save(user);
     }
@@ -126,6 +153,7 @@ public class UserManagementService {
     public User revokeRole(String requesterEmail, UUID userId, RoleChangeRequest request) {
         User requester = currentUser(requesterEmail);
         User user = userRepository.findById(userId).orElseThrow();
+        String roleName = normalizeRole(request.getRoleName());
         
         boolean requesterIsSystemAdmin = hasRole(requester, "SYSTEM_ADMIN");
         boolean requesterIsAdminOrOwner = requesterIsSystemAdmin || hasRole(requester, "ADMIN") || hasRole(requester, "OWNER");
@@ -143,11 +171,20 @@ public class UserManagementService {
             throw new org.springframework.security.access.AccessDeniedException("Apenas administradores do sistema podem revogar roles de um SYSTEM_ADMIN");
         }
 
-        if ("SYSTEM_ADMIN".equalsIgnoreCase(request.getRoleName()) && !requesterIsSystemAdmin) {
+        if (!MANAGEABLE_ROLES.contains(roleName)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role not allowed");
+        }
+        if ("SYSTEM_ADMIN".equalsIgnoreCase(roleName) && !requesterIsSystemAdmin) {
             throw new org.springframework.security.access.AccessDeniedException("Nao e permitido gerenciar o papel de SYSTEM_ADMIN via API");
         }
+        if (("OWNER".equals(roleName) || "ADMIN".equals(roleName)) && !policyService.isOwner(requester)) {
+            throw new org.springframework.security.access.AccessDeniedException("Apenas owners podem revogar OWNER ou ADMIN");
+        }
+        if ("OWNER".equals(roleName) && isLastOwnerInCompany(user)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A empresa precisa manter ao menos um OWNER ativo");
+        }
 
-        user.getRoles().removeIf(role -> role.getName().equals(request.getRoleName()));
+        user.getRoles().removeIf(role -> role.getName().equals(roleName));
         return userRepository.save(user);
     }
 
@@ -172,7 +209,32 @@ public class UserManagementService {
             throw new org.springframework.security.access.AccessDeniedException("Apenas administradores do sistema podem alterar dados de um SYSTEM_ADMIN");
         }
 
-        user.setTheme(theme);
+        user.setTheme(normalizeTheme(theme));
         return userRepository.save(user);
+    }
+
+    private String normalizeRole(String roleName) {
+        if (roleName == null || roleName.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role name is required");
+        }
+        return roleName.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private String normalizeTheme(String theme) {
+        String normalized = theme == null ? "system" : theme.trim().toLowerCase(Locale.ROOT);
+        if (!ALLOWED_THEMES.contains(normalized)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Theme must be light, dark or system");
+        }
+        return normalized;
+    }
+
+    private boolean isLastOwnerInCompany(User user) {
+        if (user.getCompany() == null) {
+            return false;
+        }
+        long ownerCount = userRepository.findByCompanyId(user.getCompany().getId()).stream()
+                .filter(candidate -> hasRole(candidate, "OWNER"))
+                .count();
+        return ownerCount <= 1 && hasRole(user, "OWNER");
     }
 }

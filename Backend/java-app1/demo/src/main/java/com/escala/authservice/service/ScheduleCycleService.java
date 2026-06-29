@@ -22,7 +22,7 @@ public class ScheduleCycleService {
     private static final String DEFAULT_TIMEZONE = "America/Sao_Paulo";
 
     private final ScheduleCycleRepository scheduleCycleRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     @Transactional
     public ScheduleCycle createCycle(String email, ScheduleCycleRequest request) {
@@ -61,8 +61,7 @@ public class ScheduleCycleService {
     }
 
     private User getRequester(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        return currentUserService.requireCurrentUser(email);
     }
 
     private void validate(ScheduleCycleRequest request) {

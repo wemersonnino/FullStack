@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -25,11 +26,11 @@ public class EmployeeService {
     private final CompanyService companyService;
     private final CheckPlanLimitUseCase checkPlanLimitUseCase;
     private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
+    private final PolicyService policyService;
 
     private Company getRequesterCompany(String requesterEmail) {
-        return userRepository.findByEmail(requesterEmail)
-                .map(com.escala.authservice.entity.User::getCompany)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario requisitante ou empresa nao encontrados"));
+        return currentUserService.requireCurrentUser(requesterEmail).getCompany();
     }
 
     public org.springframework.data.domain.Page<Employee> list(String requesterEmail, org.springframework.data.domain.Pageable pageable) {
@@ -37,17 +38,34 @@ public class EmployeeService {
         return employeeRepository.findByCompanyId(company.getId(), pageable);
     }
 
+    private void checkEmployeeAdmin(String requesterEmail, Company company) {
+        com.escala.authservice.entity.User requester = currentUserService.requireCurrentUser(requesterEmail);
+        
+        boolean isSystemAdmin = policyService.isSystemAdmin(requester);
+        boolean isAdminOrOwner = policyService.isOwnerOrAdmin(requester);
+        
+        if (!isAdminOrOwner) {
+            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores ou donos podem gerenciar funcionarios");
+        }
+        
+        if (!isSystemAdmin && (company == null || !company.getId().equals(requester.getCompany().getId()))) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a gerenciar funcionarios de outra empresa");
+        }
+    }
+
     public Employee create(String requesterEmail, EmployeeRequest request) {
         Company company = getRequesterCompany(requesterEmail);
-        int currentCount = (int) employeeRepository.countByActiveTrueAndCompanyId(company.getId());
+        checkEmployeeAdmin(requesterEmail, company);
+        validateEmployeeRequest(company, request, null);
         
+        int currentCount = (int) employeeRepository.countByActiveTrueAndCompanyId(company.getId());
         if (!checkPlanLimitUseCase.canAddEmployee(company.getPlanType(), currentCount)) {
             throw new IllegalStateException("Limite de funcionários atingido para o plano atual: " + company.getPlanType() + ". Faça upgrade do seu plano.");
         }
 
         return employeeRepository.save(Employee.builder()
-                .fullName(request.getFullName())
-                .email(request.getEmail())
+                .fullName(request.getFullName().trim())
+                .email(normalizeEmail(request.getEmail()))
                 .active(request.getActive() == null || request.getActive())
                 .sector(resolveSector(company, request.getSectorId()))
                 .project(resolveProject(company, request.getProjectId()))
@@ -56,28 +74,23 @@ public class EmployeeService {
     }
 
     public Employee update(String requesterEmail, UUID id, EmployeeRequest request) {
-        Company company = getRequesterCompany(requesterEmail);
         Employee employee = employeeRepository.findById(id).orElseThrow();
-        
-        if (employee.getCompany() == null || !employee.getCompany().getId().equals(company.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar funcionario de outra empresa");
-        }
+        checkEmployeeAdmin(requesterEmail, employee.getCompany());
+        validateEmployeeRequest(employee.getCompany(), request, employee.getId());
 
-        employee.setFullName(request.getFullName());
-        employee.setEmail(request.getEmail());
+        employee.setFullName(request.getFullName().trim());
+        employee.setEmail(normalizeEmail(request.getEmail()));
         if (request.getActive() != null) employee.setActive(request.getActive());
+        
+        Company company = getRequesterCompany(requesterEmail);
         employee.setSector(resolveSector(company, request.getSectorId()));
         employee.setProject(resolveProject(company, request.getProjectId()));
         return employeeRepository.save(employee);
     }
 
     public void remove(String requesterEmail, UUID id) {
-        Company company = getRequesterCompany(requesterEmail);
         Employee employee = employeeRepository.findById(id).orElseThrow();
-        
-        if (employee.getCompany() == null || !employee.getCompany().getId().equals(company.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a remover funcionario de outra empresa");
-        }
+        checkEmployeeAdmin(requesterEmail, employee.getCompany());
 
         employee.setActive(false);
         employeeRepository.save(employee);
@@ -99,5 +112,25 @@ public class EmployeeService {
             throw new org.springframework.security.access.AccessDeniedException("Projeto nao pertence a empresa do requisitante");
         }
         return project;
+    }
+
+    private void validateEmployeeRequest(Company company, EmployeeRequest request, UUID employeeId) {
+        if (request.getFullName() == null || request.getFullName().trim().isBlank()) {
+            throw new IllegalArgumentException("Nome completo do funcionario e obrigatorio");
+        }
+        String normalizedEmail = normalizeEmail(request.getEmail());
+        boolean exists = employeeId == null
+                ? employeeRepository.existsByCompanyIdAndEmailIgnoreCase(company.getId(), normalizedEmail)
+                : employeeRepository.existsByCompanyIdAndEmailIgnoreCaseAndIdNot(company.getId(), normalizedEmail, employeeId);
+        if (exists) {
+            throw new IllegalArgumentException("Ja existe funcionario com este email na empresa");
+        }
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null || email.trim().isBlank()) {
+            throw new IllegalArgumentException("Email do funcionario e obrigatorio");
+        }
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 }

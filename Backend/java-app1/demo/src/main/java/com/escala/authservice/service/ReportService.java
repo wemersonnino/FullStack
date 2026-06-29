@@ -5,8 +5,12 @@ import com.escala.authservice.entity.Employee;
 import com.escala.authservice.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.UUID;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +21,7 @@ public class ReportService {
     private final EmployeeRepository employeeRepository;
 
     public List<PayrollReportItem> generatePayrollReport(UUID companyId, String month) {
+        String normalizedMonth = normalizeMonth(month);
         List<Employee> employees = employeeRepository.findByCompanyId(companyId);
 
         return employees.stream().map(emp -> PayrollReportItem.builder()
@@ -27,9 +32,17 @@ public class ReportService {
                 .nightHours(5L)
                 .absences(0L)
                 .estimatedCost(new BigDecimal("3500.00"))
-                .period(month)
+                .period(normalizedMonth)
                 .build())
                 .collect(Collectors.toList());
+    }
+
+    public String normalizeMonth(String month) {
+        try {
+            return YearMonth.parse(month).toString();
+        } catch (DateTimeParseException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parametro month invalido. Use yyyy-MM.", exception);
+        }
     }
 
     public String exportToCsv(List<PayrollReportItem> report) {
@@ -38,8 +51,8 @@ public class ReportService {
         
         for (PayrollReportItem item : report) {
             csv.append(String.format("%s;%s;%d;%d;%d;%d;%s\n",
-                    item.getEmployeeName(),
-                    item.getEmployeeEmail(),
+                    escapeCsvCell(item.getEmployeeName()),
+                    escapeCsvCell(item.getEmployeeEmail()),
                     item.getTotalHours(),
                     item.getExtraHours(),
                     item.getNightHours(),
@@ -48,5 +61,25 @@ public class ReportService {
         }
         
         return csv.toString();
+    }
+
+    private String escapeCsvCell(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        String sanitized = value
+                .replace('\r', ' ')
+                .replace('\n', ' ');
+
+        if (!sanitized.isEmpty() && "=+-@".indexOf(sanitized.charAt(0)) >= 0) {
+            sanitized = "'" + sanitized;
+        }
+
+        if (sanitized.indexOf(';') >= 0 || sanitized.indexOf('"') >= 0) {
+            sanitized = "\"" + sanitized.replace("\"", "\"\"") + "\"";
+        }
+
+        return sanitized;
     }
 }

@@ -6,7 +6,6 @@ import com.escala.authservice.entity.ScheduleCycle;
 import com.escala.authservice.entity.ScheduleCycleStatus;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.ScheduleCycleRepository;
-import com.escala.authservice.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,14 +28,14 @@ class ScheduleCycleServiceTest {
     private ScheduleCycleRepository scheduleCycleRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private CurrentUserService currentUserService;
 
     @InjectMocks
     private ScheduleCycleService service;
 
     @Test
     void criaCicloMensalEmRascunhoParaEmpresaDoUsuario() {
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester());
         when(scheduleCycleRepository.findActiveForPeriod(new UUID(0L, 1L), new UUID(0L, 10L), 2026, 6, ScheduleCycleStatus.ARQUIVADO))
                 .thenReturn(Optional.empty());
         when(scheduleCycleRepository.save(any(ScheduleCycle.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -57,7 +56,7 @@ class ScheduleCycleServiceTest {
 
     @Test
     void usaTimezonePadraoQuandoNaoInformado() {
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester());
         when(scheduleCycleRepository.findActiveForPeriod(new UUID(0L, 1L), null, 2026, 7, ScheduleCycleStatus.ARQUIVADO))
                 .thenReturn(Optional.empty());
         when(scheduleCycleRepository.save(any(ScheduleCycle.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -69,7 +68,7 @@ class ScheduleCycleServiceTest {
 
     @Test
     void rejeitaCicloDuplicadoAtivoNoMesmoPeriodo() {
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester());
         when(scheduleCycleRepository.findActiveForPeriod(new UUID(0L, 1L), new UUID(0L, 10L), 2026, 6, ScheduleCycleStatus.ARQUIVADO))
                 .thenReturn(Optional.of(ScheduleCycle.builder().id(new UUID(0L, 99L)).build()));
 
@@ -81,7 +80,7 @@ class ScheduleCycleServiceTest {
 
     @Test
     void buscaCicloSomenteNaEmpresaDoUsuario() {
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester());
         UUID publicId = UUID.randomUUID();
         ScheduleCycle existing = ScheduleCycle.builder().id(new UUID(0L, 5L)).publicId(publicId).year(2026).month(6).build();
         when(scheduleCycleRepository.findByCompanyIdAndPublicId(new UUID(0L, 1L), publicId)).thenReturn(Optional.of(existing));
@@ -93,7 +92,7 @@ class ScheduleCycleServiceTest {
 
     @Test
     void rejeitaMesInvalido() {
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester());
 
         assertThrows(IllegalArgumentException.class, () -> service.createCycle(
                 "admin@escala.local",

@@ -1,9 +1,10 @@
 export interface TeamInvitation {
   id: string;
   email: string;
-  token: string;
   roleName: string;
   companyName: string;
+  companySlug: string;
+  inviteUrl?: string;
   expiresAt: string;
   acceptedAt?: string;
   active: boolean;

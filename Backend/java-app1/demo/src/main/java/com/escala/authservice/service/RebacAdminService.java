@@ -14,12 +14,13 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class RebacAdminService {
-    private final UserRepository userRepository;
     private final ManagerAssignmentRepository managerAssignmentRepository;
     private final ManagementEdgeRepository managementEdgeRepository;
     private final ManagementClosureRepository managementClosureRepository;
     private final PolicyService policyService;
     private final AuditLogService auditLogService;
+    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     public List<ManagerAssignmentResponse> listAssignments(String requesterEmail) {
         User requester = requireOwnerOrAdmin(requesterEmail);
@@ -174,8 +175,7 @@ public class RebacAdminService {
     }
 
     private User requireOwnerOrAdmin(String requesterEmail) {
-        User requester = userRepository.findByEmail(requesterEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        User requester = currentUserService.requireCurrentUser(requesterEmail);
         if (!policyService.isOwnerOrAdmin(requester)) {
             throw new AccessDeniedException("Apenas OWNER ou ADMIN podem administrar ReBAC");
         }

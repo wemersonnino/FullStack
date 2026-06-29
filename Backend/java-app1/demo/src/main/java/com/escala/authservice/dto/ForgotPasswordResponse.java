@@ -7,6 +7,4 @@ import lombok.Data;
 @Builder
 public class ForgotPasswordResponse {
     private String message;
-    private String resetToken;
-    private String resetUrl;
 }

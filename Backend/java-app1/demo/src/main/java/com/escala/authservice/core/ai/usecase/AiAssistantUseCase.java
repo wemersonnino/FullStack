@@ -7,7 +7,7 @@ import com.escala.authservice.entity.AiUsage;
 import com.escala.authservice.entity.Company;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.AiUsageRepository;
-import com.escala.authservice.repository.UserRepository;
+import com.escala.authservice.service.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +20,12 @@ import java.util.Map;
 public class AiAssistantUseCase {
     private final AiProviderPort aiProviderPort;
     private final AiUsageRepository aiUsageRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
     private final CheckPlanLimitUseCase checkPlanLimitUseCase;
 
     @Transactional
     public String executeAiTask(String userEmail, String feature, Map<String, Object> context, String instruction) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        User user = currentUserService.requireCurrentUser(userEmail);
         Company company = user.getCompany();
 
         // 1. Validar se o plano permite IA

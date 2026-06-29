@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { proxyBackend } from '@/lib/bff/backend';
 
-const MARKETING_ROLES = new Set(['ADMIN', 'OWNER', 'MARKETING']);
+const MARKETING_ROLES = new Set(['SYSTEM_ADMIN']);
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);

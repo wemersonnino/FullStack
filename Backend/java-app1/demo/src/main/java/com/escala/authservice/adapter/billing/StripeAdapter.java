@@ -49,7 +49,6 @@ public class StripeAdapter implements PaymentGatewayPort {
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .setSuccessUrl(successUrl)
                 .setCancelUrl(cancelUrl)
-                .setCustomerEmail(company.getCnpj()) // Or use a proper email if available in Company
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setPrice(priceId)
                         .setQuantity(1L)

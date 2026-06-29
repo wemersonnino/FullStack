@@ -7,7 +7,6 @@ import com.escala.authservice.entity.ScheduleCycle;
 import com.escala.authservice.entity.ScheduleValidationAcknowledgement;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.ScheduleValidationAcknowledgementRepository;
-import com.escala.authservice.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -38,7 +37,7 @@ class ScheduleValidationAcknowledgementServiceTest {
     private ScheduleValidationAcknowledgementRepository acknowledgementRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private CurrentUserService currentUserService;
 
     @InjectMocks
     private ScheduleValidationAcknowledgementService service;
@@ -50,7 +49,7 @@ class ScheduleValidationAcknowledgementServiceTest {
         User requester = requester();
         CycleValidationAlertResponse alert = alert("alert-1", "CRITICAL", "EMPTY_CYCLE");
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester);
         when(validationService.validateCycle("admin@escala.local", cyclePublicId)).thenReturn(List.of(alert));
         when(acknowledgementRepository.findByCycleIdAndAlertId(new UUID(0L, 5L), "alert-1")).thenReturn(Optional.empty());
         when(acknowledgementRepository.save(any(ScheduleValidationAcknowledgement.class)))
@@ -76,7 +75,7 @@ class ScheduleValidationAcknowledgementServiceTest {
     void rejeitaCienciaDeAlertaInexistenteNoCicloAtual() {
         UUID cyclePublicId = UUID.randomUUID();
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle(cyclePublicId));
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester());
         when(validationService.validateCycle("admin@escala.local", cyclePublicId)).thenReturn(List.of());
 
         assertThrows(IllegalArgumentException.class, () -> service.acknowledge(
@@ -102,7 +101,7 @@ class ScheduleValidationAcknowledgementServiceTest {
                 .reason("antes")
                 .build();
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester);
         when(validationService.validateCycle("admin@escala.local", cyclePublicId)).thenReturn(List.of(alert));
         when(acknowledgementRepository.findByCycleIdAndAlertId(new UUID(0L, 5L), "alert-1")).thenReturn(Optional.of(existing));
         when(acknowledgementRepository.save(any(ScheduleValidationAcknowledgement.class)))

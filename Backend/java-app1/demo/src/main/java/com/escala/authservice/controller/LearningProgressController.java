@@ -3,7 +3,7 @@ package com.escala.authservice.controller;
 import com.escala.authservice.core.learning.application.LearningProgressService;
 import com.escala.authservice.core.learning.domain.LearningProgress;
 import com.escala.authservice.entity.User;
-import com.escala.authservice.repository.UserRepository;
+import com.escala.authservice.service.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,17 +17,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LearningProgressController {
     private final LearningProgressService learningProgressService;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     @GetMapping
     public ResponseEntity<List<LearningProgress>> getMyProgress(Authentication authentication) {
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow();
+        User user = currentUserService.requireCurrentUser(authentication.getName());
         return ResponseEntity.ok(learningProgressService.getUserProgress(user.getId()));
     }
 
     @PostMapping
     public ResponseEntity<LearningProgress> trackProgress(@RequestBody LearningProgressRequest request, Authentication authentication) {
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow();
+        User user = currentUserService.requireCurrentUser(authentication.getName());
         LearningProgress progress = LearningProgress.builder()
                 .userId(user.getId())
                 .module(request.module())
@@ -39,8 +39,9 @@ public class LearningProgressController {
     }
 
     @PatchMapping("/{id}/complete")
-    public ResponseEntity<Void> complete(@PathVariable UUID id) {
-        learningProgressService.markAsCompleted(id);
+    public ResponseEntity<Void> complete(@PathVariable UUID id, Authentication authentication) {
+        User user = currentUserService.requireCurrentUser(authentication.getName());
+        learningProgressService.markAsCompleted(id, user.getId());
         return ResponseEntity.ok().build();
     }
 

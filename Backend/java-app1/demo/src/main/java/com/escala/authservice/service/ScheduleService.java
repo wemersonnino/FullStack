@@ -38,18 +38,21 @@ public class ScheduleService {
     private final AuditLogService auditLogService;
     private final UserRepository userRepository;
     private final PolicyService policyService;
+    private final CurrentUserService currentUserService;
     private final com.escala.authservice.core.scheduling.application.GenerateScheduleService generateScheduleUseCase;
     private final LaborRuleEngine laborRuleEngine = new LaborRuleEngine();
 
     private Company resolveCompany(String userEmail) {
-        return userRepository.findByEmail(userEmail)
-                .map(User::getCompany)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario ou empresa nao encontrados"));
+        Company company = currentUserService.requireCurrentUser(userEmail).getCompany();
+        if (company == null) {
+            throw new IllegalArgumentException("Usuario ou empresa nao encontrados");
+        }
+        return company;
     }
 
     public List<WorkShift> listMonth(int year, int month, String userEmail) {
         Company company = resolveCompany(userEmail);
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        User user = currentUserService.requireCurrentUser(userEmail);
         
         YearMonth yearMonth = YearMonth.of(year, month);
         if (policyService.isScopedManagerOnly(user)) {
@@ -74,7 +77,7 @@ public class ScheduleService {
 
     public List<EscalaResponse> listEscalas(LocalDate inicio, LocalDate fim, UUID usuarioId, UUID setorId, UUID projetoId, String userEmail) {
         Company company = resolveCompany(userEmail);
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        User user = currentUserService.requireCurrentUser(userEmail);
         
         LocalDate start = inicio == null ? YearMonth.now().atDay(1) : inicio;
         LocalDate end = fim == null ? YearMonth.from(start).atEndOfMonth() : fim;
@@ -123,7 +126,7 @@ public class ScheduleService {
     @Transactional
     public List<EscalaResponse> createEscalas(EscalaRequest request, String userEmail) {
         Company company = resolveCompany(userEmail);
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        User user = currentUserService.requireCurrentUser(userEmail);
         policyService.requireCanManageSchedules(user);
         Employee employee = employeeRepository.findById(request.getEmployeeId()).orElseThrow();
         policyService.requireCanAccessEmployee(user, employee);
@@ -174,7 +177,7 @@ public class ScheduleService {
     @Transactional
     public EscalaResponse updateEscala(UUID id, EscalaRequest request, String userEmail) {
         Company company = resolveCompany(userEmail);
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        User user = currentUserService.requireCurrentUser(userEmail);
         policyService.requireCanManageSchedules(user);
         WorkShift shift = workShiftRepository.findById(id).orElseThrow();
         policyService.requireCanAccessShift(user, shift);
@@ -218,7 +221,7 @@ public class ScheduleService {
     @Transactional
     public void cancelEscala(UUID id, String userEmail) {
         Company company = resolveCompany(userEmail);
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        User user = currentUserService.requireCurrentUser(userEmail);
         policyService.requireCanManageSchedules(user);
         WorkShift shift = workShiftRepository.findById(id).orElseThrow();
         policyService.requireCanAccessShift(user, shift);
@@ -230,7 +233,7 @@ public class ScheduleService {
 
     public List<UsuarioEscalaResponse> usuariosEscalaveis(UUID projectId, UUID sectorId, UUID companyId, String query, String userEmail) {
         Company myCompany = resolveCompany(userEmail);
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        User user = currentUserService.requireCurrentUser(userEmail);
         
         UUID finalSectorId = sectorId;
         if (policyService.isScopedManagerOnly(user)) {
@@ -268,6 +271,8 @@ public class ScheduleService {
     @Transactional
     public List<WorkShift> generateMonth(GenerateScheduleRequest request, String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = currentUserService.requireCurrentUser(userEmail);
+        policyService.requireCanManageSchedules(user);
         
         // Delegar para o Core Hexagonal (Lógica de Negócio Pura)
         var generated = generateScheduleUseCase.generate(request, company.getId());
@@ -300,9 +305,13 @@ public class ScheduleService {
     }
 
     public ShiftSwapRequest requestSwap(CreateShiftSwapRequest request, String userEmail) {
-        Employee requester = request.getRequesterId() == null
-                ? resolveRequester(userEmail)
-                : employeeRepository.findById(request.getRequesterId()).orElseThrow();
+        User currentUser = currentUserService.requireCurrentUser(userEmail);
+        Employee currentEmployee = resolveRequester(currentUser);
+        Employee requester = currentEmployee;
+        if (request.getRequesterId() != null && !Objects.equals(request.getRequesterId(), currentEmployee.getId())) {
+            policyService.requireCanManageSchedules(currentUser);
+            requester = employeeRepository.findById(request.getRequesterId()).orElseThrow();
+        }
         
         Company company = resolveCompany(userEmail);
         if (!Objects.equals(requester.getCompany().getId(), company.getId())) {
@@ -346,9 +355,13 @@ public class ScheduleService {
     @Transactional
     public ShiftSwapRequest decideSwap(UUID id, DecideShiftSwapRequest request, String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = currentUserService.requireCurrentUser(userEmail);
+        policyService.requireCanManageSchedules(user);
+        
         ShiftSwapRequest swap = shiftSwapRequestRepository.findById(id).orElseThrow();
         
-        if (!Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
+        boolean isSystemAdmin = user.getRoles() != null && user.getRoles().stream().map(Role::getName).anyMatch(r -> r.equals("SYSTEM_ADMIN"));
+        if (!isSystemAdmin && !Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
              throw new org.springframework.security.access.AccessDeniedException("Nao autorizado");
         }
 
@@ -399,10 +412,24 @@ public class ScheduleService {
     @Transactional
     public ShiftSwapRequest approveByColleague(UUID id, String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = currentUserService.requireCurrentUser(userEmail);
         ShiftSwapRequest swap = shiftSwapRequestRepository.findById(id).orElseThrow();
         
-        if (!Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
+        boolean isSystemAdmin = user.getRoles() != null && user.getRoles().stream().map(Role::getName).anyMatch(r -> r.equals("SYSTEM_ADMIN"));
+        if (!isSystemAdmin && !Objects.equals(swap.getRequester().getCompany().getId(), company.getId())) {
              throw new org.springframework.security.access.AccessDeniedException("Nao autorizado");
+        }
+
+        if (!isSystemAdmin && Objects.equals(swap.getRequester().getEmail(), user.getEmail())) {
+            throw new org.springframework.security.access.AccessDeniedException("Nao e permitido ao solicitante aprovar a propria troca como colega");
+        }
+        if (!isSystemAdmin && !policyService.canManageSchedules(user)) {
+            Employee approver = resolveRequester(user);
+            if (approver.getSector() == null
+                    || swap.getRequester().getSector() == null
+                    || !Objects.equals(approver.getSector().getId(), swap.getRequester().getSector().getId())) {
+                throw new org.springframework.security.access.AccessDeniedException("A aprovacao do colega exige colaborador do mesmo setor");
+            }
         }
 
         FluxoTrocaEscala fluxo = new FluxoTrocaEscala(toDomainStatus(swap.getStatus()));
@@ -420,12 +447,22 @@ public class ScheduleService {
 
     public List<ShiftSwapRequest> swapRequests(String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = currentUserService.requireCurrentUser(userEmail);
+        if (!policyService.canManageSchedules(user)) {
+            return shiftSwapRequestRepository.findByRequesterIdOrderByCreatedAtDesc(resolveRequester(user).getId());
+        }
         return shiftSwapRequestRepository.findByRequesterCompanyIdOrderByCreatedAtDesc(company.getId());
     }
 
     private Employee resolveRequester(String userEmail) {
-        return employeeRepository.findByUserEmail(userEmail)
-                .or(() -> employeeRepository.findByEmail(userEmail))
+        User currentUser = currentUserService.requireCurrentUser(userEmail);
+        return resolveRequester(currentUser);
+    }
+
+    private Employee resolveRequester(User user) {
+        String companySlug = user.getCompany() == null ? null : user.getCompany().getSlug();
+        return employeeRepository.findByUserEmailAndCompanySlug(user.getEmail(), companySlug)
+                .or(() -> employeeRepository.findByEmailAndCompanySlug(user.getEmail(), companySlug))
                 .orElseThrow();
     }
 

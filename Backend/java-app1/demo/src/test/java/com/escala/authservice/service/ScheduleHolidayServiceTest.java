@@ -5,7 +5,6 @@ import com.escala.authservice.entity.Company;
 import com.escala.authservice.entity.ScheduleHoliday;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.ScheduleHolidayRepository;
-import com.escala.authservice.repository.UserRepository;
 import com.escala.authservice.scheduling.domain.monthly.Holiday;
 import com.escala.authservice.scheduling.domain.monthly.HolidayType;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -32,7 +30,7 @@ class ScheduleHolidayServiceTest {
     private ScheduleHolidayRepository scheduleHolidayRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private CurrentUserService currentUserService;
 
     @InjectMocks
     private ScheduleHolidayService service;
@@ -40,7 +38,7 @@ class ScheduleHolidayServiceTest {
     @Test
     void criaFeriadoVinculadoAEmpresaDoUsuario() {
         User requester = requester();
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester);
         when(scheduleHolidayRepository.save(any(ScheduleHoliday.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -63,7 +61,7 @@ class ScheduleHolidayServiceTest {
 
     @Test
     void rejeitaFeriadoSemNome() {
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester());
         HolidayRequest request = new HolidayRequest(LocalDate.of(2026, 1, 1), " ", HolidayType.NATIONAL, null);
 
         assertThrows(IllegalArgumentException.class, () -> service.createHoliday("admin@escala.local", request));
@@ -71,7 +69,7 @@ class ScheduleHolidayServiceTest {
 
     @Test
     void listaFeriadosDoMesParaAplicacaoNoCalendario() {
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester()));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester());
         ScheduleHoliday holiday = ScheduleHoliday.builder()
                 .holidayDate(LocalDate.of(2026, 6, 4))
                 .name("Corpus Christi")

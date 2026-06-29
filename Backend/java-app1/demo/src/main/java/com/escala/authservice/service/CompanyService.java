@@ -53,6 +53,9 @@ public class CompanyService {
 
     public Company create(CompanyRequest request) {
         String cleanCnpj = validateAndCleanCnpj(request.getCnpj());
+        validateCoordinates(request.getLatitude(), request.getLongitude());
+        validateAllowedRadius(request.getAllowedRadius());
+        validateName(request.getName());
         
         // Mapear DTO -> Domain
         var domain = com.escala.authservice.core.company.domain.CompanyDomain.builder()
@@ -76,6 +79,9 @@ public class CompanyService {
         Company company = findById(id);
         
         String cleanCnpj = validateAndCleanCnpj(request.getCnpj());
+        validateCoordinates(request.getLatitude(), request.getLongitude());
+        validateAllowedRadius(request.getAllowedRadius());
+        validateName(request.getName());
         
         company.setName(sanitize(request.getName()));
         company.setCnpj(cleanCnpj);
@@ -106,6 +112,32 @@ public class CompanyService {
     }
 
     public void delete(UUID id) {
-        companyRepository.deleteById(id);
+        Company company = findById(id);
+        company.setActive(false);
+        companyRepository.save(company);
+    }
+
+    private void validateCoordinates(Double latitude, Double longitude) {
+        if (latitude == null && longitude == null) {
+            return;
+        }
+        if (latitude == null || longitude == null) {
+            throw new IllegalArgumentException("Latitude e longitude devem ser informadas juntas");
+        }
+        if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("Coordenadas da empresa invalidas");
+        }
+    }
+
+    private void validateAllowedRadius(Integer allowedRadius) {
+        if (allowedRadius != null && allowedRadius <= 0) {
+            throw new IllegalArgumentException("Raio permitido deve ser positivo");
+        }
+    }
+
+    private void validateName(String name) {
+        if (sanitize(name) == null || sanitize(name).isBlank()) {
+            throw new IllegalArgumentException("Nome da empresa e obrigatorio");
+        }
     }
 }

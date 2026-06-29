@@ -6,7 +6,6 @@ import com.escala.authservice.entity.ScheduleCycle;
 import com.escala.authservice.entity.ScheduleCycleStatus;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.ScheduleCycleRepository;
-import com.escala.authservice.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +35,7 @@ class ScheduleCyclePublicationServiceTest {
     private ScheduleCycleRepository scheduleCycleRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private CurrentUserService currentUserService;
 
     @InjectMocks
     private ScheduleCyclePublicationService service;
@@ -62,7 +60,7 @@ class ScheduleCyclePublicationServiceTest {
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
         when(validationService.validateCycle("admin@escala.local", cyclePublicId))
                 .thenReturn(List.of(alert("CRITICAL", true)));
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester);
         when(scheduleCycleRepository.save(any(ScheduleCycle.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ScheduleCycle published = service.publish("admin@escala.local", cyclePublicId);
@@ -128,7 +126,7 @@ class ScheduleCyclePublicationServiceTest {
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.PUBLICADO);
         User requester = requester();
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
-        when(userRepository.findByEmail("admin@escala.local")).thenReturn(Optional.of(requester));
+        when(currentUserService.requireCurrentUser("admin@escala.local")).thenReturn(requester);
         when(scheduleCycleRepository.save(any(ScheduleCycle.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ScheduleCycle archived = service.archive("admin@escala.local", cyclePublicId);

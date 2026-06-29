@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScheduleHolidayService {
     private final ScheduleHolidayRepository scheduleHolidayRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     public List<ScheduleHoliday> listHolidays(String email, int year, UUID unitId) {
         User requester = getRequester(email);
@@ -62,8 +62,7 @@ public class ScheduleHolidayService {
     }
 
     private User getRequester(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        return currentUserService.requireCurrentUser(email);
     }
 
     private void validate(HolidayRequest request) {

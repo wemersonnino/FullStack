@@ -1,0 +1,306 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1782694530513,803,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-4,text,true,,1503,432,9,9,http://host.docker.internal:8080/api/v1/auth/register,784,0,5
+1782694530706,614,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-5,text,true,,1504,432,9,9,http://host.docker.internal:8080/api/v1/auth/register,592,0,14
+1782694530910,433,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-6,text,true,,1503,432,9,9,http://host.docker.internal:8080/api/v1/auth/register,428,0,9
+1782694530326,989,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-2,text,true,,1503,432,9,9,http://host.docker.internal:8080/api/v1/auth/register,971,0,98
+1782694530326,989,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-3,text,true,,1503,432,9,9,http://host.docker.internal:8080/api/v1/auth/register,972,0,98
+1782694530326,990,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-1,text,true,,1503,432,9,9,http://host.docker.internal:8080/api/v1/auth/register,972,0,98
+1782694531113,341,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-7,text,true,,1504,432,10,10,http://host.docker.internal:8080/api/v1/auth/register,340,0,6
+1782694531316,371,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-8,text,true,,1504,432,10,10,http://host.docker.internal:8080/api/v1/auth/register,369,0,11
+1782694531832,36,GET health,200,,Usuarios simultaneos autenticados 1-7,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,35,0,0
+1782694531839,40,GET health,200,,Usuarios simultaneos autenticados 1-4,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,28,0,0
+1782694531836,44,GET health,200,,Usuarios simultaneos autenticados 1-5,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,44,0,0
+1782694531836,52,GET health,200,,Usuarios simultaneos autenticados 1-3,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,37,0,0
+1782694531507,381,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-9,text,true,,1504,432,10,10,http://host.docker.internal:8080/api/v1/auth/register,372,0,9
+1782694531831,78,GET health,200,,Usuarios simultaneos autenticados 1-1,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,73,0,0
+1782694531833,76,GET health,200,,Usuarios simultaneos autenticados 1-6,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,71,0,0
+1782694531831,78,GET health,200,,Usuarios simultaneos autenticados 1-2,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,72,0,0
+1782694531990,22,GET health,200,,Usuarios simultaneos autenticados 1-8,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,16,0,0
+1782694531705,329,POST register tenant/user,200,,Usuarios simultaneos autenticados 1-10,text,true,,1511,435,10,10,http://host.docker.internal:8080/api/v1/auth/register,327,0,9
+1782694532198,40,GET health,200,,Usuarios simultaneos autenticados 1-9,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,38,0,0
+1782694532337,55,GET health,200,,Usuarios simultaneos autenticados 1-10,text,true,,481,723,10,10,http://host.docker.internal:8080/actuator/health,37,0,0
+1782694532182,351,GET schedules month,200,,Usuarios simultaneos autenticados 1-5,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,351,0,0
+1782694532174,360,GET schedules month,200,,Usuarios simultaneos autenticados 1-7,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,359,0,0
+1782694532216,320,GET schedules month,200,,Usuarios simultaneos autenticados 1-2,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,320,0,0
+1782694532194,342,GET schedules month,200,,Usuarios simultaneos autenticados 1-3,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,342,0,0
+1782694532211,332,GET schedules month,200,,Usuarios simultaneos autenticados 1-6,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,332,0,0
+1782694532181,367,GET schedules month,200,,Usuarios simultaneos autenticados 1-4,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,367,0,0
+1782694532211,339,GET schedules month,200,,Usuarios simultaneos autenticados 1-1,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,339,0,0
+1782694532316,255,GET schedules month,200,,Usuarios simultaneos autenticados 1-8,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,255,0,0
+1782694532543,64,GET schedules month,200,,Usuarios simultaneos autenticados 1-9,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,64,0,0
+1782694532721,57,GET schedules month,200,,Usuarios simultaneos autenticados 1-10,text,true,,414,742,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,57,0,0
+1782694532837,174,GET employees,200,,Usuarios simultaneos autenticados 1-2,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,174,0,0
+1782694532845,166,GET employees,200,,Usuarios simultaneos autenticados 1-6,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,166,0,0
+1782694532837,173,GET employees,200,,Usuarios simultaneos autenticados 1-7,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,173,0,0
+1782694532873,137,GET employees,200,,Usuarios simultaneos autenticados 1-8,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,137,0,0
+1782694532835,184,GET employees,200,,Usuarios simultaneos autenticados 1-5,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,184,0,0
+1782694532851,168,GET employees,200,,Usuarios simultaneos autenticados 1-1,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,168,0,0
+1782694532909,106,GET employees,200,,Usuarios simultaneos autenticados 1-9,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,105,0,0
+1782694532851,170,GET employees,200,,Usuarios simultaneos autenticados 1-4,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,169,0,0
+1782694532837,185,GET employees,200,,Usuarios simultaneos autenticados 1-3,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,185,0,0
+1782694533080,38,GET employees,200,,Usuarios simultaneos autenticados 1-10,text,true,,729,724,10,10,http://host.docker.internal:8080/api/v1/employees,38,0,0
+1782694533313,221,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-6,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,220,0,0
+1782694533327,209,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-3,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,209,0,0
+1782694533321,218,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-5,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,217,0,0
+1782694533330,211,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-9,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,211,0,0
+1782694533316,229,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-8,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,229,0,0
+1782694533315,233,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-7,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,233,0,0
+1782694533313,237,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-2,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,236,0,0
+1782694533324,227,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-4,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,227,0,0
+1782694533323,231,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-1,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,231,0,0
+1782694533421,165,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-10,text,true,,552,760,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,165,0,0
+1782694533838,36,GET health,200,,Usuarios simultaneos autenticados 1-3,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,34,0,0
+1782694533837,33,GET health,200,,Usuarios simultaneos autenticados 1-6,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,33,0,0
+1782694533844,56,GET health,200,,Usuarios simultaneos autenticados 1-9,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,55,0,0
+1782694533849,55,GET health,200,,Usuarios simultaneos autenticados 1-5,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,55,0,0
+1782694533857,54,GET health,200,,Usuarios simultaneos autenticados 1-1,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,54,0,0
+1782694533847,69,GET health,200,,Usuarios simultaneos autenticados 1-8,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,65,0,0
+1782694533857,68,GET health,200,,Usuarios simultaneos autenticados 1-2,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,53,0,0
+1782694533855,71,GET health,200,,Usuarios simultaneos autenticados 1-7,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,70,0,0
+1782694533862,64,GET health,200,,Usuarios simultaneos autenticados 1-4,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,63,0,0
+1782694533887,52,GET health,200,,Usuarios simultaneos autenticados 1-10,text,true,,481,723,10,10,http://host.docker.internal:8080/actuator/health,49,0,0
+1782694534176,236,GET schedules month,200,,Usuarios simultaneos autenticados 1-6,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,235,0,0
+1782694534176,236,GET schedules month,200,,Usuarios simultaneos autenticados 1-3,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,235,0,0
+1782694534236,238,GET schedules month,200,,Usuarios simultaneos autenticados 1-4,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,238,0,0
+1782694534243,248,GET schedules month,200,,Usuarios simultaneos autenticados 1-7,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,248,0,0
+1782694534219,273,GET schedules month,200,,Usuarios simultaneos autenticados 1-8,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,273,0,0
+1782694534206,295,GET schedules month,200,,Usuarios simultaneos autenticados 1-5,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,293,0,0
+1782694534203,300,GET schedules month,200,,Usuarios simultaneos autenticados 1-9,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,300,0,0
+1782694534215,290,GET schedules month,200,,Usuarios simultaneos autenticados 1-1,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,290,0,0
+1782694534242,294,GET schedules month,200,,Usuarios simultaneos autenticados 1-10,text,true,,414,742,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,294,0,0
+1782694534227,310,GET schedules month,200,,Usuarios simultaneos autenticados 1-2,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,310,0,0
+1782694534714,50,GET employees,200,,Usuarios simultaneos autenticados 1-3,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,50,0,0
+1782694534721,46,GET employees,200,,Usuarios simultaneos autenticados 1-6,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,46,0,0
+1782694534777,96,GET employees,200,,Usuarios simultaneos autenticados 1-4,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,96,0,0
+1782694534808,101,GET employees,200,,Usuarios simultaneos autenticados 1-9,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,101,0,0
+1782694534804,123,GET employees,200,,Usuarios simultaneos autenticados 1-5,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,123,0,0
+1782694534839,88,GET employees,200,,Usuarios simultaneos autenticados 1-10,text,true,,729,724,10,10,http://host.docker.internal:8080/api/v1/employees,88,0,0
+1782694534808,119,GET employees,200,,Usuarios simultaneos autenticados 1-1,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,119,0,0
+1782694534798,162,GET employees,200,,Usuarios simultaneos autenticados 1-8,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,162,0,0
+1782694534793,166,GET employees,200,,Usuarios simultaneos autenticados 1-7,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,165,0,0
+1782694534843,132,GET employees,200,,Usuarios simultaneos autenticados 1-2,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,132,0,0
+1782694535068,80,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-6,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,80,0,0
+1782694535065,98,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-3,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,98,0,0
+1782694535174,64,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-4,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,64,0,0
+1782694535229,132,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-1,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,131,0,0
+1782694535233,134,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-10,text,true,,552,760,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,133,0,0
+1782694535210,167,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-9,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,166,0,0
+1782694535231,160,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-5,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,160,0,0
+1782694535262,129,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-7,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,129,0,0
+1782694535263,127,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-8,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,127,0,0
+1782694535299,129,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-2,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,129,0,0
+1782694535450,14,GET health,200,,Usuarios simultaneos autenticados 1-6,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694535466,16,GET health,200,,Usuarios simultaneos autenticados 1-3,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694535541,16,GET health,200,,Usuarios simultaneos autenticados 1-4,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,15,0,0
+1782694535664,44,GET health,200,,Usuarios simultaneos autenticados 1-1,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,44,0,0
+1782694535670,44,GET health,200,,Usuarios simultaneos autenticados 1-10,text,true,,481,723,10,10,http://host.docker.internal:8080/actuator/health,42,0,0
+1782694535696,32,GET health,200,,Usuarios simultaneos autenticados 1-8,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,31,0,0
+1782694535693,41,GET health,200,,Usuarios simultaneos autenticados 1-5,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,41,0,0
+1782694535693,41,GET health,200,,Usuarios simultaneos autenticados 1-7,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,26,0,0
+1782694535679,57,GET health,200,,Usuarios simultaneos autenticados 1-9,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,57,0,0
+1782694535737,20,GET health,200,,Usuarios simultaneos autenticados 1-2,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,20,0,0
+1782694535765,60,GET schedules month,200,,Usuarios simultaneos autenticados 1-6,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,60,0,0
+1782694535784,72,GET schedules month,200,,Usuarios simultaneos autenticados 1-3,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,72,0,0
+1782694535860,58,GET schedules month,200,,Usuarios simultaneos autenticados 1-4,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,58,0,0
+1782694536035,105,GET schedules month,200,,Usuarios simultaneos autenticados 1-7,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,105,0,0
+1782694536012,143,GET schedules month,200,,Usuarios simultaneos autenticados 1-1,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,143,0,0
+1782694536035,147,GET schedules month,200,,Usuarios simultaneos autenticados 1-8,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,147,0,0
+1782694536022,171,GET schedules month,200,,Usuarios simultaneos autenticados 1-10,text,true,,414,742,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,171,0,0
+1782694536052,141,GET schedules month,200,,Usuarios simultaneos autenticados 1-9,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,141,0,0
+1782694536043,152,GET schedules month,200,,Usuarios simultaneos autenticados 1-5,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,152,0,0
+1782694536061,192,GET schedules month,200,,Usuarios simultaneos autenticados 1-2,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,192,0,0
+1782694536129,130,GET employees,200,,Usuarios simultaneos autenticados 1-6,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,130,0,0
+1782694536161,102,GET employees,200,,Usuarios simultaneos autenticados 1-3,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,101,0,0
+1782694536230,85,GET employees,200,,Usuarios simultaneos autenticados 1-4,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,85,0,0
+1782694536442,67,GET employees,200,,Usuarios simultaneos autenticados 1-7,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,67,0,0
+1782694536457,66,GET employees,200,,Usuarios simultaneos autenticados 1-1,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,66,0,0
+1782694536495,104,GET employees,200,,Usuarios simultaneos autenticados 1-10,text,true,,729,724,10,10,http://host.docker.internal:8080/api/v1/employees,104,0,0
+1782694536500,133,GET employees,200,,Usuarios simultaneos autenticados 1-5,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,122,0,0
+1782694536484,158,GET employees,200,,Usuarios simultaneos autenticados 1-8,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,157,0,0
+1782694536496,146,GET employees,200,,Usuarios simultaneos autenticados 1-9,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,145,0,0
+1782694536557,107,GET employees,200,,Usuarios simultaneos autenticados 1-2,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,107,0,0
+1782694536563,115,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-6,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,115,0,0
+1782694536568,110,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-3,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,110,0,0
+1782694536633,66,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-4,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,66,0,0
+1782694536811,37,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-7,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,37,0,0
+1782694536837,38,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-1,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,38,0,0
+1782694536900,63,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-10,text,true,,552,760,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,63,0,0
+1782694536980,27,GET health,200,,Usuarios simultaneos autenticados 1-6,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,19,0,0
+1782694536944,67,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-8,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,67,0,0
+1782694536980,34,GET health,200,,Usuarios simultaneos autenticados 1-3,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,34,0,0
+1782694536936,83,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-5,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,83,0,0
+1782694537002,20,GET health,200,,Usuarios simultaneos autenticados 1-4,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,18,0,0
+1782694536948,75,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-9,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,74,0,0
+1782694536969,69,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-2,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,69,0,0
+1782694537150,12,GET health,200,,Usuarios simultaneos autenticados 1-7,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,12,0,0
+1782694537177,11,GET health,200,,Usuarios simultaneos autenticados 1-1,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,11,0,0
+1782694537268,13,GET health,200,,Usuarios simultaneos autenticados 1-10,text,true,,481,723,10,10,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694537312,30,GET health,200,,Usuarios simultaneos autenticados 1-8,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,20,0,0
+1782694537325,35,GET health,200,,Usuarios simultaneos autenticados 1-9,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,23,0,0
+1782694537324,37,GET health,200,,Usuarios simultaneos autenticados 1-5,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,24,0,0
+1782694537340,43,GET health,200,,Usuarios simultaneos autenticados 1-2,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,37,0,0
+1782694537316,76,GET schedules month,200,,Usuarios simultaneos autenticados 1-3,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,75,0,0
+1782694537309,96,GET schedules month,200,,Usuarios simultaneos autenticados 1-6,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,96,0,0
+1782694537327,90,GET schedules month,200,,Usuarios simultaneos autenticados 1-4,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,90,0,0
+1782694537463,45,GET schedules month,200,,Usuarios simultaneos autenticados 1-7,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,45,0,0
+1782694537490,38,GET schedules month,200,,Usuarios simultaneos autenticados 1-1,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,38,0,0
+1782694537583,114,GET schedules month,200,,Usuarios simultaneos autenticados 1-10,text,true,,414,742,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,114,0,0
+1782694537667,62,GET schedules month,200,,Usuarios simultaneos autenticados 1-5,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,62,0,0
+1782694537663,81,GET schedules month,200,,Usuarios simultaneos autenticados 1-9,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,81,0,0
+1782694537692,54,GET schedules month,200,,Usuarios simultaneos autenticados 1-2,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,54,0,0
+1782694537643,104,GET schedules month,200,,Usuarios simultaneos autenticados 1-8,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,104,0,0
+1782694537696,61,GET employees,200,,Usuarios simultaneos autenticados 1-3,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,57,0,0
+1782694537707,57,GET employees,200,,Usuarios simultaneos autenticados 1-6,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,57,0,0
+1782694537720,56,GET employees,200,,Usuarios simultaneos autenticados 1-4,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,56,0,0
+1782694537834,53,GET employees,200,,Usuarios simultaneos autenticados 1-1,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,53,0,0
+1782694537809,79,GET employees,200,,Usuarios simultaneos autenticados 1-7,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,78,0,0
+1782694537999,32,GET employees,200,,Usuarios simultaneos autenticados 1-10,text,true,,729,724,10,10,http://host.docker.internal:8080/api/v1/employees,32,0,0
+1782694538031,32,GET employees,200,,Usuarios simultaneos autenticados 1-5,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,32,0,0
+1782694538047,35,GET employees,200,,Usuarios simultaneos autenticados 1-2,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,34,0,0
+1782694538048,42,GET employees,200,,Usuarios simultaneos autenticados 1-8,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,42,0,0
+1782694538045,54,GET employees,200,,Usuarios simultaneos autenticados 1-9,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,54,0,0
+1782694538060,46,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-3,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,46,0,0
+1782694538068,45,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-6,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,45,0,0
+1782694538078,45,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-4,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,45,0,0
+1782694538188,33,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-1,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,33,0,0
+1782694538189,33,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-7,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,33,0,0
+1782694538333,31,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-10,text,true,,552,760,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,31,0,0
+1782694538364,46,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-5,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,45,0,0
+1782694538383,42,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-2,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,42,0,0
+1782694538407,18,GET health,200,,Usuarios simultaneos autenticados 1-3,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,16,0,0
+1782694538414,24,GET health,200,,Usuarios simultaneos autenticados 1-6,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,24,0,0
+1782694538391,49,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-8,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,49,0,0
+1782694538424,17,GET health,200,,Usuarios simultaneos autenticados 1-4,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,16,0,0
+1782694538400,51,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-9,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,50,0,0
+1782694538523,13,GET health,200,,Usuarios simultaneos autenticados 1-1,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694538524,12,GET health,200,,Usuarios simultaneos autenticados 1-7,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,12,0,0
+1782694538665,16,GET health,200,,Usuarios simultaneos autenticados 1-10,text,true,,481,723,10,10,http://host.docker.internal:8080/actuator/health,14,0,0
+1782694538711,23,GET health,200,,Usuarios simultaneos autenticados 1-5,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,22,0,0
+1782694538727,21,GET health,200,,Usuarios simultaneos autenticados 1-2,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,18,0,0
+1782694538743,29,GET health,200,,Usuarios simultaneos autenticados 1-8,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,28,0,0
+1782694538727,48,GET schedules month,200,,Usuarios simultaneos autenticados 1-3,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,48,0,0
+1782694538739,44,GET schedules month,200,,Usuarios simultaneos autenticados 1-6,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,43,0,0
+1782694538752,36,GET health,200,,Usuarios simultaneos autenticados 1-9,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,36,0,0
+1782694538742,48,GET schedules month,200,,Usuarios simultaneos autenticados 1-4,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,47,0,0
+1782694538837,33,GET schedules month,200,,Usuarios simultaneos autenticados 1-7,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,33,0,0
+1782694538837,33,GET schedules month,200,,Usuarios simultaneos autenticados 1-1,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,33,0,0
+1782694538983,34,GET schedules month,200,,Usuarios simultaneos autenticados 1-10,text,true,,414,742,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,34,0,0
+1782694539037,34,GET schedules month,200,,Usuarios simultaneos autenticados 1-5,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,34,0,0
+1782694539049,38,GET schedules month,200,,Usuarios simultaneos autenticados 1-2,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,38,0,0
+1782694539074,45,GET schedules month,200,,Usuarios simultaneos autenticados 1-8,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,45,0,0
+1782694539086,34,GET employees,200,,Usuarios simultaneos autenticados 1-6,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,34,0,0
+1782694539081,53,GET employees,200,,Usuarios simultaneos autenticados 1-3,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,53,0,0
+1782694539090,46,GET schedules month,200,,Usuarios simultaneos autenticados 1-9,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,46,0,0
+1782694539091,54,GET employees,200,,Usuarios simultaneos autenticados 1-4,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,54,0,0
+1782694539172,28,GET employees,200,,Usuarios simultaneos autenticados 1-7,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,28,0,0
+1782694539172,28,GET employees,200,,Usuarios simultaneos autenticados 1-1,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,28,0,0
+1782694539319,23,GET employees,200,,Usuarios simultaneos autenticados 1-10,text,true,,729,724,10,10,http://host.docker.internal:8080/api/v1/employees,23,0,0
+1782694539372,22,GET employees,200,,Usuarios simultaneos autenticados 1-5,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,22,0,0
+1782694539388,23,GET employees,200,,Usuarios simultaneos autenticados 1-2,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,23,0,0
+1782694539420,29,GET employees,200,,Usuarios simultaneos autenticados 1-8,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,29,0,0
+1782694539422,40,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-6,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,40,0,0
+1782694539437,34,GET employees,200,,Usuarios simultaneos autenticados 1-9,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,34,0,0
+1782694539435,42,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-3,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,42,0,0
+1782694539446,39,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-4,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,39,0,0
+1782694539501,27,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-7,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,27,0,0
+1782694539501,27,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-1,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,27,0,0
+1782694539643,30,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-10,text,true,,552,760,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,30,0,0
+1782694539695,31,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-5,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,31,0,0
+1782694539713,30,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-2,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,30,0,0
+1782694539764,9,GET health,200,,Usuarios simultaneos autenticados 1-6,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,9,0,0
+1782694539751,29,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-8,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,29,0,0
+1782694539779,11,GET health,200,,Usuarios simultaneos autenticados 1-3,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,10,0,0
+1782694539786,16,GET health,200,,Usuarios simultaneos autenticados 1-4,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,14,0,0
+1782694539773,41,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-9,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,41,0,0
+1782694539830,10,GET health,200,,Usuarios simultaneos autenticados 1-1,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,10,0,0
+1782694539830,11,GET health,200,,Usuarios simultaneos autenticados 1-7,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,11,0,0
+1782694539975,15,GET health,200,,Usuarios simultaneos autenticados 1-10,text,true,,481,723,10,10,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694540028,12,GET health,200,,Usuarios simultaneos autenticados 1-5,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,11,0,0
+1782694540044,12,GET health,200,,Usuarios simultaneos autenticados 1-2,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,12,0,0
+1782694540080,10,GET health,200,,Usuarios simultaneos autenticados 1-8,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,10,0,0
+1782694540075,30,GET schedules month,200,,Usuarios simultaneos autenticados 1-6,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,30,0,0
+1782694540090,30,GET schedules month,200,,Usuarios simultaneos autenticados 1-3,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,30,0,0
+1782694540114,11,GET health,200,,Usuarios simultaneos autenticados 1-9,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,10,0,0
+1782694540104,28,GET schedules month,200,,Usuarios simultaneos autenticados 1-4,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,28,0,0
+1782694540141,30,GET schedules month,200,,Usuarios simultaneos autenticados 1-7,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,30,0,0
+1782694540141,32,GET schedules month,200,,Usuarios simultaneos autenticados 1-1,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,32,0,0
+1782694540291,42,GET schedules month,200,,Usuarios simultaneos autenticados 1-10,text,true,,414,742,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,42,0,0
+1782694540341,41,GET schedules month,200,,Usuarios simultaneos autenticados 1-5,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,41,0,0
+1782694540356,40,GET schedules month,200,,Usuarios simultaneos autenticados 1-2,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,39,0,0
+1782694540391,48,GET schedules month,200,,Usuarios simultaneos autenticados 1-8,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,48,0,0
+1782694540405,35,GET employees,200,,Usuarios simultaneos autenticados 1-6,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,34,0,0
+1782694540421,37,GET employees,200,,Usuarios simultaneos autenticados 1-3,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,37,0,0
+1782694540434,28,GET employees,200,,Usuarios simultaneos autenticados 1-4,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,28,0,0
+1782694540426,42,GET schedules month,200,,Usuarios simultaneos autenticados 1-9,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,42,0,0
+1782694540474,26,GET employees,200,,Usuarios simultaneos autenticados 1-1,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,25,0,0
+1782694540472,28,GET employees,200,,Usuarios simultaneos autenticados 1-7,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,28,0,0
+1782694540634,24,GET employees,200,,Usuarios simultaneos autenticados 1-10,text,true,,729,724,10,10,http://host.docker.internal:8080/api/v1/employees,24,0,0
+1782694540684,27,GET employees,200,,Usuarios simultaneos autenticados 1-5,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,27,0,0
+1782694540697,26,GET employees,200,,Usuarios simultaneos autenticados 1-2,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,26,0,0
+1782694540740,23,GET employees,200,,Usuarios simultaneos autenticados 1-8,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,22,0,0
+1782694540741,32,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-6,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,32,0,0
+1782694540770,24,GET employees,200,,Usuarios simultaneos autenticados 1-9,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,24,0,0
+1782694540763,31,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-4,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,31,0,0
+1782694540760,34,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-3,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,34,0,0
+1782694540801,25,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-7,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,25,0,0
+1782694540801,26,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-1,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,26,0,0
+1782694540959,30,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-10,text,true,,552,760,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,30,0,0
+1782694541013,34,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-5,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,34,0,0
+1782694541024,30,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-2,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,30,0,0
+1782694541079,11,GET health,200,,Usuarios simultaneos autenticados 1-6,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,11,0,0
+1782694541065,42,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-8,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,42,0,0
+1782694541095,18,GET health,200,,Usuarios simultaneos autenticados 1-4,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,17,0,0
+1782694541095,18,GET health,200,,Usuarios simultaneos autenticados 1-3,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,18,0,0
+1782694541095,35,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-9,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,35,0,0
+1782694541128,14,GET health,200,,Usuarios simultaneos autenticados 1-7,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,14,0,0
+1782694541128,15,GET health,200,,Usuarios simultaneos autenticados 1-1,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,15,0,0
+1782694541291,16,GET health,200,,Usuarios simultaneos autenticados 1-10,text,true,,481,723,10,10,http://host.docker.internal:8080/actuator/health,16,0,0
+1782694541349,13,GET health,200,,Usuarios simultaneos autenticados 1-5,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694541356,15,GET health,200,,Usuarios simultaneos autenticados 1-2,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,15,0,0
+1782694541409,18,GET health,200,,Usuarios simultaneos autenticados 1-8,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,18,0,0
+1782694541392,42,GET schedules month,200,,Usuarios simultaneos autenticados 1-6,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,42,0,0
+1782694541432,19,GET health,200,,Usuarios simultaneos autenticados 1-9,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,19,0,0
+1782694541415,37,GET schedules month,200,,Usuarios simultaneos autenticados 1-4,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,37,0,0
+1782694541415,38,GET schedules month,200,,Usuarios simultaneos autenticados 1-3,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,38,0,0
+1782694541444,27,GET schedules month,200,,Usuarios simultaneos autenticados 1-7,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,27,0,0
+1782694541445,26,GET schedules month,200,,Usuarios simultaneos autenticados 1-1,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,26,0,0
+1782694541608,31,GET schedules month,200,,Usuarios simultaneos autenticados 1-10,text,true,,414,742,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,31,0,0
+1782694541663,29,GET schedules month,200,,Usuarios simultaneos autenticados 1-5,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,29,0,0
+1782694541673,27,GET schedules month,200,,Usuarios simultaneos autenticados 1-2,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,27,0,0
+1782694541729,26,GET schedules month,200,,Usuarios simultaneos autenticados 1-8,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,26,0,0
+1782694541736,20,GET employees,200,,Usuarios simultaneos autenticados 1-6,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,20,0,0
+1782694541753,22,GET employees,200,,Usuarios simultaneos autenticados 1-4,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,22,0,0
+1782694541754,21,GET employees,200,,Usuarios simultaneos autenticados 1-3,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,21,0,0
+1782694541752,36,GET schedules month,200,,Usuarios simultaneos autenticados 1-9,text,true,,414,739,10,10,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,36,0,0
+1782694541772,28,GET employees,200,,Usuarios simultaneos autenticados 1-1,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,28,0,0
+1782694541772,28,GET employees,200,,Usuarios simultaneos autenticados 1-7,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,28,0,0
+1782694541940,23,GET employees,200,,Usuarios simultaneos autenticados 1-10,text,true,,729,724,10,10,http://host.docker.internal:8080/api/v1/employees,23,0,0
+1782694541993,22,GET employees,200,,Usuarios simultaneos autenticados 1-5,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,22,0,0
+1782694542001,25,GET employees,200,,Usuarios simultaneos autenticados 1-2,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,25,0,0
+1782694542057,20,GET employees,200,,Usuarios simultaneos autenticados 1-8,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,19,0,0
+1782694542057,26,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-6,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,26,0,0
+1782694542076,28,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-4,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,28,0,0
+1782694542076,28,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-3,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,28,0,0
+1782694542090,21,GET employees,200,,Usuarios simultaneos autenticados 1-9,text,true,,729,721,10,10,http://host.docker.internal:8080/api/v1/employees,21,0,0
+1782694542101,28,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-7,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,28,0,0
+1782694542101,28,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-1,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,28,0,0
+1782694542264,29,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-10,text,true,,552,760,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,29,0,0
+1782694542316,40,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-5,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,40,0,0
+1782694542328,37,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-2,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,37,0,0
+1782694542384,16,GET health,200,,Usuarios simultaneos autenticados 1-6,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,16,0,0
+1782694542378,38,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-8,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,38,0,0
+1782694542405,14,GET health,200,,Usuarios simultaneos autenticados 1-4,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694542405,13,GET health,200,,Usuarios simultaneos autenticados 1-3,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694542430,12,GET health,200,,Usuarios simultaneos autenticados 1-7,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,11,0,0
+1782694542412,30,GET dashboard summary,200,,Usuarios simultaneos autenticados 1-9,text,true,,552,757,10,10,http://host.docker.internal:8080/api/v1/schedules/dashboard-summary?year=2026&month=6,30,0,0
+1782694542430,12,GET health,200,,Usuarios simultaneos autenticados 1-1,text,true,,481,720,10,10,http://host.docker.internal:8080/actuator/health,10,0,0
+1782694542594,12,GET health,200,,Usuarios simultaneos autenticados 1-10,text,true,,481,723,10,10,http://host.docker.internal:8080/actuator/health,12,0,0
+1782694542658,13,GET health,200,,Usuarios simultaneos autenticados 1-5,text,true,,481,720,9,9,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694542666,13,GET health,200,,Usuarios simultaneos autenticados 1-2,text,true,,481,720,8,8,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694542702,24,GET schedules month,200,,Usuarios simultaneos autenticados 1-6,text,true,,414,739,7,7,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,24,0,0
+1782694542717,17,GET health,200,,Usuarios simultaneos autenticados 1-8,text,true,,481,720,6,6,http://host.docker.internal:8080/actuator/health,13,0,0
+1782694542720,32,GET schedules month,200,,Usuarios simultaneos autenticados 1-3,text,true,,414,739,5,5,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,32,0,0
+1782694542720,33,GET schedules month,200,,Usuarios simultaneos autenticados 1-4,text,true,,414,739,5,5,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,33,0,0
+1782694542743,20,GET health,200,,Usuarios simultaneos autenticados 1-9,text,true,,481,720,3,3,http://host.docker.internal:8080/actuator/health,20,0,0
+1782694542743,36,GET schedules month,200,,Usuarios simultaneos autenticados 1-1,text,true,,414,739,2,2,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,35,0,0
+1782694542743,38,GET schedules month,200,,Usuarios simultaneos autenticados 1-7,text,true,,414,739,1,1,http://host.docker.internal:8080/api/v1/schedules?year=2026&month=6,38,0,0
