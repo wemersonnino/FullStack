@@ -115,9 +115,12 @@ export function TeamInviteManager() {
     }
   };
 
-  const copyLink = (token: string) => {
-    const link = `${window.location.origin}/invite/${token}`;
-    navigator.clipboard.writeText(link);
+  const copyLink = (inviteUrl?: string) => {
+    if (!inviteUrl) {
+      toast.error('Link do convite indisponível.');
+      return;
+    }
+    navigator.clipboard.writeText(inviteUrl);
     toast.success('Link copiado para a área de transferência!');
   };
 
@@ -215,7 +218,7 @@ export function TeamInviteManager() {
                 <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                   {!inv.acceptedAt && (
                     <>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => copyLink(inv.token)} title="Copiar link de convite">
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => copyLink(inv.inviteUrl)} title="Copiar link de convite">
                         <Copy className="h-4 w-4" />
                       </Button>
                       <Button variant="outline" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => onCancel(inv.id)} title="Cancelar convite">

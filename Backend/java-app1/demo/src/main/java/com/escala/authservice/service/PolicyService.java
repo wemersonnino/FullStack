@@ -27,6 +27,20 @@ public class PolicyService {
                 .anyMatch(role -> role.equals("OWNER") || role.equals("ADMIN") || role.equals("SYSTEM_ADMIN"));
     }
 
+    public boolean isSystemAdmin(User user) {
+        Set<Role> roles = user.getRoles();
+        return roles != null && roles.stream()
+                .map(Role::getName)
+                .anyMatch(role -> role.equals("SYSTEM_ADMIN"));
+    }
+
+    public boolean isOwner(User user) {
+        Set<Role> roles = user.getRoles();
+        return roles != null && roles.stream()
+                .map(Role::getName)
+                .anyMatch(role -> role.equals("OWNER") || role.equals("SYSTEM_ADMIN"));
+    }
+
     public boolean isManager(User user) {
         Set<Role> roles = user.getRoles();
         return roles != null && roles.stream()
@@ -75,6 +89,18 @@ public class PolicyService {
     public void requireCanManageSchedules(User user) {
         if (!canManageSchedules(user)) {
             throw new AccessDeniedException("Usuario sem permissao para gerir escalas");
+        }
+    }
+
+    public void requireOwnerOrAdmin(User user, String message) {
+        if (!isOwnerOrAdmin(user)) {
+            throw new AccessDeniedException(message);
+        }
+    }
+
+    public void requireOwner(User user, String message) {
+        if (!isOwner(user)) {
+            throw new AccessDeniedException(message);
         }
     }
 

@@ -22,12 +22,19 @@ public class CheckInService {
     private final UserRepository userRepository;
     private final TimeRecordRepository timeRecordRepository;
     private final CheckPlanLimitUseCase checkPlanLimitUseCase;
+    private final CurrentUserService currentUserService;
 
     public void validateAndRegister(String userEmail, CheckInRequest request, String ipAddress) {
         if (request == null || request.getLatitude() == null || request.getLongitude() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coordenadas de geolocalização do check-in são obrigatórias");
         }
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        if (request.getDeviceFingerprint() == null || request.getDeviceFingerprint().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Device fingerprint e obrigatorio");
+        }
+        if (ipAddress == null || ipAddress.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Endereco IP nao identificado");
+        }
+        User user = currentUserService.requireCurrentUser(userEmail);
         Company company = user.getCompany();
 
         if (company == null) {
@@ -40,6 +47,9 @@ public class CheckInService {
 
         if (company.getLatitude() == null || company.getLongitude() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Configuração de geolocalização da empresa pendente");
+        }
+        if (company.getAllowedRadius() == null || company.getAllowedRadius() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Raio permitido da empresa nao configurado");
         }
 
         checkPlanLimitUseCase.validateFeatureAccess(company.getPlanType(), "GEOLOCATION");
@@ -79,7 +89,7 @@ public class CheckInService {
                 .ipAddress(ipAddress)
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
-                .deviceFingerprint(request.getDeviceFingerprint())
+                .deviceFingerprint(request.getDeviceFingerprint().trim())
                 .build();
         
         timeRecordRepository.save(record);

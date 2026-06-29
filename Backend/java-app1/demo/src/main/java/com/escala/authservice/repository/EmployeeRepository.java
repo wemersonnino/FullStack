@@ -37,6 +37,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     long countByActiveTrue();
     long countByActiveTrueAndCompanyId(UUID companyId);
+    boolean existsByCompanyIdAndEmailIgnoreCase(UUID companyId, String email);
+    boolean existsByCompanyIdAndEmailIgnoreCaseAndIdNot(UUID companyId, String email, UUID id);
     Optional<Employee> findByEmail(String email);
     Optional<Employee> findByUserEmail(String email);
     Optional<Employee> findByEmailAndCompanySlug(String email, String companySlug);
@@ -45,4 +47,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     org.springframework.data.domain.Page<Employee> findByCompanyId(UUID companyId, org.springframework.data.domain.Pageable pageable);
     List<Employee> findByIdInAndActiveTrueAndCompanyId(List<UUID> ids, UUID companyId);
     Optional<Employee> findByPublicIdAndCompanyId(UUID publicId, UUID companyId);
+    long countBySectorIdAndCompanyId(UUID sectorId, UUID companyId);
+    long countByProjectIdAndCompanyId(UUID projectId, UUID companyId);
 }

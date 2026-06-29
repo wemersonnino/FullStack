@@ -28,6 +28,22 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     headers['Content-Type'] = 'application/json';
   }
 
+  if (options.request) {
+    const forwardedFor = options.request.headers.get('x-forwarded-for');
+    const realIp = options.request.headers.get('x-real-ip');
+    const userAgent = options.request.headers.get('user-agent');
+
+    if (forwardedFor) {
+      headers['X-Forwarded-For'] = forwardedFor;
+    }
+    if (realIp) {
+      headers['X-Real-IP'] = realIp;
+    }
+    if (userAgent) {
+      headers['User-Agent'] = userAgent;
+    }
+  }
+
   if (options.authenticated !== false) {
     let accessToken: string | undefined;
 

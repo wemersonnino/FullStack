@@ -54,7 +54,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         </CardContent>
         <CardFooter>
           <Button className="w-full" asChild>
-            <Link href={`/register?email=${invitation.email}&companySlug=${invitation.companyName.toLowerCase().replace(/ /g, '-')}`}>
+            <Link href={`/register?email=${invitation.email}&companySlug=${invitation.companySlug}`}>
               Criar minha conta
             </Link>
           </Button>

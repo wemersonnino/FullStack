@@ -11,4 +11,5 @@ public interface ShiftSwapRequestRepository extends JpaRepository<ShiftSwapReque
     long countByStatus(SwapStatus status);
     long countByStatusAndRequesterCompanyId(SwapStatus status, UUID companyId);
     List<ShiftSwapRequest> findByRequesterCompanyIdOrderByCreatedAtDesc(UUID companyId);
+    List<ShiftSwapRequest> findByRequesterIdOrderByCreatedAtDesc(UUID requesterId);
 }

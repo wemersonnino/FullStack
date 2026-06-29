@@ -9,6 +9,7 @@ import com.escala.authservice.entity.WorkShift;
 import com.escala.authservice.service.ScheduleService;
 import com.escala.authservice.service.StatsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class ScheduleController {
 
     @GetMapping
     public List<WorkShift> listMonth(@RequestParam int year, @RequestParam int month, Authentication authentication) {
+        requireManager(authentication);
         return scheduleService.listMonth(year, month, authentication.getName());
     }
 
@@ -59,5 +61,14 @@ public class ScheduleController {
     @GetMapping("/dashboard-summary")
     public DashboardSummaryResponse dashboardSummary(@RequestParam int year, @RequestParam int month, Authentication authentication) {
         return statsService.getSummary(year, month, authentication.getName());
+    }
+
+    private void requireManager(Authentication authentication) {
+        boolean allowed = authentication != null && authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ADMIN") || role.equals("OWNER") || role.equals("SYSTEM_ADMIN") || role.equals("MANAGER") || role.startsWith("MANAGER_"));
+        if (!allowed) {
+            throw new org.springframework.security.access.AccessDeniedException("Permissao de gestor requerida");
+        }
     }
 }

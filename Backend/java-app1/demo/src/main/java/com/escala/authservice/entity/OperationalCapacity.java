@@ -39,6 +39,10 @@ public class OperationalCapacity {
     @Column(nullable = false)
     private Integer minEmployeesRequired;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
+
     @ManyToOne(optional = false)
     private Company company;
 }

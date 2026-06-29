@@ -10,10 +10,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -30,6 +34,33 @@ public class JwtService {
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
+    }
+
+    public UUID extractUuidClaim(String token, String claimName) {
+        Object raw = extractClaim(token, claims -> claims.get(claimName));
+        if (raw == null) {
+            return null;
+        }
+        try {
+            return UUID.fromString(String.valueOf(raw));
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+    }
+
+    public String extractStringClaim(String token, String claimName) {
+        Object raw = extractClaim(token, claims -> claims.get(claimName));
+        return raw == null ? null : String.valueOf(raw);
+    }
+
+    public Set<String> extractRoles(String token) {
+        Object raw = extractClaim(token, claims -> claims.get("roles"));
+        if (raw instanceof Collection<?> collection) {
+            return collection.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.toUnmodifiableSet());
+        }
+        return Set.of();
     }
 
     public String generateToken(UserDetails userDetails) {

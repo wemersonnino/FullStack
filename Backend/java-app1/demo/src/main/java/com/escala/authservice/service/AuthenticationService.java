@@ -9,11 +9,14 @@ import com.escala.authservice.repository.RoleRepository;
 import com.escala.authservice.repository.TeamInvitationRepository;
 import com.escala.authservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,11 +35,17 @@ public class AuthenticationService {
     private final GoogleIdentityService googleIdentityService;
     private final com.escala.authservice.core.auth.port.in.AuthenticationUseCase authenticationUseCase;
     private final TeamInvitationRepository teamInvitationRepository;
+    private final CurrentUserService currentUserService;
 
     public AuthenticationResponse register(RegisterRequest request) {
         recaptchaService.verifyIfProduction(request.getRecaptchaToken());
         if (request.getPassword() == null || request.getPassword().length() < 8) {
             throw new IllegalArgumentException("A senha deve ter no minimo 8 caracteres");
+        }
+        String normalizedEmail = normalizeEmail(request.getEmail());
+        String normalizedUsername = normalizeText(request.getUsername());
+        if (normalizedUsername == null || normalizedUsername.isBlank()) {
+            throw new IllegalArgumentException("Username e obrigatorio");
         }
         
         // Se companyName for fornecido, cria uma nova empresa (Fluxo SaaS Self-Service)
@@ -52,7 +61,7 @@ public class AuthenticationService {
         } else {
             company = companyService.resolve(request.getCompanySlug());
             // Validar convite ativo para o e-mail nesta empresa
-            TeamInvitation invitation = teamInvitationRepository.findByEmailAndCompanyId(request.getEmail().trim().toLowerCase(), company.getId())
+            TeamInvitation invitation = teamInvitationRepository.findByEmailAndCompanyId(normalizedEmail, company.getId())
                     .filter(inv -> inv.isActive() && inv.getExpiresAt().isAfter(java.time.OffsetDateTime.now()))
                     .orElseThrow(() -> new IllegalArgumentException("Nao ha nenhum convite ativo para este e-mail nesta empresa"));
             
@@ -62,17 +71,20 @@ public class AuthenticationService {
             roleName = invitation.getRoleName() != null ? invitation.getRoleName() : "USER";
         }
 
-        repository.findByEmailAndCompanySlug(request.getEmail(), company.getSlug())
+        repository.findByEmailAndCompanySlug(normalizedEmail, company.getSlug())
                 .ifPresent(existing -> {
                     throw new IllegalArgumentException("Email ja cadastrado para esta empresa");
                 });
+        if (repository.existsByCompanyIdAndUsernameIgnoreCase(company.getId(), normalizedUsername)) {
+            throw new IllegalArgumentException("Username ja cadastrado para esta empresa");
+        }
         
         Role userRole = roleRepository.findByName(roleName)
                 .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
 
         var user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
+                .username(normalizedUsername)
+                .email(normalizedEmail)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .roles(Set.of(userRole))
                 .theme("system")
@@ -97,13 +109,14 @@ public class AuthenticationService {
 
         // Mapear para DTOs do Spring (Capa de Adaptação)
         var userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(userDomain.getEmail())
+                .username(userDomain.getId().toString())
                 .password(userDomain.getPassword())
                 .authorities(userDomain.getRoles().toArray(String[]::new))
                 .build();
 
         var jwtToken = jwtService.generateToken(Map.of(
                 "id", userDomain.getId(),
+                "email", userDomain.getEmail(),
                 "roles", userDomain.getRoles(),
                 "companyId", userDomain.getCompanyId() != null ? userDomain.getCompanyId() : "",
                 "companySlug", userDomain.getCompanySlug() != null ? userDomain.getCompanySlug() : ""
@@ -125,7 +138,8 @@ public class AuthenticationService {
     public ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request) {
         recaptchaService.verifyIfProduction(request.getRecaptchaToken());
         Company company = companyService.resolve(request.getCompanySlug());
-        User user = repository.findByEmailAndCompanySlug(request.getEmail(), company.getSlug())
+        String normalizedEmail = normalizeEmail(request.getEmail());
+        User user = repository.findByEmailAndCompanySlug(normalizedEmail, company.getSlug())
                 .orElse(null);
 
         if (user == null) {
@@ -134,16 +148,15 @@ public class AuthenticationService {
                     .build();
         }
 
-        PasswordResetToken resetToken = passwordResetTokenRepository.save(PasswordResetToken.builder()
+        passwordResetTokenRepository.deleteByUserId(user.getId());
+        passwordResetTokenRepository.save(PasswordResetToken.builder()
                 .token(UUID.randomUUID().toString())
                 .user(user)
                 .expiresAt(OffsetDateTime.now().plusMinutes(30))
                 .build());
 
         return ForgotPasswordResponse.builder()
-                .message("Token de recuperacao gerado.")
-                .resetToken(resetToken.getToken())
-                .resetUrl("/reset-password?code=" + resetToken.getToken())
+                .message("Se o email existir, enviaremos instrucoes de recuperacao.")
                 .build();
     }
 
@@ -185,7 +198,7 @@ public class AuthenticationService {
         }
 
         GoogleIdentityService.GoogleProfile profile = googleIdentityService.verify(request.getIdToken());
-        String email = profile.email();
+        String email = normalizeEmail(profile.email());
         String companySlug = request.getCompanySlug();
 
         // 🏢 Lógica de Resolução de Empresa
@@ -193,9 +206,12 @@ public class AuthenticationService {
         boolean isLead = false;
 
         if (companySlug == null || companySlug.isBlank() || companySlug.equalsIgnoreCase("undefined")) {
-            var existingUser = repository.findByEmail(email).stream().findFirst();
-            if (existingUser.isPresent()) {
-                company = existingUser.get().getCompany();
+            var existingUsers = repository.findAllByEmailIgnoreCase(email);
+            if (existingUsers.size() > 1) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Informe a empresa para continuar com Google SSO");
+            }
+            if (!existingUsers.isEmpty()) {
+                company = existingUsers.get(0).getCompany();
             } else {
                 // 🚀 Fluxo PLG: Criar Workspace Temporário (Lead)
                 String uuid = UUID.randomUUID().toString().substring(0, 8);
@@ -240,9 +256,9 @@ public class AuthenticationService {
 
                     return repository.save(User.builder()
                             .username(profile.name() == null || profile.name().isBlank()
-                                    ? uniqueUsername(profile.email())
+                                    ? uniqueUsername(email)
                                     : profile.name())
-                            .email(profile.email())
+                            .email(email)
                             .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                             .roles(new java.util.HashSet<>(Set.of(role)))
                             .theme(company.getTheme() == null ? "system" : company.getTheme())
@@ -276,9 +292,7 @@ public class AuthenticationService {
 
     @Transactional
     public AuthenticationResponse completeRegistration(String email, CompleteRegistrationRequest request) {
-        User user = repository.findByEmail(email)
-                .stream().findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        User user = currentUserService.requireCurrentUser(email);
 
         boolean isLead = user.getRoles().stream().anyMatch(r -> r.getName().equals("LEAD"));
         if (!isLead) {
@@ -313,6 +327,9 @@ public class AuthenticationService {
         user.getRoles().add(ownerRole);
 
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            if (request.getPassword().length() < 8) {
+                throw new IllegalArgumentException("A senha deve ter no minimo 8 caracteres");
+            }
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
@@ -335,6 +352,7 @@ public class AuthenticationService {
         Company company = user.getCompany();
         return Map.of(
                 "id", user.getId(),
+                "email", user.getEmail(),
                 "roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()),
                 "theme", user.getTheme() == null ? "system" : user.getTheme(),
                 "companyId", company == null ? "" : company.getId(),
@@ -346,7 +364,7 @@ public class AuthenticationService {
 
     private org.springframework.security.core.userdetails.UserDetails userDetails(User user) {
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
+                .username(user.getId().toString())
                 .password(user.getPassword())
                 .authorities(user.getRoles().stream().map(Role::getName).toArray(String[]::new))
                 .build();
@@ -391,5 +409,17 @@ public class AuthenticationService {
         }
         candidate = base + "-" + UUID.randomUUID().toString().substring(0, 8);
         return candidate;
+    }
+
+    private String normalizeEmail(String email) {
+        String normalized = normalizeText(email);
+        if (normalized == null || normalized.isBlank()) {
+            throw new IllegalArgumentException("Email e obrigatorio");
+        }
+        return normalized.toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeText(String value) {
+        return value == null ? null : value.trim();
     }
 }

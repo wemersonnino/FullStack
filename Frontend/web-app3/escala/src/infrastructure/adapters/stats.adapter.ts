@@ -25,14 +25,7 @@ export class StatsBackendAdapter {
     });
 
     if (!response.ok) {
-        // Fallback para fins de prototipagem se o endpoint Java ainda não existir
-        return {
-            totalEmployees: 42,
-            openShifts: 5,
-            pendingSwaps: 3,
-            activeProjects: 2,
-            attendanceRate: 94.5
-        };
+      throw new Error(`Failed to fetch dashboard summary: ${response.status}`);
     }
     const dto = await response.json();
     return StatsMapper.toDomain(dto);

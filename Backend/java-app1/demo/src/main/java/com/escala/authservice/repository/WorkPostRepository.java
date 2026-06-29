@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface WorkPostRepository extends JpaRepository<WorkPost, UUID> {
     List<WorkPost> findByCompany(Company company);
+    boolean existsByCompanyAndNameIgnoreCase(Company company, String name);
+    long countByProjectId(UUID projectId);
 }

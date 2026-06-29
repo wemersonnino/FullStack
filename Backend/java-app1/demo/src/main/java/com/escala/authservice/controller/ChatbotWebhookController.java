@@ -5,17 +5,23 @@ import com.escala.authservice.repository.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/webhooks/chatbot")
 @RequiredArgsConstructor
 public class ChatbotWebhookController {
+    @Value("${application.integrations.chatbot.webhook-secret:}")
+    private String webhookSecret;
 
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
@@ -38,7 +44,14 @@ public class ChatbotWebhookController {
     }
 
     @PostMapping
-    public ResponseEntity<ChatbotWebhookResponse> processWebhook(@RequestBody ChatbotWebhookRequest request) {
+    public ResponseEntity<ChatbotWebhookResponse> processWebhook(
+            @RequestBody ChatbotWebhookRequest request,
+            @RequestHeader(value = "X-Webhook-Secret", required = false) String providedSecret
+    ) {
+        if (!webhookSecret.isBlank() && !Objects.equals(webhookSecret, providedSecret)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Webhook secret invalido");
+        }
+
         String email = request.getSenderEmail() != null ? request.getSenderEmail() : "admin@escala.local";
         User user = userRepository.findByEmail(email).orElse(null);
         Employee employee = employeeRepository.findByEmail(email).orElse(null);
@@ -65,7 +78,10 @@ public class ChatbotWebhookController {
                 action = "SUGGEST_REPLACEMENT";
                 Sector sector = employee.getSector();
                 List<Employee> colleagues = sector != null
-                        ? employeeRepository.findByCompanyId(employee.getCompany().getId())
+                        ? employeeRepository.findByActiveTrueAndSectorIdOrderByFullNameAsc(sector.getId()).stream()
+                            .filter(col -> col.getCompany() != null && employee.getCompany() != null
+                                    && Objects.equals(col.getCompany().getId(), employee.getCompany().getId()))
+                            .toList()
                         : List.of();
                 
                 suggestions.add("Opções de substitutos disponíveis no mesmo setor/projeto:");

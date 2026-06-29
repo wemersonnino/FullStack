@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { DashboardStats } from '@/core/domain/models/stats.model';
 import { StatsService } from '@/core/application/services/stats.service';
 import { Users, AlertTriangle, ArrowLeftRight, Activity } from 'lucide-react';
 
@@ -7,7 +8,17 @@ export default async function StatsSlot() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.token) return null;
 
-  const stats = await StatsService.getSummary(session.user.token);
+  let stats: DashboardStats;
+  try {
+    stats = await StatsService.getSummary(session.user.token);
+  } catch (error) {
+    console.error('Failed to load dashboard summary', error);
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        Resumo estatistico indisponivel no momento.
+      </div>
+    );
+  }
 
   const cards = [
     {
