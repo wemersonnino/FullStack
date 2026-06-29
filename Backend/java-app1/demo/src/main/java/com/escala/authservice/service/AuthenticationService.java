@@ -47,6 +47,9 @@ public class AuthenticationService {
         if (normalizedUsername == null || normalizedUsername.isBlank()) {
             throw new IllegalArgumentException("Username e obrigatorio");
         }
+        if (repository.existsByEmailIgnoreCase(normalizedEmail)) {
+            throw new IllegalArgumentException("Este email ja pertence a outro usuario");
+        }
         
         // Se companyName for fornecido, cria uma nova empresa (Fluxo SaaS Self-Service)
         // Caso contrário, tenta resolver pelo slug (Fluxo de Convite/Empresa Existente)
@@ -60,21 +63,11 @@ public class AuthenticationService {
             roleName = "OWNER";
         } else {
             company = companyService.resolve(request.getCompanySlug());
-            // Validar convite ativo para o e-mail nesta empresa
-            TeamInvitation invitation = teamInvitationRepository.findByEmailAndCompanyId(normalizedEmail, company.getId())
-                    .filter(inv -> inv.isActive() && inv.getExpiresAt().isAfter(java.time.OffsetDateTime.now()))
-                    .orElseThrow(() -> new IllegalArgumentException("Nao ha nenhum convite ativo para este e-mail nesta empresa"));
-            
-            // Consumir o convite
-            invitation.setActive(false);
-            teamInvitationRepository.save(invitation);
+            TeamInvitation invitation = requireActiveInvitation(normalizedEmail, company);
+            consumeInvitation(invitation);
             roleName = invitation.getRoleName() != null ? invitation.getRoleName() : "USER";
         }
 
-        repository.findByEmailAndCompanySlug(normalizedEmail, company.getSlug())
-                .ifPresent(existing -> {
-                    throw new IllegalArgumentException("Email ja cadastrado para esta empresa");
-                });
         if (repository.existsByCompanyIdAndUsernameIgnoreCase(company.getId(), normalizedUsername)) {
             throw new IllegalArgumentException("Username ja cadastrado para esta empresa");
         }
@@ -200,73 +193,82 @@ public class AuthenticationService {
         GoogleIdentityService.GoogleProfile profile = googleIdentityService.verify(request.getIdToken());
         String email = normalizeEmail(profile.email());
         String companySlug = request.getCompanySlug();
+        User existingUser = repository.findByEmail(email).orElse(null);
 
-        // 🏢 Lógica de Resolução de Empresa
         Company company;
         boolean isLead = false;
+        TeamInvitation invitation = null;
+        String invitedRoleName = "USER";
 
-        if (companySlug == null || companySlug.isBlank() || companySlug.equalsIgnoreCase("undefined")) {
-            var existingUsers = repository.findAllByEmailIgnoreCase(email);
-            if (existingUsers.size() > 1) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Informe a empresa para continuar com Google SSO");
+        if (existingUser != null) {
+            if (existingUser.getCompany() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuario existente sem empresa associada");
             }
-            if (!existingUsers.isEmpty()) {
-                company = existingUsers.get(0).getCompany();
-            } else {
-                // 🚀 Fluxo PLG: Criar Workspace Temporário (Lead)
-                String uuid = UUID.randomUUID().toString().substring(0, 8);
-                company = companyService.create(com.escala.authservice.dto.CompanyRequest.builder()
-                        .name("Workspace Demo " + uuid.toUpperCase())
-                        .active(true)
-                        .planType("TRIAL")
-                        .trialExpiresAt(OffsetDateTime.now().plusDays(14))
-                        .build());
-                isLead = true;
+            if (companySlug != null
+                    && !companySlug.isBlank()
+                    && !companySlug.equalsIgnoreCase("undefined")
+                    && !companySlug.equalsIgnoreCase(existingUser.getCompany().getSlug())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este email ja pertence a outra empresa");
+            }
+            company = existingUser.getCompany();
+        } else if (companySlug == null || companySlug.isBlank() || companySlug.equalsIgnoreCase("undefined")) {
+            String uuid = UUID.randomUUID().toString().substring(0, 8);
+            company = companyService.create(com.escala.authservice.dto.CompanyRequest.builder()
+                    .name("Workspace Demo " + uuid.toUpperCase())
+                    .active(true)
+                    .planType("TRIAL")
+                    .trialExpiresAt(OffsetDateTime.now().plusDays(14))
+                    .build());
+            isLead = true;
 
-                // Salvar Marketing Lead
-                if (request.getAttribution() != null) {
-                    marketingLeadRepository.save(MarketingLead.builder()
-                            .email(email)
-                            .name(profile.name())
-                            .companyName(company.getName())
-                            .source("GOOGLE_SSO")
-                            .leadStatus("WARM")
-                            .marketingConsentGranted(false)
-                            .createdAt(OffsetDateTime.now())
-                            .lastLoginAt(OffsetDateTime.now())
-                            .utmSource(request.getAttribution().get("utm_source"))
-                            .utmMedium(request.getAttribution().get("utm_medium"))
-                            .utmCampaign(request.getAttribution().get("utm_campaign"))
-                            .utmContent(request.getAttribution().get("utm_content"))
-                            .utmTerm(request.getAttribution().get("utm_term"))
-                            .referrer(request.getAttribution().get("referrer"))
-                            .build());
-                }
+            if (request.getAttribution() != null) {
+                marketingLeadRepository.save(MarketingLead.builder()
+                        .email(email)
+                        .name(profile.name())
+                        .companyName(company.getName())
+                        .source("GOOGLE_SSO")
+                        .leadStatus("WARM")
+                        .marketingConsentGranted(false)
+                        .createdAt(OffsetDateTime.now())
+                        .lastLoginAt(OffsetDateTime.now())
+                        .utmSource(request.getAttribution().get("utm_source"))
+                        .utmMedium(request.getAttribution().get("utm_medium"))
+                        .utmCampaign(request.getAttribution().get("utm_campaign"))
+                        .utmContent(request.getAttribution().get("utm_content"))
+                        .utmTerm(request.getAttribution().get("utm_term"))
+                        .referrer(request.getAttribution().get("referrer"))
+                        .build());
             }
         } else {
             company = companyService.resolve(companySlug);
+            invitation = requireActiveInvitation(email, company);
+            invitedRoleName = invitation.getRoleName() != null ? invitation.getRoleName() : "USER";
         }
 
         final boolean finalizedIsLead = isLead;
-        User user = repository.findByEmailAndCompanySlug(email, company.getSlug())
-                .orElseGet(() -> {
-                    String roleName = finalizedIsLead ? "LEAD" : "USER";
-                    Role role = roleRepository.findByName(roleName)
-                            .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
+        final TeamInvitation invitationToConsume = invitation;
+        final String roleNameToAssign = finalizedIsLead ? "LEAD" : invitedRoleName;
+        User user = existingUser != null
+                ? existingUser
+                : repository.save(User.builder()
+                        .username(profile.name() == null || profile.name().isBlank()
+                                ? uniqueUsername(email)
+                                : profile.name())
+                        .email(email)
+                        .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                        .roles(new java.util.HashSet<>(Set.of(
+                                roleRepository.findByName(roleNameToAssign)
+                                        .orElseGet(() -> roleRepository.save(Role.builder().name(roleNameToAssign).build()))
+                        )))
+                        .theme(company.getTheme() == null ? "system" : company.getTheme())
+                        .avatarUrl(profile.picture())
+                        .active(true)
+                        .company(company)
+                        .build());
 
-                    return repository.save(User.builder()
-                            .username(profile.name() == null || profile.name().isBlank()
-                                    ? uniqueUsername(email)
-                                    : profile.name())
-                            .email(email)
-                            .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                            .roles(new java.util.HashSet<>(Set.of(role)))
-                            .theme(company.getTheme() == null ? "system" : company.getTheme())
-                            .avatarUrl(profile.picture())
-                            .active(true)
-                            .company(company)
-                            .build());
-                });
+        if (invitationToConsume != null && existingUser == null) {
+            consumeInvitation(invitationToConsume);
+        }
 
         if (!user.isActive()) {
             throw new IllegalArgumentException("Usuario inativo");
@@ -409,6 +411,21 @@ public class AuthenticationService {
         }
         candidate = base + "-" + UUID.randomUUID().toString().substring(0, 8);
         return candidate;
+    }
+
+    private TeamInvitation requireActiveInvitation(String email, Company company) {
+        return teamInvitationRepository.findByEmailAndCompanyId(email, company.getId())
+                .filter(TeamInvitation::isUsable)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Nao ha nenhum convite ativo para este e-mail nesta empresa"
+                ));
+    }
+
+    private void consumeInvitation(TeamInvitation invitation) {
+        invitation.setActive(false);
+        invitation.setAcceptedAt(OffsetDateTime.now());
+        teamInvitationRepository.save(invitation);
     }
 
     private String normalizeEmail(String email) {

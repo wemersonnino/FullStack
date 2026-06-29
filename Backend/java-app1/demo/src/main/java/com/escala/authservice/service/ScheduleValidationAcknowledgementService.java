@@ -20,7 +20,7 @@ public class ScheduleValidationAcknowledgementService {
     private final ScheduleCycleService scheduleCycleService;
     private final ScheduleCycleValidationService validationService;
     private final ScheduleValidationAcknowledgementRepository acknowledgementRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     @Transactional
     public ScheduleValidationAcknowledgement acknowledge(
@@ -33,8 +33,7 @@ public class ScheduleValidationAcknowledgementService {
             throw new IllegalArgumentException("ID do alerta e obrigatorio");
         }
         ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
-        User requester = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        User requester = currentUserService.requireCurrentUser(email);
         CycleValidationAlertResponse alert = validationService.validateCycle(email, cyclePublicId).stream()
                 .filter(candidate -> candidate.id().equals(alertId))
                 .findFirst()

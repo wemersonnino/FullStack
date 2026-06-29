@@ -33,6 +33,9 @@ public class UserManagementService {
     public org.springframework.data.domain.Page<User> list(String requesterEmail, org.springframework.data.domain.Pageable pageable) {
         User requester = currentUser(requesterEmail);
         policyService.requireOwnerOrAdmin(requester, "Apenas administradores ou donos podem listar usuarios");
+        if (policyService.isSystemAdmin(requester)) {
+            return userRepository.findAll(pageable);
+        }
         return userRepository.findByCompanyId(requester.getCompany().getId(), pageable);
     }
 
@@ -52,8 +55,8 @@ public class UserManagementService {
         if (userRepository.existsByCompanyIdAndUsernameIgnoreCaseAndIdNot(user.getCompany().getId(), username, user.getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists in this company");
         }
-        if (userRepository.existsByCompanyIdAndEmailIgnoreCaseAndIdNot(user.getCompany().getId(), email, user.getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists in this company");
+        if (userRepository.existsByEmailIgnoreCaseAndIdNot(email, user.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
 
         user.setUsername(username);

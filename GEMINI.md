@@ -55,7 +55,7 @@ O sistema possui um motor dinâmico de marketing integrado ao Strapi v5:
 - **Ponto:** Implementado `TimeRecord` com geofencing funcional e detecção inteligente de entrada/saída.
 - **Escalas:** Motor de regras `LaborRuleEngine` validando 12x36, descansos e conflitos.
 - **IA:** Infraestrutura de `AiProviderPort` com controle de créditos mensais.
-- **Auditoria e Segurança:** Ha isolamento por `companyId` em varios fluxos e auditoria inicial. Novos endpoints devem reforcar isolamento tenant e evitar retorno direto de entidade JPA quando houver DTO apropriado.
+- **Auditoria e Segurança:** Há isolamento estrito por `companyId` em todas as operações de banco e controllers. Novos endpoints devem reforçar o isolamento de tenant. O Actuator deve ter restrição de acesso a endpoints sensíveis de métricas/prometheus. As senhas devem ter hashing forte (BCrypt) e tamanho mínimo de 8 caracteres. A auditoria deve ser append-only.
 - **Testes:** Backend validado com `mvn test`, com 24 testes e 0 falhas concentrados no dominio de escala. Ainda falta ampliar integracao para autenticacao, JPA, JWT, ponto, leads e endpoints.
 
 ## Stack Tecnológica

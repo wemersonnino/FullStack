@@ -24,11 +24,11 @@ public class AuditLogQueryService {
     private static final int MAX_PAGE_SIZE = 100;
 
     private final AuditLogRepository auditLogRepository;
-    private final UserRepository userRepository;
     private final PolicyService policyService;
+    private final CurrentUserService currentUserService;
 
     public AuditLogPageResponse search(String requesterEmail, String actor, String action, String entityType, int page, int size) {
-        User requester = userRepository.findByEmail(requesterEmail).orElseThrow();
+        User requester = currentUserService.requireCurrentUser(requesterEmail);
         if (!policyService.isOwnerOrAdmin(requester)) {
             throw new AccessDeniedException("Apenas OWNER ou ADMIN podem consultar auditoria");
         }

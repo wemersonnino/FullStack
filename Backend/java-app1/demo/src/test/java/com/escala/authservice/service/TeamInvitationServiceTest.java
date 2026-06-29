@@ -14,7 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -37,6 +40,9 @@ class TeamInvitationServiceTest {
     @Mock
     private PolicyService policyService;
 
+    @Mock
+    private CurrentUserService currentUserService;
+
     @InjectMocks
     private TeamInvitationService teamInvitationService;
 
@@ -53,8 +59,10 @@ class TeamInvitationServiceTest {
         request.setEmail(" USER@Example.com ");
         request.setRoleName("manager");
 
-        when(userRepository.findByEmail("owner@example.com")).thenReturn(Optional.of(inviter));
-        when(userRepository.findByEmailAndCompanySlug("user@example.com", "empresa-a")).thenReturn(Optional.empty());
+        when(currentUserService.requireCurrentUser("owner@example.com")).thenReturn(inviter);
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
+        when(invitationRepository.findByEmailIgnoreCaseAndActiveTrue("user@example.com")).thenReturn(List.of());
+        when(invitationRepository.findAllByEmailIgnoreCaseAndCompanyId("user@example.com", company.getId())).thenReturn(List.of());
         when(invitationRepository.save(any(TeamInvitation.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         teamInvitationService.invite("owner@example.com", request);
@@ -78,9 +86,71 @@ class TeamInvitationServiceTest {
         request.setEmail("user@example.com");
         request.setRoleName("OWNER");
 
-        when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(inviter));
+        when(currentUserService.requireCurrentUser("admin@example.com")).thenReturn(inviter);
         when(policyService.isOwner(inviter)).thenReturn(false);
 
         assertThrows(AccessDeniedException.class, () -> teamInvitationService.invite("admin@example.com", request));
+    }
+
+    @Test
+    void inviteRejectsEmailAlreadyLinkedToAnotherCompany() {
+        Company companyA = Company.builder().id(UUID.randomUUID()).slug("empresa-a").name("Empresa A").build();
+        Company companyB = Company.builder().id(UUID.randomUUID()).slug("empresa-b").name("Empresa B").build();
+        User inviter = User.builder()
+                .email("owner@example.com")
+                .company(companyA)
+                .roles(Set.of(Role.builder().name("OWNER").build()))
+                .build();
+        User existingUser = User.builder()
+                .email("user@example.com")
+                .company(companyB)
+                .build();
+        TeamInvitationRequest request = new TeamInvitationRequest();
+        request.setEmail("user@example.com");
+        request.setRoleName("USER");
+
+        when(currentUserService.requireCurrentUser("owner@example.com")).thenReturn(inviter);
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(existingUser));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> teamInvitationService.invite("owner@example.com", request)
+        );
+
+        assertEquals(400, exception.getStatusCode().value());
+        assertEquals("Este email ja pertence a outro usuario", exception.getReason());
+    }
+
+    @Test
+    void inviteRejectsActiveInvitationInAnotherCompany() {
+        Company companyA = Company.builder().id(UUID.randomUUID()).slug("empresa-a").name("Empresa A").build();
+        Company companyB = Company.builder().id(UUID.randomUUID()).slug("empresa-b").name("Empresa B").build();
+        User inviter = User.builder()
+                .email("owner@example.com")
+                .company(companyA)
+                .roles(Set.of(Role.builder().name("OWNER").build()))
+                .build();
+        TeamInvitationRequest request = new TeamInvitationRequest();
+        request.setEmail("user@example.com");
+        request.setRoleName("USER");
+        TeamInvitation activeOtherCompanyInvitation = TeamInvitation.builder()
+                .email("user@example.com")
+                .company(companyB)
+                .active(true)
+                .expiresAt(OffsetDateTime.now().plusDays(2))
+                .build();
+
+        when(currentUserService.requireCurrentUser("owner@example.com")).thenReturn(inviter);
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
+        when(invitationRepository.findByEmailIgnoreCaseAndActiveTrue("user@example.com"))
+                .thenReturn(List.of(activeOtherCompanyInvitation));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> teamInvitationService.invite("owner@example.com", request)
+        );
+
+        assertEquals(400, exception.getStatusCode().value());
+        assertEquals("Ja existe um convite ativo para este email em outra empresa", exception.getReason());
     }
 }

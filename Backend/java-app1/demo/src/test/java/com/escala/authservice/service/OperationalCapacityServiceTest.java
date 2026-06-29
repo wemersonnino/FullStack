@@ -5,7 +5,6 @@ import com.escala.authservice.entity.Company;
 import com.escala.authservice.entity.OperationalCapacity;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.OperationalCapacityRepository;
-import com.escala.authservice.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,10 +28,10 @@ class OperationalCapacityServiceTest {
     private OperationalCapacityRepository operationalCapacityRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private PolicyService policyService;
 
     @Mock
-    private PolicyService policyService;
+    private CurrentUserService currentUserService;
 
     @InjectMocks
     private OperationalCapacityService operationalCapacityService;
@@ -49,7 +48,7 @@ class OperationalCapacityServiceTest {
         request.setEndTime(LocalTime.of(18, 0));
         request.setMinEmployeesRequired(2);
 
-        when(userRepository.findByEmail("owner@example.com")).thenReturn(Optional.of(requester));
+        when(currentUserService.requireCurrentUser("owner@example.com")).thenReturn(requester);
         when(operationalCapacityRepository.save(any(OperationalCapacity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         OperationalCapacity saved = operationalCapacityService.createCapacity("owner@example.com", request);
@@ -69,7 +68,7 @@ class OperationalCapacityServiceTest {
         request.setEndTime(LocalTime.of(8, 0));
         request.setMinEmployeesRequired(2);
 
-        when(userRepository.findByEmail("owner@example.com")).thenReturn(Optional.of(requester));
+        when(currentUserService.requireCurrentUser("owner@example.com")).thenReturn(requester);
 
         assertThrows(IllegalArgumentException.class, () -> operationalCapacityService.createCapacity("owner@example.com", request));
     }
@@ -90,7 +89,7 @@ class OperationalCapacityServiceTest {
                 .active(true)
                 .build();
 
-        when(userRepository.findByEmail("owner@example.com")).thenReturn(Optional.of(requester));
+        when(currentUserService.requireCurrentUser("owner@example.com")).thenReturn(requester);
         when(operationalCapacityRepository.findById(capacity.getId())).thenReturn(Optional.of(capacity));
 
         operationalCapacityService.deleteCapacity("owner@example.com", capacity.getId());

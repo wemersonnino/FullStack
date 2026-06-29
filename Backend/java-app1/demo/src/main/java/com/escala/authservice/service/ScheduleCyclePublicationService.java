@@ -20,7 +20,7 @@ public class ScheduleCyclePublicationService {
     private final ScheduleCycleService scheduleCycleService;
     private final ScheduleCycleValidationService validationService;
     private final ScheduleCycleRepository scheduleCycleRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     @Transactional
     public ScheduleCycle publish(String email, UUID cyclePublicId) {
@@ -39,8 +39,7 @@ public class ScheduleCyclePublicationService {
             throw new IllegalStateException("Existem alertas criticos sem ciencia antes da publicacao");
         }
 
-        User requester = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        User requester = currentUserService.requireCurrentUser(email);
         cycle.setStatus(ScheduleCycleStatus.PUBLICADO);
         cycle.setPublishedAt(OffsetDateTime.now());
         cycle.setPublishedBy(requester);
@@ -72,8 +71,7 @@ public class ScheduleCyclePublicationService {
             throw new IllegalStateException("Somente ciclos publicados ou retificados podem ser arquivados");
         }
 
-        User requester = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        User requester = currentUserService.requireCurrentUser(email);
         cycle.setStatus(ScheduleCycleStatus.ARQUIVADO);
         cycle.setArchivedAt(OffsetDateTime.now());
         cycle.setArchivedBy(requester);

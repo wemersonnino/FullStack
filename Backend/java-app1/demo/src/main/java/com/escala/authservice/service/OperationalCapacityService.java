@@ -23,12 +23,11 @@ public class OperationalCapacityService {
     private static final Set<String> ALLOWED_TARGET_TYPES = Set.of("SECTOR", "WORK_POST");
 
     private final OperationalCapacityRepository operationalCapacityRepository;
-    private final UserRepository userRepository;
     private final PolicyService policyService;
+    private final CurrentUserService currentUserService;
 
     private User getRequester(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        return currentUserService.requireCurrentUser(email);
     }
 
     public List<OperationalCapacity> listCapacities(String email) {

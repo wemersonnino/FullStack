@@ -11,4 +11,6 @@ public interface TeamInvitationRepository extends JpaRepository<TeamInvitation, 
     Optional<TeamInvitation> findByToken(String token);
     List<TeamInvitation> findByCompanyId(UUID companyId);
     Optional<TeamInvitation> findByEmailAndCompanyId(String email, UUID companyId);
+    List<TeamInvitation> findAllByEmailIgnoreCaseAndCompanyId(String email, UUID companyId);
+    List<TeamInvitation> findByEmailIgnoreCaseAndActiveTrue(String email);
 }

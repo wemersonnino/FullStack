@@ -26,10 +26,10 @@ public class TeamInvitationService {
     private final TeamInvitationRepository invitationRepository;
     private final UserRepository userRepository;
     private final PolicyService policyService;
+    private final CurrentUserService currentUserService;
 
     public TeamInvitation invite(String inviterEmail, TeamInvitationRequest request) {
-        User inviter = userRepository.findByEmail(inviterEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inviter not found"));
+        User inviter = currentUserService.requireCurrentUser(inviterEmail);
         policyService.requireOwnerOrAdmin(inviter, "Apenas OWNER ou ADMIN podem convidar usuarios");
         
         Company company = inviter.getCompany();
@@ -43,14 +43,22 @@ public class TeamInvitationService {
             throw new AccessDeniedException("Somente OWNER pode convidar perfis OWNER ou ADMIN");
         }
 
-        // Check if user already exists in this company
-        if (userRepository.findByEmailAndCompanySlug(email, company.getSlug()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already belongs to this company");
+        userRepository.findByEmail(email).ifPresent(existingUser -> {
+            if (existingUser.getCompany() != null && company.getId().equals(existingUser.getCompany().getId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already belongs to this company");
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este email ja pertence a outro usuario");
+        });
+
+        boolean hasOtherCompanyActiveInvitation = invitationRepository.findByEmailIgnoreCaseAndActiveTrue(email).stream()
+                .filter(TeamInvitation::isUsable)
+                .anyMatch(existing -> !company.getId().equals(existing.getCompany().getId()));
+        if (hasOtherCompanyActiveInvitation) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ja existe um convite ativo para este email em outra empresa");
         }
 
-        // Deactivate previous invitations for this email in this company
-        invitationRepository.findByEmailAndCompanyId(email, company.getId())
-                .ifPresent(existing -> {
+        invitationRepository.findAllByEmailIgnoreCaseAndCompanyId(email, company.getId())
+                .forEach(existing -> {
                     existing.setActive(false);
                     invitationRepository.save(existing);
                 });
@@ -68,7 +76,7 @@ public class TeamInvitationService {
     }
 
     public List<TeamInvitation> listByCompany(String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        User user = currentUserService.requireCurrentUser(userEmail);
         policyService.requireOwnerOrAdmin(user, "Apenas OWNER ou ADMIN podem listar convites");
         if (user.getCompany() == null) return List.of();
         return invitationRepository.findByCompanyId(user.getCompany().getId());
@@ -81,7 +89,7 @@ public class TeamInvitationService {
     }
 
     public void cancel(String userEmail, UUID invitationId) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        User user = currentUserService.requireCurrentUser(userEmail);
         policyService.requireOwnerOrAdmin(user, "Apenas OWNER ou ADMIN podem cancelar convites");
         TeamInvitation invitation = invitationRepository.findById(invitationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found"));
