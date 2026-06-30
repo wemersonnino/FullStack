@@ -1,3 +1,5 @@
+import { httpGet } from '@/lib/http/request';
+
 export interface BrasilApiCep {
   cep: string;
   state: string;
@@ -22,27 +24,14 @@ export class ExternalDataService {
   static async lookupCep(cep: string): Promise<BrasilApiCep | null> {
     const cleanCep = cep.replace(/\D/g, '');
     if (cleanCep.length !== 8) return null;
-    
-    try {
-      const res = await fetch(`https://brasilapi.com.br/api/cep/v1/${cleanCep}`);
-      if (!res.ok) return null;
-      return await res.json();
-    } catch {
-      return null;
-    }
+
+    return httpGet<BrasilApiCep>(`/api/bff/external/cep/${cleanCep}`);
   }
 
   static async lookupCnpj(cnpj: string): Promise<BrasilApiCnpj | null> {
-    // Remove pontuação mas preserva letras (Novo CNPJ Alfanumérico)
-    const cleanCnpj = cnpj.replace(/[^\w]/g, '');
+    const cleanCnpj = cnpj.replace(/[^0-9A-Za-z]/g, '');
     if (cleanCnpj.length !== 14) return null;
 
-    try {
-      const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
-      if (!res.ok) return null;
-      return await res.json();
-    } catch {
-      return null;
-    }
+    return httpGet<BrasilApiCnpj>(`/api/bff/external/cnpj/${cleanCnpj}`);
   }
 }

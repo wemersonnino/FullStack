@@ -1,8 +1,7 @@
-import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { canManageEscala, canViewAllEscalas } from '@/core/domain/escala/escala.permissions';
 import { SessionLikeUser } from '@/core/domain/escala/escala.types';
+import { getOptionalServerSession } from '@/lib/auth/server-auth';
 
 function decodeBearerUser(request?: Request): SessionLikeUser | null {
   const authorization = request?.headers.get('authorization');
@@ -37,7 +36,7 @@ function decodeBearerUser(request?: Request): SessionLikeUser | null {
 }
 
 export async function requireEscalaSession(request?: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalServerSession();
   if (session) {
     return { session };
   }

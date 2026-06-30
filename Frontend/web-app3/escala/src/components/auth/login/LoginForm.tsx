@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginSchema, LoginSchemaType } from '@/lib/schemas/login.schema';
@@ -17,14 +17,31 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { Chrome, Eye, EyeOff } from 'lucide-react';
 import { ENV } from '@/constants/env';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 export const LoginForm = () => {
   const { login, loginGoogle } = useAuth();
+  const { status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedPlan = searchParams.get('plan');
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (status !== 'authenticated') {
+      return;
+    }
+
+    const locale = pathname.split('/').filter(Boolean)[0] || 'pt-BR';
+    const destination = selectedPlan
+      ? `/${locale}/dashboard/billing/plans`
+      : `/${locale}/dashboard`;
+
+    router.replace(destination);
+  }, [pathname, router, selectedPlan, status]);
 
   const form = useForm<LoginSchemaType>({
     resolver: zodResolver(LoginSchema),
@@ -47,6 +64,7 @@ export const LoginForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
+        method="POST"
         className="bg-background/60 mx-auto mt-16 max-w-md space-y-4 rounded-lg border p-6"
       >
         <h1 className="text-center text-xl font-semibold">Acessar conta</h1>

@@ -1,18 +1,16 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { getShifts, getShiftSwaps } from '@/services/shift.service';
 import { ShiftList } from '@/components/dashboard/ShiftList';
 import { AdminSwapManagement } from '@/components/dashboard/AdminSwapManagement';
+import { getRequiredServerAuth } from '@/lib/auth/server-auth';
 
 export default async function ContentSlot() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.token) return null;
+  const { session, accessToken } = await getRequiredServerAuth();
 
   const isAdmin = session.user.roles.includes('ADMIN') || session.user.roles.includes('OWNER');
 
   const [shifts, shiftSwaps] = await Promise.all([
-    getShifts(session.user.token),
-    getShiftSwaps(session.user.token),
+    getShifts(accessToken),
+    getShiftSwaps(accessToken),
   ]);
 
   return (

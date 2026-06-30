@@ -1,9 +1,6 @@
-import { DashboardClient } from '@/components/dashboard/DashboardClient';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { redirect } from 'next/navigation';
 import { AiAssistantPanel } from '@/features/ai/components/AiAssistantPanel';
 import { AiAssistantTrigger } from '@/features/ai/components/AiAssistantTrigger';
+import { getRequiredServerAuth } from '@/lib/auth/server-auth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,11 +15,7 @@ export default async function DashboardLayout({
   content,
   team,
 }: LayoutProps) {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    redirect('/login');
-  }
+  const { session } = await getRequiredServerAuth();
 
   return (
     <div className="mx-auto mt-12 max-w-6xl space-y-10 px-4 pb-12">

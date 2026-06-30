@@ -13,6 +13,12 @@ services:
     volumes:
       - escala_pg_data:/var/lib/postgresql/data/
       - ./Data/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - escala-network
 
@@ -24,12 +30,19 @@ services:
     image: escala-backend:develop
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - ./Backend/java-app1/demo/.env:/app/.env:ro
       - ~/.m2:/root/.m2
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/actuator/health | grep '\"status\":\"UP\"' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 50s
     networks:
       - escala-network
 
@@ -41,7 +54,8 @@ services:
     image: cms-strapi:develop
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     env_file:
       - ./Backend/cms-strapi/.env
     environment:
@@ -64,6 +78,12 @@ services:
       - ./Backend/cms-strapi/scripts:/opt/app/scripts
       - ./Backend/cms-strapi/data:/opt/app/data
       - ./Backend/cms-strapi/public/uploads:/opt/app/public/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:1337/admin >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
     networks:
       - escala-network
 
@@ -75,8 +95,10 @@ services:
     image: fullstack-frontend:develop
     restart: unless-stopped
     depends_on:
-      - backend
-      - strapi
+      backend:
+        condition: service_healthy
+      strapi:
+        condition: service_healthy
     env_file:
       - ./Frontend/web-app3/escala/.env.local
     environment:
@@ -98,6 +120,12 @@ services:
       - /app/.next
     working_dir: /app
     command: sh -lc "rm -rf /app/.next/* && pnpm dev"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/auth/session >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - escala-network
 

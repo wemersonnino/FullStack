@@ -18,6 +18,20 @@ export interface MessageModel {
 export class MessageBackendAdapter {
   private static baseUrl = '/api/bff/messages';
 
+  private static url(path = '', params?: URLSearchParams) {
+    const url = `${this.baseUrl}${path}`;
+    if (typeof window !== 'undefined') {
+      const relativeUrl = new URL(url, window.location.origin);
+      params?.forEach((value, key) => relativeUrl.searchParams.set(key, value));
+      return `${relativeUrl.pathname}${relativeUrl.search}`;
+    }
+
+    const resolvedUrl = new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000');
+
+    params?.forEach((value, key) => resolvedUrl.searchParams.set(key, value));
+    return resolvedUrl.toString();
+  }
+
   private static normalizeListResponse(payload: unknown): MessageModel[] {
     if (Array.isArray(payload)) {
       return payload as MessageModel[];
@@ -31,13 +45,14 @@ export class MessageBackendAdapter {
     return [];
   }
 
-  static async listMessages(token: string, status?: string): Promise<MessageModel[]> {
-    const url = status 
-      ? `${this.baseUrl}?status=${status}`
-      : this.baseUrl;
+  static async listMessages(token?: string, status?: string): Promise<MessageModel[]> {
+    const params = new URLSearchParams();
+    if (status) {
+      params.set('status', status);
+    }
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(this.url('', params), {
         headers: {
           Accept: 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -47,13 +62,16 @@ export class MessageBackendAdapter {
       if (!response.ok) return [];
       return this.normalizeListResponse(await response.json());
     } catch (error) {
-      console.warn('Failed to fetch messages', error);
+      // Dev/HMR and route transitions can cause transient client fetch failures.
+      if (typeof window === 'undefined') {
+        console.warn('Failed to fetch messages', error);
+      }
       return [];
     }
   }
 
-  static async createMessage(message: Partial<MessageModel>, token: string): Promise<MessageModel> {
-    const response = await fetch(this.baseUrl, {
+  static async createMessage(message: Partial<MessageModel>, token?: string): Promise<MessageModel> {
+    const response = await fetch(this.url(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -71,8 +89,8 @@ export class MessageBackendAdapter {
     return await response.json();
   }
 
-  static async decideMessage(id: string, decision: 'APPROVED' | 'REJECTED', token: string): Promise<MessageModel> {
-    const response = await fetch(`${this.baseUrl}/${id}/decision`, {
+  static async decideMessage(id: string, decision: 'APPROVED' | 'REJECTED', token?: string): Promise<MessageModel> {
+    const response = await fetch(this.url(`/${id}/decision`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

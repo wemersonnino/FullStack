@@ -15,8 +15,8 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
     @Query("""
             select a from AuditLog a
             where a.company.id = :companyId
-              and (:actor is null or lower(a.actor) like lower(concat('%', :actor, '%')))
-              and (:action is null or lower(a.action) like lower(concat('%', :action, '%')))
+              and (:actor is null or lower(a.actor) like lower(concat('%', cast(:actor as string), '%')))
+              and (:action is null or lower(a.action) like lower(concat('%', cast(:action as string), '%')))
               and (:entityType is null or lower(a.entityType) = lower(:entityType))
             order by a.createdAt desc
             """)

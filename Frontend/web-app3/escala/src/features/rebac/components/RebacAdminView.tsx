@@ -34,7 +34,6 @@ type ScopeOption = {
 };
 
 type RebacAdminViewProps = {
-  token: string;
   users: UserProfile[];
   assignments: ManagerAssignment[];
   edges: ManagementEdge[];
@@ -57,7 +56,7 @@ function scopeLabel(scopeOptions: ScopeOption[], type: ManagerScopeType, id: str
 }
 
 export function RebacAdminView(props: RebacAdminViewProps) {
-  const { token, users, assignments, edges, closure, scopeTypes, roleLevels, scopeOptions } = props;
+  const { users, assignments, edges, closure, scopeTypes, roleLevels, scopeOptions } = props;
 
   return (
     <section className="container mx-auto space-y-6 py-8">
@@ -148,7 +147,7 @@ export function RebacAdminView(props: RebacAdminViewProps) {
                         <Badge variant={assignment.active ? 'default' : 'secondary'}>{assignment.active ? 'Ativo' : 'Inativo'}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DeleteAssignmentButton token={token} id={assignment.id} />
+                        <DeleteAssignmentButton id={assignment.id} />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -194,7 +193,7 @@ export function RebacAdminView(props: RebacAdminViewProps) {
                         <Badge variant={edge.active ? 'default' : 'secondary'}>{edge.active ? 'Ativo' : 'Inativo'}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DeleteEdgeButton token={token} id={edge.id} />
+                        <DeleteEdgeButton id={edge.id} />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -206,7 +205,7 @@ export function RebacAdminView(props: RebacAdminViewProps) {
 
         <TabsContent value="closure" className="space-y-4">
           <div className="flex justify-end">
-            <RecalculateClosureButton token={token} />
+            <RecalculateClosureButton />
           </div>
           <Card className="rounded-lg shadow-sm">
             <CardHeader>

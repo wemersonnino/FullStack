@@ -34,7 +34,6 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from '@/hooks/useAuth';
 import { WorkPostService } from '@/core/application/services/workPost.service';
 import { OrganizationService } from '@/core/application/services/organization.service';
 import { Project } from '@/core/domain/models/organization.model';
@@ -49,9 +48,6 @@ const WorkPostSchema = z.object({
 type WorkPostFormValues = z.infer<typeof WorkPostSchema>;
 
 export function WorkPostManagement() {
-  const { session } = useAuth();
-  const token = (session?.user as any)?.token;
-
   const [workPosts, setWorkPosts] = useState<WorkPostModel[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,16 +63,14 @@ export function WorkPostManagement() {
   });
 
   useEffect(() => {
-    if (token) {
-      fetchWorkPosts();
-      fetchProjects();
-    }
-  }, [token]);
+    fetchWorkPosts();
+    fetchProjects();
+  }, []);
 
   async function fetchWorkPosts() {
     setIsLoading(true);
     try {
-      const data = await WorkPostService.list(token);
+      const data = await WorkPostService.list();
       setWorkPosts(data);
     } catch (error) {
       toast.error('Erro ao carregar postos de trabalho.');
@@ -87,7 +81,7 @@ export function WorkPostManagement() {
 
   async function fetchProjects() {
     try {
-      const data = await OrganizationService.listProjects(token);
+      const data = await OrganizationService.listProjects();
       setProjects(data);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -105,7 +99,7 @@ export function WorkPostManagement() {
 
   async function onSubmit(values: WorkPostFormValues) {
     try {
-      await WorkPostService.create(values, token);
+      await WorkPostService.create(values);
       toast.success('Posto de trabalho criado com sucesso.');
       setIsDialogOpen(false);
       fetchWorkPosts();
@@ -117,7 +111,7 @@ export function WorkPostManagement() {
   async function handleDelete(id: string) {
     if (!confirm('Deseja realmente excluir este posto de trabalho?')) return;
     try {
-      await WorkPostService.delete(id, token);
+      await WorkPostService.delete(id);
       toast.success('Posto de trabalho excluído.');
       fetchWorkPosts();
     } catch (error) {

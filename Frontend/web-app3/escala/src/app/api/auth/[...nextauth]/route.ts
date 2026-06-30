@@ -288,7 +288,6 @@ export const authOptions: AuthOptions = {
         token.state = session.user.state ?? token.state;
         token.position = session.user.position ?? token.position;
         token.function = session.user.function ?? token.function;
-        token.provider = isGoogleManaged ? 'google' : ((session.user as any).provider ?? token.provider);
       }
       return token;
     },
@@ -314,7 +313,6 @@ export const authOptions: AuthOptions = {
         state: (token.state as string) ?? '',
         position: (token.position as string) ?? '',
         function: (token.function as string) ?? '',
-        token: (token.accessToken as string) ?? '',
         companySlug: (token.companySlug as string) ?? ENV.COMPANY_SLUG,
         companyTheme: (token.companyTheme as string) ?? 'system',
         planType: (token.planType as string) ?? 'FREE',

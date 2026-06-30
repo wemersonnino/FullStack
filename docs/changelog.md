@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-06-30 - Escala Inteligente operacional, robustez do BFF e atualizacao documental
+
+### Adicionado
+
+- **Escala Inteligente no dashboard:** nova rota privada `/dashboard/escala/inteligente` com carregamento SSR de calendario mensal, legendas, feriados, ciclo, atribuicoes, contadores e alertas.
+- **Workspace operacional de atribuicoes:** grade mensal por colaborador x dia com edicao local e persistencia bulk em `PATCH /api/v1/scheduling/cycles/{id}/assignments`.
+- **Operacoes de produtividade na grade mensal:** `preencher semana`, `copiar mes`, presets `5x2`, `6x1`, `12x36` e resumo visual de diff antes do save.
+- **Healthchecks no Docker Compose:** `postgres`, `backend`, `strapi` e `frontend` agora expõem readiness local, com `depends_on.condition: service_healthy`.
+
+### Alterado
+
+- **Sessao do perfil endurecida:** o frontend passou a reduzir o payload enviado em `useSession().update()` para apenas campos editaveis/visuais.
+- **Callback de update do NextAuth:** preserva `provider` de forma controlada e deixa de aceitar alteracao arbitraria via update de sessao.
+- **Adapter de mensagens:** usa URL relativa no browser e URL absoluta apenas em SSR, evitando erro `Failed to parse URL from /api/bff/messages?...`.
+- **BFF do backend:** `proxyBackend()` passou a retornar `503` JSON controlado quando o Spring Boot ainda nao esta pronto.
+- **Documentacao do projeto:** README, arquitetura, ambientes, cobertura, plano da Escala Inteligente, Swagger/OpenAPI, requisitos, roadmap e OKRs foram atualizados para refletir o estado real do codigo.
+
+### Corrigido
+
+- **`/dashboard/configuracoes`:** normalizacao de resposta paginada de usuarios para evitar `users.map is not a function`.
+- **Polling de mensagens no browser:** falhas transientes deixaram de gerar ruido funcional no console.
+- **Logo da dashboard:** ajuste de proporcao do `next/image` em `BrandLink` para eliminar warning de largura/altura inconsistentes.
+- **Boot concorrente no Docker:** reduzidos `ECONNREFUSED` e `500` falsos durante subida local.
+
 ## 2026-06-26 - Copywriting Persuasivo, Expansão de Schemas e Seeding no Strapi v5
 
 ### Adicionado

@@ -1,5 +1,3 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { getShifts, getWorkSchedules } from '@/services/shift.service';
 import { ShiftSwapForm } from '@/components/dashboard/ShiftSwapForm';
 import { WorkScheduleModal } from '@/components/dashboard/WorkScheduleModal';
@@ -7,16 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Users, Briefcase, BarChart3, Building2, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { getRequiredServerAuth } from '@/lib/auth/server-auth';
 
 export default async function TeamSlot() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.token) return null;
+  const { session, accessToken } = await getRequiredServerAuth();
 
   const isAdmin = session.user.roles.includes('ADMIN') || session.user.roles.includes('OWNER');
   
   const [shifts, workSchedules] = await Promise.all([
-    getShifts(session.user.token),
-    getWorkSchedules(session.user.token),
+    getShifts(accessToken),
+    getWorkSchedules(accessToken),
   ]);
 
   return (

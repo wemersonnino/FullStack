@@ -1,9 +1,8 @@
 import { randomUUID } from 'crypto';
 import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
-import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getOptionalServerSession } from '@/lib/auth/server-auth';
 
 export const runtime = 'nodejs';
 
@@ -23,7 +22,7 @@ function extensionFor(file: File) {
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalServerSession();
   if (!session) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }

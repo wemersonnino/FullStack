@@ -16,6 +16,9 @@ type BrandLinkProps = {
 export function BrandLink({ global, href = '/', collapsed = false, className }: BrandLinkProps) {
   const siteName = global?.siteName || 'Escala SaaS';
   const logo = global?.logo;
+  const expandedWidth = 180;
+  const expandedHeight = 40;
+  const collapsedSize = 40;
 
   return (
     <Link href={href} className={cn('group flex items-center gap-2', className)} aria-label={siteName}>
@@ -23,12 +26,13 @@ export function BrandLink({ global, href = '/', collapsed = false, className }: 
         <Image
           src={logo.url}
           alt={logo.alternativeText || siteName}
-          width={collapsed ? 40 : 180}
-          height={40}
+          width={collapsed ? collapsedSize : expandedWidth}
+          height={collapsed ? collapsedSize : expandedHeight}
           className={cn(
-            'h-10 rounded-lg object-contain',
-            collapsed ? 'w-10' : 'w-auto max-w-[180px]'
+            'rounded-lg object-contain',
+            collapsed ? 'h-10 w-10' : 'h-10 max-w-[180px]'
           )}
+          style={collapsed ? undefined : { width: 'auto', height: `${expandedHeight}px` }}
           priority
         />
       ) : (

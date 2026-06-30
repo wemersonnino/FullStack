@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Bell, ChevronDown, LogOut, User, Settings, Shield, MailOpen } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { signOut, useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +18,6 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/hooks/useAuth';
 import { resolveAvatarUrl } from '@/lib/utils';
 import { MessageModel } from '@/infrastructure/adapters/message.adapter';
 import { MessageService } from '@/core/application/services/message.service';
@@ -27,15 +27,20 @@ type HeaderUser = {
   username?: string | null;
   email?: string | null;
   roles?: string[];
-  token?: string;
   avatarUrl?: string | null;
   image?: string | null;
   picture?: string | null;
   avatar?: string | { url?: string | null } | null;
 };
 
-export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
-  const { session, logout } = useAuth();
+export const HeaderPrivate = ({
+  user: initialUser,
+  initialMessages = [],
+}: {
+  user?: HeaderUser;
+  initialMessages?: MessageModel[];
+}) => {
+  const { data: session } = useSession();
   const sessionUser = session?.user as HeaderUser | undefined;
   const user = {
     ...initialUser,
@@ -43,16 +48,14 @@ export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
     avatarUrl: sessionUser?.avatarUrl || initialUser?.avatarUrl || null,
     image: sessionUser?.image || initialUser?.image || null,
   };
-  const token = (user as any)?.token;
 
-  const [messages, setMessages] = useState<MessageModel[]>([]);
+  const [messages, setMessages] = useState<MessageModel[]>(initialMessages);
   const [selectedMessage, setSelectedMessage] = useState<MessageModel | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   async function refreshNotifications() {
-    if (!token) return;
     try {
-      const data = await MessageService.listMessages(token, 'PENDING');
+      const data = await MessageService.listMessages(undefined, 'PENDING');
       setMessages(data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -62,9 +65,8 @@ export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
   useEffect(() => {
     let cancelled = false;
     async function loadNotifications() {
-      if (!token) return;
       try {
-        const data = await MessageService.listMessages(token, 'PENDING');
+        const data = await MessageService.listMessages(undefined, 'PENDING');
         if (!cancelled) setMessages(data);
       } catch (error) {
         console.error('Error fetching notifications:', error);
@@ -83,13 +85,17 @@ export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
       window.clearTimeout(initialLoad);
       clearInterval(interval);
     };
-  }, [token]);
+  }, []);
 
   const avatarSrc = resolveAvatarUrl(user);
 
   const handleMessageClick = (msg: MessageModel) => {
     setSelectedMessage(msg);
     setModalOpen(true);
+  };
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/login' });
   };
 
   return (
@@ -206,7 +212,7 @@ export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
             )}
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
             <LogOut className="mr-2 h-4 w-4" />
             <span>Sair da conta</span>
           </DropdownMenuItem>
@@ -223,7 +229,6 @@ export const HeaderPrivate = ({ user: initialUser }: { user?: HeaderUser }) => {
             setSelectedMessage(null);
           }}
           onDecisionSuccess={refreshNotifications}
-          token={token}
         />
       )}
     </header>

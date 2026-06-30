@@ -155,7 +155,7 @@ services:
       - api-java
     environment:
       - NEXTAUTH_URL=http://localhost:3000
-      - NEXT_PUBLIC_API_BASE=http://api-java:8080
+      - API_BASE_URL=http://backend:8080
 
   api-java:
     build: ./backend
@@ -238,6 +238,6 @@ graph TD
 ---
 
 [^1]📘 **Autor:** Wemerson Pereira
-📅 **Última atualização:** {{data_atual}}
+📅 **Ultima atualizacao:** 2026-06-30
 
 [^1]: Autor Wemerson

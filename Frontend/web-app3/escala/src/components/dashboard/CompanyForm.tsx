@@ -24,6 +24,7 @@ import { useCompanyStore } from '@/store/useCompanyStore';
 import { uploadFile } from '@/services/profile.service';
 import { Company } from '@/services/company.service';
 import Link from 'next/link';
+import { ExternalDataService } from '@/core/application/services/external.service';
 
 const CompanySchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
@@ -130,11 +131,9 @@ export function CompanyForm({ companyId }: { companyId?: string }) {
 
     setIsFetchingCep(true);
     try {
-      const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cleanCep}`);
-      if (!response.ok) throw new Error('CEP nao encontrado');
-      
-      const data = await response.json();
-      
+      const data = await ExternalDataService.lookupCep(cleanCep);
+      if (!data) throw new Error('CEP nao encontrado');
+
       form.setValue('street', data.street || '');
       form.setValue('neighborhood', data.neighborhood || '');
       form.setValue('city', data.city || '');

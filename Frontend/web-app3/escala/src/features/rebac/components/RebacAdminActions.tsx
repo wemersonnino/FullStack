@@ -31,7 +31,6 @@ type ScopeOption = {
 };
 
 type RebacAdminActionsProps = {
-  token: string;
   users: UserProfile[];
   scopeTypes: ManagerScopeTypeOption[];
   roleLevels: ManagerRoleLevelOption[];
@@ -44,7 +43,7 @@ function userLabel(user: UserProfile) {
   return `${user.username || user.email} (${user.email})`;
 }
 
-export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOptions }: RebacAdminActionsProps) {
+export function AssignmentForm({ users, scopeTypes, roleLevels, scopeOptions }: RebacAdminActionsProps) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
   const [scopeType, setScopeType] = useState<ManagerScopeType>(scopeTypes[0]?.name ?? 'COMPANY');
@@ -53,7 +52,7 @@ export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOpti
   async function handleSubmit(formData: FormData) {
     setSubmitting(true);
     try {
-      await RebacService.createAssignment(token, {
+      await RebacService.createAssignment(undefined, {
         managerUserId: formData.get('managerUserId')?.toString() || '',
         scopeType,
         scopeId: formData.get('scopeId')?.toString() || '',
@@ -140,14 +139,14 @@ export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOpti
   );
 }
 
-export function EdgeForm({ token, users }: RebacAdminActionsProps) {
+export function EdgeForm({ users }: RebacAdminActionsProps) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setSubmitting(true);
     try {
-      await RebacService.createEdge(token, {
+      await RebacService.createEdge(undefined, {
         parentUserId: formData.get('parentUserId')?.toString() || '',
         childUserId: formData.get('childUserId')?.toString() || '',
         relationType: formData.get('relationType')?.toString() || 'REPORTS_TO',
@@ -211,14 +210,14 @@ export function EdgeForm({ token, users }: RebacAdminActionsProps) {
   );
 }
 
-export function DeleteAssignmentButton({ token, id }: { token: string; id: string }) {
+export function DeleteAssignmentButton({ id }: { id: string }) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
   async function handleClick() {
     setSubmitting(true);
     try {
-      await RebacService.deleteAssignment(token, id);
+      await RebacService.deleteAssignment(undefined, id);
       router.refresh();
     } finally {
       setSubmitting(false);
@@ -232,14 +231,14 @@ export function DeleteAssignmentButton({ token, id }: { token: string; id: strin
   );
 }
 
-export function DeleteEdgeButton({ token, id }: { token: string; id: string }) {
+export function DeleteEdgeButton({ id }: { id: string }) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
   async function handleClick() {
     setSubmitting(true);
     try {
-      await RebacService.deleteEdge(token, id);
+      await RebacService.deleteEdge(undefined, id);
       router.refresh();
     } finally {
       setSubmitting(false);
@@ -253,14 +252,14 @@ export function DeleteEdgeButton({ token, id }: { token: string; id: string }) {
   );
 }
 
-export function RecalculateClosureButton({ token }: { token: string }) {
+export function RecalculateClosureButton() {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
   async function handleClick() {
     setSubmitting(true);
     try {
-      await RebacService.recalculateClosure(token);
+      await RebacService.recalculateClosure(undefined);
       router.refresh();
     } finally {
       setSubmitting(false);

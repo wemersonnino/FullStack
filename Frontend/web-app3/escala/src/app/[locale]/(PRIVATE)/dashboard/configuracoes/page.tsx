@@ -1,18 +1,13 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { SettingsForm } from '@/components/dashboard/SettingsForm';
+import { sanitizeClientUser } from '@/lib/auth/client-user';
+import { getRequiredServerAuth } from '@/lib/auth/server-auth';
 
 export const metadata = {
   title: 'Configurações | Plataforma Escala',
 };
 
 export default async function SettingsPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    redirect('/login');
-  }
+  const { session } = await getRequiredServerAuth();
 
   // Permissão de administrador ou owner
   const isAdmin =
@@ -20,5 +15,5 @@ export default async function SettingsPage() {
     session.user.roles?.includes('OWNER') ||
     false;
 
-  return <SettingsForm user={session.user} isAdmin={isAdmin} />;
+  return <SettingsForm user={sanitizeClientUser(session.user)} isAdmin={isAdmin} />;
 }

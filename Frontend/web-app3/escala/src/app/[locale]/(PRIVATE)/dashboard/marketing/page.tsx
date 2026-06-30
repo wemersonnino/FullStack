@@ -1,8 +1,7 @@
-import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { MarketingStatsPanel } from '@/components/dashboard/MarketingStatsPanel';
 import { getMarketingStats, MarketingStats } from '@/services/marketing-stats.service';
+import { getRequiredServerAuth } from '@/lib/auth/server-auth';
 
 const MARKETING_ROLES = new Set(['ADMIN', 'OWNER', 'MARKETING']);
 
@@ -15,11 +14,7 @@ const EMPTY_STATS: MarketingStats = {
 };
 
 export default async function MarketingDashboardPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    redirect('/login');
-  }
+  const { session, accessToken } = await getRequiredServerAuth();
 
   const roles = session.user.roles ?? [];
   const canAccess = roles.some((role) => MARKETING_ROLES.has(role));
@@ -28,7 +23,7 @@ export default async function MarketingDashboardPage() {
     redirect('/dashboard');
   }
 
-  const stats = await getMarketingStats(session.user.token);
+  const stats = await getMarketingStats(accessToken);
 
   return <MarketingStatsPanel stats={stats ?? EMPTY_STATS} />;
 }

@@ -1,5 +1,35 @@
 # Decisoes Tecnicas
 
+## 2026-06-30 - Escala Inteligente SSR, endurecimento de sessao e robustez do BFF
+
+### Contexto
+
+O frontend ja possuia rotas privadas, BFF por dominio e o backend ja expunha a API de `SchedulingController`, mas ainda faltava fechar a experiencia de produto para a Escala Inteligente, endurecer o update de sessao do perfil e reduzir falhas falsas de startup/polling no ambiente Docker.
+
+### Decisoes confirmadas
+
+- **Escala Inteligente via SSR + workspace cliente**: a rota `/dashboard/escala/inteligente` passou a seguir o fluxo `Server Page -> BFF scheduling -> backend -> workspace cliente`. O SSR carrega calendario mensal, legendas, feriados, ciclo, atribuicoes, contadores e alertas.
+- **Editor operacional bulk, nao mutacao por celula no backend**: o backend de `PATCH /api/v1/scheduling/cycles/{id}/assignments` substitui o conjunto inteiro de atribuicoes do ciclo. A UI foi desenhada explicitamente para draft local + save bulk.
+- **Produtividade no editor mensal**: as operacoes `preencher semana`, `copiar escala mensal`, presets `5x2`/`6x1`/`12x36` e `dif antes do save` ficaram no frontend como aceleradores de edicao, mantendo a persistencia consolidada no save bulk.
+- **Sessao do perfil reduzida a payload editavel**: o `useSession().update()` deixou de reenviar dados sensiveis/nao editaveis como roles, plano, tenant ou provider arbitrario. O frontend envia apenas campos de perfil/sessao visual, e o callback do `next-auth` preserva o `provider` de forma controlada.
+- **Adapter de mensagens SSR-safe**: no browser, o adapter de mensagens voltou a usar URL relativa; em SSR, usa URL absoluta baseada em `NEXTAUTH_URL`. Falhas transientes no polling cliente deixaram de poluir o console como erro funcional.
+- **BFF com degradacao controlada**: `proxyBackend()` passou a responder `503` JSON quando o backend ainda nao esta pronto, em vez de propagar excecao crua de `fetch`.
+- **Compose local com readiness real**: `docker-compose.yml` ganhou `healthcheck` e `depends_on.condition: service_healthy` para `postgres`, `backend`, `strapi` e `frontend`.
+- **Normalizacao de pagina de usuarios**: o frontend passou a aceitar tanto array direto quanto `Page<UserResponse>.content[]`, evitando quebra em `/dashboard/configuracoes`.
+
+### Por que fizemos
+
+- Fechar a jornada de produto da Escala Inteligente usando os endpoints que ja existiam no backend.
+- Evitar que o frontend trate payload de sessao como espelho confiavel de dados do usuario.
+- Reduzir ruido de diagnostico local causado por startup concorrente dos containers.
+- Tornar o polling de mensagens resiliente a transicoes de rota, HMR e indisponibilidade momentanea do BFF.
+
+### Consequencias
+
+- A Escala Inteligente agora ja existe como produto navegavel, mas ainda depende de `cycleId` para recuperar um ciclo existente.
+- A mensageria continua parcial: existe badge/header/modal, mas ainda nao ha inbox completo.
+- Qualquer evolucao do contrato de usuarios paginados deve continuar normalizada nos adapters, nao nos componentes.
+
 ## 2026-06-26 - Manutenção do Padrão REST com DTOs Selecionados vs GraphQL e Copywriting via Strapi v5
 
 ### Contexto

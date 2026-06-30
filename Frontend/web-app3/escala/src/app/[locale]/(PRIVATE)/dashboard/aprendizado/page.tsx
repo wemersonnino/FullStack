@@ -1,15 +1,14 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { LearningProgressPanel } from '@/components/dashboard/learning/LearningProgressPanel';
 import { getLearningProgress } from '@/services/learning-progress.service';
+import { getRequiredServerAuth } from '@/lib/auth/server-auth';
 
 export const metadata = {
   title: 'Aprendizado | Plataforma Escala',
 };
 
 export default async function AprendizadoPage() {
-  const session = await getServerSession(authOptions);
-  const items = session?.user?.token ? await getLearningProgress(session.user.token) : [];
+  const { accessToken } = await getRequiredServerAuth();
+  const items = await getLearningProgress(accessToken);
 
   return (
     <div className="container mx-auto space-y-6 py-10">

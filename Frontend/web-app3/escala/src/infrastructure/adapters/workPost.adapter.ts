@@ -14,12 +14,22 @@ export class WorkPostBackendAdapter {
     return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
   }
 
-  static async list(token: string): Promise<WorkPostModel[]> {
+  private static headers(token?: string, json = false): HeadersInit {
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+    };
+    if (json) {
+      headers['Content-Type'] = 'application/json';
+    }
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
+  }
+
+  static async list(token?: string): Promise<WorkPostModel[]> {
     const response = await fetch(this.url(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
+      headers: this.headers(token),
       cache: 'no-store',
     });
     if (!response.ok) throw new Error("Failed to fetch work posts");
@@ -32,13 +42,10 @@ export class WorkPostBackendAdapter {
     }));
   }
 
-  static async create(workPost: WorkPostModel, token: string): Promise<WorkPostModel> {
+  static async create(workPost: WorkPostModel, token?: string): Promise<WorkPostModel> {
     const response = await fetch(this.url(), {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: this.headers(token, true),
       body: JSON.stringify({
         name: workPost.name,
         description: workPost.description,
@@ -55,12 +62,10 @@ export class WorkPostBackendAdapter {
     };
   }
 
-  static async delete(id: string, token: string): Promise<void> {
+  static async delete(id: string, token?: string): Promise<void> {
     const response = await fetch(this.url(`/${id}`), {
       method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this.headers(token),
     });
     if (!response.ok) throw new Error("Failed to delete work post");
   }

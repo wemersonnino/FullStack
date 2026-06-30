@@ -20,7 +20,6 @@ declare module "next-auth" {
       state?: string;
       position?: string;
       function?: string;
-      token: string;
       companySlug?: string;
       companyTheme?: string;
       provider?: string;

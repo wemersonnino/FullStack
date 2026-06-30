@@ -32,7 +32,6 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from '@/hooks/useAuth';
 import { OperationalCapacityService } from '@/core/application/services/operationalCapacity.service';
 import { OrganizationService } from '@/core/application/services/organization.service';
 import { WorkPostService } from '@/core/application/services/workPost.service';
@@ -62,9 +61,6 @@ const DAYS_OF_WEEK = [
 ];
 
 export function OperationalCapacityForm() {
-  const { session } = useAuth();
-  const token = (session?.user as any)?.token;
-
   const [capacities, setCapacities] = useState<OperationalCapacityModel[]>([]);
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [workPosts, setWorkPosts] = useState<WorkPostModel[]>([]);
@@ -86,16 +82,14 @@ export function OperationalCapacityForm() {
   const selectedTargetType = form.watch('targetType');
 
   useEffect(() => {
-    if (token) {
-      fetchCapacities();
-      fetchSectorsAndWorkPosts();
-    }
-  }, [token]);
+    fetchCapacities();
+    fetchSectorsAndWorkPosts();
+  }, []);
 
   async function fetchCapacities() {
     setIsLoading(true);
     try {
-      const data = await OperationalCapacityService.listCapacities(token);
+      const data = await OperationalCapacityService.listCapacities();
       setCapacities(data);
     } catch (error) {
       toast.error('Erro ao carregar capacidades operacionais.');
@@ -106,9 +100,9 @@ export function OperationalCapacityForm() {
 
   async function fetchSectorsAndWorkPosts() {
     try {
-      const sectorData = await OrganizationService.listSectors(token);
+      const sectorData = await OrganizationService.listSectors();
       setSectors(sectorData as any);
-      const postData = await WorkPostService.list(token);
+      const postData = await WorkPostService.list();
       setWorkPosts(postData);
     } catch (error) {
       console.error('Error fetching sectors/workposts:', error);
@@ -137,7 +131,7 @@ export function OperationalCapacityForm() {
         endTime: values.endTime + (values.endTime.length === 5 ? ":00" : ""),
         minEmployeesRequired: values.minEmployeesRequired,
       };
-      await OperationalCapacityService.createCapacity(payload, token);
+      await OperationalCapacityService.createCapacity(payload);
       toast.success('Regra de capacidade criada com sucesso.');
       setIsDialogOpen(false);
       fetchCapacities();
@@ -149,7 +143,7 @@ export function OperationalCapacityForm() {
   async function handleDelete(id: string) {
     if (!confirm('Deseja realmente excluir esta regra de capacidade?')) return;
     try {
-      await OperationalCapacityService.deleteCapacity(id, token);
+      await OperationalCapacityService.deleteCapacity(id);
       toast.success('Regra excluída.');
       fetchCapacities();
     } catch (error) {

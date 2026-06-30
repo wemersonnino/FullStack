@@ -321,7 +321,7 @@ server:
 
 |Sistema|Função|Endpoint base|
 |---|---|---|
-|**Strapi**|Conteudo editorial, landing pages, menus, artigos, SEO e legal pages|`${NEXT_PUBLIC_STRAPI_API}`|
+|**Strapi**|Conteudo editorial, landing pages, menus, artigos, SEO e legal pages|`${NEXT_PUBLIC_STRAPI_PUBLIC_URL}` / `${NEXT_INTERNAL_STRAPI_URL}`|
 |**Integracoes futuras**|Folha, ERP, mensageria, mapas, relatorios externos ou automacoes|Variavel propria por integracao|
 
 O backend Java pode orquestrar integracoes externas quando a regra operacional pertencer ao backend. O frontend deve usar BFF para chamadas protegidas.
@@ -334,22 +334,21 @@ O backend Java pode orquestrar integracoes externas quando a regra operacional p
 - Camadas bem separadas (`controller`, `service`, `repository`).
 - DTOs entre API ↔ entidades JPA.
 - Centralizar logs e erros em `GlobalExceptionHandler`.
-- Versão do Java ≥ **21**.
+- Versão atual validada do Java: **25**.
 - Testes com **JUnit 5** e **Mockito**.
 
 ---
 
-## 🧾 10. Próximos Passos
+## 🧾 10. Proximos Passos
 
--  Implementar `AuthService` completo com JWT e bcrypt.
--  Criar `UserController` com CRUD básico.
--  Mockar `/noticias` com dados estáticos para integração inicial.
--  Integrar com NextAuth e testar autenticação real.
--  Configurar volume persistente do PostgreSQL no Docker.
+- ampliar testes de integracao para autenticacao, JPA, JWT e endpoints
+- manter `OpenApiController` sincronizado com controllers reais
+- evoluir a Escala Inteligente com listagem de ciclos por periodo
+- aprofundar rules/policies de cobertura, capacidade e ausencia no dominio de scheduling
 
 ---
 
 [^1]📘 **Autor:** Wemerson Pereira
-📅 **Última atualização:** {{data_atual}}
+📅 **Ultima atualizacao:** 2026-06-30
 
 [^1]: Autor Wemerson

@@ -23,8 +23,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
               and (:sectorId is null or e.sector.id = :sectorId)
               and (
                     :query is null
-                    or lower(e.fullName) like concat('%', :query, '%')
-                    or lower(e.email) like concat('%', :query, '%')
+                    or lower(e.fullName) like concat('%', cast(:query as string), '%')
+                    or lower(e.email) like concat('%', cast(:query as string), '%')
                   )
             order by e.fullName asc
             """)

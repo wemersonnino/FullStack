@@ -37,6 +37,9 @@ public class BillingService {
     public void updateSubscriptionStatus(String stripeSubscriptionId, String stripeCustomerId, SubscriptionStatus status, String planType, UUID companyId) {
         Subscription subscription = subscriptionRepository.findByStripeSubscriptionId(stripeSubscriptionId)
                 .orElseGet(() -> {
+                    if (companyId == null) {
+                        throw new IllegalArgumentException("companyId obrigatorio para nova assinatura");
+                    }
                     Company company = companyRepository.findById(companyId)
                             .orElseThrow(() -> new IllegalArgumentException("Empresa nao encontrada para nova assinatura"));
                     return Subscription.builder()
@@ -47,16 +50,19 @@ public class BillingService {
 
         subscription.setStripeCustomerId(stripeCustomerId);
         subscription.setStatus(status);
-        subscription.setPlanType(normalizePlanType(planType));
+        if (planType != null && !planType.isBlank()) {
+            subscription.setPlanType(normalizePlanType(planType));
+        } else if (isEntitledStatus(status) && (subscription.getPlanType() == null || subscription.getPlanType().isBlank())) {
+            throw new IllegalArgumentException("planType obrigatorio para assinatura ativa");
+        }
+        if (status == SubscriptionStatus.CANCELED) {
+            subscription.setCanceledAt(OffsetDateTime.now());
+        } else if (status == SubscriptionStatus.ACTIVE || status == SubscriptionStatus.TRIALING) {
+            subscription.setCanceledAt(null);
+        }
         
         subscriptionRepository.save(subscription);
-
-        // Update company planType if active
-        if (status == SubscriptionStatus.ACTIVE || status == SubscriptionStatus.TRIALING) {
-            Company company = subscription.getCompany();
-            company.setPlanType(subscription.getPlanType());
-            companyRepository.save(company);
-        }
+        syncCompanyPlan(subscription.getCompany(), subscription);
     }
 
     @Transactional
@@ -76,6 +82,27 @@ public class BillingService {
     
     public Optional<Subscription> getSubscription(UUID companyId) {
         return subscriptionRepository.findByCompanyId(companyId);
+    }
+
+    private void syncCompanyPlan(Company company, Subscription subscription) {
+        SubscriptionStatus status = subscription.getStatus();
+
+        if (isEntitledStatus(status)) {
+            company.setPlanType(subscription.getPlanType());
+            companyRepository.save(company);
+            return;
+        }
+
+        if (status == SubscriptionStatus.CANCELED
+                || status == SubscriptionStatus.UNPAID
+                || status == SubscriptionStatus.INCOMPLETE_EXPIRED) {
+            company.setPlanType("FREE");
+            companyRepository.save(company);
+        }
+    }
+
+    private boolean isEntitledStatus(SubscriptionStatus status) {
+        return status == SubscriptionStatus.ACTIVE || status == SubscriptionStatus.TRIALING;
     }
 
     private String normalizePlanType(String planType) {

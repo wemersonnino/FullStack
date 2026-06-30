@@ -1,23 +1,18 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { ProfileForm } from '@/components/dashboard/ProfileForm';
 import { getMyProfile } from '@/services/profile.service';
+import { sanitizeClientUser } from '@/lib/auth/client-user';
+import { getRequiredServerAuth } from '@/lib/auth/server-auth';
 
 export const metadata = {
   title: 'Meu perfil | Plataforma Escala',
 };
 
 export default async function ProfilePage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    redirect('/login');
-  }
+  const { session, accessToken } = await getRequiredServerAuth();
 
   let freshUser = session.user;
   try {
-    const profile = await getMyProfile(session.user.token);
+    const profile = await getMyProfile(accessToken);
     if (profile) {
       freshUser = { ...session.user, ...profile };
     }
@@ -25,5 +20,5 @@ export default async function ProfilePage() {
     console.error('Failed to fetch fresh profile', error);
   }
 
-  return <ProfileForm user={freshUser} />;
+  return <ProfileForm user={sanitizeClientUser(freshUser)} />;
 }

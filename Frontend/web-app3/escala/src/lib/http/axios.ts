@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { signOut } from 'next-auth/react';
 
 /**
  * Instância global do Axios.
@@ -11,14 +10,17 @@ export const api = axios.create({
 });
 
 /**
- * Interceptor global para capturar erros de autenticação (401)
- * e redirecionar o usuário para o login.
+ * Interceptor global para observabilidade de falhas HTTP.
+ * Nao derruba a sessao automaticamente: um 401 pode representar
+ * permissao insuficiente em um recurso especifico, nao sessao invalida.
  */
 api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      signOut({ callbackUrl: '/login' });
+      const method = String(error.config?.method || 'GET').toUpperCase();
+      const url = error.config?.url || 'unknown-url';
+      console.warn(`[HTTP 401] ${method} ${url}`);
     }
 
     return Promise.reject(error);

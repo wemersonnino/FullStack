@@ -63,7 +63,7 @@ export const HeaderPublic = ({ global, menuItems }: HeaderPublicProps) => {
           
           {session ? (
             <Button asChild size="sm" className="rounded-full px-6">
-              <Link href="/dashboard">Dashboard</Link>
+              <Link href="/dashboard" prefetch={false}>Dashboard</Link>
             </Button>
           ) : (
             <div className="hidden sm:flex items-center gap-2">
