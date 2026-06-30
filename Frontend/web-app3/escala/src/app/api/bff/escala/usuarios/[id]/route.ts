@@ -2,7 +2,7 @@ import { proxyBackend } from '@/lib/bff/backend';
 import { requireEscalaAdmin } from '../../_permissions';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const state = await requireEscalaAdmin();
+  const state = await requireEscalaAdmin(request);
   if ('response' in state) return state.response;
   const { id } = await params;
 

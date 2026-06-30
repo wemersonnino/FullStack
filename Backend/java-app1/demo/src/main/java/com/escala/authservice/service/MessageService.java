@@ -25,10 +25,10 @@ public class MessageService {
     private final WorkShiftRepository workShiftRepository;
     private final AuditLogService auditLogService;
     private final PolicyService policyService;
+    private final CurrentUserService currentUserService;
 
     private User getRequester(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
+        return currentUserService.requireCurrentUser(email);
     }
 
     public org.springframework.data.domain.Page<Message> listMessages(String email, MessageStatus status, org.springframework.data.domain.Pageable pageable) {

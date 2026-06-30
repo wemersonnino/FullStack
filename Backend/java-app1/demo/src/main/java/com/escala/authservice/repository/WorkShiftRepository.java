@@ -2,6 +2,7 @@ package com.escala.authservice.repository;
 
 import com.escala.authservice.entity.WorkShift;
 import com.escala.authservice.entity.WorkMode;
+import com.escala.authservice.entity.ShiftStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -70,6 +71,7 @@ public interface WorkShiftRepository extends JpaRepository<WorkShift, UUID> {
     List<WorkShift> findByEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(UUID companyId, LocalDate shiftDate);
     List<WorkShift> findByEmployeeIdAndEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(UUID employeeId, UUID companyId, LocalDate shiftDate);
     boolean existsByEmployeeIdAndShiftDate(UUID employeeId, LocalDate shiftDate);
+    boolean existsByEmployeeIdAndShiftDateAndStatusNot(UUID employeeId, LocalDate shiftDate, ShiftStatus status);
     long countByEmployeeCompanyIdAndShiftDateBetween(UUID companyId, LocalDate start, LocalDate end);
     long countByEmployeeCompanyIdAndShiftDateAndWorkMode(UUID companyId, LocalDate shiftDate, WorkMode workMode);
 

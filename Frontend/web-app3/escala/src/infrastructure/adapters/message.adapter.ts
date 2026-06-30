@@ -18,6 +18,19 @@ export interface MessageModel {
 export class MessageBackendAdapter {
   private static baseUrl = '/api/bff/messages';
 
+  private static normalizeListResponse(payload: unknown): MessageModel[] {
+    if (Array.isArray(payload)) {
+      return payload as MessageModel[];
+    }
+    if (payload && typeof payload === 'object') {
+      const content = (payload as { content?: unknown }).content;
+      if (Array.isArray(content)) {
+        return content as MessageModel[];
+      }
+    }
+    return [];
+  }
+
   static async listMessages(token: string, status?: string): Promise<MessageModel[]> {
     const url = status 
       ? `${this.baseUrl}?status=${status}`
@@ -32,7 +45,7 @@ export class MessageBackendAdapter {
         cache: 'no-store',
       });
       if (!response.ok) return [];
-      return await response.json();
+      return this.normalizeListResponse(await response.json());
     } catch (error) {
       console.warn('Failed to fetch messages', error);
       return [];
