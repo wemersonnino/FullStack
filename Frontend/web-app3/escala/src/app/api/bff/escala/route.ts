@@ -3,7 +3,7 @@ import { proxyBackend, readJson } from '@/lib/bff/backend';
 import { requireCanViewAllEscalas, requireEscalaAdmin } from './_permissions';
 
 export async function GET(request: Request) {
-  const state = await requireCanViewAllEscalas();
+  const state = await requireCanViewAllEscalas(request);
   if ('response' in state) return state.response;
 
   const response = await proxyBackend('/api/v1/escala', {
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const state = await requireEscalaAdmin();
+  const state = await requireEscalaAdmin(request);
   if ('response' in state) return state.response;
 
   return proxyBackend('/api/v1/escala', {

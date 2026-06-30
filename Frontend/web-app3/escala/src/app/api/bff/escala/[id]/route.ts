@@ -6,7 +6,7 @@ type RouteContext = {
 };
 
 export async function PUT(request: Request, context: RouteContext) {
-  const state = await requireEscalaAdmin();
+  const state = await requireEscalaAdmin(request);
   if ('response' in state) return state.response;
 
   const { id } = await context.params;
@@ -18,7 +18,7 @@ export async function PUT(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(request: Request, context: RouteContext) {
-  const state = await requireEscalaAdmin();
+  const state = await requireEscalaAdmin(request);
   if ('response' in state) return state.response;
 
   const { id } = await context.params;

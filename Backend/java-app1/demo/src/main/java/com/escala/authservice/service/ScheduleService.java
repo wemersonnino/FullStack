@@ -140,12 +140,13 @@ public class ScheduleService {
         if (request.getStartTime() == null || request.getEndTime() == null) {
             throw new IllegalArgumentException("Horario inicial e final sao obrigatorios");
         }
+        validateShiftWindow(request.getStartTime(), request.getEndTime());
 
         List<WorkShift> saved = new ArrayList<>();
         PadraoEscala padraoEscala = request.getPadraoEscala() != null ? request.getPadraoEscala() : PadraoEscala.COMUM;
         
         for (LocalDate date : request.getDates()) {
-            if (workShiftRepository.existsByEmployeeIdAndShiftDate(employee.getId(), date)) {
+            if (workShiftRepository.existsByEmployeeIdAndShiftDateAndStatusNot(employee.getId(), date, ShiftStatus.CANCELLED)) {
                 throw new IllegalStateException("Funcionario ja possui escala em " + date);
             }
             WorkMode workMode = request.getWorkMode() == null ? WorkMode.PRESENCIAL : request.getWorkMode();
@@ -197,9 +198,12 @@ public class ScheduleService {
         applyEmployeeAllocation(shift.getEmployee(), request);
         validateEmployeeSelection(shift.getEmployee(), request);
         if (request.getDates() != null && !request.getDates().isEmpty()) {
+            if (request.getDates().size() > 1) {
+                throw new IllegalArgumentException("Atualizacao de escala aceita apenas uma data");
+            }
             LocalDate newDate = request.getDates().get(0);
             if (!Objects.equals(newDate, shift.getShiftDate())
-                    && workShiftRepository.existsByEmployeeIdAndShiftDate(shift.getEmployee().getId(), newDate)) {
+                    && workShiftRepository.existsByEmployeeIdAndShiftDateAndStatusNot(shift.getEmployee().getId(), newDate, ShiftStatus.CANCELLED)) {
                 throw new IllegalStateException("Funcionario ja possui escala em " + newDate);
             }
             shift.setShiftDate(newDate);
@@ -209,6 +213,7 @@ public class ScheduleService {
         if (request.getWorkMode() != null) shift.setWorkMode(request.getWorkMode());
         if (request.getPadraoEscala() != null) shift.setPadraoEscala(request.getPadraoEscala());
         if (request.getNotes() != null) shift.setNotes(request.getNotes());
+        validateShiftWindow(shift.getStartTime(), shift.getEndTime());
         
         validateLaborRules(shift.getEmployee(), shift.getShiftDate(), shift.getStartTime(), shift.getEndTime(), shift.getPadraoEscala(), shift.getId(), List.of(), null);
         validateSectorCapacity(shift.getEmployee(), request, shift.getShiftDate(), shift.getWorkMode(), shift.getId(), company.getId());
@@ -261,10 +266,12 @@ public class ScheduleService {
 
     public UsuarioEscalaResponse usuarioEscalavel(UUID id, String userEmail) {
         Company company = resolveCompany(userEmail);
+        User user = currentUserService.requireCurrentUser(userEmail);
         Employee employee = employeeRepository.findById(id).orElseThrow();
         if (!Objects.equals(employee.getCompany().getId(), company.getId())) {
             throw new org.springframework.security.access.AccessDeniedException("Funcionario nao pertence a sua empresa");
         }
+        policyService.requireCanAccessEmployee(user, employee);
         return UsuarioEscalaResponse.from(employee);
     }
 
@@ -377,9 +384,10 @@ public class ScheduleService {
 
         if (request.isApproved() && swap.getCompensationDate() != null) {
             WorkShift originalShift = swap.getOriginalShift();
-            if (!workShiftRepository.existsByEmployeeIdAndShiftDate(
+            if (!workShiftRepository.existsByEmployeeIdAndShiftDateAndStatusNot(
                     swap.getRequester().getId(),
-                    swap.getCompensationDate()
+                    swap.getCompensationDate(),
+                    ShiftStatus.CANCELLED
             )) {
                 workShiftRepository.save(WorkShift.builder()
                         .employee(swap.getRequester())
@@ -491,7 +499,7 @@ public class ScheduleService {
         }
         Sector sector = request.getSectorId() == null
                 ? employee.getSector()
-                : sectorRepository.findById(request.getSectorId()).orElseThrow();
+                : resolveSectorForCompany(request.getSectorId(), companyId);
         if (sector == null || sector.getMaxSeats() == null || sector.getMaxSeats() <= 0) {
             return;
         }
@@ -508,18 +516,43 @@ public class ScheduleService {
 
         if (request.getSectorId() != null
                 && (employee.getSector() == null || !Objects.equals(employee.getSector().getId(), request.getSectorId()))) {
-            employee.setSector(sectorRepository.findById(request.getSectorId()).orElseThrow());
+            employee.setSector(resolveSectorForCompany(request.getSectorId(), employee.getCompany().getId()));
             changed = true;
         }
 
         if (request.getProjectId() != null
                 && (employee.getProject() == null || !Objects.equals(employee.getProject().getId(), request.getProjectId()))) {
-            employee.setProject(projectRepository.findById(request.getProjectId()).orElseThrow());
+            employee.setProject(resolveProjectForCompany(request.getProjectId(), employee.getCompany().getId()));
             changed = true;
         }
 
         if (changed) {
             employeeRepository.save(employee);
+        }
+    }
+
+    private Sector resolveSectorForCompany(UUID sectorId, UUID companyId) {
+        Sector sector = sectorRepository.findById(sectorId).orElseThrow();
+        if (sector.getCompany() == null || !Objects.equals(sector.getCompany().getId(), companyId)) {
+            throw new org.springframework.security.access.AccessDeniedException("Setor nao pertence a empresa do funcionario");
+        }
+        return sector;
+    }
+
+    private Project resolveProjectForCompany(UUID projectId, UUID companyId) {
+        Project project = projectRepository.findById(projectId).orElseThrow();
+        if (project.getCompany() == null || !Objects.equals(project.getCompany().getId(), companyId)) {
+            throw new org.springframework.security.access.AccessDeniedException("Projeto nao pertence a empresa do funcionario");
+        }
+        return project;
+    }
+
+    private void validateShiftWindow(java.time.LocalTime startTime, java.time.LocalTime endTime) {
+        if (startTime == null || endTime == null) {
+            return;
+        }
+        if (!startTime.isBefore(endTime)) {
+            throw new IllegalArgumentException("Horario inicial deve ser anterior ao horario final");
         }
     }
 

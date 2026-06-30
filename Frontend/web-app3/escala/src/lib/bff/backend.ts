@@ -46,11 +46,16 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
 
   if (options.authenticated !== false) {
     let accessToken: string | undefined;
+    const incomingAuthorization = options.request?.headers.get('authorization');
+
+    if (incomingAuthorization?.startsWith('Bearer ')) {
+      accessToken = incomingAuthorization.slice('Bearer '.length).trim();
+    }
 
     // 1. Tenta extrair o token do cookie (NextAuth) se houver requisição
     if (options.request) {
       const jwtToken = await getToken({ req: options.request as any, secret: process.env.NEXTAUTH_SECRET });
-      accessToken = typeof jwtToken?.accessToken === 'string' ? jwtToken.accessToken : undefined;
+      accessToken = accessToken || (typeof jwtToken?.accessToken === 'string' ? jwtToken.accessToken : undefined);
     }
 
     // 2. Fallback: tenta obter da sessão (necessário para Server Components e chamadas server-side)
