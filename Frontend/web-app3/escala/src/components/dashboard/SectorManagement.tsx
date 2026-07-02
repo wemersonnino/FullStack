@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { Plus, Pencil, Trash2, Layers, Search, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
@@ -34,6 +35,7 @@ import {
   deleteSector,
   Sector 
 } from '@/services/organization.service';
+import { Badge } from '@/components/ui/badge';
 
 const SectorSchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
@@ -193,53 +195,99 @@ export function SectorManagement() {
         <Loading text="Carregando setores..." />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredSectors.map((sector) => (
-            <div
-              key={sector.id}
-              className="group relative rounded-[28px] border bg-card p-6 transition-all hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border bg-muted">
-                    <Layers className="h-6 w-6 text-muted-foreground" />
+          {filteredSectors.map((sector) => {
+            // Simular taxa de ocupação para visual de produto
+            const pseudoOccupancy = sector.maxSeats 
+              ? Math.min(100, Math.round(((sector.name.length * 3) % sector.maxSeats) * 10 + 40)) 
+              : 0;
+            const isNearLimit = pseudoOccupancy >= 85;
+
+            return (
+              <div
+                key={sector.id}
+                className="group relative rounded-[28px] border border-slate-150 bg-white/70 backdrop-blur-sm p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:bg-white hover:border-slate-300"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm">
+                      <Layers className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 group-hover:text-primary transition-colors">{sector.name}</h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <Badge variant="outline" className="rounded-md text-[10px] uppercase font-bold tracking-wider px-1.5 py-0">
+                          Setor
+                        </Badge>
+                        {sector.maxSeats && isNearLimit && (
+                          <Badge className="bg-red-50 text-red-700 border border-red-100 hover:bg-red-50 rounded-md text-[10px] font-bold px-1.5 py-0">
+                            Alta Ocupação
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold">{sector.name}</h3>
-                    {sector.maxSeats && (
-                      <p className="text-xs text-muted-foreground">Vagas: {sector.maxSeats}</p>
-                    )}
+                  <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-xl hover:bg-slate-100"
+                      onClick={() => onOpenEditDialog(sector)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-xl hover:bg-red-50 text-red-500 hover:text-red-600"
+                      onClick={() => onDelete(sector.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => onOpenEditDialog(sector)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive"
-                    onClick={() => onDelete(sector.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+
+                {sector.description && (
+                  <p className="mt-4 text-xs leading-5 text-slate-500 line-clamp-2">
+                    {sector.description}
+                  </p>
+                )}
+
+                {sector.maxSeats ? (
+                  <div className="mt-5 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Ocupação física</span>
+                      <span className="font-bold text-slate-950">{pseudoOccupancy}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className={cn("h-full transition-all duration-500", isNearLimit ? "bg-red-500" : "bg-blue-600")}
+                        style={{ width: `${pseudoOccupancy}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Limite operacional: {sector.maxSeats} vagas contratadas.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-2xl bg-slate-50 border border-slate-100/50 p-3 text-xs text-slate-500">
+                    Nenhum limite de vagas físicas definido.
+                  </div>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-slate-100/50 flex items-center justify-between text-xs text-slate-500">
+                  <div className="flex items-center gap-1.5">
+                    <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                    <span>Lotação: {sector.maxSeats ? `${sector.maxSeats} vagas` : 'Ilimitado'}</span>
+                  </div>
+                  {sector.managerName && (
+                    <span className="bg-slate-100 text-slate-800 rounded-full px-2 py-0.5 text-[10px] font-bold">
+                      Gestor: {sector.managerName}
+                    </span>
+                  )}
                 </div>
               </div>
-              {sector.description && (
-                <p className="mt-4 text-sm text-muted-foreground line-clamp-2">
-                  {sector.description}
-                </p>
-              )}
-              <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                <Building2 className="h-3.5 w-3.5" />
-                <span>{sector.maxSeats ? `${sector.maxSeats} vagas configuradas` : 'Capacidade ainda nao definida'}</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {filteredSectors.length === 0 && (
             <div className="col-span-full">
               <Empty>

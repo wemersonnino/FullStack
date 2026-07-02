@@ -12,7 +12,16 @@ export default async function RelatoriosPage({ searchParams }: RelatoriosPagePro
 
   const params = await searchParams;
   const month = params?.month || format(new Date(), 'yyyy-MM');
-  const items = await ReportService.getPayrollData(accessToken, month);
+  
+  let items: any[] = [];
+  let hasError = false;
 
-  return <RelatoriosView month={month} items={items} />;
+  try {
+    items = await ReportService.getPayrollData(accessToken, month);
+  } catch (err) {
+    console.error('Failed to fetch payroll report:', err);
+    hasError = true;
+  }
+
+  return <RelatoriosView month={month} items={items} hasError={hasError} />;
 }

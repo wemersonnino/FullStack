@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Plus, Trash2, Award } from 'lucide-react';
+import { Plus, Trash2, Award, MapPin, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -154,31 +156,51 @@ export function WorkPostManagement() {
           {workPosts.map((wp) => {
             const project = projects.find((p) => p.id === wp.projectId);
             return (
-              <Card key={wp.id} className="border border-border/60 rounded-2xl hover:shadow-lg transition-all hover:border-border/100 overflow-hidden">
-                <CardHeader className="pb-3 flex flex-row items-start justify-between space-y-0">
-                  <div className="space-y-1">
-                    <CardTitle className="text-base font-bold truncate max-w-[200px]">{wp.name}</CardTitle>
-                    {project && (
-                      <span className="inline-block text-[10px] uppercase tracking-wider font-extrabold text-primary bg-primary/10 px-2 py-0.5 rounded-full mt-1">
-                        {project.name}
-                      </span>
-                    )}
+              <div 
+                key={wp.id} 
+                className="group relative rounded-[28px] border border-slate-150 bg-white/70 backdrop-blur-sm p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:bg-white hover:border-slate-300"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm">
+                      <MapPin className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 group-hover:text-primary transition-colors truncate max-w-[150px]">{wp.name}</h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <Badge variant="outline" className="rounded-md text-[10px] uppercase font-bold tracking-wider px-1.5 py-0">
+                          Posto
+                        </Badge>
+                        {project && (
+                          <Badge className="bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-50 rounded-md text-[10px] font-bold px-1.5 py-0 truncate max-w-[100px]">
+                            {project.name}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full hover:bg-red-50 hover:text-red-500 text-muted-foreground"
+                    className="h-8 w-8 rounded-xl hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors"
                     onClick={() => wp.id && handleDelete(wp.id)}
                   >
-                    <Trash2 className="size-4" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                    {wp.description || 'Sem descrição cadastrada.'}
-                  </p>
-                </CardContent>
-              </Card>
+                </div>
+
+                <p className="mt-4 text-xs leading-5 text-slate-500 line-clamp-3 min-h-[60px]">
+                  {wp.description || 'Sem descrição ou diretrizes cadastrada para este posto de cobertura.'}
+                </p>
+
+                <div className="mt-4 pt-4 border-t border-slate-100/50 flex items-center justify-between text-xs text-slate-400">
+                  <div className="flex items-center gap-1">
+                    <Layers className="h-3.5 w-3.5" />
+                    <span>Contrato: Ativo</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400">ID: {wp.id?.slice(0, 8)}</span>
+                </div>
+              </div>
             );
           })}
         </div>

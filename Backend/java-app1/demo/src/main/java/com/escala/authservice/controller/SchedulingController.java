@@ -117,6 +117,13 @@ public class SchedulingController {
         return ResponseEntity.ok(toResponse(cycle));
     }
 
+    @GetMapping("/cycles")
+    public List<ScheduleCycleResponse> listCycles(Authentication authentication) {
+        return scheduleCycleService.listCycles(authentication.getName()).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     @GetMapping("/cycles/{id}")
     public ScheduleCycleResponse cycle(
             @PathVariable UUID id,

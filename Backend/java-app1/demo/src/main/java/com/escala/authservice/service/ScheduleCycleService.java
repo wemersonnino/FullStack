@@ -60,6 +60,11 @@ public class ScheduleCycleService {
                 .orElseThrow(() -> new IllegalArgumentException("Ciclo de escala nao encontrado"));
     }
 
+    public java.util.List<ScheduleCycle> listCycles(String email) {
+        User requester = getRequester(email);
+        return scheduleCycleRepository.findAllByCompanyId(requester.getCompany().getId());
+    }
+
     private User getRequester(String email) {
         return currentUserService.requireCurrentUser(email);
     }

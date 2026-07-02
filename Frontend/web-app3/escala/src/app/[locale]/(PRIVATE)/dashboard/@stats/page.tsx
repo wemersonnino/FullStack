@@ -5,7 +5,16 @@ import { getRequiredServerAuth } from '@/lib/auth/server-auth';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 
 export default async function StatsSlot() {
-  const { accessToken } = await getRequiredServerAuth();
+  const { accessToken, session } = await getRequiredServerAuth();
+  const roles = session.user.roles ?? [];
+  const isManagerOrAdmin =
+    roles.includes('ADMIN') ||
+    roles.includes('OWNER') ||
+    roles.some((role) => role.startsWith('MANAGER'));
+
+  if (!isManagerOrAdmin) {
+    return null;
+  }
 
   let stats: DashboardStats;
   try {

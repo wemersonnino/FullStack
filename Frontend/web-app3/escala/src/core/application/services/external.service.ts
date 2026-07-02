@@ -32,6 +32,19 @@ export class ExternalDataService {
     const cleanCnpj = cnpj.replace(/[^0-9A-Za-z]/g, '');
     if (cleanCnpj.length !== 14) return null;
 
-    return httpGet<BrasilApiCnpj>(`/api/bff/external/cnpj/${cleanCnpj}`);
+    try {
+      return await httpGet<BrasilApiCnpj>(`/api/bff/external/cnpj/${cleanCnpj}`, undefined, {
+        throwOnError: true,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Falha ao consultar CNPJ';
+      if (/cnpj nao encontrado|cnpj não encontrado/i.test(message)) {
+        throw new Error('CNPJ não encontrado');
+      }
+      if (/limite de consultas de cnpj atingido|status code 429|too many requests/i.test(message)) {
+        throw new Error('Limite de consultas de CNPJ atingido');
+      }
+      throw error;
+    }
   }
 }

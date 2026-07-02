@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const CNPJ_PATTERN = /^[0-9A-Za-z]{14}$/;
+const CNPJ_REVALIDATE_SECONDS = 60 * 60 * 12;
 
 export async function GET(
   _request: Request,
@@ -19,18 +20,36 @@ export async function GET(
       headers: {
         Accept: 'application/json',
       },
-      cache: 'no-store',
+      next: {
+        revalidate: CNPJ_REVALIDATE_SECONDS,
+      },
     });
 
     if (!response.ok) {
-      return NextResponse.json({ message: 'CNPJ nao encontrado' }, { status: response.status });
+      if (response.status === 404) {
+        return NextResponse.json({ message: 'CNPJ nao encontrado' }, { status: 404 });
+      }
+
+      if (response.status === 429) {
+        return NextResponse.json(
+          { message: 'Limite de consultas de CNPJ atingido. Tente novamente em instantes.' },
+          {
+            status: 429,
+            headers: {
+              'Cache-Control': 'private, no-store',
+            },
+          }
+        );
+      }
+
+      return NextResponse.json({ message: 'Falha ao consultar CNPJ' }, { status: response.status });
     }
 
     const data = await response.json();
     return NextResponse.json(data, {
       status: 200,
       headers: {
-        'Cache-Control': 'no-store',
+        'Cache-Control': `public, max-age=${CNPJ_REVALIDATE_SECONDS}, s-maxage=${CNPJ_REVALIDATE_SECONDS}, stale-while-revalidate=86400`,
         'X-Content-Type-Options': 'nosniff',
       },
     });

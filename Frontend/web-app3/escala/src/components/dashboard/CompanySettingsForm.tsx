@@ -61,15 +61,27 @@ export function CompanySettingsForm({ company, onSave }: { company: Company, onS
   const handleCnpjLookup = async () => {
     const cnpj = form.getValues('cnpj');
     setIsSearching(true);
-    const data = await ExternalDataService.lookupCnpj(cnpj);
-    if (data) {
-      form.setValue('name', data.nome_fantasia || data.razao_social);
-      form.setValue('address', `${data.logradouro}, ${data.numero} - ${data.bairro}`);
-      toast.success('Dados da empresa recuperados!');
-    } else {
-      toast.error('CNPJ não encontrado ou formato inválido.');
+    try {
+      const data = await ExternalDataService.lookupCnpj(cnpj);
+      if (data) {
+        form.setValue('name', data.nome_fantasia || data.razao_social);
+        form.setValue('address', `${data.logradouro}, ${data.numero} - ${data.bairro}`);
+        toast.success('Dados da empresa recuperados!');
+      } else {
+        toast.error('CNPJ não encontrado ou formato inválido.');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      toast.error(
+        message === 'CNPJ não encontrado'
+          ? 'CNPJ não encontrado na base consultada.'
+          : message === 'Limite de consultas de CNPJ atingido'
+            ? 'Limite de consultas de CNPJ atingido. Aguarde alguns instantes e tente novamente.'
+            : 'Erro ao consultar CNPJ.'
+      );
+    } finally {
+      setIsSearching(false);
     }
-    setIsSearching(false);
   };
 
   const handlePointSelect = (point: { lat: number, lng: number }) => {

@@ -57,7 +57,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ~/.m2:/tmp/.m2
+      - escala_m2_cache:/tmp/.m2
     ports:
       - "8080:8080"
     healthcheck:
@@ -157,6 +157,7 @@ services:
 
 volumes:
   escala_pg_data:
+  escala_m2_cache:
 
 networks:
   escala-network:

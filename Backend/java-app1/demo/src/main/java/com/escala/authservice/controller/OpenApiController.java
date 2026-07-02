@@ -287,7 +287,10 @@ public class OpenApiController {
                 get("Escala Inteligente", "Listar feriados de escala", "Lista feriados configurados para a empresa no ano informado, incluindo feriados globais da empresa e feriados especificos da unidade.", queryParamRequired("year", "Ano dos feriados."), queryParam("unitId", "ID da unidade operacional.")),
                 post("Escala Inteligente", "Criar feriado de escala", "Cria um feriado nacional, estadual, municipal ou customizado para a empresa, opcionalmente restrito a uma unidade.", "HolidayRequest")
         ));
-        paths.put("/api/v1/scheduling/cycles", pathPost(post("Escala Inteligente", "Criar ciclo mensal de escala", "Cria um ciclo mensal em rascunho para a empresa e unidade informadas, evitando duplicidade de ciclo ativo no mesmo periodo.", "ScheduleCycleRequest")));
+        paths.put("/api/v1/scheduling/cycles", path(
+                get("Escala Inteligente", "Listar ciclos mensais de escala", "Lista todos os ciclos de escala da empresa do usuario autenticado."),
+                post("Escala Inteligente", "Criar ciclo mensal de escala", "Cria um ciclo mensal em rascunho para a empresa e unidade informadas, evitando duplicidade de ciclo ativo no mesmo periodo.", "ScheduleCycleRequest")
+        ));
         paths.put("/api/v1/scheduling/cycles/{id}", pathGet(get("Escala Inteligente", "Buscar ciclo mensal de escala", "Retorna um ciclo mensal de escala da empresa do usuario autenticado usando o UUID publico do ciclo.", pathParam("id", "UUID publico do ciclo mensal."))));
         paths.put("/api/v1/scheduling/cycles/{id}/assignments", path(
                 get("Escala Inteligente", "Listar atribuicoes do ciclo", "Lista as atribuicoes diarias do ciclo mensal usando o UUID publico do ciclo.", pathParam("id", "UUID publico do ciclo mensal.")),

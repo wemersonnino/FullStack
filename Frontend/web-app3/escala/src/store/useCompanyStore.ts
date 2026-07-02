@@ -37,7 +37,8 @@ export const useCompanyStore = create<CompanyState>((set, get) => ({
       }
       return false;
     } catch (error) {
-      toast.error('Erro ao cadastrar empresa.');
+      const message = error instanceof Error ? error.message : 'Erro ao cadastrar empresa.';
+      toast.error(message);
       return false;
     }
   },
@@ -54,7 +55,8 @@ export const useCompanyStore = create<CompanyState>((set, get) => ({
       }
       return false;
     } catch (error) {
-      toast.error('Erro ao atualizar empresa.');
+      const message = error instanceof Error ? error.message : 'Erro ao atualizar empresa.';
+      toast.error(message);
       return false;
     }
   },
@@ -68,7 +70,8 @@ export const useCompanyStore = create<CompanyState>((set, get) => ({
       toast.success('Empresa excluída.');
       return true;
     } catch (error) {
-      toast.error('Erro ao excluir empresa.');
+      const message = error instanceof Error ? error.message : 'Erro ao excluir empresa.';
+      toast.error(message);
       return false;
     }
   },

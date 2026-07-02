@@ -61,7 +61,14 @@ export function OnboardingForm({ onSuccess }: { onSuccess: () => void }) {
         toast.error('CNPJ não encontrado na base da Receita.');
       }
     } catch (error) {
-      toast.error('Erro ao consultar CNPJ.');
+      const message = error instanceof Error ? error.message : '';
+      toast.error(
+        message === 'CNPJ não encontrado'
+          ? 'CNPJ não encontrado na base da Receita.'
+          : message === 'Limite de consultas de CNPJ atingido'
+            ? 'Limite de consultas de CNPJ atingido. Aguarde alguns instantes e tente novamente.'
+            : 'Erro ao consultar CNPJ.'
+      );
     } finally {
       setIsSearching(false);
     }

@@ -6,7 +6,9 @@ import { useAppStore } from '@/stores/app.store';
  * Rotas de CMS usam URLs absolutas do Strapi; rotas de domínio usam o BFF em /api/bff.
  */
 export const api = axios.create({
-  timeout: 15000,
+  timeout: typeof process !== 'undefined' && process.env.HTTP_TIMEOUT
+    ? Number(process.env.HTTP_TIMEOUT)
+    : 30000,
   headers: { 'Content-Type': 'application/json' },
 });
 

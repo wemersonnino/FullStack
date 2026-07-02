@@ -8,6 +8,7 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Check, X, MessageSquare, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -52,77 +53,76 @@ export const AdminSwapManagement = ({ swaps }: AdminSwapManagementProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Gestão de Trocas</h2>
-        <span className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider">
-          {pendingSwaps.length} Pendentes
-        </span>
-      </div>
-
+    <div className="space-y-4">
       {pendingSwaps.length === 0 ? (
-        <div className="bg-muted/30 flex flex-col items-center justify-center rounded-xl border border-dashed py-12 text-center">
-          <Check className="text-muted-foreground mb-4 h-12 w-12 opacity-20" />
-          <h3 className="text-lg font-medium">Tudo em dia!</h3>
-          <p className="text-muted-foreground text-sm">Não há solicitações de troca aguardando aprovação.</p>
+        <div className="bg-white/50 flex flex-col items-center justify-center rounded-2xl border border-dashed py-10 text-center backdrop-blur-sm">
+          <Check className="text-emerald-500 mb-3 h-10 w-10 opacity-70 animate-pulse" />
+          <h3 className="text-sm font-bold text-slate-900">Tudo em dia!</h3>
+          <p className="text-xs text-slate-500 mt-1">Não há solicitações de troca pendentes de decisão.</p>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           {pendingSwaps.map((swap) => (
-            <div key={swap.id} className="bg-card flex flex-col justify-between gap-4 rounded-xl border p-5 shadow-sm md:flex-row md:items-center">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-full">
-                    <User className="h-4 w-4" />
+            <div 
+              key={swap.id} 
+              className="bg-white/70 border border-slate-100 flex flex-col justify-between gap-4 rounded-2xl p-4 shadow-sm backdrop-blur-sm transition-all hover:shadow-md hover:border-slate-200 md:flex-row md:items-center"
+            >
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="bg-slate-950 text-white flex h-7 w-7 items-center justify-center rounded-xl text-xs font-black">
+                    {swap.requester?.username?.slice(0, 2).toUpperCase() || 'US'}
                   </div>
-                  <span className="font-semibold">{swap.requester?.username || 'Funcionário'}</span>
-                  <span className="text-muted-foreground text-sm">solicitou troca de:</span>
-                  {swap.status === 'colleague_approved' && (
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                      Aceita pelo colega
-                    </span>
+                  <span className="font-bold text-sm text-slate-900">{swap.requester?.username || 'Funcionário'}</span>
+                  <span className="text-slate-500 text-xs">solicitou troca</span>
+                  {swap.status === 'colleague_approved' ? (
+                    <Badge className="bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-50 rounded-full text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5">
+                      Aceito pelo colega
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-50 rounded-full text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5">
+                      Pendente Colega
+                    </Badge>
                   )}
                 </div>
                 
-                <div className="flex flex-wrap gap-4 text-sm">
+                <div className="flex flex-wrap gap-4 text-xs text-slate-600">
                   <div className="flex items-center gap-1.5">
-                    <Calendar className="text-muted-foreground h-4 w-4" />
-                    <span className="font-medium">
-                      {swap.originalShift ? format(parseISO(swap.originalShift.date), "dd/MM/yyyy", { locale: ptBR }) : 'Data N/A'}
+                    <Calendar className="text-slate-400 h-3.5 w-3.5" />
+                    <span>
+                      Jornada: <span className="font-bold text-slate-900">{swap.originalShift ? format(parseISO(swap.originalShift.date), "dd/MM/yyyy", { locale: ptBR }) : 'Data N/A'}</span>
                     </span>
                   </div>
                   {swap.compensationRequired && (
-                    <div className="text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
-                      <Check className="h-4 w-4" />
-                      <span>Compensação em: {swap.compensationDate ? format(parseISO(swap.compensationDate), "dd/MM/yyyy") : 'N/A'}</span>
+                    <div className="text-blue-700 flex items-center gap-1.5">
+                      <Check className="h-3.5 w-3.5" />
+                      <span>Compensação: <span className="font-bold">{swap.compensationDate ? format(parseISO(swap.compensationDate), "dd/MM/yyyy") : 'N/A'}</span></span>
                     </div>
                   )}
                 </div>
-
+ 
                 {swap.comments && (
-                  <div className="bg-muted/50 flex items-start gap-2 rounded-lg p-3 text-sm italic">
-                    <MessageSquare className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="bg-slate-50 border border-slate-100/50 flex items-start gap-2 rounded-xl p-3 text-xs italic text-slate-600">
+                    <MessageSquare className="text-slate-400 mt-0.5 h-3.5 w-3.5 shrink-0" />
                     <p>&ldquo;{swap.comments}&rdquo;</p>
                   </div>
                 )}
               </div>
-
-              <div className="flex gap-2 shrink-0">
+ 
+              <div className="flex gap-2 shrink-0 self-end md:self-center">
                 <Button 
                   variant="outline" 
-                  className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20"
+                  size="sm"
+                  className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors text-xs font-bold"
                   onClick={() => setSelectedSwap(swap)}
                 >
-                  <X className="mr-2 h-4 w-4" /> Rejeitar
+                  <X className="mr-1.5 h-3.5 w-3.5" /> Rejeitar
                 </Button>
                 <Button 
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => {
-                    setSelectedSwap(swap);
-                    // Aqui poderíamos abrir um modal de confirmação ou aprovar direto
-                  }}
+                  size="sm"
+                  className="rounded-xl bg-slate-950 hover:bg-slate-900 text-white text-xs font-bold transition-all shadow-sm"
+                  onClick={() => setSelectedSwap(swap)}
                 >
-                  <Check className="mr-2 h-4 w-4" /> Aprovar
+                  <Check className="mr-1.5 h-3.5 w-3.5" /> Aprovar
                 </Button>
               </div>
             </div>

@@ -31,7 +31,7 @@ export function BrandLink({ global, href = '/', collapsed = false, className }: 
           sizes={collapsed ? '40px' : '180px'}
           className={cn(
             'rounded-lg object-contain',
-            collapsed ? 'h-10 w-10' : 'max-w-[180px]'
+            collapsed ? 'h-10 w-10' : 'max-w-[180px] h-auto'
           )}
           style={
             collapsed

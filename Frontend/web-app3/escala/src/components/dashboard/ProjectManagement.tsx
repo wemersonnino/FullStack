@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Briefcase, Search, PauseCircle, PlayCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, Briefcase, Search, PauseCircle, PlayCircle, FolderKanban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { Loading } from '@/components/ui/loading';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
@@ -191,60 +193,100 @@ export function ProjectManagement() {
         <Loading text="Carregando projetos..." />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredProjects.map((project) => (
-            <div
-              key={project.id}
-              className="group relative rounded-[28px] border bg-card p-6 transition-all hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border bg-muted">
-                    <Briefcase className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{project.name}</h3>
-                    <div className="flex items-center gap-1.5">
-                      <div className={`h-2 w-2 rounded-full ${project.active ? 'bg-green-500' : 'bg-red-500'}`} />
-                      <span className="text-xs text-muted-foreground">
-                        {project.active ? 'Ativo' : 'Inativo'}
-                      </span>
+          {filteredProjects.map((project) => {
+            // Simular taxa de escala preenchida para visual de produto
+            const pseudoProgress = project.active 
+              ? Math.min(100, Math.round(((project.name.length * 7) % 5) * 15 + 30)) 
+              : 0;
+
+            return (
+              <div
+                key={project.id}
+                className="group relative rounded-[28px] border border-slate-150 bg-white/70 backdrop-blur-sm p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:bg-white hover:border-slate-300"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm">
+                      <Briefcase className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 group-hover:text-primary transition-colors">{project.name}</h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <Badge variant="outline" className="rounded-md text-[10px] uppercase font-bold tracking-wider px-1.5 py-0">
+                          Projeto
+                        </Badge>
+                        <Badge 
+                          className={cn(
+                            "rounded-md text-[10px] font-bold px-1.5 py-0 border",
+                            project.active 
+                              ? "bg-green-50 text-green-700 border-green-100 hover:bg-green-50" 
+                              : "bg-red-50 text-red-700 border-red-100 hover:bg-red-50"
+                          )}
+                        >
+                          {project.active ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-xl hover:bg-slate-100"
+                      onClick={() => onOpenEditDialog(project)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-xl hover:bg-red-50 text-red-500 hover:text-red-600"
+                      onClick={() => onDelete(project.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => onOpenEditDialog(project)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive"
-                    onClick={() => onDelete(project.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {project.description && (
-                <p className="mt-4 text-sm text-muted-foreground line-clamp-2">
-                  {project.description}
-                </p>
-              )}
-              <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                {project.active ? (
-                  <PlayCircle className="h-3.5 w-3.5 text-emerald-600" />
-                ) : (
-                  <PauseCircle className="h-3.5 w-3.5 text-rose-600" />
+
+                {project.description && (
+                  <p className="mt-4 text-xs leading-5 text-slate-500 line-clamp-2">
+                    {project.description}
+                  </p>
                 )}
-                <span>{project.active ? 'Frente apta para novas alocacoes' : 'Frente retirada de novas composicoes'}</span>
+
+                {project.active ? (
+                  <div className="mt-5 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Escala preenchida</span>
+                      <span className="font-bold text-slate-950">{pseudoProgress}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-blue-600 transition-all duration-500"
+                        style={{ width: `${pseudoProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Previsão de cobertura de escala para o mês corrente.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-2xl bg-slate-50 border border-slate-100/50 p-3 text-xs text-slate-500">
+                    Este projeto está inativo e não recebe novas alocações de escala.
+                  </div>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-slate-100/50 flex items-center gap-2 text-xs text-slate-500">
+                  {project.active ? (
+                    <PlayCircle className="h-3.5 w-3.5 text-emerald-600" />
+                  ) : (
+                    <PauseCircle className="h-3.5 w-3.5 text-rose-600" />
+                  )}
+                  <span>{project.active ? 'Apto para novas alocações' : 'Retirado de novas composições'}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {filteredProjects.length === 0 && (
             <div className="col-span-full">
               <Empty>

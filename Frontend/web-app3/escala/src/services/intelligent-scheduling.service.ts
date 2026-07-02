@@ -59,6 +59,10 @@ export async function createSchedulingCycle(
   );
 }
 
+export async function listSchedulingCycles(authToken?: string): Promise<ScheduleCycle[]> {
+  return (await httpGet<ScheduleCycle[]>(API_ROUTES.SCHEDULING_CYCLES, undefined, authToken ? { authToken } : undefined)) ?? [];
+}
+
 export async function getSchedulingCycle(cycleId: string, authToken?: string): Promise<ScheduleCycle | null> {
   return httpGet<ScheduleCycle>(cycleBasePath(cycleId), undefined, authToken ? { authToken } : undefined);
 }

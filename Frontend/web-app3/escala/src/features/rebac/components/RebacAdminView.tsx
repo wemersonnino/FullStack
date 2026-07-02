@@ -123,7 +123,7 @@ export function RebacAdminView(props: RebacAdminViewProps) {
       <div className="rounded-3xl border bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white shadow-xl">
         <div className="flex flex-wrap items-center gap-3 text-slate-300">
           <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">
-            ReBAC Jethro
+            Hierarquia de Gestão
           </Badge>
           <span className="text-sm">Governança hierárquica e escopo administrativo</span>
         </div>

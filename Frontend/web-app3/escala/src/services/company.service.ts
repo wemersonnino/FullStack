@@ -39,14 +39,14 @@ export async function getCompany(id: string | string): Promise<Company | null> {
 }
 
 export async function createCompany(data: Partial<Company>): Promise<Company | null> {
-  return await httpPost<Company>(BASE_URL, data);
+  return await httpPost<Company>(BASE_URL, data, { throwOnError: true });
 }
 
 export async function updateCompany(id: string | string, data: Partial<Company>): Promise<Company | null> {
-  return await httpPut<Company>(`${BASE_URL}/${id}`, data);
+  return await httpPut<Company>(`${BASE_URL}/${id}`, data, { throwOnError: true });
 }
 
 export async function deleteCompany(id: string | string): Promise<boolean> {
-  const response = await httpDelete(`${BASE_URL}/${id}`);
+  const response = await httpDelete(`${BASE_URL}/${id}`, { throwOnError: true });
   return !!response;
 }

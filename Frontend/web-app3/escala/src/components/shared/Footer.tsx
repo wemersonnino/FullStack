@@ -22,7 +22,7 @@ export const Footer = ({ data }: { data: FooterInterface | null }) => {
               width={180}
               height={40}
               sizes="180px"
-              className="max-w-[180px] object-contain"
+              className="max-w-[180px] h-auto object-contain"
               style={{ width: "auto", height: "40px" }}
             />
           )}

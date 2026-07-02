@@ -1,10 +1,20 @@
 import { TeamInviteManager } from '@/components/dashboard/TeamInviteManager';
+import { getRequiredServerAuth } from '@/lib/auth/server-auth';
+import { redirect } from 'next/navigation';
 
 export const metadata = {
   title: 'Convidar Equipe | Plataforma Escala',
 };
 
-export default function TeamInvitesPage() {
+export default async function TeamInvitesPage() {
+  const { session } = await getRequiredServerAuth();
+  const roles = session?.user?.roles ?? [];
+  const canAccess = roles.includes('ADMIN') || roles.includes('OWNER');
+
+  if (!canAccess) {
+    redirect('/dashboard');
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-2">

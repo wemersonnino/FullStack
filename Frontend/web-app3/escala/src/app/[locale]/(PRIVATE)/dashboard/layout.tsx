@@ -18,7 +18,9 @@ export default async function DashboardLayout({
   team,
 }: LayoutProps) {
   const { session } = await getRequiredServerAuth();
-  const primaryRole = session.user.roles?.[0] ?? 'MEMBRO';
+  const roles = session.user.roles ?? [];
+  const isManagerOrAdmin = roles.includes('ADMIN') || roles.includes('OWNER') || roles.some((role) => role.startsWith('MANAGER'));
+  const primaryRole = roles[0] ?? 'MEMBRO';
 
   return (
     <div className="mx-auto mt-8 max-w-[1440px] space-y-8 px-4 pb-12 md:px-6">
@@ -80,9 +82,11 @@ export default async function DashboardLayout({
       </section>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.92fr)]">
-        <div className="xl:col-span-2">
-          {stats}
-        </div>
+        {isManagerOrAdmin && (
+          <div className="xl:col-span-2">
+            {stats}
+          </div>
+        )}
         <div className="space-y-6">
           {content}
         </div>

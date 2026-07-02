@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Building2, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, Building2, Upload, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
@@ -28,11 +28,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { isValidCnpj, formatCnpj } from '@/lib/cnpj';
+import { cn } from '@/lib/utils';
 import { 
   Company 
 } from '@/services/company.service';
 import { uploadFile } from '@/services/profile.service';
 import { useCompanyStore } from '@/store/useCompanyStore';
+import { ExternalDataService } from '@/core/application/services/external.service';
 
 const CompanySchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
@@ -71,6 +73,7 @@ export function CompanyManagement() {
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [isSearchingCnpj, setIsSearchingCnpj] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<CompanyFormValues>({
@@ -104,11 +107,50 @@ export function CompanyManagement() {
     setLogoFile(null);
     form.reset({
       name: company.name || '',
-      cnpj: company.cnpj || '',
+      cnpj: formatCnpj(company.cnpj || ''),
       address: typeof company.address === 'string' ? company.address : company.address?.additionalInfo || '',
     });
     setIsDialogOpen(true);
   };
+
+  async function handleCnpjLookup() {
+    const cnpj = form.getValues('cnpj');
+    if (!isValidCnpj(cnpj)) {
+      toast.error('Digite um CNPJ válido para buscar.');
+      return;
+    }
+
+    setIsSearchingCnpj(true);
+    try {
+      const data = await ExternalDataService.lookupCnpj(cnpj);
+      if (!data) {
+        toast.error('CNPJ não encontrado na base consultada.');
+        return;
+      }
+
+      const addressParts = [
+        data.logradouro,
+        data.numero,
+        data.bairro,
+        data.municipio && data.uf ? `${data.municipio} - ${data.uf}` : data.municipio || data.uf,
+      ].filter(Boolean);
+
+      form.setValue('name', data.nome_fantasia || data.razao_social, { shouldValidate: true });
+      form.setValue('address', addressParts.join(', '), { shouldValidate: true });
+      toast.success('Dados da empresa recuperados com sucesso.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      toast.error(
+        message === 'CNPJ não encontrado'
+          ? 'CNPJ não encontrado na base consultada.'
+          : message === 'Limite de consultas de CNPJ atingido'
+            ? 'Limite de consultas de CNPJ atingido. Aguarde alguns instantes e tente novamente.'
+            : 'Erro ao consultar CNPJ.'
+      );
+    } finally {
+      setIsSearchingCnpj(false);
+    }
+  }
 
   async function onSubmit(values: CompanyFormValues) {
     try {
@@ -159,18 +201,9 @@ export function CompanyManagement() {
 
       const payload = {
         name: values.name,
-        cnpj: values.cnpj,
+        cnpj: values.cnpj.replace(/[^\w]/g, '').toUpperCase(),
         logoUrl: logoUrl ?? editingCompany?.logoUrl ?? editingCompany?.logo?.url,
-        address: {
-          cep: currentAddress?.cep,
-          street: currentAddress?.street,
-          number: currentAddress?.number,
-          complement: currentAddress?.complement,
-          neighborhood: currentAddress?.neighborhood,
-          city: currentAddress?.city,
-          state: currentAddress?.state,
-          additionalInfo: values.address || currentAddress?.additionalInfo,
-        },
+        address: values.address || currentAddress?.additionalInfo,
         cep: currentAddress?.cep,
         street: currentAddress?.street,
         number: currentAddress?.number,
@@ -181,12 +214,16 @@ export function CompanyManagement() {
       };
 
       if (editingCompany) {
-        await editCompany(editingCompany.id, payload);
+        const updated = await editCompany(editingCompany.id, payload);
+        if (!updated) {
+          return;
+        }
       }
 
       setIsDialogOpen(false);
     } catch (error) {
-      toast.error('Erro ao salvar empresa.');
+      const message = error instanceof Error ? error.message : 'Erro ao salvar empresa.';
+      toast.error(message);
     }
   }
 
@@ -341,16 +378,28 @@ export function CompanyManagement() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>CNPJ</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="00.000.000/0000-00" 
-                        {...field} 
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^\w]/g, '');
-                          field.onChange(formatCnpj(value));
-                        }}
-                      />
-                    </FormControl>
+                    <div className="flex gap-2">
+                      <FormControl>
+                        <Input 
+                          placeholder="00.000.000/0000-00" 
+                          {...field} 
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^\w]/g, '');
+                            field.onChange(formatCnpj(value));
+                          }}
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={handleCnpjLookup}
+                        disabled={isSearchingCnpj}
+                        aria-label="Buscar dados da empresa pelo CNPJ"
+                      >
+                        <Search className={cn('h-4 w-4', isSearchingCnpj && 'animate-spin')} />
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
