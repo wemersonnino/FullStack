@@ -4,18 +4,34 @@ server:
 spring:
   application:
     name: escala-backend
+  config:
+    import: optional:file:.env[.properties]
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:escala_core}
-    username: ${DB_USER:escala_api_user}
-    password: ${DB_PASS:escala_api_password}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASS}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     open-in-view: false
     show-sql: false
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
 logging:
   level:
     org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
@@ -24,7 +40,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,metrics,prometheus
+        include: health
 
 app:
   openapi:
@@ -34,8 +50,8 @@ app:
 application:
   security:
     jwt:
-      secret-key: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-      expiration: ${JWT_EXPIRATION_MS:86400000}
+      secret-key: ${JWT_SECRET}
+      expiration: ${JWT_EXPIRATION_MS:900000}
       refresh-token:
         expiration: ${JWT_REFRESH_EXPIRATION_MS:604800000}
     google:
@@ -50,13 +66,19 @@ application:
       price-critical: ${STRIPE_PRICE_CRITICAL:}
   integrations:
     strapi:
-      base-url: ${STRAPI_BASE_URL:http://localhost:1337}
+      base-url: ${STRAPI_BASE_URL}
+  locks:
+    schedule-generate-ttl: ${SCHEDULE_GENERATE_LOCK_TTL:PT2M}
+    schedule-cycle-ttl: ${SCHEDULE_CYCLE_LOCK_TTL:PT1M}
 
 ---
 spring:
   config:
     activate:
       on-profile: development
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 ---
 spring:

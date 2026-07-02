@@ -6,11 +6,11 @@ export const metadata = {
 
 export default function TeamInvitesPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Gestão de Equipe</h1>
+        <h1 className="text-3xl font-black tracking-tight">Convites e Onboarding</h1>
         <p className="text-muted-foreground">
-          Envie convites para novos colaboradores e gerencie as permissões de acesso.
+          Emita convites com link transitório, acompanhe o status e reduza exposição administrativa de credenciais.
         </p>
       </div>
       

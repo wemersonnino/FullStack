@@ -24,7 +24,8 @@ import {
   Megaphone,
   ShieldCheck,
   CreditCard,
-  GraduationCap
+  GraduationCap,
+  Bell,
 } from 'lucide-react';
 import { MenuItem } from '@/interfaces/menu/menu.interface';
 import { GlobalInterface } from '@/interfaces/global/global.interface';
@@ -56,6 +57,7 @@ const navigationGroups = [
       { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { title: 'Minhas Escalas', href: '/dashboard/escala', icon: CalendarDays },
       { title: 'Trocas de Turno', href: '/dashboard/escala/trocas', icon: ArrowLeftRight },
+      { title: 'Mensagens', href: '/dashboard/mensagens', icon: Bell },
     ]
   },
   {

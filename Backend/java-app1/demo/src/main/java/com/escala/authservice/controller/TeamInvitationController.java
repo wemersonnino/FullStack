@@ -26,15 +26,15 @@ public class TeamInvitationController {
             Authentication authentication,
             @RequestBody TeamInvitationRequest request
     ) {
-        var invitation = invitationService.invite(authentication.getName(), request);
-        return ResponseEntity.ok(TeamInvitationResponse.forAdmin(invitation, inviteUrl(invitation.getToken())));
+        var issued = invitationService.invite(authentication.getName(), request);
+        return ResponseEntity.ok(TeamInvitationResponse.forAdmin(issued.invitation(), inviteUrl(issued.plainToken())));
     }
 
     @GetMapping
     public List<TeamInvitationResponse> list(Authentication authentication) {
         return invitationService.listByCompany(authentication.getName())
                 .stream()
-                .map(invitation -> TeamInvitationResponse.forAdmin(invitation, inviteUrl(invitation.getToken())))
+                .map(invitation -> TeamInvitationResponse.forAdmin(invitation, null))
                 .toList();
     }
 

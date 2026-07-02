@@ -16,6 +16,7 @@ public class TeamInvitationResponse {
     private String companyName;
     private String companySlug;
     private String inviteUrl;
+    private String tokenPreview;
     private OffsetDateTime expiresAt;
     private OffsetDateTime acceptedAt;
     private boolean active;
@@ -29,6 +30,7 @@ public class TeamInvitationResponse {
                 .companyName(invitation.getCompany().getName())
                 .companySlug(invitation.getCompany().getSlug())
                 .inviteUrl(inviteUrl)
+                .tokenPreview(invitation.getTokenPreview())
                 .expiresAt(invitation.getExpiresAt())
                 .acceptedAt(invitation.getAcceptedAt())
                 .active(invitation.isActive())
@@ -43,6 +45,7 @@ public class TeamInvitationResponse {
                 .roleName(invitation.getRoleName())
                 .companyName(invitation.getCompany().getName())
                 .companySlug(invitation.getCompany().getSlug())
+                .tokenPreview(invitation.getTokenPreview())
                 .expiresAt(invitation.getExpiresAt())
                 .acceptedAt(invitation.getAcceptedAt())
                 .active(invitation.isActive())

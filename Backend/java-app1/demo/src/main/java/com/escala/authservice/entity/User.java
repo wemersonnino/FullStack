@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,8 +15,10 @@ import java.util.UUID;
 @Table(
     name = "users",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_user_email", columnNames = {"email"}),
         @UniqueConstraint(name = "uk_user_company_username", columnNames = {"company_id", "username"})
+    },
+    indexes = {
+        @Index(name = "idx_users_company_active", columnList = "company_id, active")
     }
 )
 @Data
@@ -125,4 +128,15 @@ public class User {
 
     @ManyToOne
     private Company company;
+
+    @PrePersist
+    @PreUpdate
+    void normalizeFields() {
+        if (email != null) {
+            email = email.trim().toLowerCase(Locale.ROOT);
+        }
+        if (username != null) {
+            username = username.trim();
+        }
+    }
 }

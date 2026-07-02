@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import { Mail, Plus, Search, Users } from 'lucide-react';
+import { Briefcase, Layers3, Mail, Plus, Search, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
@@ -20,6 +20,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Employee, getEmployees } from '@/services/employee.service';
+import { DashboardPageHeader } from '@/components/dashboard/DashboardPageHeader';
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 
 export default function TeamPage() {
   const router = useRouter();
@@ -63,37 +65,83 @@ export default function TeamPage() {
       );
     });
   }, [employees, search]);
+  const activeEmployees = employees.filter((employee) => employee.active).length;
+  const withoutSector = employees.filter((employee) => !employee.sector?.name).length;
+  const withoutProject = employees.filter((employee) => !employee.project?.name).length;
 
   return (
-    <div className="container mx-auto space-y-6 py-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Users className="h-5 w-5" />
-            <span className="text-sm font-medium uppercase tracking-wide">Team</span>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">Colaboradores</h1>
-          <p className="text-muted-foreground">Lista de colaboradores gerenciados pelo administrador.</p>
-        </div>
-        <Button asChild className="gap-2">
-          <Link href="/dashboard/colaboradores/novo">
-            <Plus className="h-4 w-4" />
-            Cadastrar colaborador
-          </Link>
-        </Button>
-      </div>
+    <div className="container mx-auto space-y-8 py-8">
+      <DashboardPageHeader
+        eyebrow="Gestao de Equipe"
+        title="Colaboradores, cobertura e lacunas de alocacao em uma leitura so."
+        description="Use esta visao para acompanhar a base ativa, localizar pessoas sem setor ou projeto e decidir rapidamente onde abrir cadastro, convite ou redistribuicao."
+        actions={
+          <>
+            <Button variant="outline" className="rounded-2xl" asChild>
+              <Link href="/dashboard/team/invites">Gerenciar convites</Link>
+            </Button>
+            <Button asChild className="rounded-2xl gap-2">
+              <Link href="/dashboard/colaboradores/novo">
+                <Plus className="h-4 w-4" />
+                Cadastrar colaborador
+              </Link>
+            </Button>
+          </>
+        }
+      />
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Buscar colaborador..."
-          className="pl-9"
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <DashboardStatCard
+          label="Base total"
+          value={employees.length}
+          hint="Colaboradores carregados para este tenant."
+          icon={Users}
+          tone="blue"
+        />
+        <DashboardStatCard
+          label="Ativos"
+          value={activeEmployees}
+          hint="Equipe apta para composicao de escala."
+          icon={Users}
+          tone="emerald"
+        />
+        <DashboardStatCard
+          label="Sem setor"
+          value={withoutSector}
+          hint="Demandam organizacao estrutural."
+          icon={Layers3}
+          tone="amber"
+        />
+        <DashboardStatCard
+          label="Sem projeto"
+          value={withoutProject}
+          hint="Podem gerar ociosidade ou alocacao ambigua."
+          icon={Briefcase}
+          tone="rose"
         />
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-card">
+      <section className="rounded-[28px] border bg-card p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              Explorar equipe
+            </p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight">Painel de colaboradores</h2>
+          </div>
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar por nome, email, setor ou projeto..."
+              className="h-12 rounded-2xl pl-9"
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="overflow-hidden rounded-[28px] border bg-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>

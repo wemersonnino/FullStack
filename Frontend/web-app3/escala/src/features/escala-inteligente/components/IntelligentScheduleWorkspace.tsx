@@ -252,6 +252,10 @@ export function IntelligentScheduleWorkspace({
   const workedLegend = preferredLegendByImpact(legends, 'WORKED');
   const restLegend = preferredLegendByImpact(legends, 'REST');
   const initialAssignmentsMap = useMemo(() => buildAssignmentDraftMap(assignments), [assignments]);
+  const pendingAlertCount = alerts.filter((alert) => !alert.acknowledged).length;
+  const pendingCriticalAlertCount = alerts.filter(
+    (alert) => alert.severity === 'CRITICAL' && !alert.acknowledged
+  ).length;
   const diffSummary = useMemo(() => {
     const changes: Array<{ key: string; type: 'added' | 'updated' | 'removed'; before?: AssignmentDraft; after?: AssignmentDraft }> = [];
     const allKeys = new Set([...Object.keys(initialAssignmentsMap), ...Object.keys(assignmentDrafts)]);
@@ -295,6 +299,9 @@ export function IntelligentScheduleWorkspace({
     setRunningAction(actionKey);
     try {
       await action();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Nao foi possivel concluir esta acao.';
+      toast.error(message);
     } finally {
       setRunningAction(null);
     }
@@ -710,7 +717,7 @@ export function IntelligentScheduleWorkspace({
             <CardTitle className="text-xl">{alerts.length}</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            {alerts.filter((alert) => !alert.acknowledged).length} pendentes de ciencia.
+            {pendingAlertCount} pendentes de ciencia.
           </CardContent>
         </Card>
         <Card>
@@ -811,15 +818,30 @@ export function IntelligentScheduleWorkspace({
                   <strong>{cycle?.businessVersion ?? '-'}</strong>
                 </div>
               </div>
+              {pendingCriticalAlertCount > 0 && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                  Existem {pendingCriticalAlertCount} alertas criticos sem ciencia. Valide os alertas e registre a ciencia antes de publicar.
+                </div>
+              )}
               <div className="grid gap-2">
                 <Button type="button" variant="outline" onClick={handleValidateCycle} disabled={!cycleId || runningAction === 'validate-cycle'}>
                   {runningAction === 'validate-cycle' ? <Loader2 className="size-4 animate-spin" /> : <ShieldAlert className="size-4" />}
                   Validar ciclo
                 </Button>
-                <Button type="button" variant="outline" onClick={handlePublishCycle} disabled={!cycleId || runningAction === 'publish-cycle'}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePublishCycle}
+                  disabled={!cycleId || runningAction === 'publish-cycle' || pendingCriticalAlertCount > 0}
+                >
                   {runningAction === 'publish-cycle' ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
                   Publicar ciclo
                 </Button>
+                {pendingCriticalAlertCount > 0 && (
+                  <p className="px-1 text-xs text-muted-foreground">
+                    A publicacao so e liberada quando todos os alertas criticos estiverem marcados como cientes.
+                  </p>
+                )}
                 <Button type="button" variant="outline" onClick={handleRectifyCycle} disabled={!cycleId || runningAction === 'rectify-cycle'}>
                   {runningAction === 'rectify-cycle' ? <Loader2 className="size-4 animate-spin" /> : <RefreshCcw className="size-4" />}
                   Abrir retificacao

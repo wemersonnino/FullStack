@@ -1,4 +1,4 @@
-import { API_ROUTES } from '@/constants';
+import { API_ROUTES, ENV } from '@/constants';
 import { mapLandingPage, fallbackLandingPage, normalizeFeatures } from '@/dto/landing.dto';
 import { LandingPageContent, LandingPricingPlan, LandingTestimonial } from '@/interfaces/landing/landing.interface';
 import { httpGet } from '@/lib/http/request';
@@ -6,6 +6,19 @@ import { httpGet } from '@/lib/http/request';
 type StrapiResponse<T> = {
   data?: T[];
 };
+
+const PUBLIC_CONTENT_ROUTES = {
+  landing: API_ROUTES.LANDING_PAGE,
+  pricingPlans: API_ROUTES.PRICING_PLAN_CONTENTS,
+  testimonials: API_ROUTES.TESTIMONIALS,
+} as const;
+
+function getPublicContentRoute(
+  browserRoute: string,
+  serverRoute: (typeof PUBLIC_CONTENT_ROUTES)[keyof typeof PUBLIC_CONTENT_ROUTES],
+) {
+  return ENV.IS_SERVER ? serverRoute : browserRoute;
+}
 
 export async function getLandingPage(options: { 
   locale?: string; 
@@ -15,44 +28,20 @@ export async function getLandingPage(options: {
   const { locale, pageKey = 'home', slug } = options;
 
   try {
-    const localeParam = locale ? `&locale=${locale}` : '';
-    const url = `${API_ROUTES.LANDING_PAGE}${localeParam}`;
-    
-    console.log(`[LandingService] Buscando landing pages (Role: ${pageKey}, Slug: ${slug || 'N/A'}): ${url}`);
-    
-    const response = await httpGet<{ data?: any[] }>(url);
-    
-    // Normalizar resposta Strapi v4/v5
-    let allItems: any[] = [];
-    if (response?.data) {
-      allItems = Array.isArray(response.data) ? response.data : 
-                 (Array.isArray((response.data as any).data) ? (response.data as any).data : [response.data]);
-    }
+    const response = await httpGet<any>(
+      getPublicContentRoute(
+        API_ROUTES.CONTENT_LANDING,
+        PUBLIC_CONTENT_ROUTES.landing,
+      ),
+      { locale, pageKey, slug },
+      { throwOnError: true }
+    );
 
-    if (!allItems || allItems.length === 0) {
-      console.warn('[LandingService] Nenhuma entrada encontrada na coleção Landing Pages.');
+    if (!response) {
       return fallbackLandingPage;
     }
 
-    // LÓGICA DE SELEÇÃO SEMÂNTICA:
-    // 1. Se informamos um SLUG específico (ex: /lp/[slug]), ele é a prioridade absoluta.
-    // 2. Se for a HOME, buscamos pelo pageKey='home'.
-    // 3. FALLBACK DE TRANSIÇÃO: Se a home não estiver marcada com pageKey='home', buscamos por slugs conhecidos.
-    // 4. FALLBACK DE SEGURANÇA: Primeira página disponível.
-    
-    const page = allItems.find(item => {
-      const attrs = item.attributes ?? item;
-      if (slug) return attrs.slug === slug;
-      return attrs.pageKey === pageKey;
-    }) || allItems.find(item => {
-      const attrs = item.attributes ?? item;
-      return pageKey === 'home' && (attrs.slug === 'home' || attrs.slug === 'landpage-home');
-    }) || allItems[0];
-
-    const foundSlug = (page.attributes ?? page).slug;
-    console.log(`[LandingService] Página selecionada: ID=${page.id}, Slug=${foundSlug}`);
-    
-    return mapLandingPage(page);
+    return mapLandingPage(response);
   } catch (error) {
     console.error('[LandingService] Erro ao recuperar Landing Page:', error);
     return fallbackLandingPage;
@@ -61,9 +50,14 @@ export async function getLandingPage(options: {
 
 export async function getPricingPlans(locale?: string): Promise<LandingPricingPlan[]> {
   try {
-    const localeParam = locale ? `&locale=${locale}` : '';
-    const url = `${API_ROUTES.PRICING_PLAN_CONTENTS}${localeParam}`;
-    const response = await httpGet<StrapiResponse<any>>(url);
+    const response = await httpGet<StrapiResponse<any>>(
+      getPublicContentRoute(
+        API_ROUTES.CONTENT_PRICING_PLANS,
+        PUBLIC_CONTENT_ROUTES.pricingPlans,
+      ),
+      { locale },
+      { throwOnError: true }
+    );
     
     if (!response?.data || response.data.length === 0) {
       return fallbackLandingPage.pricingPlans;
@@ -82,7 +76,7 @@ export async function getPricingPlans(locale?: string): Promise<LandingPricingPl
       ctaUrl: item.ctaUrl,
     }));
   } catch (error) {
-    console.error('Erro ao buscar planos do Strapi:', error);
+    console.error('Erro ao buscar planos:', error);
     return fallbackLandingPage.pricingPlans;
   }
 }
@@ -116,8 +110,14 @@ export const fallbackTestimonials: LandingTestimonial[] = [
 
 export async function getTestimonials(locale?: string): Promise<LandingTestimonial[]> {
   try {
-    const localeParam = locale ? `&locale=${locale}` : '';
-    const response = await httpGet<StrapiResponse<any>>(`${API_ROUTES.TESTIMONIALS}${localeParam}`);
+    const response = await httpGet<StrapiResponse<any>>(
+      getPublicContentRoute(
+        API_ROUTES.CONTENT_TESTIMONIALS,
+        PUBLIC_CONTENT_ROUTES.testimonials,
+      ),
+      { locale },
+      { throwOnError: true }
+    );
 
     if (!response?.data || response.data.length === 0) {
       return fallbackTestimonials;
@@ -134,7 +134,7 @@ export async function getTestimonials(locale?: string): Promise<LandingTestimoni
       };
     }).filter((item) => item.content);
   } catch (error) {
-    console.error('Erro ao buscar depoimentos do Strapi:', error);
+    console.error('Erro ao buscar depoimentos:', error);
     return fallbackTestimonials;
   }
 }

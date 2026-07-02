@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ENV } from '@/constants/env';
+import { enforceRateLimit } from '@/lib/bff/rate-limit';
 import { getMarketingAttribution } from '@/services/campaign';
 import { LeadCapturePayload } from '@/types/campaign';
 
@@ -53,6 +54,16 @@ export async function POST(request: NextRequest) {
     payload = (await request.json()) as LeadCapturePayload & Record<string, unknown>;
   } catch {
     return jsonError('Corpo da requisicao invalido', 400);
+  }
+
+  const limited = await enforceRateLimit(request, {
+    name: 'marketing-leads',
+    limit: 12,
+    windowMs: 15 * 60 * 1000,
+    keyParts: [normalize(payload.email), normalize(payload.companyName), normalize(payload.campaignSlug)],
+  });
+  if (limited) {
+    return limited;
   }
 
   const attribution = await getMarketingAttribution();

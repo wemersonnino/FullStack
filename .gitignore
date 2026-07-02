@@ -1,6 +1,8 @@
 /Frontend/web-app1/
 /Frontend/web-app3/.env
 /Frontend/web-app3/escala/.env.local
+/Backend/java-app1/demo/.env.local
+/Backend/java-app1/demo/.env.override
 /Frontend/web-app3/escala/core
 /Backend/java-app1/**/target/
 /Data/postgres/.env

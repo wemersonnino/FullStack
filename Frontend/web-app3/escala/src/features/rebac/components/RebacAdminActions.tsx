@@ -68,11 +68,11 @@ export function AssignmentForm({ users, scopeTypes, roleLevels, scopeOptions }: 
   }
 
   return (
-    <form action={handleSubmit} className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-6">
+    <form action={handleSubmit} className="grid gap-3 rounded-2xl border bg-card p-4 md:grid-cols-6">
       <div className="space-y-1 md:col-span-2">
         <Label>Gestor</Label>
         <Select name="managerUserId" required>
-          <SelectTrigger><SelectValue placeholder="Selecionar usuário" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Selecionar gestor" /></SelectTrigger>
           <SelectContent>
             {users.map((user) => (
               <SelectItem key={user.id} value={user.id}>{userLabel(user)}</SelectItem>
@@ -96,7 +96,7 @@ export function AssignmentForm({ users, scopeTypes, roleLevels, scopeOptions }: 
       <div className="space-y-1 md:col-span-2">
         <Label>Entidade</Label>
         <Select name="scopeId" required>
-          <SelectTrigger><SelectValue placeholder="Selecionar destino" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Selecionar escopo" /></SelectTrigger>
           <SelectContent>
             {availableScopes.map((item) => (
               <SelectItem key={`${item.type}-${item.id}`} value={String(item.id)}>{item.label}</SelectItem>
@@ -108,7 +108,7 @@ export function AssignmentForm({ users, scopeTypes, roleLevels, scopeOptions }: 
       <div className="space-y-1">
         <Label>Nível</Label>
         <Select name="roleLevel" required>
-          <SelectTrigger><SelectValue placeholder="Role" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Selecionar nível" /></SelectTrigger>
           <SelectContent>
             {roleLevels.map((item) => (
               <SelectItem key={item.name} value={item.name}>{item.name} ({item.weight})</SelectItem>
@@ -132,7 +132,7 @@ export function AssignmentForm({ users, scopeTypes, roleLevels, scopeOptions }: 
       <div className="flex items-end md:col-span-3">
         <Button type="submit" isLoading={isSubmitting}>
           <Plus className="size-4" />
-          Criar assignment
+          Criar alçada
         </Button>
       </div>
     </form>
@@ -161,7 +161,7 @@ export function EdgeForm({ users }: RebacAdminActionsProps) {
   }
 
   return (
-    <form action={handleSubmit} className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-6">
+    <form action={handleSubmit} className="grid gap-3 rounded-2xl border bg-card p-4 md:grid-cols-6">
       <div className="space-y-1 md:col-span-2">
         <Label>Gestor superior</Label>
         <Select name="parentUserId" required>
@@ -185,7 +185,7 @@ export function EdgeForm({ users }: RebacAdminActionsProps) {
         </Select>
       </div>
       <div className="space-y-1">
-        <Label>Relação</Label>
+        <Label>Tipo de relação</Label>
         <Input name="relationType" defaultValue="REPORTS_TO" />
       </div>
       <label className="flex items-end gap-2 pb-2 text-sm">
@@ -203,7 +203,7 @@ export function EdgeForm({ users }: RebacAdminActionsProps) {
       <div className="flex items-end md:col-span-4">
         <Button type="submit" isLoading={isSubmitting}>
           <Network className="size-4" />
-          Criar edge
+          Criar relação
         </Button>
       </div>
     </form>
@@ -225,7 +225,7 @@ export function DeleteAssignmentButton({ id }: { id: string }) {
   }
 
   return (
-    <Button type="button" size="icon-sm" variant="ghost" isLoading={isSubmitting} onClick={handleClick} aria-label="Remover assignment">
+    <Button type="button" size="icon-sm" variant="ghost" isLoading={isSubmitting} onClick={handleClick} aria-label="Remover alçada">
       <Trash2 className="size-4" />
     </Button>
   );
@@ -246,7 +246,7 @@ export function DeleteEdgeButton({ id }: { id: string }) {
   }
 
   return (
-    <Button type="button" size="icon-sm" variant="ghost" isLoading={isSubmitting} onClick={handleClick} aria-label="Remover edge">
+    <Button type="button" size="icon-sm" variant="ghost" isLoading={isSubmitting} onClick={handleClick} aria-label="Remover relação">
       <Trash2 className="size-4" />
     </Button>
   );

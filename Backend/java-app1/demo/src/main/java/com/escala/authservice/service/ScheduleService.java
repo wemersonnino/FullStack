@@ -41,6 +41,7 @@ public class ScheduleService {
     private final PolicyService policyService;
     private final CurrentUserService currentUserService;
     private final com.escala.authservice.core.scheduling.application.GenerateScheduleService generateScheduleUseCase;
+    private final DistributedLockService distributedLockService;
     private final LaborRuleEngine laborRuleEngine = new LaborRuleEngine();
 
     private Company resolveCompany(String userEmail) {
@@ -320,19 +321,24 @@ public class ScheduleService {
         Company company = resolveCompany(userEmail);
         User user = currentUserService.requireCurrentUser(userEmail);
         policyService.requireCanManageSchedules(user);
-        
-        // Delegar para o Core Hexagonal (Lógica de Negócio Pura)
-        var generated = generateScheduleUseCase.generate(request, company.getId());
 
-        auditLogService.record(
-                userEmail,
-                "SCHEDULE_MONTH_GENERATED",
-                "WorkShift",
-                YearMonth.of(request.getYear(), request.getMonth()),
-                "Escalas geradas: " + generated.size() + "; modalidade=" + request.getWorkMode()
-        );
+        DistributedLockService.LockHandle lockHandle =
+                distributedLockService.acquireScheduleGenerationLock(company.getId(), request.getYear(), request.getMonth());
+        try {
+            var generated = generateScheduleUseCase.generate(request, company.getId());
 
-        return listMonth(request.getYear(), request.getMonth(), userEmail);
+            auditLogService.record(
+                    userEmail,
+                    "SCHEDULE_MONTH_GENERATED",
+                    "WorkShift",
+                    YearMonth.of(request.getYear(), request.getMonth()),
+                    "Escalas geradas: " + generated.size() + "; modalidade=" + request.getWorkMode()
+            );
+
+            return listMonth(request.getYear(), request.getMonth(), userEmail);
+        } finally {
+            distributedLockService.release(lockHandle);
+        }
     }
 
     public DashboardSummaryResponse dashboardSummary(int year, int month, String userEmail) {

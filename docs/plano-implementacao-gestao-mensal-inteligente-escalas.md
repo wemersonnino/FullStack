@@ -2,6 +2,21 @@
 
 Data de referencia: 2026-06-30.
 
+## Atualizacao de estado em 2026-07-01
+
+As frentes abaixo deixaram de ser apenas plano e passaram a contar com implementacao concreta no repositorio:
+
+- Redis integrado ao ambiente local e ao backend para locks curtos.
+- Lock distribuido aplicado a geracao mensal e transicoes do ciclo de escala.
+- Flyway habilitado com migracao versionada para seguranca multitenant e indices.
+- Unicidade por tenant no backend e no banco para usuario por email.
+- Endurecimento de convite/reset com `tokenHash` e `tokenPreview`.
+- BFF com rate limit para rotas publicas sensiveis.
+- Headers de seguranca no frontend e no backend.
+- UI administrativa de convites e configuracoes reescrita para refletir onboarding seguro.
+
+Isso muda a prioridade do plano: a proxima etapa nao e mais “ligar Redis” ou “separar segredos do YAML”, e sim ampliar integracao real com banco/Redis em testes, endurecer filtros JWT em rotas publicas e reduzir fallbacks de conteudo/IA ainda fake fora do escopo estrito de teste.
+
 ## 1. Contexto
 
 O projeto busca evoluir um SaaS B2B multi-tenant de gestao inteligente de escalas, jornada, banco de horas, ponto, postos, geolocalizacao, IA, trial comercial e captura de leads.

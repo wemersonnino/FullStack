@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useAppTheme } from '@/components/shared/providers/ThemeProvider';
 import { useAppStore } from '@/stores/app.store';
@@ -14,9 +15,13 @@ import {
   Laptop,
   Shield,
   Users,
-  Check,
   RefreshCw,
-  UserCheck
+  UserCheck,
+  LockKeyhole,
+  Building2,
+  Link2,
+  Activity,
+  ArrowRight,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -145,13 +150,101 @@ export function SettingsForm({ user, isAdmin }: SettingsFormProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Configurações</h2>
+        <h2 className="text-3xl font-black tracking-tight">Centro de Configurações</h2>
         <p className="text-muted-foreground">
-          Gerencie as preferências visuais do sistema e as permissões de acesso da equipe.
+          Preferências visuais, identidade por tenant e controles de acesso da operação.
         </p>
       </div>
 
       <Separator />
+
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <Card className="overflow-hidden border-0 bg-[linear-gradient(135deg,#111827_0%,#172554_45%,#0f766e_100%)] text-white shadow-xl shadow-slate-900/10">
+          <CardContent className="grid gap-6 p-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="space-y-4">
+              <Badge className="w-fit rounded-full bg-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-white hover:bg-white/10">
+                Segurança Operacional
+              </Badge>
+              <div className="space-y-3">
+                <h3 className="max-w-xl text-3xl font-black tracking-tight">
+                  Tenant isolado, sessão curta e convites protegidos na borda.
+                </h3>
+                <p className="max-w-2xl text-sm leading-6 text-slate-200">
+                  O acesso agora opera com unicidade por empresa, headers mais rígidos no frontend, rate limit em
+                  endpoints públicos e token de convite tratado como segredo transitório.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <Building2 className="mb-3 h-5 w-5 text-cyan-300" />
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">Tenant</p>
+                  <p className="mt-2 text-sm font-semibold">{user?.companySlug || 'sem-slug'}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <LockKeyhole className="mb-3 h-5 w-5 text-emerald-300" />
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">JWT</p>
+                  <p className="mt-2 text-sm font-semibold">15 min de expiração</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <Activity className="mb-3 h-5 w-5 text-amber-300" />
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">BFF</p>
+                  <p className="mt-2 text-sm font-semibold">Rate limit em auth e leads</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-white/10 bg-white/5 p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">Controles aplicados</p>
+              <div className="mt-4 space-y-4 text-sm text-slate-100">
+                <div className="flex items-start gap-3">
+                  <Shield className="mt-0.5 h-4 w-4 text-emerald-300" />
+                  <p>E-mail de usuário passa a ser único dentro da empresa, não globalmente no banco inteiro.</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Link2 className="mt-0.5 h-4 w-4 text-cyan-300" />
+                  <p>Convites administrativos mostram o link apenas na criação e guardam somente a prévia do token.</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Activity className="mt-0.5 h-4 w-4 text-amber-300" />
+                  <p>Login, reset, contato e captura de lead receberam limitação por janela de tempo na borda.</p>
+                </div>
+              </div>
+              <Link
+                href="/dashboard/team/invites"
+                className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+              >
+                Revisar convites e onboarding
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-muted-foreground/10 bg-card shadow-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-xl">Identidade da Conta</CardTitle>
+            <CardDescription>Resumo rápido do tenant e do perfil principal em uso.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-1">
+            <div className="flex justify-between gap-4 border-b py-2 text-sm">
+              <span className="text-muted-foreground">Slug da empresa</span>
+              <span className="font-semibold">{user?.companySlug || 'default'}</span>
+            </div>
+            <div className="flex justify-between gap-4 border-b py-2 text-sm">
+              <span className="text-muted-foreground">Perfil principal</span>
+              <span className="font-semibold">{user?.roles?.[0] || 'USER'}</span>
+            </div>
+            <div className="flex justify-between gap-4 border-b py-2 text-sm">
+              <span className="text-muted-foreground">Plano</span>
+              <span className="font-semibold">{user?.planType || 'TRIAL'}</span>
+            </div>
+            <div className="flex justify-between gap-4 py-2 text-sm">
+              <span className="text-muted-foreground">Email</span>
+              <span className="font-semibold">{user?.email}</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="shadow-md border border-muted-foreground/10 bg-card">

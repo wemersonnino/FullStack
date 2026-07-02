@@ -23,8 +23,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +46,9 @@ class TeamInvitationServiceTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private SensitiveTokenService sensitiveTokenService;
+
     @InjectMocks
     private TeamInvitationService teamInvitationService;
 
@@ -60,9 +66,9 @@ class TeamInvitationServiceTest {
         request.setRoleName("manager");
 
         when(currentUserService.requireCurrentUser("owner@example.com")).thenReturn(inviter);
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
-        when(invitationRepository.findByEmailIgnoreCaseAndActiveTrue("user@example.com")).thenReturn(List.of());
+        when(userRepository.existsByCompanyIdAndEmailIgnoreCase(company.getId(), "user@example.com")).thenReturn(false);
         when(invitationRepository.findAllByEmailIgnoreCaseAndCompanyId("user@example.com", company.getId())).thenReturn(List.of());
+        when(sensitiveTokenService.issue()).thenReturn(new SensitiveTokenService.IssuedToken("plain", "hash", "prev1234"));
         when(invitationRepository.save(any(TeamInvitation.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         teamInvitationService.invite("owner@example.com", request);
@@ -93,24 +99,19 @@ class TeamInvitationServiceTest {
     }
 
     @Test
-    void inviteRejectsEmailAlreadyLinkedToAnotherCompany() {
+    void inviteRejectsEmailAlreadyLinkedToSameCompany() {
         Company companyA = Company.builder().id(UUID.randomUUID()).slug("empresa-a").name("Empresa A").build();
-        Company companyB = Company.builder().id(UUID.randomUUID()).slug("empresa-b").name("Empresa B").build();
         User inviter = User.builder()
                 .email("owner@example.com")
                 .company(companyA)
                 .roles(Set.of(Role.builder().name("OWNER").build()))
-                .build();
-        User existingUser = User.builder()
-                .email("user@example.com")
-                .company(companyB)
                 .build();
         TeamInvitationRequest request = new TeamInvitationRequest();
         request.setEmail("user@example.com");
         request.setRoleName("USER");
 
         when(currentUserService.requireCurrentUser("owner@example.com")).thenReturn(inviter);
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(existingUser));
+        when(userRepository.existsByCompanyIdAndEmailIgnoreCase(companyA.getId(), "user@example.com")).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -118,13 +119,12 @@ class TeamInvitationServiceTest {
         );
 
         assertEquals(400, exception.getStatusCode().value());
-        assertEquals("Este email ja pertence a outro usuario", exception.getReason());
+        assertEquals("Este email ja pertence a um usuario desta empresa", exception.getReason());
     }
 
     @Test
-    void inviteRejectsActiveInvitationInAnotherCompany() {
+    void inviteDisablesPreviousInvitationsInSameCompanyBeforeIssuingNewOne() {
         Company companyA = Company.builder().id(UUID.randomUUID()).slug("empresa-a").name("Empresa A").build();
-        Company companyB = Company.builder().id(UUID.randomUUID()).slug("empresa-b").name("Empresa B").build();
         User inviter = User.builder()
                 .email("owner@example.com")
                 .company(companyA)
@@ -133,24 +133,23 @@ class TeamInvitationServiceTest {
         TeamInvitationRequest request = new TeamInvitationRequest();
         request.setEmail("user@example.com");
         request.setRoleName("USER");
-        TeamInvitation activeOtherCompanyInvitation = TeamInvitation.builder()
+        TeamInvitation activeInvitation = TeamInvitation.builder()
                 .email("user@example.com")
-                .company(companyB)
+                .company(companyA)
                 .active(true)
                 .expiresAt(OffsetDateTime.now().plusDays(2))
                 .build();
 
         when(currentUserService.requireCurrentUser("owner@example.com")).thenReturn(inviter);
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
-        when(invitationRepository.findByEmailIgnoreCaseAndActiveTrue("user@example.com"))
-                .thenReturn(List.of(activeOtherCompanyInvitation));
+        when(userRepository.existsByCompanyIdAndEmailIgnoreCase(companyA.getId(), "user@example.com")).thenReturn(false);
+        when(invitationRepository.findAllByEmailIgnoreCaseAndCompanyId("user@example.com", companyA.getId()))
+                .thenReturn(List.of(activeInvitation));
+        when(sensitiveTokenService.issue()).thenReturn(new SensitiveTokenService.IssuedToken("plain", "hash", "prev1234"));
+        when(invitationRepository.save(any(TeamInvitation.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> teamInvitationService.invite("owner@example.com", request)
-        );
+        teamInvitationService.invite("owner@example.com", request);
 
-        assertEquals(400, exception.getStatusCode().value());
-        assertEquals("Ja existe um convite ativo para este email em outra empresa", exception.getReason());
+        assertFalse(activeInvitation.isActive());
+        verify(invitationRepository, times(2)).save(any(TeamInvitation.class));
     }
 }

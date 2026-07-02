@@ -12,6 +12,7 @@ import com.escala.authservice.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,6 +33,7 @@ public class DataInitializer {
     private final JdbcTemplate jdbcTemplate;
 
     @Bean
+    @ConditionalOnProperty(prefix = "application.seed", name = "enabled", havingValue = "true", matchIfMissing = true)
     CommandLineRunner seedDevelopmentData() {
         return args -> {
             createTriggers();
@@ -52,7 +54,7 @@ public class DataInitializer {
             Role adminRole = roleRepository.findByName("ADMIN").orElseThrow();
             Role userRole = roleRepository.findByName("USER").orElseThrow();
 
-            User admin = userRepository.findByEmail("admin@escala.local")
+            User admin = userRepository.findByEmailAndCompanyId("admin@escala.local", company.getId())
                     .orElseGet(() -> userRepository.save(User.builder()
                             .username("admin")
                             .email("admin@escala.local")
@@ -67,7 +69,7 @@ public class DataInitializer {
                 userRepository.save(admin);
             }
 
-            User employeeUser = userRepository.findByEmail("funcionario@escala.local")
+            User employeeUser = userRepository.findByEmailAndCompanyId("funcionario@escala.local", company.getId())
                     .orElseGet(() -> userRepository.save(User.builder()
                             .username("funcionario")
                             .email("funcionario@escala.local")
@@ -82,7 +84,7 @@ public class DataInitializer {
                 userRepository.save(employeeUser);
             }
 
-            employeeRepository.findByEmail("funcionario@escala.local")
+            employeeRepository.findByEmailAndCompanySlug("funcionario@escala.local", company.getSlug())
                     .orElseGet(() -> employeeRepository.save(Employee.builder()
                             .fullName("Funcionario Demo")
                             .email("funcionario@escala.local")
@@ -97,7 +99,7 @@ public class DataInitializer {
             Role coordRole = roleRepository.findByName("MANAGER_COORDENADOR").orElseThrow();
             Role supRole = roleRepository.findByName("MANAGER_SUPERVISOR").orElseThrow();
 
-            userRepository.findByEmail("dir@escala.local")
+            userRepository.findByEmailAndCompanyId("dir@escala.local", company.getId())
                     .orElseGet(() -> userRepository.save(User.builder()
                             .username("Diretor")
                             .email("dir@escala.local")
@@ -108,7 +110,7 @@ public class DataInitializer {
                             .company(company)
                             .build()));
 
-            userRepository.findByEmail("ger@escala.local")
+            userRepository.findByEmailAndCompanyId("ger@escala.local", company.getId())
                     .orElseGet(() -> userRepository.save(User.builder()
                             .username("Gerente")
                             .email("ger@escala.local")
@@ -119,7 +121,7 @@ public class DataInitializer {
                             .company(company)
                             .build()));
 
-            userRepository.findByEmail("coord@escala.local")
+            userRepository.findByEmailAndCompanyId("coord@escala.local", company.getId())
                     .orElseGet(() -> userRepository.save(User.builder()
                             .username("Coordenador")
                             .email("coord@escala.local")
@@ -130,7 +132,7 @@ public class DataInitializer {
                             .company(company)
                             .build()));
 
-            userRepository.findByEmail("sup@escala.local")
+            userRepository.findByEmailAndCompanyId("sup@escala.local", company.getId())
                     .orElseGet(() -> userRepository.save(User.builder()
                             .username("Supervisor")
                             .email("sup@escala.local")

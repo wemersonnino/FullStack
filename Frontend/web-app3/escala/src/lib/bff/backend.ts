@@ -31,6 +31,8 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     const forwardedFor = options.request.headers.get('x-forwarded-for');
     const realIp = options.request.headers.get('x-real-ip');
     const userAgent = options.request.headers.get('user-agent');
+    const forwardedProto = options.request.headers.get('x-forwarded-proto');
+    const forwardedHost = options.request.headers.get('x-forwarded-host') || options.request.headers.get('host');
 
     if (forwardedFor) {
       headers['X-Forwarded-For'] = forwardedFor;
@@ -40,6 +42,12 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     }
     if (userAgent) {
       headers['User-Agent'] = userAgent;
+    }
+    if (forwardedProto) {
+      headers['X-Forwarded-Proto'] = forwardedProto;
+    }
+    if (forwardedHost) {
+      headers['X-Forwarded-Host'] = forwardedHost;
     }
   }
 
@@ -66,7 +74,17 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     }
 
     if (!accessToken) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { message: 'Unauthorized' },
+        {
+          status: 401,
+          headers: {
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff',
+            'Referrer-Policy': 'strict-origin-when-cross-origin',
+          },
+        }
+      );
     }
     headers.Authorization = `Bearer ${accessToken}`;
   }
@@ -94,18 +112,39 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
         message: 'Backend indisponivel no momento',
         detail: message,
       },
-      { status: 503 }
+      {
+        status: 503,
+        headers: {
+          'Cache-Control': 'no-store',
+          'X-Content-Type-Options': 'nosniff',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+        },
+      }
     );
   }
 
   const contentType = response.headers.get('content-type') ?? '';
   if (response.status === 204) {
-    return new NextResponse(null, { status: 204 });
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+      },
+    });
   }
 
   const data = contentType.includes('application/json') ? await response.json() : await response.text();
 
-  return NextResponse.json(data, { status: response.status });
+  return NextResponse.json(data, {
+    status: response.status,
+    headers: {
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    },
+  });
 }
 
 export async function readJson(request: Request) {

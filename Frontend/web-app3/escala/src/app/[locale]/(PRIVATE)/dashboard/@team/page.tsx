@@ -2,10 +2,11 @@ import { getShifts, getWorkSchedules } from '@/services/shift.service';
 import { ShiftSwapForm } from '@/components/dashboard/ShiftSwapForm';
 import { WorkScheduleModal } from '@/components/dashboard/WorkScheduleModal';
 import { Button } from '@/components/ui/button';
-import { Users, Briefcase, BarChart3, Building2, LogOut } from 'lucide-react';
+import { Users, BarChart3, Building2, Compass, CalendarClock, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { getRequiredServerAuth } from '@/lib/auth/server-auth';
+import { Badge } from '@/components/ui/badge';
 
 export default async function TeamSlot() {
   const { session, accessToken } = await getRequiredServerAuth();
@@ -19,34 +20,59 @@ export default async function TeamSlot() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-card space-y-4 rounded-xl border p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Perfil</h3>
+      <section className="rounded-[28px] border bg-card p-6 shadow-sm">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <Badge className="rounded-full bg-slate-950 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-white hover:bg-slate-950">
+              Perfil Operacional
+            </Badge>
+            <h3 className="text-xl font-black tracking-tight">{session.user.username}</h3>
+            <p className="text-sm text-muted-foreground">
+              Acesso ativo para acompanhar agenda, trocas e areas sob sua gestao.
+            </p>
+          </div>
           <ThemeToggle />
         </div>
-        <div className="space-y-2 text-sm">
-          <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Usuário</span>
-            <span className="font-medium">{session.user.username}</span>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border bg-muted/30 p-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Permissoes</p>
+            <p className="mt-2 text-sm font-semibold text-foreground">{session.user.roles.join(', ')}</p>
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Permissão</span>
-            <span className="font-medium text-primary">{session.user.roles.join(', ')}</span>
+          <div className="rounded-2xl border bg-muted/30 p-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Turnos pessoais</p>
+            <p className="mt-2 text-sm font-semibold text-foreground">{shifts.length} no periodo atual</p>
           </div>
         </div>
-      </div>
+      </section>
       
-      <div className="bg-primary/5 space-y-4 rounded-xl border border-primary/20 p-6">
-        <h3 className="text-lg font-semibold text-primary">Ações Rápidas</h3>
-        <div className="grid gap-3">
-            <ShiftSwapForm shifts={shifts} />
-            <WorkScheduleModal schedules={workSchedules} />
+      <section className="rounded-[28px] border border-blue-200/70 bg-[linear-gradient(135deg,#eef5ff_0%,#ffffff_100%)] p-6 shadow-sm">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="rounded-2xl bg-blue-600 p-2 text-white">
+            <CalendarClock className="h-4 w-4" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black tracking-tight text-slate-950">Acoes imediatas</h3>
+            <p className="text-sm text-slate-600">Dispare trocas e consulte jornadas sem sair do cockpit.</p>
+          </div>
         </div>
-      </div>
+        <div className="grid gap-3">
+          <ShiftSwapForm shifts={shifts} />
+          <WorkScheduleModal schedules={workSchedules} />
+        </div>
+      </section>
 
       {isAdmin && (
-        <div className="bg-card space-y-4 rounded-xl border p-6 shadow-sm">
-          <h3 className="text-lg font-semibold">Dashboard Admin</h3>
+        <section className="rounded-[28px] border bg-card p-6 shadow-sm">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="rounded-2xl bg-emerald-600 p-2 text-white">
+              <ShieldCheck className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black tracking-tight">Atalhos de gestao</h3>
+              <p className="text-sm text-muted-foreground">Entradas rapidas para equipe, tenants e relatorios.</p>
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-2">
             <Button variant="outline" size="sm" className="justify-start gap-2" asChild>
               <Link href="/dashboard/empresas">
@@ -67,15 +93,23 @@ export default async function TeamSlot() {
               </Link>
             </Button>
           </div>
-        </div>
+        </section>
       )}
 
-      <div className="pt-4">
-          <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-red-500 hover:bg-red-50 hover:text-red-600">
-             <LogOut className="h-4 w-4" />
-             Encerrar Sessão
-          </Button>
-      </div>
+      <section className="rounded-[28px] border bg-slate-950 p-6 text-slate-50 shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="rounded-2xl bg-white/10 p-2">
+            <Compass className="h-4 w-4" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-black tracking-tight">Leitura recomendada</h3>
+            <p className="text-sm leading-6 text-slate-300">
+              Comece pelo resumo do mes, trate trocas pendentes e so depois entre em setores, projetos e escalas
+              detalhadas.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

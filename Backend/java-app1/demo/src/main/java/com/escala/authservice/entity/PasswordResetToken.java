@@ -11,7 +11,13 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "password_reset_tokens")
+@Table(
+    name = "password_reset_tokens",
+    indexes = {
+        @Index(name = "idx_password_reset_tokens_user_expires", columnList = "user_id, expires_at"),
+        @Index(name = "idx_password_reset_tokens_used_at", columnList = "used_at")
+    }
+)
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,8 +28,14 @@ public class PasswordResetToken {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String token;
+
+    @Column(name = "token_hash", nullable = false, unique = true, length = 64)
+    private String tokenHash;
+
+    @Column(name = "token_preview", length = 12)
+    private String tokenPreview;
 
     @ManyToOne(optional = false)
     private User user;

@@ -28,11 +28,16 @@ export function BrandLink({ global, href = '/', collapsed = false, className }: 
           alt={logo.alternativeText || siteName}
           width={collapsed ? collapsedSize : expandedWidth}
           height={collapsed ? collapsedSize : expandedHeight}
+          sizes={collapsed ? '40px' : '180px'}
           className={cn(
             'rounded-lg object-contain',
-            collapsed ? 'h-10 w-10' : 'h-10 max-w-[180px]'
+            collapsed ? 'h-10 w-10' : 'max-w-[180px]'
           )}
-          style={collapsed ? undefined : { width: 'auto', height: `${expandedHeight}px` }}
+          style={
+            collapsed
+              ? { width: `${collapsedSize}px`, height: `${collapsedSize}px` }
+              : { width: 'auto', height: `${expandedHeight}px` }
+          }
           priority
         />
       ) : (

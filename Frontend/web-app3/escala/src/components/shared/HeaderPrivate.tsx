@@ -150,6 +150,12 @@ export const HeaderPrivate = ({
               ))
             )}
           </div>
+          <DropdownMenuSeparator className="bg-border/60" />
+          <div className="p-2">
+            <Button asChild variant="outline" className="w-full rounded-xl">
+              <Link href="/dashboard/mensagens">Abrir central de mensagens</Link>
+            </Button>
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
 

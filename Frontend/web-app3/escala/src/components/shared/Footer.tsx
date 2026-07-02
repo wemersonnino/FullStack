@@ -1,5 +1,5 @@
-import { FooterInterface } from "@/interfaces/footer/footer.interface";
 import Image from "next/image";
+import { FooterInterface } from "@/interfaces/footer/footer.interface";
 
 function hasHref(url?: string | null) {
   return Boolean(url?.trim());
@@ -19,8 +19,11 @@ export const Footer = ({ data }: { data: FooterInterface | null }) => {
             <Image
               src={data.logo.url}
               alt={data.logo.alternativeText || "Logo"}
-              width={100}
-              height={100}
+              width={180}
+              height={40}
+              sizes="180px"
+              className="max-w-[180px] object-contain"
+              style={{ width: "auto", height: "40px" }}
             />
           )}
           <p className="text-sm text-gray-400 max-w-xs">{data.description}</p>

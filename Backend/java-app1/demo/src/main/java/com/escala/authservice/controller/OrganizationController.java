@@ -2,6 +2,7 @@ package com.escala.authservice.controller;
 
 import com.escala.authservice.dto.ProjectRequest;
 import com.escala.authservice.dto.SectorRequest;
+import com.escala.authservice.dto.common.PagedResponse;
 import com.escala.authservice.entity.Project;
 import com.escala.authservice.entity.Sector;
 import com.escala.authservice.service.OrganizationService;
@@ -20,13 +21,15 @@ public class OrganizationController {
     private final OrganizationService organizationService;
 
     @GetMapping("/sectors")
-    public org.springframework.data.domain.Page<com.escala.authservice.dto.SectorResponse> sectors(
+    public PagedResponse<com.escala.authservice.dto.SectorResponse> sectors(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
-        return organizationService.sectors(authentication.getName(), pageable).map(com.escala.authservice.dto.SectorResponse::from);
+        return PagedResponse.from(
+                organizationService.sectors(authentication.getName(), pageable).map(com.escala.authservice.dto.SectorResponse::from)
+        );
     }
 
     @PostMapping("/sectors")
@@ -50,13 +53,15 @@ public class OrganizationController {
     }
 
     @GetMapping("/projects")
-    public org.springframework.data.domain.Page<com.escala.authservice.dto.ProjectResponse> projects(
+    public PagedResponse<com.escala.authservice.dto.ProjectResponse> projects(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
-        return organizationService.projects(authentication.getName(), pageable).map(com.escala.authservice.dto.ProjectResponse::from);
+        return PagedResponse.from(
+                organizationService.projects(authentication.getName(), pageable).map(com.escala.authservice.dto.ProjectResponse::from)
+        );
     }
 
     @PostMapping("/projects")

@@ -1,5 +1,83 @@
 # Decisoes Tecnicas
 
+## 2026-07-01 - Hardening multitenant, Redis, Flyway, segredos externos e estrategia de testes
+
+### Contexto
+
+O projeto precisava sair de um estado onde parte relevante da seguranca ainda dependia de disciplina de codigo e configuracao local permissiva. As frentes mais urgentes eram:
+
+- unicidade real por tenant
+- tokens sensiveis persistidos com hash
+- locks curtos para operacoes concorrentes
+- BFF com rate limit e headers fortes
+- eliminacao de fallbacks sensiveis no `application.yml`
+- clareza sobre o papel de mocks em testes versus dados fake de produto
+
+### Decisoes confirmadas
+
+- **Unicidade por tenant no banco e no dominio**: a regra oficial para usuario passou a ser `unique(company_id, lower(email))`, com normalizacao de email em entidades e migracao Flyway para dados existentes.
+- **Flyway como controle de schema**: o profile base agora usa `ddl-auto=validate` e o desenvolvimento conserva `update` apenas para acelerar iteracao local. A linha oficial para homolog/producao passa a ser migracao versionada.
+- **Token em claro deixou de ser persistido**: `TeamInvitation` e `PasswordResetToken` armazenam `tokenHash` e `tokenPreview`. A URL completa do convite e entregue so no ato da criacao.
+- **Redis como concern transversal, nao banco de verdade**: adotado para locks curtos e rate limit de borda. O estado operacional final continua no PostgreSQL.
+- **Lock distribuido com fallback local controlado**: `DistributedLockService` usa Redis quando disponivel e fallback em memoria apenas para development/test, evitando bloquear a produtividade local.
+- **Segredos obrigatoriamente externos ao YAML versionado**: `JWT_SECRET`, `STRAPI_BASE_URL`, credenciais de banco e Redis deixaram de ter fallback perigoso em `application.yml`. O backend importa `.env` local apenas como conveniencia de desenvolvimento.
+- **BFF com responsabilidade de borda**: o Next.js recebeu headers de seguranca e rate limit em rotas publicas criticas, mas regras de negocio, idempotencia forte e estado concorrente seguem no backend.
+- **Mocks continuam corretos em testes unitarios**: `@Mock` em testes de service nao significa “dados mocados na aplicacao”. Eles isolam colaboracoes para validar regra de negocio. Para banco, seguranca, transacao e SQL real, a estrategia correta e complementar com testes de integracao, nao trocar todos os unitarios por banco.
+
+### Por que fizemos
+
+- Reduzir vazamento entre tenants e ambiguidades por email.
+- Remover segredos operacionais de arquivos versionados.
+- Evitar dupla publicacao/geracao de escala em ambiente concorrente.
+- Diminuir superficie de abuso em endpoints publicos.
+- Separar claramente teste de unidade de teste de integracao.
+
+### Consequencias
+
+- O backend ficou mais aderente a SaaS multitenant real.
+- O frontend administrativo de convites precisou mudar porque o link nao pode mais ser reexibido indefinidamente.
+- A suite automatizada continua usando mocks em testes unitarios e isso deve permanecer.
+- A camada de testes de integracao com PostgreSQL/Redis reais passou a existir via Testcontainers.
+- Quando o ambiente nao oferece Docker valido ao Testcontainers, essa camada roda como `skipped`, preservando a suite unitaria.
+
+### O que ainda e mock/fallback de produto
+
+- **IA**: ainda existe `MockAiAdapter` no backend. Isso e comportamento fake de produto e deve ser substituido por provider real controlado por feature flag.
+- **Conteudo de landing**: `landing.dto.ts` ainda possui fallback estatico caso o Strapi nao responda. Isso e util para resiliencia local, mas nao deve ser a base do conteudo oficial em homolog/producao.
+- **Seed de desenvolvimento**: `DataInitializer` cria empresa/usuarios demo no profile local. Isso e seed de ambiente, nao substituto de regra real nem fixture de producao.
+
+### Proxima camada recomendada
+
+- Testes de integracao com PostgreSQL real para repositories, constraints por tenant, filtros de seguranca e fluxo de autenticacao.
+- Testes de integracao com Redis real para locks/rate limit.
+- Seed SQL/fixture controlada para cenarios de QA e smoke test.
+- Eventual Testcontainers quando a stack de testes precisar ficar completamente isolada do ambiente local.
+
+## 2026-07-01 - Conteudo publico via backend -> BFF -> UI
+
+### Contexto
+
+Parte do frontend publico ainda falava direto com o Strapi e so depois caia em fallback estatico. Isso contrariava a fronteira arquitetural oficial do projeto, em que o frontend deve se integrar com backend Spring Boot/BFF, e nao diretamente com a fonte editorial.
+
+### Decisoes confirmadas
+
+- **O frontend nao deve conhecer o CMS nesse fluxo**: `landing`, `pricing plans` e `testimonials` passaram a seguir `UI -> BFF -> backend -> Strapi`.
+- **O backend ganhou um adapter explicito de conteudo**: `PublicContentController` e `PublicContentService` expõem `/api/v1/public/content/...`.
+- **O BFF continua sendo adapter de borda**: o Next.js mascara topologia e concentra politicas HTTP da aplicacao nas rotas `/api/bff/content/...`.
+- **Fallback estatico deixou de ser caminho principal**: ele continua apenas como contingencia, nao como integracao oficial.
+
+### Por que fizemos
+
+- Reforcar a disciplina hexagonal nas integracoes externas.
+- Preparar cache curto, sanitizacao e observabilidade sem espalhar detalhes de CMS pelo frontend.
+- Permitir troca futura de fonte editorial com impacto menor na UI.
+
+### Consequencias
+
+- A UI publica fica menos acoplada a query strings e endpoints do Strapi.
+- O backend vira o ponto natural para enriquecer conteudo editorial com regras, cache e seguranca.
+- Outros services publicos ainda podem seguir a mesma trilha gradualmente.
+
 ## 2026-06-30 - Escala Inteligente SSR, endurecimento de sessao e robustez do BFF
 
 ### Contexto

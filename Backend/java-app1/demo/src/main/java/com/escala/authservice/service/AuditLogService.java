@@ -16,7 +16,7 @@ public class AuditLogService {
     public void record(String actor, String action, String entityType, Object entityId, String details) {
         User user = actor == null || actor.isBlank()
                 ? null
-                : userRepository.findByEmail(actor).orElse(null);
+                : userRepository.findAllByEmailIgnoreCase(actor).stream().findFirst().orElse(null);
 
         auditLogRepository.save(AuditLog.builder()
                 .actor(actor == null || actor.isBlank() ? "system" : actor)

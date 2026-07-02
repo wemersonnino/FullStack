@@ -4,9 +4,10 @@ import { Calendar } from 'lucide-react';
 
 interface ShiftListProps {
   shifts: Shift[];
+  showHeader?: boolean;
 }
 
-export const ShiftList = ({ shifts }: ShiftListProps) => {
+export const ShiftList = ({ shifts, showHeader = true }: ShiftListProps) => {
   if (shifts.length === 0) {
     return (
       <div className="bg-muted/30 flex flex-col items-center justify-center rounded-xl border border-dashed py-12 text-center">
@@ -21,12 +22,14 @@ export const ShiftList = ({ shifts }: ShiftListProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Suas Próximas Escalas</h2>
-        <span className="text-muted-foreground text-sm">
-          {shifts.length} {shifts.length === 1 ? 'turno' : 'turnos'}
-        </span>
-      </div>
+      {showHeader ? (
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Suas Próximas Escalas</h2>
+          <span className="text-muted-foreground text-sm">
+            {shifts.length} {shifts.length === 1 ? 'turno' : 'turnos'}
+          </span>
+        </div>
+      ) : null}
       
       <div className="grid gap-4">
         {shifts.map((shift) => (

@@ -1,10 +1,16 @@
+import { ENV } from "@/constants/env";
 import { OrganizationMapper } from "./mappers/organization.mapper";
 import { Sector, Project } from "@/core/domain/models/organization.model";
 
 export class OrganizationBackendAdapter {
   private static baseUrl = '/api/bff/organization';
+  private static backendBaseUrl = `${ENV.API_BASE_URL}/api/v1/organization`;
 
-  private static url(path: string) {
+  private static url(path: string, token?: string) {
+    if (typeof window === 'undefined' && token) {
+      return `${this.backendBaseUrl}${path}`;
+    }
+
     const url = `${this.baseUrl}${path}`;
     if (typeof window !== 'undefined') return url;
     return new URL(url, process.env.NEXTAUTH_URL || 'http://localhost:3000').toString();
@@ -23,18 +29,25 @@ export class OrganizationBackendAdapter {
     return headers;
   }
 
+  private static extractCollection<T>(payload: T[] | { content?: T[] } | null | undefined): T[] {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.content)) return payload.content;
+    return [];
+  }
+
   // Sectors
   static async listSectors(token?: string): Promise<Sector[]> {
-    const response = await fetch(this.url('/sectors'), {
+    const response = await fetch(this.url('/sectors', token), {
       headers: this.headers(token),
+      cache: 'no-store',
     });
     if (!response.ok) throw new Error("Failed to fetch sectors");
-    const dtos = await response.json();
+    const dtos = this.extractCollection(await response.json());
     return dtos.map((dto: any) => OrganizationMapper.sectorToDomain(dto));
   }
 
   static async createSector(sector: Partial<Sector>, token?: string): Promise<Sector> {
-    const response = await fetch(this.url('/sectors'), {
+    const response = await fetch(this.url('/sectors', token), {
       method: 'POST',
       headers: this.headers(token, true),
       body: JSON.stringify(OrganizationMapper.sectorToDto(sector)),
@@ -45,8 +58,8 @@ export class OrganizationBackendAdapter {
   }
 
   static async updateSector(id: string, sector: Partial<Sector>, token?: string): Promise<Sector> {
-    const response = await fetch(this.url(`/sectors/${id}`), {
-      method: 'PATCH',
+    const response = await fetch(this.url(`/sectors/${id}`, token), {
+      method: 'PUT',
       headers: this.headers(token, true),
       body: JSON.stringify(OrganizationMapper.sectorToDto(sector)),
     });
@@ -56,7 +69,7 @@ export class OrganizationBackendAdapter {
   }
 
   static async deleteSector(id: string, token?: string): Promise<void> {
-    const response = await fetch(this.url(`/sectors/${id}`), {
+    const response = await fetch(this.url(`/sectors/${id}`, token), {
       method: 'DELETE',
       headers: this.headers(token),
     });
@@ -65,16 +78,17 @@ export class OrganizationBackendAdapter {
 
   // Projects
   static async listProjects(token?: string): Promise<Project[]> {
-    const response = await fetch(this.url('/projects'), {
+    const response = await fetch(this.url('/projects', token), {
       headers: this.headers(token),
+      cache: 'no-store',
     });
     if (!response.ok) throw new Error("Failed to fetch projects");
-    const dtos = await response.json();
+    const dtos = this.extractCollection(await response.json());
     return dtos.map((dto: any) => OrganizationMapper.projectToDomain(dto));
   }
 
   static async createProject(project: Partial<Project>, token?: string): Promise<Project> {
-    const response = await fetch(this.url('/projects'), {
+    const response = await fetch(this.url('/projects', token), {
       method: 'POST',
       headers: this.headers(token, true),
       body: JSON.stringify(OrganizationMapper.projectToDto(project)),
@@ -85,8 +99,8 @@ export class OrganizationBackendAdapter {
   }
 
   static async updateProject(id: string, project: Partial<Project>, token?: string): Promise<Project> {
-    const response = await fetch(this.url(`/projects/${id}`), {
-      method: 'PATCH',
+    const response = await fetch(this.url(`/projects/${id}`, token), {
+      method: 'PUT',
       headers: this.headers(token, true),
       body: JSON.stringify(OrganizationMapper.projectToDto(project)),
     });
@@ -96,7 +110,7 @@ export class OrganizationBackendAdapter {
   }
 
   static async deleteProject(id: string, token?: string): Promise<void> {
-    const response = await fetch(this.url(`/projects/${id}`), {
+    const response = await fetch(this.url(`/projects/${id}`, token), {
       method: 'DELETE',
       headers: this.headers(token),
     });

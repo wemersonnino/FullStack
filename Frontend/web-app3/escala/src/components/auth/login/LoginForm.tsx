@@ -35,7 +35,10 @@ export const LoginForm = () => {
       return;
     }
 
-    const locale = pathname.split('/').filter(Boolean)[0] || 'pt-BR';
+    const locales = ['pt-BR', 'en', 'es'];
+    const firstSegment = pathname.split('/').filter(Boolean)[0] || 'pt-BR';
+    const locale = locales.includes(firstSegment) ? firstSegment : 'pt-BR';
+
     const destination = selectedPlan
       ? `/${locale}/dashboard/billing/plans`
       : `/${locale}/dashboard`;

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,6 +25,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableWebSecurity
@@ -40,16 +42,51 @@ public class SecurityConfiguration {
     private boolean openApiEnabled;
 
     @Bean
+    @Order(0)
+    public SecurityFilterChain publicSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/api/v1/public/content/**", "/api/v1/public/contact", "/api/v1/leads")
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .contentTypeOptions(contentTypeOptions -> {})
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(TimeUnit.DAYS.toSeconds(365))
+                        )
+                )
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .contentTypeOptions(contentTypeOptions -> {})
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(TimeUnit.DAYS.toSeconds(365))
+                        )
+                )
                 .authorizeHttpRequests(auth -> {
                     auth
                             .requestMatchers("/api/v1/auth/**").permitAll()
+                            .requestMatchers("/api/v1/leads").permitAll()
                             .requestMatchers("/api/v1/public/**").permitAll()
+                            .requestMatchers("/api/v1/public/content/**").permitAll()
                             .requestMatchers("/api/v1/billing/webhook").permitAll()
                             .requestMatchers("/actuator/health").permitAll()
+                            .requestMatchers("/error").permitAll()
                             .requestMatchers("/actuator/metrics", "/actuator/prometheus").hasAuthority("ADMIN");
 
                     if (openApiEnabled) {
@@ -77,8 +114,10 @@ public class SecurityConfiguration {
                         .toList()
         );
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "If-Match", "X-Requested-With"));
+        configuration.setExposedHeaders(List.of("ETag"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

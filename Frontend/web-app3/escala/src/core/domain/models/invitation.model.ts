@@ -5,6 +5,7 @@ export interface TeamInvitation {
   companyName: string;
   companySlug: string;
   inviteUrl?: string;
+  tokenPreview?: string;
   expiresAt: string;
   acceptedAt?: string;
   active: boolean;

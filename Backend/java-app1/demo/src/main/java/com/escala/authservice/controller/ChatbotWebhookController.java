@@ -53,8 +53,10 @@ public class ChatbotWebhookController {
         }
 
         String email = request.getSenderEmail() != null ? request.getSenderEmail() : "admin@escala.local";
-        User user = userRepository.findByEmail(email).orElse(null);
-        Employee employee = employeeRepository.findByEmail(email).orElse(null);
+        List<User> users = userRepository.findAllByEmailIgnoreCase(email);
+        List<Employee> employees = employeeRepository.findAllByEmailIgnoreCase(email);
+        User user = users.size() == 1 ? users.getFirst() : null;
+        Employee employee = employees.size() == 1 ? employees.getFirst() : null;
 
         String msg = request.getMessage() != null ? request.getMessage().toLowerCase() : "";
         String action = "UNKNOWN";

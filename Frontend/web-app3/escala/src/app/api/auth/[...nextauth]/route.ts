@@ -323,7 +323,7 @@ export const authOptions: AuthOptions = {
     },
   },
   pages: { signIn: '/login' },
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NEXTAUTH_DEBUG === 'true',
 };
 
 const authHandler = NextAuth(authOptions);

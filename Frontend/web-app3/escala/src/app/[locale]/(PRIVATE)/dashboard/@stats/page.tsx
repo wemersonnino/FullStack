@@ -2,6 +2,7 @@ import { DashboardStats } from '@/core/domain/models/stats.model';
 import { StatsService } from '@/core/application/services/stats.service';
 import { Users, AlertTriangle, ArrowLeftRight, Activity } from 'lucide-react';
 import { getRequiredServerAuth } from '@/lib/auth/server-auth';
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 
 export default async function StatsSlot() {
   const { accessToken } = await getRequiredServerAuth();
@@ -50,18 +51,40 @@ export default async function StatsSlot() {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {cards.map((card) => (
-        <div key={card.title} className="flex items-center gap-4 rounded-xl border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-          <div className={`${card.bg} rounded-lg p-2`}>
-            <card.icon className={`h-6 w-6 ${card.color}`} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{card.title}</p>
-            <h4 className="text-2xl font-bold">{card.value}</h4>
-          </div>
+    <section className="space-y-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            Pulso da operacao
+          </p>
+          <h2 className="text-2xl font-black tracking-tight text-foreground">
+            Resumo executivo do mes
+          </h2>
         </div>
-      ))}
-    </div>
+        <p className="text-sm text-muted-foreground">
+          Indicadores essenciais para decidir antes de publicar, corrigir ou redistribuir escala.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => (
+          <DashboardStatCard
+            key={card.title}
+            label={card.title}
+            value={card.value}
+            icon={card.icon}
+            tone={
+              card.title === 'Total Colaboradores'
+                ? 'blue'
+                : card.title === 'Escalas em Aberto'
+                  ? 'amber'
+                  : card.title === 'Trocas Pendentes'
+                    ? 'rose'
+                    : 'emerald'
+            }
+          />
+        ))}
+      </div>
+    </section>
   );
 }
