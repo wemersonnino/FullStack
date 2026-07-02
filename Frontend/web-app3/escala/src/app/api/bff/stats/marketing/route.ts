@@ -1,16 +1,16 @@
-import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { proxyBackend } from '@/lib/bff/backend';
+import { getOptionalServerAccessToken, getOptionalServerSession } from '@/lib/auth/server-auth';
 
 const MARKETING_ROLES = new Set(['SYSTEM_ADMIN']);
 
 export async function GET(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalServerSession();
   const roles = session?.user?.roles ?? [];
   const canAccess = roles.some((role) => MARKETING_ROLES.has(role));
+  const accessToken = await getOptionalServerAccessToken();
 
-  if (!session?.user?.token) {
+  if (!accessToken) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 

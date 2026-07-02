@@ -1,5 +1,67 @@
 # Changelog
 
+## 2026-07-01 - Hardening multitenant, Redis operacional, tokens sensiveis com hash e BFF seguro
+
+### Adicionado
+
+- **Migracoes versionadas com Flyway:** criado `V2026070101__tenant_uniqueness_and_security_indexes.sql` para consolidar unicidade por tenant, backfill de tokens sensiveis com hash e novos indices operacionais.
+- **Redis no ambiente local oficial:** o `docker-compose.yml` agora sobe `redis:7.4-alpine` e conecta backend e frontend para locks curtos e rate limit de borda.
+- **Lock distribuido no backend:** novo `DistributedLockService` para proteger geracao mensal de escala e transicoes de ciclo (`publish`, `rectify`, `archive`).
+- **Servico de token sensivel:** novo `SensitiveTokenService` para emitir token aleatorio, hash SHA-256 e `tokenPreview`, evitando persistencia de segredo em claro.
+- **Rate limit no BFF do Next.js:** nova camada server-side em `src/lib/bff/rate-limit.ts` aplicada a `register`, `forgot-password`, `reset-password`, `google`, `contact` e `leads`.
+- **Novo guia de testes e dados:** criado `docs/estrategia-testes-e-dados.md` para separar claramente testes unitarios com mocks, testes de integracao com banco e dados fake de produto ainda existentes.
+- **Suite de integracao com Testcontainers:** adicionados testes reais em `src/test/java/com/escala/authservice/integration/` para unicidade por tenant, convites, locks Redis e publicacao de ciclo.
+- **Endpoints publicos de conteudo via backend:** adicionados `/api/v1/public/content/landing`, `/api/v1/public/content/pricing-plans` e `/api/v1/public/content/testimonials`.
+
+### Alterado
+
+- **Unicidade de usuario por tenant:** a regra de email deixou de ser global e passou a respeitar empresa/tenant no backend e no banco.
+- **Segredos e URLs sensiveis no backend:** `application.yml` deixou de carregar fallback perigoso para `JWT_SECRET`, `STRAPI_BASE_URL`, banco e Redis; o backend agora importa `.env` local de forma explicita e segura.
+- **Convites e reset de senha:** `TeamInvitation` e `PasswordResetToken` passam a armazenar `tokenHash` e `tokenPreview`; a URL completa do convite aparece apenas na resposta de criacao.
+- **Google SSO e lookup por email:** autenticacao passou a tratar ambiguidade entre tenants e exigir contexto de empresa quando o mesmo email existir em mais de uma companhia.
+- **Cabecalhos de seguranca:** frontend e backend receberam endurecimento de `CSP`, `HSTS`, `X-Frame-Options`, `Referrer-Policy`, `X-Content-Type-Options` e diretivas relacionadas.
+- **UI administrativa de convites e configuracoes:** redesign de `/dashboard/team/invites` e `/dashboard/configuracoes` para refletir onboarding seguro, tenant isolado e protecoes do BFF.
+- **Actuator:** exposicao web reduzida para `health` por padrao.
+- **JPA default:** profile base passou de `ddl-auto=update` para `ddl-auto=validate`, mantendo `update` apenas em `development`.
+- **Seed local do backend:** `DataInitializer` passa a respeitar `application.seed.enabled`, evitando contaminar testes de integracao.
+- **Conteudo publico do frontend:** `landing.service.ts` passa a consumir BFF `content/*`, deixando de usar Strapi direto no caminho principal de `landing`, `pricing plans` e `testimonials`.
+
+### Corrigido
+
+- **Multi-tenant no lookup de usuario atual:** `CurrentUserService` agora detecta email ambiguo entre tenants em vez de resolver silenciosamente para uma conta errada.
+- **Compilacao e testes apos locks/tokens:** suites unitarias foram alinhadas ao novo contrato multitenant e ao lock distribuido.
+- **Fluxo de convite administrativo:** listagem deixa de expor link reutilizavel e passa a mostrar apenas status, expiracao e `tokenPreview`.
+
+### Validado
+
+- `Backend/java-app1/demo`: `./mvnw -Dmaven.repo.local=/tmp/m2/repository test` com `88` testes, `0` falhas, `0` erros e `6` `skipped`.
+- Os `6` `skipped` sao exatamente os testes de integracao Testcontainers, porque o ambiente atual nao expunha um Docker valido para eles.
+- `Frontend/web-app3/escala`: `pnpm run typecheck` com sucesso.
+
+## 2026-06-30 - Escala Inteligente operacional, robustez do BFF e atualizacao documental
+
+### Adicionado
+
+- **Escala Inteligente no dashboard:** nova rota privada `/dashboard/escala/inteligente` com carregamento SSR de calendario mensal, legendas, feriados, ciclo, atribuicoes, contadores e alertas.
+- **Workspace operacional de atribuicoes:** grade mensal por colaborador x dia com edicao local e persistencia bulk em `PATCH /api/v1/scheduling/cycles/{id}/assignments`.
+- **Operacoes de produtividade na grade mensal:** `preencher semana`, `copiar mes`, presets `5x2`, `6x1`, `12x36` e resumo visual de diff antes do save.
+- **Healthchecks no Docker Compose:** `postgres`, `backend`, `strapi` e `frontend` agora expõem readiness local, com `depends_on.condition: service_healthy`.
+
+### Alterado
+
+- **Sessao do perfil endurecida:** o frontend passou a reduzir o payload enviado em `useSession().update()` para apenas campos editaveis/visuais.
+- **Callback de update do NextAuth:** preserva `provider` de forma controlada e deixa de aceitar alteracao arbitraria via update de sessao.
+- **Adapter de mensagens:** usa URL relativa no browser e URL absoluta apenas em SSR, evitando erro `Failed to parse URL from /api/bff/messages?...`.
+- **BFF do backend:** `proxyBackend()` passou a retornar `503` JSON controlado quando o Spring Boot ainda nao esta pronto.
+- **Documentacao do projeto:** README, arquitetura, ambientes, cobertura, plano da Escala Inteligente, Swagger/OpenAPI, requisitos, roadmap e OKRs foram atualizados para refletir o estado real do codigo.
+
+### Corrigido
+
+- **`/dashboard/configuracoes`:** normalizacao de resposta paginada de usuarios para evitar `users.map is not a function`.
+- **Polling de mensagens no browser:** falhas transientes deixaram de gerar ruido funcional no console.
+- **Logo da dashboard:** ajuste de proporcao do `next/image` em `BrandLink` para eliminar warning de largura/altura inconsistentes.
+- **Boot concorrente no Docker:** reduzidos `ECONNREFUSED` e `500` falsos durante subida local.
+
 ## 2026-06-26 - Copywriting Persuasivo, Expansão de Schemas e Seeding no Strapi v5
 
 ### Adicionado

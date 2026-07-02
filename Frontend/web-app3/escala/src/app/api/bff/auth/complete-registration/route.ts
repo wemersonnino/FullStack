@@ -1,12 +1,10 @@
-import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { ENV } from '@/constants/env';
+import { getOptionalServerAccessToken } from '@/lib/auth/server-auth';
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.token) {
+  const accessToken = await getOptionalServerAccessToken();
+  if (!accessToken) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -17,7 +15,7 @@ export async function POST(request: Request) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.user.token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(body),
     });

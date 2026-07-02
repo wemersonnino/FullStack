@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { signOut } from 'next-auth/react';
 import {
   Briefcase,
   Building2,
@@ -23,7 +24,8 @@ import {
   Megaphone,
   ShieldCheck,
   CreditCard,
-  GraduationCap
+  GraduationCap,
+  Bell,
 } from 'lucide-react';
 import { MenuItem } from '@/interfaces/menu/menu.interface';
 import { GlobalInterface } from '@/interfaces/global/global.interface';
@@ -31,7 +33,6 @@ import { cn, resolveAvatarUrl } from '@/lib/utils';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useAuth } from '@/hooks/useAuth';
 import { BrandLink } from '@/components/shared/BrandLink';
 
 interface SidebarProps {
@@ -56,6 +57,14 @@ const navigationGroups = [
       { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { title: 'Minhas Escalas', href: '/dashboard/escala', icon: CalendarDays },
       { title: 'Trocas de Turno', href: '/dashboard/escala/trocas', icon: ArrowLeftRight },
+      { title: 'Mensagens', href: '/dashboard/mensagens', icon: Bell },
+    ]
+  },
+  {
+    title: 'Planejamento',
+    roles: ['ADMIN', 'OWNER', 'MANAGER'],
+    items: [
+      { title: 'Escala Inteligente', href: '/dashboard/escala/inteligente', icon: CalendarDays },
     ]
   },
   {
@@ -75,7 +84,7 @@ const navigationGroups = [
       { title: 'Empresas (Tenants)', href: '/dashboard/empresas', icon: Building2 },
       { title: 'Relatórios Avançados', href: '/dashboard/relatorios', icon: BarChart4 },
       { title: 'Planos e Faturamento', href: '/dashboard/billing/plans', icon: CreditCard },
-      { title: 'ReBAC Jethro', href: '/dashboard/rebac', icon: ShieldCheck },
+      { title: 'Hierarquia de Gestão', href: '/dashboard/rebac', icon: ShieldCheck },
       { title: 'Auditoria e Logs', href: '/dashboard/auditoria', icon: ShieldCheck },
     ]
   },
@@ -98,11 +107,14 @@ const navigationGroups = [
 
 export const Sidebar = ({ items, global, user }: SidebarProps) => {
   const pathname = usePathname();
-  const { logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const avatarSrc = resolveAvatarUrl(user);
   void items;
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/login' });
+  };
 
   const filteredGroups = useMemo(() => {
     const userRoles = user.roles || [];
@@ -225,7 +237,7 @@ export const Sidebar = ({ items, global, user }: SidebarProps) => {
             type="button" 
             variant="ghost" 
             size="icon" 
-            onClick={logout}
+            onClick={handleLogout}
             className="h-9 w-9 text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"
           >
             <LogOut className="size-4" />

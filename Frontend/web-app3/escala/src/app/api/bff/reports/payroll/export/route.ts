@@ -1,11 +1,10 @@
-import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { ENV } from '@/constants/env';
+import { getOptionalServerAccessToken } from '@/lib/auth/server-auth';
 
 export async function GET(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.token) {
+  const accessToken = await getOptionalServerAccessToken();
+  if (!accessToken) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -15,7 +14,7 @@ export async function GET(request: Request) {
 
   const response = await fetch(backendUrl, {
     headers: {
-      Authorization: `Bearer ${session.user.token}`,
+      Authorization: `Bearer ${accessToken}`,
       Accept: 'text/csv',
     },
     cache: 'no-store',

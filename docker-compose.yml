@@ -13,6 +13,28 @@ services:
     volumes:
       - escala_pg_data:/var/lib/postgresql/data/
       - ./Data/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - escala-network
+
+  redis:
+    container_name: escala-redis
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "no", "--save", ""]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     networks:
       - escala-network
 
@@ -23,13 +45,27 @@ services:
       dockerfile: ./Docker/develop/Dockerfile
     image: escala-backend:develop
     restart: unless-stopped
+    env_file:
+      - ./Backend/java-app1/demo/.env
+    environment:
+      HOME: /tmp
+      MAVEN_CONFIG: /tmp/.m2
+      MAVEN_USER_HOME: /tmp/.m2
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
-      - ./Backend/java-app1/demo/.env:/app/.env:ro
-      - ~/.m2:/root/.m2
+      - escala_m2_cache:/tmp/.m2
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/actuator/health | grep '\"status\":\"UP\"' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 50s
     networks:
       - escala-network
 
@@ -41,7 +77,8 @@ services:
     image: cms-strapi:develop
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     env_file:
       - ./Backend/cms-strapi/.env
     environment:
@@ -64,6 +101,12 @@ services:
       - ./Backend/cms-strapi/scripts:/opt/app/scripts
       - ./Backend/cms-strapi/data:/opt/app/data
       - ./Backend/cms-strapi/public/uploads:/opt/app/public/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:1337/admin >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
     networks:
       - escala-network
 
@@ -75,8 +118,12 @@ services:
     image: fullstack-frontend:develop
     restart: unless-stopped
     depends_on:
-      - backend
-      - strapi
+      backend:
+        condition: service_healthy
+      strapi:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - ./Frontend/web-app3/escala/.env.local
     environment:
@@ -88,6 +135,7 @@ services:
       NEXT_PUBLIC_COMPANY_SLUG: ${NEXT_PUBLIC_COMPANY_SLUG:-escala-demo}
       NEXT_PUBLIC_HOME_LANDING_PAGE_KEY: ${NEXT_PUBLIC_HOME_LANDING_PAGE_KEY:-home}
       NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:-}
+      REDIS_URL: redis://redis:6379
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "1"
     ports:
@@ -98,11 +146,18 @@ services:
       - /app/.next
     working_dir: /app
     command: sh -lc "rm -rf /app/.next/* && pnpm dev"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/auth/session >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - escala-network
 
 volumes:
   escala_pg_data:
+  escala_m2_cache:
 
 networks:
   escala-network:

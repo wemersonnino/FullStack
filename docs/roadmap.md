@@ -1,6 +1,6 @@
 # Roadmap — Gestao Inteligente de Escalas
 
-Data de referencia: 2026-06-25.
+Data de referencia: 2026-06-30.
 
 ## Estrategia de entrega
 
@@ -17,6 +17,13 @@ O roadmap prioriza uma entrada de Oceano Azul: PMEs que ainda operam com Excel, 
 | 4 | Mes 4 | Trocas, ausencias e notificacoes | Troca com aceite do colega e gestor, ausencias, ferias, atestados, notificacoes |
 | 5 | Mes 5 | Banco de horas e ponto web | Check-in/out/intervalo, saldos, relatorios, preparacao LGPD para geolocalizacao |
 | 6 | Mes 6 | Dimensionamento e IA MVP | Demanda x cobertura, alertas de sub/superdimensionamento, IA explicavel para conflito/substituto |
+
+## Progresso atual observado
+
+- Fase 1: em producao local, com captura de leads, campanhas e base de trial/billing
+- Fase 2: avancada, com Escala Inteligente ja entregue em SSR, BFF e editor operacional mensal
+- Fase 3: iniciada, com ciclo mensal, alertas, ciencia e acoes de publicacao/retificacao/arquivamento ja expostas
+- Fase 4 em diante: ainda parcial ou planejada
 
 ## Fase 0 — Auditoria, estabilizacao e documentacao
 
@@ -45,6 +52,12 @@ O roadmap prioriza uma entrada de Oceano Azul: PMEs que ainda operam com Excel, 
 - Calcular contadores mensais por colaborador: dias trabalhados, ausentes, descansos, ferias, faltas, feriados trabalhados, fins de semana trabalhados e horas previstas.
 - Implementar legendas configuraveis com impacto em dias, horas, banco de horas, folha e alertas.
 - Entregar UI de grid mensal em desktop e mobile.
+
+Status atual:
+
+- entregue calendario mensal, feriados, legendas, ciclo, atribuicoes, contadores, alertas e grid mensal
+- entregue produtividade no editor: preencher semana, copiar mes, presets e dif antes do save
+- pendente listagem de ciclos por periodo e regras mais profundas de cobertura/capacidade no produto
 
 ## Fase 3 — Conformidade, publicacao e auditoria
 

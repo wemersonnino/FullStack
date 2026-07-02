@@ -1,55 +1,89 @@
 # Cobertura Frontend x Backend
 
-Data: 2026-06-23
+Data: 2026-06-30
 
-## Critério
+## Criterio
 
-- Backend oficial: `Backend/java-app1/demo`.
-- Frontend oficial: `Frontend/web-app3/escala`.
-- Padrão alvo: `Page Server Component -> BFF -> service/adapter -> backend`, com componentes cliente recebendo dados por props e fazendo mutações por BFF.
-- Rotas técnicas, como webhooks e health check, não exigem UI de produto, mas devem estar documentadas no Swagger.
+- Backend oficial: `Backend/java-app1/demo`
+- Frontend oficial: `Frontend/web-app3/escala`
+- Padrao alvo: `Server Page -> BFF explicito -> service/adapter -> backend`
+- A rota generica `src/app/api/server/[...endpoint]/route.ts` ainda existe, mas novas features de produto devem preferir BFFs nomeados por dominio
 
-## Cobertura por domínio
+## Cobertura por dominio
 
-| Backend | UI/UX no frontend | BFF dedicado | Observação |
+| Dominio backend | UI/UX no frontend | BFF dedicado | Estado atual |
 |---|---:|---:|---|
-| Auth (`/api/v1/auth/**`) | Sim | Sim | Login, registro, recuperação, reset, Google e convite. |
-| Users (`/api/v1/users/**`) | Sim | Sim/parcial | Perfil, senha, tema e gestão de roles em telas administrativas. |
-| Companies (`/api/v1/companies/**`) | Sim | Sim | Gestão de empresas/tenants. |
-| Employees (`/api/v1/employees/**`) | Sim | Sim | Team/colaboradores e cadastro. |
-| Organization (`/api/v1/organization/**`) | Sim | Sim | Setores e projetos. |
-| Work posts (`/api/v1/work-posts/**`) | Sim | Sim | Corrigido para BFF dedicado. |
-| Operational capacities (`/api/v1/operational-capacities/**`) | Sim | Sim | Corrigido para BFF dedicado. |
-| Escala (`/api/v1/escala/**`) | Sim | Sim | Calendário, admin e usuários escaláveis. |
-| Schedules (`/api/v1/schedules/**`) | Sim | Sim | Geração, resumo e trocas. |
-| Check-in (`/api/v1/check-in`) | Sim | Sim | Corrigido para BFF dedicado. |
-| Reports (`/api/v1/reports/**`) | Sim | Sim | Export CSV corrigido para BFF. |
-| Team invitations (`/api/v1/team/invitations/**`) | Sim | Sim | Convites internos e consulta pública por token. |
-| Leads (`/api/v1/leads`) | Sim | Sim | Formulários públicos comerciais. |
-| Contact (`/api/v1/public/contact`) | Sim | Sim | Página pública de contato. |
-| Billing (`/api/v1/billing/**`) | Sim | Sim | Planos, checkout, assinatura e cancelamento. Webhook não precisa UI. |
-| Messages (`/api/v1/messages/**`) | Sim | Sim | Header/modal de notificações corrigidos para BFF. |
-| AI (`/api/v1/ai/**`) | Sim | Sim | Painel de IA via `/api/bff/ai/task`; serialização corrigida. |
-| Learning progress (`/api/v1/learning-progress/**`) | Sim | Sim | Página `/dashboard/aprendizado` adicionada. |
-| Stats (`/api/v1/stats/**`) | Sim | Sim | Summary do dashboard e métricas de marketing em `/dashboard/marketing`. |
-| Chatbot webhook (`/api/v1/webhooks/chatbot`) | Não aplicável | Não | Endpoint de integração externa, documentado no Swagger. |
-| Stripe webhook (`/api/v1/billing/webhook`) | Não aplicável | Não | Endpoint de integração externa, documentado no Swagger. |
-| Actuator health (`/actuator/health`) | Não aplicável | Não | Endpoint operacional, documentado no Swagger. |
+| Auth (`/api/v1/auth/**`) | Sim | Sim | Login, registro, reset, Google e convite |
+| Users (`/api/v1/users/**`) | Sim | Sim | Perfil, senha, tema e gestao de roles; lista paginada normalizada no frontend |
+| Companies (`/api/v1/companies/**`) | Sim | Sim | Gestao de tenants/empresas |
+| Employees (`/api/v1/employees/**`) | Sim | Sim | Team/colaboradores e cadastro |
+| Organization (`/api/v1/organization/**`) | Sim | Sim | Setores e projetos |
+| Work posts (`/api/v1/work-posts/**`) | Sim | Sim | CRUD operacional |
+| Operational capacities (`/api/v1/operational-capacities/**`) | Sim | Sim | CRUD e consulta por setor/posto |
+| Escala classica (`/api/v1/escala/**`) | Sim | Sim | Calendario, admin, meus dias e usuarios escalaveis |
+| Schedules (`/api/v1/schedules/**`) | Sim | Sim | Resumo do dashboard, geracao e trocas |
+| Scheduling (`/api/v1/scheduling/**`) | Sim | Sim | Escala Inteligente SSR + editor operacional mensal |
+| Messages (`/api/v1/messages/**`) | Parcial | Sim | Header com pendencias e modal de decisao; ainda nao ha central completa de mensagens |
+| ReBAC (`/api/v1/rebac/**`) | Sim | Sim | UI administrativa e enums de apoio |
+| Learning progress (`/api/v1/learning-progress/**`) | Sim | Sim | Pagina `/dashboard/aprendizado` |
+| Stats (`/api/v1/stats/**`) | Sim | Sim | Summary do dashboard e metricas de marketing |
+| Reports (`/api/v1/reports/**`) | Sim | Sim | Folha e export CSV via BFF |
+| Billing (`/api/v1/billing/**`) | Sim | Sim | Planos, checkout, assinatura e cancelamento |
+| Leads (`/api/v1/leads`) | Sim | Sim | Formularios publicos comerciais |
+| Contact (`/api/v1/public/contact`) | Sim | Sim | Pagina publica de contato |
+| Check-in (`/api/v1/check-in`) | Sim | Sim | Fluxo operacional do ponto web basico |
+| Team invitations (`/api/v1/team/invitations/**`) | Sim | Sim | Convites internos e consulta por token |
+| AI (`/api/v1/ai/**`) | Sim | Sim | Painel de IA via BFF |
+| Webhooks/health (`/actuator/health`, webhooks) | Nao aplicavel | Nao | Endpoints tecnicos e de integracao externa |
 
-## Correções desta rodada
+## Escala Inteligente
 
-- Adicionados BFFs dedicados para mensagens, postos de trabalho, capacidades operacionais, aprendizado, stats, billing, check-in e convites por ID/token.
-- Corrigido `/api/bff/ai/task` para enviar objeto JSON ao backend sem serialização dupla.
-- Corrigido `/api/bff/reports/payroll/export` para proxy de CSV com headers de download.
-- Componentes de mensagens, postos, capacidades, convites, check-in, billing e relatório passaram a consumir BFF em vez de backend direto.
-- Adicionada UI de aprendizado em `/dashboard/aprendizado`.
-- Migrados services/adapters legados de `/api/server/api/v1/**` para BFFs nomeados por domínio.
-- Consolidada a duplicidade de escala removendo `/api/bff/escalas/**` e mantendo `/api/bff/escala/**` como rota canônica.
-- Corrigido `StatsBackendAdapter` para usar URL absoluta quando executado em Server Component e encaminhar o token ao BFF.
-- Adicionada UI administrativa de marketing para `GET /api/v1/stats/marketing`, com acesso limitado a `ADMIN`, `OWNER` e `MARKETING`.
-- Corrigido o modal global de nova escala para permitir seleção do colaborador antes de salvar.
-- Padronizada a resolução de avatar para `avatarUrl`, `avatar.url`, `image` e `picture` no header e sidebar.
+Estado atual entregue no frontend:
 
-## Pendências recomendadas
+- Pagina SSR em `/dashboard/escala/inteligente`
+- BFFs dedicados para:
+  - `GET /api/bff/scheduling/month-calendar`
+  - `GET /api/bff/scheduling/legends`
+  - `GET|POST /api/bff/scheduling/holidays`
+  - `POST /api/bff/scheduling/cycles`
+  - `GET /api/bff/scheduling/cycles/{id}`
+  - `GET|PATCH /api/bff/scheduling/cycles/{id}/assignments`
+  - `GET /api/bff/scheduling/cycles/{id}/counters`
+  - `POST /api/bff/scheduling/cycles/{id}/validate`
+  - `GET /api/bff/scheduling/cycles/{id}/alerts`
+  - `POST /api/bff/scheduling/cycles/{id}/alerts/{alertId}/acknowledge`
+  - `POST /api/bff/scheduling/cycles/{id}/publish`
+  - `POST /api/bff/scheduling/cycles/{id}/rectify`
+  - `POST /api/bff/scheduling/cycles/{id}/archive`
+- Workspace cliente com:
+  - grade mensal de atribuicoes
+  - edicao por celula
+  - preencher semana
+  - copiar escala mensal entre colaboradores
+  - presets `5x2`, `6x1`, `12x36`
+  - dif visual antes do save bulk
 
-- Avaliar se o frontend ainda precisa de consulta individual de funcionário; o backend atual não expõe `GET /api/v1/employees/{id}`.
+## Mensageria
+
+Cobertura atual:
+
+- Polling e badge no header privado
+- Modal de leitura e decisao para `PERMISSION_REQUEST` e `SHIFT_SWAP`
+- BFF robusto para `GET /api/bff/messages`, `POST /api/bff/messages` e `PATCH /api/bff/messages/{id}/decision`
+
+Lacuna atual:
+
+- Ainda nao existe `/dashboard/mensagens` com inbox, enviados, filtros e composer
+
+## Correcoes recentes refletidas na cobertura
+
+- `StatsBackendAdapter` e `MessageBackendAdapter` passaram a lidar corretamente com SSR/browser
+- `GET /api/v1/users` retorna estrutura paginada; o frontend agora normaliza `content[]`
+- Erros transientes de polling de mensagens no browser deixaram de poluir o console como falso erro funcional
+- O BFF do backend passou a responder `503` controlado quando o Spring Boot ainda nao esta pronto, em vez de propagar excecao crua de `fetch`
+
+## Pendencias recomendadas
+
+- Criar listagem de ciclos por mes/unidade para evitar depender de `cycleId` na URL da Escala Inteligente
+- Entregar uma central de mensagens completa no dashboard
+- Revisar se a rota generica `/api/server/**` ainda e necessaria para dominios que ja possuem BFF nomeado

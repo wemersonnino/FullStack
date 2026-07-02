@@ -27,8 +27,9 @@ public class TeamInvitationService {
     private final UserRepository userRepository;
     private final PolicyService policyService;
     private final CurrentUserService currentUserService;
+    private final SensitiveTokenService sensitiveTokenService;
 
-    public TeamInvitation invite(String inviterEmail, TeamInvitationRequest request) {
+    public IssuedInvitation invite(String inviterEmail, TeamInvitationRequest request) {
         User inviter = currentUserService.requireCurrentUser(inviterEmail);
         policyService.requireOwnerOrAdmin(inviter, "Apenas OWNER ou ADMIN podem convidar usuarios");
         
@@ -43,18 +44,8 @@ public class TeamInvitationService {
             throw new AccessDeniedException("Somente OWNER pode convidar perfis OWNER ou ADMIN");
         }
 
-        userRepository.findByEmail(email).ifPresent(existingUser -> {
-            if (existingUser.getCompany() != null && company.getId().equals(existingUser.getCompany().getId())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already belongs to this company");
-            }
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este email ja pertence a outro usuario");
-        });
-
-        boolean hasOtherCompanyActiveInvitation = invitationRepository.findByEmailIgnoreCaseAndActiveTrue(email).stream()
-                .filter(TeamInvitation::isUsable)
-                .anyMatch(existing -> !company.getId().equals(existing.getCompany().getId()));
-        if (hasOtherCompanyActiveInvitation) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ja existe um convite ativo para este email em outra empresa");
+        if (userRepository.existsByCompanyIdAndEmailIgnoreCase(company.getId(), email)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este email ja pertence a um usuario desta empresa");
         }
 
         invitationRepository.findAllByEmailIgnoreCaseAndCompanyId(email, company.getId())
@@ -63,16 +54,19 @@ public class TeamInvitationService {
                     invitationRepository.save(existing);
                 });
 
+        SensitiveTokenService.IssuedToken issuedToken = sensitiveTokenService.issue();
+
         TeamInvitation invitation = TeamInvitation.builder()
                 .email(email)
                 .roleName(roleName)
-                .token(UUID.randomUUID().toString())
+                .tokenHash(issuedToken.hash())
+                .tokenPreview(issuedToken.preview())
                 .company(company)
                 .invitedBy(inviter)
                 .expiresAt(OffsetDateTime.now().plusDays(7))
                 .build();
 
-        return invitationRepository.save(invitation);
+        return new IssuedInvitation(invitationRepository.save(invitation), issuedToken.plainText());
     }
 
     public List<TeamInvitation> listByCompany(String userEmail) {
@@ -83,7 +77,7 @@ public class TeamInvitationService {
     }
 
     public TeamInvitation findByToken(String token) {
-        return invitationRepository.findByToken(token)
+        return invitationRepository.findByTokenHash(sensitiveTokenService.sha256Hex(token))
                 .filter(TeamInvitation::isUsable)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found or expired"));
     }
@@ -119,5 +113,8 @@ public class TeamInvitationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role do convite invalida");
         }
         return normalized;
+    }
+
+    public record IssuedInvitation(TeamInvitation invitation, String plainToken) {
     }
 }

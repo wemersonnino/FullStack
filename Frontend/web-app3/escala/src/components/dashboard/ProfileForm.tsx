@@ -31,6 +31,7 @@ import {
 import { ThemeEnum } from '@/interfaces/enums/theme.enum';
 import { changeMyPassword, updateMyProfile, uploadAvatar } from '@/services/profile.service';
 import { normalizeAvatarUrl } from '@/lib/utils';
+import { ExternalDataService } from '@/core/application/services/external.service';
 
 type ProfileUser = {
   id: string | number;
@@ -56,6 +57,23 @@ type ProfileUser = {
 interface ProfileFormProps {
   user: ProfileUser;
 }
+
+type SessionUserUpdatePayload = {
+  username?: string | null;
+  email?: string | null;
+  theme?: ThemeEnum;
+  avatarUrl?: string | null;
+  address?: string;
+  cep?: string;
+  street?: string;
+  number?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  position?: string;
+  function?: string;
+};
 
 const ProfileSchema = z.object({
   username: z.string().trim().min(2, 'Informe pelo menos 2 caracteres.'),
@@ -104,6 +122,23 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const buildSessionUserUpdate = (sessionUser: SessionUserUpdatePayload) => ({
+    username: sessionUser.username ?? '',
+    email: sessionUser.email ?? '',
+    theme: sessionUser.theme ?? ThemeEnum.SYSTEM,
+    avatarUrl: sessionUser.avatarUrl ?? null,
+    address: sessionUser.address ?? '',
+    cep: sessionUser.cep ?? '',
+    street: sessionUser.street ?? '',
+    number: sessionUser.number ?? '',
+    complement: sessionUser.complement ?? '',
+    neighborhood: sessionUser.neighborhood ?? '',
+    city: sessionUser.city ?? '',
+    state: sessionUser.state ?? '',
+    position: sessionUser.position ?? '',
+    function: sessionUser.function ?? '',
+  });
+
   const profileForm = useForm<ProfileSchemaType>({
     resolver: zodResolver(ProfileSchema),
     defaultValues: {
@@ -131,11 +166,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     setIsFetchingCep(true);
     try {
-      const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cleanCep}`);
-      if (!response.ok) throw new Error('CEP nao encontrado');
-      
-      const data = await response.json();
-      
+      const data = await ExternalDataService.lookupCep(cleanCep);
+      if (!data) throw new Error('CEP nao encontrado');
+
       profileForm.setValue('street', data.street || '');
       profileForm.setValue('neighborhood', data.neighborhood || '');
       profileForm.setValue('city', data.city || '');
@@ -236,18 +269,24 @@ export function ProfileForm({ user }: ProfileFormProps) {
         return;
       }
 
-      const sessionUser = isGoogleUser
-        ? {
-            ...user,
-            ...updated,
-            username: user.username,
-            email: user.email,
-            avatarUrl: user.avatarUrl,
-            provider: user.provider,
-          }
-        : { ...user, ...updated };
-
-      await update({ user: sessionUser });
+      await update({
+        user: buildSessionUserUpdate({
+          username: isGoogleUser ? user.username : data.username,
+          email: isGoogleUser ? user.email : data.email,
+          theme: data.theme,
+          avatarUrl: isGoogleUser ? user.avatarUrl : updated.avatarUrl,
+          address: data.address,
+          cep: data.cep,
+          street: data.street,
+          number: data.number,
+          complement: data.complement,
+          neighborhood: data.neighborhood,
+          city: data.city,
+          state: data.state,
+          position: data.position,
+          function: data.function,
+        }),
+      });
       router.refresh();
       setAvatarPreview(
         normalizeAvatarUrl(isGoogleUser ? user.avatarUrl : updated.avatarUrl) || null

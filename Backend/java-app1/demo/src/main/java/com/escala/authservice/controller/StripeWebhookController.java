@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/billing/webhook")
 @RequiredArgsConstructor
@@ -67,10 +69,10 @@ public class StripeWebhookController {
     }
 
     private void handleCheckoutSessionCompleted(Session session) {
-        String stripeSubscriptionId = session.getSubscription();
-        String stripeCustomerId = session.getCustomer();
-        String planType = session.getMetadata().get("planType");
-        UUID companyId = UUID.fromString(session.getMetadata().get("companyId"));
+        String stripeSubscriptionId = requireNonBlank(session.getSubscription(), "subscriptionId");
+        String stripeCustomerId = requireNonBlank(session.getCustomer(), "customerId");
+        String planType = requireMetadata(session.getMetadata(), "planType");
+        UUID companyId = requireUuidMetadata(session.getMetadata(), "companyId");
 
         billingService.updateSubscriptionStatus(
                 stripeSubscriptionId,
@@ -82,11 +84,11 @@ public class StripeWebhookController {
     }
 
     private void handleSubscriptionUpdated(Subscription stripeSubscription) {
-        String stripeSubscriptionId = stripeSubscription.getId();
-        String stripeCustomerId = stripeSubscription.getCustomer();
+        String stripeSubscriptionId = requireNonBlank(stripeSubscription.getId(), "subscriptionId");
+        String stripeCustomerId = requireNonBlank(stripeSubscription.getCustomer(), "customerId");
         SubscriptionStatus status = mapStripeStatus(stripeSubscription.getStatus());
-        String planType = stripeSubscription.getMetadata().get("planType");
-        UUID companyId = UUID.fromString(stripeSubscription.getMetadata().get("companyId"));
+        String planType = readMetadata(stripeSubscription.getMetadata(), "planType");
+        UUID companyId = readUuidMetadata(stripeSubscription.getMetadata(), "companyId");
 
         billingService.updateSubscriptionStatus(
                 stripeSubscriptionId,
@@ -95,6 +97,50 @@ public class StripeWebhookController {
                 planType,
                 companyId
         );
+    }
+
+    private String requireMetadata(Map<String, String> metadata, String key) {
+        String value = readMetadata(metadata, key);
+        if (value == null) {
+            throw new IllegalArgumentException("Metadata obrigatoria ausente: " + key);
+        }
+        return value;
+    }
+
+    private UUID requireUuidMetadata(Map<String, String> metadata, String key) {
+        UUID value = readUuidMetadata(metadata, key);
+        if (value == null) {
+            throw new IllegalArgumentException("Metadata UUID obrigatoria ausente: " + key);
+        }
+        return value;
+    }
+
+    private String readMetadata(Map<String, String> metadata, String key) {
+        if (metadata == null) {
+            return null;
+        }
+
+        String value = metadata.get(key);
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        return value.trim();
+    }
+
+    private UUID readUuidMetadata(Map<String, String> metadata, String key) {
+        String value = readMetadata(metadata, key);
+        if (value == null) {
+            return null;
+        }
+        return UUID.fromString(value);
+    }
+
+    private String requireNonBlank(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " obrigatorio");
+        }
+        return value;
     }
 
     private SubscriptionStatus mapStripeStatus(String stripeStatus) {

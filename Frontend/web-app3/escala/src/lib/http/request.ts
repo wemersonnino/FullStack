@@ -1,5 +1,4 @@
 import { api } from './axios';
-import { getSession } from 'next-auth/react';
 
 type RequestOptions = {
   authToken?: string;
@@ -15,18 +14,12 @@ function resolveUrl(url: string) {
 }
 
 /**
- * Retorna cabeçalhos de autenticação caso o usuário esteja logado.
+ * Retorna cabeçalhos de autenticacao apenas quando um token
+ * for explicitamente fornecido pelo chamador server-side.
  */
 async function getAuthHeaders(options?: RequestOptions) {
-  let token = options?.authToken;
-  
-  if (!token && typeof window !== 'undefined') {
-    const session = await getSession();
-    token = (session?.user as any)?.token;
-  }
-  
   const headers: Record<string, string> = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (options?.authToken) headers.Authorization = `Bearer ${options.authToken}`;
   return headers;
 }
 

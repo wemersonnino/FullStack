@@ -10,11 +10,13 @@ export async function GET(request: Request) {
     searchParams: new URL(request.url).searchParams,
     request,
   });
+  const responseClone = response.clone();
 
   if (response.ok) {
     try {
-      const data = await response.json();
-      if (Array.isArray(data)) {
+      const payload = await responseClone.json();
+      const data = Array.isArray(payload) ? payload : Array.isArray(payload?.content) ? payload.content : null;
+      if (data) {
         const slimData = data.map((shift: any) => ({
           id: shift.id,
           shiftDate: shift.shiftDate || shift.date,
@@ -30,8 +32,8 @@ export async function GET(request: Request) {
         }));
         return NextResponse.json(slimData, { status: 200 });
       }
-    } catch (e) {
-      return response;
+    } catch {
+      return responseClone;
     }
   }
 

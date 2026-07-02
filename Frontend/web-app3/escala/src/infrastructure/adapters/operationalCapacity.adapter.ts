@@ -11,7 +11,7 @@ export interface OperationalCapacityModel {
 export class OperationalCapacityBackendAdapter {
   private static baseUrl = '/api/bff/operational-capacities';
 
-  static async listCapacities(_token: string): Promise<OperationalCapacityModel[]> {
+  static async listCapacities(_token?: string): Promise<OperationalCapacityModel[]> {
     const response = await fetch(this.baseUrl, {
       headers: {
         Accept: 'application/json',
@@ -21,7 +21,7 @@ export class OperationalCapacityBackendAdapter {
     return await response.json();
   }
 
-  static async createCapacity(capacity: OperationalCapacityModel, _token: string): Promise<OperationalCapacityModel> {
+  static async createCapacity(capacity: OperationalCapacityModel, _token?: string): Promise<OperationalCapacityModel> {
     const response = await fetch(this.baseUrl, {
       method: 'POST',
       headers: {
@@ -40,7 +40,7 @@ export class OperationalCapacityBackendAdapter {
     return await response.json();
   }
 
-  static async deleteCapacity(id: string, _token: string): Promise<void> {
+  static async deleteCapacity(id: string, _token?: string): Promise<void> {
     const response = await fetch(`${this.baseUrl}/${id}`, {
       method: 'DELETE',
     });

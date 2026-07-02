@@ -48,8 +48,14 @@ public class CurrentUserService {
             return userRepository.findById(UUID.fromString(resolved))
                     .orElseThrow(() -> new IllegalArgumentException("Usuario autenticado nao encontrado"));
         } catch (IllegalArgumentException ignored) {
-            return userRepository.findByEmail(normalize(resolved))
-                    .orElseThrow(() -> new IllegalArgumentException("Usuario autenticado nao encontrado"));
+            var candidates = userRepository.findAllByEmailIgnoreCase(normalize(resolved));
+            if (candidates.size() == 1) {
+                return candidates.getFirst();
+            }
+            if (candidates.isEmpty()) {
+                throw new IllegalArgumentException("Usuario autenticado nao encontrado");
+            }
+            throw new IllegalArgumentException("Email ambiguo entre tenants; autentique-se com contexto de empresa");
         }
     }
 

@@ -3,6 +3,7 @@ package com.escala.authservice.controller;
 import com.escala.authservice.dto.MessageDecisionRequest;
 import com.escala.authservice.dto.MessageRequest;
 import com.escala.authservice.dto.MessageResponse;
+import com.escala.authservice.dto.common.PagedResponse;
 import com.escala.authservice.entity.Message;
 import com.escala.authservice.entity.MessageStatus;
 import com.escala.authservice.entity.User;
@@ -23,7 +24,7 @@ public class MessageController {
     private final MessageService messageService;
 
     @GetMapping
-    public ResponseEntity<org.springframework.data.domain.Page<MessageResponse>> getMessages(
+    public ResponseEntity<PagedResponse<MessageResponse>> getMessages(
             Authentication authentication,
             @RequestParam(required = false) MessageStatus status,
             @RequestParam(defaultValue = "0") int page,
@@ -33,7 +34,7 @@ public class MessageController {
         org.springframework.data.domain.Page<MessageResponse> response = messageService
                 .listMessages(authentication.getName(), status, pageable)
                 .map(MessageResponse::from);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(PagedResponse.from(response));
     }
 
     @PostMapping

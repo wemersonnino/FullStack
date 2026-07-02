@@ -3,11 +3,13 @@ import { proxyBackend, readJson } from '@/lib/bff/backend';
 
 export async function GET(request: Request) {
   const response = await proxyBackend('/api/v1/organization/sectors', { request });
+  const responseClone = response.clone();
 
   if (response.ok) {
     try {
-      const data = await response.json();
-      if (Array.isArray(data)) {
+      const payload = await responseClone.json();
+      const data = Array.isArray(payload) ? payload : Array.isArray(payload?.content) ? payload.content : null;
+      if (data) {
         const slimData = data.map((sec: any) => ({
           id: sec.id,
           name: sec.name,
@@ -21,8 +23,8 @@ export async function GET(request: Request) {
         }));
         return NextResponse.json(slimData, { status: 200 });
       }
-    } catch (e) {
-      return response;
+    } catch {
+      return responseClone;
     }
   }
 

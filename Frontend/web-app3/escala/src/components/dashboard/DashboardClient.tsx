@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/hooks/useAuth';
+import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { ThemeEnum } from '@/interfaces/enums/theme.enum';
@@ -35,8 +35,11 @@ interface DashboardClientProps {
 }
 
 export const DashboardClient = ({ user, shifts, workSchedules, shiftSwaps }: DashboardClientProps) => {
-  const { logout } = useAuth();
   const isAdmin = user.roles.includes('ADMIN');
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/login' });
+  };
 
   return (
     <section className="mx-auto mt-12 max-w-4xl space-y-10">
@@ -44,7 +47,7 @@ export const DashboardClient = ({ user, shifts, workSchedules, shiftSwaps }: Das
         <h1 className="text-3xl font-bold">Bem-vindo, {user.username} 👋</h1>
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <Button variant="destructive" size="sm" onClick={logout}>
+          <Button variant="destructive" size="sm" onClick={handleLogout}>
             Sair
           </Button>
         </div>

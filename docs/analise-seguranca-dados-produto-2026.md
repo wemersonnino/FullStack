@@ -2,6 +2,33 @@
 
 Data: 2026-06-24
 
+## Atualizacao 2026-06-30
+
+Novos fatos relevantes de seguranca observados no produto:
+
+- a tela de perfil do usuario logado deixou de reenviar payload amplo de sessao no `next-auth update`; agora envia apenas campos editaveis/visuais
+- o callback `trigger === 'update'` do `next-auth` foi endurecido para nao aceitar alteracao arbitraria de `provider`
+- o backend de perfil continua protegendo a escrita real em `/api/v1/users/me` por DTO restrito, o que reduz risco de escalacao por tampering do payload do browser
+- a mensageria segue com UI parcial no header/modal; ainda nao existe inbox completo com trilha mais rica de autorizacao e observabilidade
+
+### Avaliacao do payload observado em Network na edicao de perfil
+
+O fato de o browser ver `csrfToken` e um objeto `data.user` em uma submissao de sessao nao e, por si so, uma vulnerabilidade.
+
+Risco real analisado:
+
+- **nao e vulnerabilidade automaticamente**: o `csrfToken` deve mesmo trafegar para o navegador nesse fluxo
+- **seria vulnerabilidade** se o backend de persistencia aceitasse campos sensiveis como `roles`, `companyId`, `planType` ou `provider` vindos do cliente sem validacao forte
+- **estado atual reduz risco** porque:
+  - o frontend passou a reduzir o payload de sessao ao minimo necessario
+  - o `next-auth` nao deveria aceitar mutacoes arbitrarias de identidade gerenciada
+  - o endpoint real de perfil no backend aceita DTO restrito, nao um espelho completo do usuario
+
+Conclusao:
+
+- o payload antes estava mais largo do que o ideal do ponto de vista de minimizacao de dados
+- apos o endurecimento, o fluxo fica mais alinhado com LGPD, least privilege e defesa em profundidade
+
 ## Escopo
 
 Esta analise considera o backend oficial `Backend/java-app1/demo`, o frontend principal `Frontend/web-app3/escala`, o CMS `Backend/cms-strapi` e a diretriz de produto para uma plataforma multiempresa de escalas, ponto, trocas, hierarquia de gestores, mensageria, IA e marketing.

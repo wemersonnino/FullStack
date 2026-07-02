@@ -1,47 +1,53 @@
-# Requisitos do Sistema - Engenharia de Software
+# Requisitos do Sistema
 
-Este documento define as especificações técnicas da plataforma seguindo os padrões de arquitetura de software.
+Data: 2026-06-30
 
-## 1. Requisitos Funcionais (RF)
-| ID | Descrição | Prioridade |
-|:---|:---|:---|
-| RF01 | O sistema deve permitir o registro de novas empresas (Tenants) com geração automática de admin (OWNER). | Alta |
-| RF02 | O sistema deve permitir o envio de convites para colaboradores com definição de cargo/role. | Alta |
-| RF03 | O sistema deve capturar a localização GPS do usuário ao registrar o ponto. | Crítica |
-| RF04 | O sistema deve validar se o usuário está dentro da cerca virtual (Geofencing) da empresa antes de aceitar o ponto. | Crítica |
-| RF05 | O sistema deve gerar relatórios de folha de pagamento mensais com exportação para CSV. | Média |
-| RF06 | O sistema deve fornecer um dashboard com KPIs de absenteísmo e trocas pendentes. | Alta |
-| RF07 | O sistema deve permitir que o gestor defina o raio permitido para geofencing via mapa interativo. | Média |
-| RF08 | O sistema deve suportar o cadastro de CNPJ no novo formato alfanumérico brasileiro. | Crítica |
-| RF09 | O sistema deve suportar a delegação de autoridade em níveis de gestão (Gestores de 1000, 100, 50, 10) e restringir o escopo de ação aos setores atribuídos. | Crítica |
-| RF10 | O sistema deve permitir que administradores de TI (`ADMIN`/`OWNER`) definam gestores, atribuam responsabilidade de escopo e editem permissões customizadas. | Alta |
-| RF11 | O sistema deve disponibilizar uma central de notificações no header do dashboard com indicador visual e contador de mensagens pendentes. | Alta |
-| RF12 | O sistema deve carregar as mensagens pendentes em formato de pilha ou fila no modal de rotas paralelas da UI. | Alta |
-| RF13 | O sistema deve alterar a renderização e o formulário do modal de mensagens dinamicamente de acordo com o tipo de conteúdo (Permissões, Troca de turno, Acordo gestor-colaborador, etc.). | Alta |
-| RF14 | O sistema deve se integrar a canais de WhatsApp e Telegram das empresas para capturar ausências e pedidos de trocas automáticas de turnos dos colaboradores. | Média |
-| RF15 | O assistente de IA deve sugerir substitutos baseando-se em proximidade física (geofencing), setor e banco de horas ao processar mensagens do WhatsApp/Telegram. | Média |
-| RF16 | O sistema deve relatar automaticamente trocas de turnos, faltas e atestados validados ao módulo de RH. | Média |
+Este documento foi alinhado ao estado real do projeto e diferencia o que ja existe do que ainda e backlog.
 
-## 2. Requisitos Não-Funcionais (RNF)
-| ID | Categoria | Descrição |
-|:---|:---|:---|
-| RNF01 | **Arquitetura** | O sistema deve seguir a Arquitetura Hexagonal (Ports and Adapters) no Frontend/BFF. |
-| RNF02 | **Segurança** | As senhas devem ser criptografadas utilizando BCrypt no banco de dados. |
-| RNF03 | **Disponibilidade** | O sistema deve ser projetado para rodar em clusters escaláveis (AWS ECS/EKS). |
-| RNF04 | **Multi-Tenancy** | O isolamento de dados deve ser garantido em nível de aplicação e banco de dados (company_id). |
-| RNF05 | **Performance** | O carregamento do Dashboard não deve exceder 2 segundos (Parallel Routes / Streaming). |
-| RNF06 | **Portabilidade** | A camada de infraestrutura de mapas deve ser abstrata para permitir troca de Leaflet por Google Maps sem refatoração de domínio. |
-| RNF07 | **Usabilidade** | A interface deve ser responsiva e adaptada para dispositivos móveis para registro de ponto. |
-| RNF08 | **Internacionalização** | O sistema deve suportar localização (i18n) para PT-BR, EN e ES. |
-| RNF09 | **Concorrência** | O sistema deve garantir integridade e proteção contra edições simultâneas de escalas usando Optimistic Locking com a propriedade `@Version` nas entidades de banco de dados. |
-| RNF10 | **Auditoria** | Todas as ações de usuários (criações, edições, logins, delegações e aprovações) devem gravar registros de auditoria detalhados e inalteráveis por tenant. |
+## Requisitos funcionais
 
-## 3. Tecnologias e Padrões
-*   **Backend Core:** Java Spring Boot 4.x / Java 25 LTS
-*   **Frontend/BFF:** Next.js 16+ (App Router, Parallel Routes)
-*   **Database:** PostgreSQL (Relacional)
-*   **CMS (UI Content):** Strapi v5 (Apenas para Menus, Banners, Artigos e Landing Pages)
-*   **Segurança:** Next-Auth (JWT) + Spring Security
-*   **Mapas:** Leaflet / OpenStreetMap
-*   **IA Engine:** Motor integrado com NLP/LLMs para processamento de WhatsApp/Telegram
+| ID | Requisito | Prioridade | Estado |
+|---|---|---:|---|
+| RF01 | Registrar empresas/tenants e criar administracao inicial | Alta | Implementado |
+| RF02 | Convidar colaboradores e atribuir papeis | Alta | Implementado |
+| RF03 | Gerir usuarios, perfil, senha e tema | Alta | Implementado |
+| RF04 | Gerir funcionarios, setores, projetos e postos | Alta | Implementado |
+| RF05 | Gerar e consultar escalas classicas e trocas | Alta | Implementado |
+| RF06 | Exibir dashboard com KPIs, trocas e resumo operacional | Alta | Implementado |
+| RF07 | Gerir capacidades operacionais por setor/posto | Alta | Implementado |
+| RF08 | Expor administracao ReBAC para `OWNER`/`ADMIN` | Alta | Implementado |
+| RF09 | Capturar leads publicos com UTM/referrer | Alta | Implementado |
+| RF10 | Entregar billing com checkout, assinatura e cancelamento | Alta | Implementado |
+| RF11 | Oferecer mensageria in-app com leitura e decisao | Alta | Parcial |
+| RF12 | Entregar Escala Inteligente com calendario mensal, feriados, legendas e ciclo | Alta | Implementado |
+| RF13 | Editar atribuicoes mensais em grade e salvar em bulk | Alta | Implementado |
+| RF14 | Acelerar a edicao mensal com preencher semana, copiar mes, presets e dif | Media | Implementado |
+| RF15 | Central de mensagens completa com inbox, enviados e composer | Media | Planejado |
+| RF16 | Buscar/listar ciclos mensais por mes/unidade sem depender de `cycleId` na URL | Media | Planejado |
+| RF17 | Ponto web com geolocalizacao e geofencing | Media | Parcial |
+| RF18 | Integracoes WhatsApp/Telegram para pedidos operacionais | Media | Planejado |
+| RF19 | Banco de horas basico com saldo, compensacao e expiracao | Media | Planejado |
+| RF20 | IA operacional explicavel para substituicao/conflito | Media | Parcial |
 
+## Requisitos nao funcionais
+
+| ID | Categoria | Descricao |
+|---|---|---|
+| RNF01 | Arquitetura | Frontend com SSR + BFF; backend como fonte da verdade |
+| RNF02 | Seguranca | Senhas com BCrypt; sessao minimizada; tokens protegidos |
+| RNF03 | Multi-tenant | Isolamento por empresa/tenant em backend e BFF |
+| RNF04 | Disponibilidade | Compose local com healthchecks; cloud com readiness/liveness |
+| RNF05 | Performance | Dashboard e paginas SSR devem degradar graciosamente quando backend ainda estiver subindo |
+| RNF06 | Auditoria | Alteracoes criticas devem gerar trilha de auditoria |
+| RNF07 | UX | UI responsiva para dashboard e fluxos operacionais |
+| RNF08 | Internacionalizacao | Suporte atual via `next-intl` |
+| RNF09 | Concorrencia | Integridade de edicao de escala protegida por backend e regras transacionais |
+| RNF10 | Documentacao | Mudanca REST exige atualizacao do `OpenApiController` e dos docs canonicamente relacionados |
+
+## Observacoes de estado atual
+
+- A central de notificacoes no header existe
+- O modal de mensagens por tipo existe para `PERMISSION_REQUEST` e `SHIFT_SWAP`
+- Ainda nao existe pagina dedicada de inbox/outbox
+- A Escala Inteligente ja existe como produto navegavel
+- O backend de scheduling ja oferece o fluxo principal do ciclo mensal

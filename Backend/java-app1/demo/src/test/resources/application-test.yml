@@ -1,0 +1,17 @@
+app:
+  openapi:
+    enabled: false
+    include-admin: false
+
+application:
+  seed:
+    enabled: false
+  security:
+    jwt:
+      secret-key: dGVzdC1zZWNyZXQtcGFyYS1pbnRlZ3JhdGlvbi10ZXN0cy1hcGVuYXM=
+  integrations:
+    strapi:
+      base-url: http://localhost:1337
+  locks:
+    schedule-generate-ttl: PT15S
+    schedule-cycle-ttl: PT15S

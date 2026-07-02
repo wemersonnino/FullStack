@@ -14,7 +14,10 @@ public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
 
     @Override
     public UserDomain authenticate(String email, String companySlug, String password) {
-        UserDomain user = userPersistencePort.findByEmailAndCompanySlug(email, companySlug)
+        String normalizedEmail = email != null ? email.trim().toLowerCase(java.util.Locale.ROOT) : "";
+        String normalizedSlug = companySlug != null ? companySlug.trim().toLowerCase(java.util.Locale.ROOT) : "";
+
+        UserDomain user = userPersistencePort.findByEmailAndCompanySlug(normalizedEmail, normalizedSlug)
                 .orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas"));
 
         if (!user.isActive() || !passwordEncoder.apply(password, user.getPassword())) {

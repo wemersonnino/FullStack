@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +37,7 @@ public class AuthenticationService {
     private final com.escala.authservice.core.auth.port.in.AuthenticationUseCase authenticationUseCase;
     private final TeamInvitationRepository teamInvitationRepository;
     private final CurrentUserService currentUserService;
+    private final SensitiveTokenService sensitiveTokenService;
 
     public AuthenticationResponse register(RegisterRequest request) {
         recaptchaService.verifyIfProduction(request.getRecaptchaToken());
@@ -47,10 +49,6 @@ public class AuthenticationService {
         if (normalizedUsername == null || normalizedUsername.isBlank()) {
             throw new IllegalArgumentException("Username e obrigatorio");
         }
-        if (repository.existsByEmailIgnoreCase(normalizedEmail)) {
-            throw new IllegalArgumentException("Este email ja pertence a outro usuario");
-        }
-        
         // Se companyName for fornecido, cria uma nova empresa (Fluxo SaaS Self-Service)
         // Caso contrário, tenta resolver pelo slug (Fluxo de Convite/Empresa Existente)
         Company company;
@@ -68,6 +66,9 @@ public class AuthenticationService {
             roleName = invitation.getRoleName() != null ? invitation.getRoleName() : "USER";
         }
 
+        if (repository.existsByCompanyIdAndEmailIgnoreCase(company.getId(), normalizedEmail)) {
+            throw new IllegalArgumentException("Este email ja pertence a um usuario desta empresa");
+        }
         if (repository.existsByCompanyIdAndUsernameIgnoreCase(company.getId(), normalizedUsername)) {
             throw new IllegalArgumentException("Username ja cadastrado para esta empresa");
         }
@@ -141,9 +142,11 @@ public class AuthenticationService {
                     .build();
         }
 
+        SensitiveTokenService.IssuedToken issuedToken = sensitiveTokenService.issue();
         passwordResetTokenRepository.deleteByUserId(user.getId());
         passwordResetTokenRepository.save(PasswordResetToken.builder()
-                .token(UUID.randomUUID().toString())
+                .tokenHash(issuedToken.hash())
+                .tokenPreview(issuedToken.preview())
                 .user(user)
                 .expiresAt(OffsetDateTime.now().plusMinutes(30))
                 .build());
@@ -163,7 +166,7 @@ public class AuthenticationService {
             throw new IllegalArgumentException("Confirmacao de senha invalida");
         }
 
-        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getCode())
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByTokenHash(sensitiveTokenService.sha256Hex(request.getCode()))
                 .filter(PasswordResetToken::isUsable)
                 .orElseThrow(() -> new IllegalArgumentException("Token de recuperacao invalido ou expirado"));
 
@@ -193,25 +196,42 @@ public class AuthenticationService {
         GoogleIdentityService.GoogleProfile profile = googleIdentityService.verify(request.getIdToken());
         String email = normalizeEmail(profile.email());
         String companySlug = request.getCompanySlug();
-        User existingUser = repository.findByEmail(email).orElse(null);
+        List<User> usersByEmail = repository.findAllByEmailIgnoreCase(email);
+        User existingUser = null;
 
         Company company;
         boolean isLead = false;
         TeamInvitation invitation = null;
         String invitedRoleName = "USER";
 
-        if (existingUser != null) {
+        boolean hasCompanySlug = companySlug != null
+                && !companySlug.isBlank()
+                && !companySlug.equalsIgnoreCase("undefined");
+
+        if (hasCompanySlug) {
+            company = companyService.resolve(companySlug);
+            String resolvedCompanySlug = company.getSlug();
+            existingUser = usersByEmail.stream()
+                    .filter(candidate -> candidate.getCompany() != null
+                            && resolvedCompanySlug.equalsIgnoreCase(candidate.getCompany().getSlug()))
+                    .findFirst()
+                    .orElse(null);
+            if (existingUser == null) {
+                invitation = requireActiveInvitation(email, company);
+                invitedRoleName = invitation.getRoleName() != null ? invitation.getRoleName() : "USER";
+            }
+        } else if (usersByEmail.size() == 1) {
+            existingUser = usersByEmail.get(0);
             if (existingUser.getCompany() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuario existente sem empresa associada");
             }
-            if (companySlug != null
-                    && !companySlug.isBlank()
-                    && !companySlug.equalsIgnoreCase("undefined")
-                    && !companySlug.equalsIgnoreCase(existingUser.getCompany().getSlug())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este email ja pertence a outra empresa");
-            }
             company = existingUser.getCompany();
-        } else if (companySlug == null || companySlug.isBlank() || companySlug.equalsIgnoreCase("undefined")) {
+        } else if (!usersByEmail.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Este email existe em mais de uma empresa. Informe o slug da empresa para continuar"
+            );
+        } else {
             String uuid = UUID.randomUUID().toString().substring(0, 8);
             company = companyService.create(com.escala.authservice.dto.CompanyRequest.builder()
                     .name("Workspace Demo " + uuid.toUpperCase())
@@ -239,10 +259,13 @@ public class AuthenticationService {
                         .referrer(request.getAttribution().get("referrer"))
                         .build());
             }
-        } else {
-            company = companyService.resolve(companySlug);
-            invitation = requireActiveInvitation(email, company);
-            invitedRoleName = invitation.getRoleName() != null ? invitation.getRoleName() : "USER";
+        }
+
+        if (existingUser != null) {
+            if (existingUser.getCompany() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuario existente sem empresa associada");
+            }
+            company = existingUser.getCompany();
         }
 
         final boolean finalizedIsLead = isLead;
@@ -251,9 +274,7 @@ public class AuthenticationService {
         User user = existingUser != null
                 ? existingUser
                 : repository.save(User.builder()
-                        .username(profile.name() == null || profile.name().isBlank()
-                                ? uniqueUsername(email)
-                                : profile.name())
+                        .username(uniqueUsername(company, profile.name() == null || profile.name().isBlank() ? email : profile.name(), null))
                         .email(email)
                         .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                         .roles(new java.util.HashSet<>(Set.of(
@@ -280,7 +301,7 @@ public class AuthenticationService {
 
         if ((user.getUsername() == null || user.getUsername().isBlank() || user.getUsername().equalsIgnoreCase(user.getEmail()))
                 && profile.name() != null && !profile.name().isBlank()) {
-            user.setUsername(profile.name());
+            user.setUsername(uniqueUsername(company, profile.name(), user.getId()));
         }
 
         repository.save(user);
@@ -400,21 +421,33 @@ public class AuthenticationService {
                 .build();
     }
 
-    private String uniqueUsername(String email) {
-        String base = email.split("@")[0].replaceAll("[^A-Za-z0-9._-]", "").toLowerCase();
+    private String uniqueUsername(Company company, String seed, UUID ignoredUserId) {
+        String base = seed == null ? "" : seed.replaceAll("[^A-Za-z0-9._-]", "").toLowerCase(Locale.ROOT);
+        if (base.contains("@")) {
+            base = base.split("@")[0];
+        }
         if (base.isBlank()) {
             base = "user";
         }
         String candidate = base;
-        if (repository.findByUsername(candidate).isEmpty()) {
+        if (!usernameExists(company, candidate, ignoredUserId)) {
             return candidate;
         }
-        candidate = base + "-" + UUID.randomUUID().toString().substring(0, 8);
+        do {
+            candidate = base + "-" + UUID.randomUUID().toString().substring(0, 8);
+        } while (usernameExists(company, candidate, ignoredUserId));
         return candidate;
     }
 
+    private boolean usernameExists(Company company, String username, UUID ignoredUserId) {
+        if (ignoredUserId == null) {
+            return repository.existsByCompanyIdAndUsernameIgnoreCase(company.getId(), username);
+        }
+        return repository.existsByCompanyIdAndUsernameIgnoreCaseAndIdNot(company.getId(), username, ignoredUserId);
+    }
+
     private TeamInvitation requireActiveInvitation(String email, Company company) {
-        return teamInvitationRepository.findByEmailAndCompanyId(email, company.getId())
+        return teamInvitationRepository.findByEmailIgnoreCaseAndCompanyId(email, company.getId())
                 .filter(TeamInvitation::isUsable)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,

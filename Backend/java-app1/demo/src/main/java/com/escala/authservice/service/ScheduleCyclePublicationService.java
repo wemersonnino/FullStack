@@ -21,60 +21,76 @@ public class ScheduleCyclePublicationService {
     private final ScheduleCycleValidationService validationService;
     private final ScheduleCycleRepository scheduleCycleRepository;
     private final CurrentUserService currentUserService;
+    private final DistributedLockService distributedLockService;
 
     @Transactional
     public ScheduleCycle publish(String email, UUID cyclePublicId) {
-        ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
-        if (cycle.getStatus() == ScheduleCycleStatus.PUBLICADO) {
-            return cycle;
-        }
-        if (cycle.getStatus() != ScheduleCycleStatus.RASCUNHO && cycle.getStatus() != ScheduleCycleStatus.EM_VALIDACAO) {
-            throw new IllegalStateException("Somente ciclos em rascunho ou validacao podem ser publicados");
-        }
+        DistributedLockService.LockHandle lockHandle = distributedLockService.acquireScheduleCycleLock(cyclePublicId, "publish");
+        try {
+            ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
+            if (cycle.getStatus() == ScheduleCycleStatus.PUBLICADO) {
+                return cycle;
+            }
+            if (cycle.getStatus() != ScheduleCycleStatus.RASCUNHO && cycle.getStatus() != ScheduleCycleStatus.EM_VALIDACAO) {
+                throw new IllegalStateException("Somente ciclos em rascunho ou validacao podem ser publicados");
+            }
 
-        List<CycleValidationAlertResponse> alerts = validationService.validateCycle(email, cyclePublicId);
-        boolean hasUnacknowledgedCriticalAlert = alerts.stream()
-                .anyMatch(alert -> "CRITICAL".equals(alert.severity()) && !alert.acknowledged());
-        if (hasUnacknowledgedCriticalAlert) {
-            throw new IllegalStateException("Existem alertas criticos sem ciencia antes da publicacao");
-        }
+            List<CycleValidationAlertResponse> alerts = validationService.validateCycle(email, cyclePublicId);
+            boolean hasUnacknowledgedCriticalAlert = alerts.stream()
+                    .anyMatch(alert -> "CRITICAL".equals(alert.severity()) && !alert.acknowledged());
+            if (hasUnacknowledgedCriticalAlert) {
+                throw new IllegalStateException("Existem alertas criticos sem ciencia antes da publicacao");
+            }
 
-        User requester = currentUserService.requireCurrentUser(email);
-        cycle.setStatus(ScheduleCycleStatus.PUBLICADO);
-        cycle.setPublishedAt(OffsetDateTime.now());
-        cycle.setPublishedBy(requester);
-        return scheduleCycleRepository.save(cycle);
+            User requester = currentUserService.requireCurrentUser(email);
+            cycle.setStatus(ScheduleCycleStatus.PUBLICADO);
+            cycle.setPublishedAt(OffsetDateTime.now());
+            cycle.setPublishedBy(requester);
+            return scheduleCycleRepository.save(cycle);
+        } finally {
+            distributedLockService.release(lockHandle);
+        }
     }
 
     @Transactional
     public ScheduleCycle rectify(String email, UUID cyclePublicId) {
-        ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
-        if (cycle.getStatus() == ScheduleCycleStatus.RETIFICADO) {
-            return cycle;
-        }
-        if (cycle.getStatus() != ScheduleCycleStatus.PUBLICADO) {
-            throw new IllegalStateException("Somente ciclos publicados podem entrar em retificacao");
-        }
+        DistributedLockService.LockHandle lockHandle = distributedLockService.acquireScheduleCycleLock(cyclePublicId, "rectify");
+        try {
+            ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
+            if (cycle.getStatus() == ScheduleCycleStatus.RETIFICADO) {
+                return cycle;
+            }
+            if (cycle.getStatus() != ScheduleCycleStatus.PUBLICADO) {
+                throw new IllegalStateException("Somente ciclos publicados podem entrar em retificacao");
+            }
 
-        cycle.setStatus(ScheduleCycleStatus.RETIFICADO);
-        cycle.setBusinessVersion(cycle.getBusinessVersion() + 1);
-        return scheduleCycleRepository.save(cycle);
+            cycle.setStatus(ScheduleCycleStatus.RETIFICADO);
+            cycle.setBusinessVersion(cycle.getBusinessVersion() + 1);
+            return scheduleCycleRepository.save(cycle);
+        } finally {
+            distributedLockService.release(lockHandle);
+        }
     }
 
     @Transactional
     public ScheduleCycle archive(String email, UUID cyclePublicId) {
-        ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
-        if (cycle.getStatus() == ScheduleCycleStatus.ARQUIVADO) {
-            return cycle;
-        }
-        if (cycle.getStatus() != ScheduleCycleStatus.PUBLICADO && cycle.getStatus() != ScheduleCycleStatus.RETIFICADO) {
-            throw new IllegalStateException("Somente ciclos publicados ou retificados podem ser arquivados");
-        }
+        DistributedLockService.LockHandle lockHandle = distributedLockService.acquireScheduleCycleLock(cyclePublicId, "archive");
+        try {
+            ScheduleCycle cycle = scheduleCycleService.getCycle(email, cyclePublicId);
+            if (cycle.getStatus() == ScheduleCycleStatus.ARQUIVADO) {
+                return cycle;
+            }
+            if (cycle.getStatus() != ScheduleCycleStatus.PUBLICADO && cycle.getStatus() != ScheduleCycleStatus.RETIFICADO) {
+                throw new IllegalStateException("Somente ciclos publicados ou retificados podem ser arquivados");
+            }
 
-        User requester = currentUserService.requireCurrentUser(email);
-        cycle.setStatus(ScheduleCycleStatus.ARQUIVADO);
-        cycle.setArchivedAt(OffsetDateTime.now());
-        cycle.setArchivedBy(requester);
-        return scheduleCycleRepository.save(cycle);
+            User requester = currentUserService.requireCurrentUser(email);
+            cycle.setStatus(ScheduleCycleStatus.ARQUIVADO);
+            cycle.setArchivedAt(OffsetDateTime.now());
+            cycle.setArchivedBy(requester);
+            return scheduleCycleRepository.save(cycle);
+        } finally {
+            distributedLockService.release(lockHandle);
+        }
     }
 }

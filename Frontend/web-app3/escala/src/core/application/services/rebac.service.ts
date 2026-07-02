@@ -10,43 +10,43 @@ export class RebacService {
     return canAdministerRebac(roles);
   }
 
-  static listAssignments(token: string) {
+  static listAssignments(token?: string) {
     return RebacBackendAdapter.listAssignments(token);
   }
 
-  static createAssignment(token: string, payload: ManagerAssignmentPayload) {
+  static createAssignment(token: string | undefined, payload: ManagerAssignmentPayload) {
     return RebacBackendAdapter.createAssignment(token, payload);
   }
 
-  static deleteAssignment(token: string, id: string) {
+  static deleteAssignment(token: string | undefined, id: string) {
     return RebacBackendAdapter.deleteAssignment(token, id);
   }
 
-  static listEdges(token: string) {
+  static listEdges(token?: string) {
     return RebacBackendAdapter.listEdges(token);
   }
 
-  static createEdge(token: string, payload: ManagementEdgePayload) {
+  static createEdge(token: string | undefined, payload: ManagementEdgePayload) {
     return RebacBackendAdapter.createEdge(token, payload);
   }
 
-  static deleteEdge(token: string, id: string) {
+  static deleteEdge(token: string | undefined, id: string) {
     return RebacBackendAdapter.deleteEdge(token, id);
   }
 
-  static listClosure(token: string) {
+  static listClosure(token?: string) {
     return RebacBackendAdapter.listClosure(token);
   }
 
-  static recalculateClosure(token: string) {
+  static recalculateClosure(token?: string) {
     return RebacBackendAdapter.recalculateClosure(token);
   }
 
-  static listScopeTypes(token: string) {
+  static listScopeTypes(token?: string) {
     return RebacBackendAdapter.listScopeTypes(token);
   }
 
-  static listRoleLevels(token: string) {
+  static listRoleLevels(token?: string) {
     return RebacBackendAdapter.listRoleLevels(token);
   }
 }

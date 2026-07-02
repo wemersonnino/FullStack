@@ -7,10 +7,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Locale;
 import java.util.UUID;
 
 @Entity
-@Table(name = "employees")
+@Table(
+    name = "employees",
+    indexes = {
+        @Index(name = "idx_employees_company_active_name", columnList = "company_id, active, full_name"),
+        @Index(name = "idx_employees_company_sector_active", columnList = "company_id, sector_id, active"),
+        @Index(name = "idx_employees_company_project_active", columnList = "company_id, project_id, active")
+    }
+)
 @Data
 @Builder
 @NoArgsConstructor
@@ -50,6 +58,22 @@ public class Employee {
     void prePersist() {
         if (publicId == null) {
             publicId = UUID.randomUUID();
+        }
+        if (email != null) {
+            email = email.trim().toLowerCase(Locale.ROOT);
+        }
+        if (fullName != null) {
+            fullName = fullName.trim();
+        }
+    }
+
+    @PreUpdate
+    void preUpdate() {
+        if (email != null) {
+            email = email.trim().toLowerCase(Locale.ROOT);
+        }
+        if (fullName != null) {
+            fullName = fullName.trim();
         }
     }
 }

@@ -11,7 +11,13 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "team_invitations")
+@Table(
+    name = "team_invitations",
+    indexes = {
+        @Index(name = "idx_team_invitations_company_email_active", columnList = "company_id, email, active"),
+        @Index(name = "idx_team_invitations_expires_at", columnList = "expires_at")
+    }
+)
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,8 +32,14 @@ public class TeamInvitation {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String token;
+
+    @Column(name = "token_hash", nullable = false, unique = true, length = 64)
+    private String tokenHash;
+
+    @Column(name = "token_preview", length = 12)
+    private String tokenPreview;
 
     @Column(nullable = false)
     private String roleName; // OWNER, MANAGER, USER

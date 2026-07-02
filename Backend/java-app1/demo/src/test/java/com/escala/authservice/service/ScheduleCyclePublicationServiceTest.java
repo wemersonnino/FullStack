@@ -37,12 +37,16 @@ class ScheduleCyclePublicationServiceTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private DistributedLockService distributedLockService;
+
     @InjectMocks
     private ScheduleCyclePublicationService service;
 
     @Test
     void bloqueiaPublicacaoComAlertaCriticoSemCiencia() {
         UUID cyclePublicId = UUID.randomUUID();
+        mockLock(cyclePublicId, "publish");
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId))
                 .thenReturn(cycle(cyclePublicId, ScheduleCycleStatus.RASCUNHO));
         when(validationService.validateCycle("admin@escala.local", cyclePublicId))
@@ -55,6 +59,7 @@ class ScheduleCyclePublicationServiceTest {
     @Test
     void publicaCicloComAlertasCriticosComCiencia() {
         UUID cyclePublicId = UUID.randomUUID();
+        mockLock(cyclePublicId, "publish");
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.EM_VALIDACAO);
         User requester = requester();
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
@@ -73,6 +78,7 @@ class ScheduleCyclePublicationServiceTest {
     @Test
     void publicacaoJaPublicadaEIdempotente() {
         UUID cyclePublicId = UUID.randomUUID();
+        mockLock(cyclePublicId, "publish");
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.PUBLICADO);
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
 
@@ -85,6 +91,7 @@ class ScheduleCyclePublicationServiceTest {
     @Test
     void abreRetificacaoDeCicloPublicadoIncrementandoVersao() {
         UUID cyclePublicId = UUID.randomUUID();
+        mockLock(cyclePublicId, "rectify");
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.PUBLICADO);
         cycle.setBusinessVersion(2);
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
@@ -99,6 +106,7 @@ class ScheduleCyclePublicationServiceTest {
     @Test
     void retificacaoJaRetificadaEIdempotente() {
         UUID cyclePublicId = UUID.randomUUID();
+        mockLock(cyclePublicId, "rectify");
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.RETIFICADO);
         cycle.setBusinessVersion(2);
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
@@ -113,6 +121,7 @@ class ScheduleCyclePublicationServiceTest {
     @Test
     void bloqueiaRetificacaoDeRascunho() {
         UUID cyclePublicId = UUID.randomUUID();
+        mockLock(cyclePublicId, "rectify");
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId))
                 .thenReturn(cycle(cyclePublicId, ScheduleCycleStatus.RASCUNHO));
 
@@ -123,6 +132,7 @@ class ScheduleCyclePublicationServiceTest {
     @Test
     void arquivaCicloPublicado() {
         UUID cyclePublicId = UUID.randomUUID();
+        mockLock(cyclePublicId, "archive");
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.PUBLICADO);
         User requester = requester();
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
@@ -139,6 +149,7 @@ class ScheduleCyclePublicationServiceTest {
     @Test
     void bloqueiaArquivamentoDeRascunho() {
         UUID cyclePublicId = UUID.randomUUID();
+        mockLock(cyclePublicId, "archive");
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId))
                 .thenReturn(cycle(cyclePublicId, ScheduleCycleStatus.RASCUNHO));
 
@@ -149,6 +160,7 @@ class ScheduleCyclePublicationServiceTest {
     @Test
     void arquivamentoJaArquivadoEIdempotente() {
         UUID cyclePublicId = UUID.randomUUID();
+        mockLock(cyclePublicId, "archive");
         ScheduleCycle cycle = cycle(cyclePublicId, ScheduleCycleStatus.ARQUIVADO);
         when(scheduleCycleService.getCycle("admin@escala.local", cyclePublicId)).thenReturn(cycle);
 
@@ -191,5 +203,10 @@ class ScheduleCyclePublicationServiceTest {
                 .username("admin")
                 .company(Company.builder().id(new UUID(0L, 1L)).name("Escala Demo").slug("escala-demo").build())
                 .build();
+    }
+
+    private void mockLock(UUID cyclePublicId, String action) {
+        when(distributedLockService.acquireScheduleCycleLock(cyclePublicId, action))
+                .thenReturn(new DistributedLockService.LockHandle("lock:" + action, cyclePublicId.toString(), true));
     }
 }

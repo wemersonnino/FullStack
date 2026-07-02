@@ -102,6 +102,7 @@ public class OpenApiController {
     private List<Map<String, String>> tags() {
         return List.of(
                 tag("Auth", "Cadastro, login, recuperacao de senha, Google SSO e conclusao de cadastro por convite."),
+                tag("Conteudo", "Conteudo publico servido pelo backend a partir do CMS, evitando acesso direto do frontend ao Strapi."),
                 tag("Usuarios", "Perfil do usuario autenticado, troca de senha, roles, tema e listagem administrativa."),
                 tag("Empresas", "CRUD de empresas usadas para separar organizacoes e vincular usuarios e funcionarios."),
                 tag("Funcionarios", "Cadastro e manutencao de funcionarios da empresa."),
@@ -147,6 +148,9 @@ public class OpenApiController {
         paths.put("/api/v1/auth/google", pathPost(postPublic("Auth", "Autenticar com Google", "Valida idToken do Google, provisiona ou autentica o usuario e retorna tokens de acesso.", "GoogleLoginRequest")));
         paths.put("/api/v1/public/contact", pathPost(postPublic("Marketing", "Enviar mensagem de contato", "Recebe nome, email, assunto e mensagem via formulario hexagonal e processa o envio.", "ContactRequest")));
         paths.put("/api/v1/leads", pathPost(postPublic("Marketing", "Capturar lead comercial", "Recebe nome, email, empresa, consentimento e metadados de campanha para o fluxo de demo e relacionamento comercial.", "LeadCaptureRequest")));
+        paths.put("/api/v1/public/content/landing", pathGet(getPublic("Conteudo", "Consultar landing page publica", "Retorna uma landing page publica resolvida pelo backend a partir do CMS, com filtros opcionais por locale, pageKey e slug.", queryParam("locale", "Locale do conteudo, por exemplo pt-BR."), queryParam("pageKey", "Chave semantica da pagina, como home, campaign ou segment."), queryParam("slug", "Slug publico da landing page."))));
+        paths.put("/api/v1/public/content/pricing-plans", pathGet(getPublic("Conteudo", "Listar planos publicos", "Retorna planos publicos de pricing publicados no CMS para o locale informado.", queryParam("locale", "Locale do conteudo, por exemplo pt-BR."))));
+        paths.put("/api/v1/public/content/testimonials", pathGet(getPublic("Conteudo", "Listar depoimentos publicos", "Retorna depoimentos publicos publicados no CMS para o locale informado.", queryParam("locale", "Locale do conteudo, por exemplo pt-BR."))));
 
         // IA
         paths.put("/api/v1/ai/suggest-replacement", pathPost(post("IA", "Sugerir substituto", "Sugere um colaborador substituto qualificado para um turno vago usando IA.", "AiContextRequest")));
@@ -283,7 +287,10 @@ public class OpenApiController {
                 get("Escala Inteligente", "Listar feriados de escala", "Lista feriados configurados para a empresa no ano informado, incluindo feriados globais da empresa e feriados especificos da unidade.", queryParamRequired("year", "Ano dos feriados."), queryParam("unitId", "ID da unidade operacional.")),
                 post("Escala Inteligente", "Criar feriado de escala", "Cria um feriado nacional, estadual, municipal ou customizado para a empresa, opcionalmente restrito a uma unidade.", "HolidayRequest")
         ));
-        paths.put("/api/v1/scheduling/cycles", pathPost(post("Escala Inteligente", "Criar ciclo mensal de escala", "Cria um ciclo mensal em rascunho para a empresa e unidade informadas, evitando duplicidade de ciclo ativo no mesmo periodo.", "ScheduleCycleRequest")));
+        paths.put("/api/v1/scheduling/cycles", path(
+                get("Escala Inteligente", "Listar ciclos mensais de escala", "Lista todos os ciclos de escala da empresa do usuario autenticado."),
+                post("Escala Inteligente", "Criar ciclo mensal de escala", "Cria um ciclo mensal em rascunho para a empresa e unidade informadas, evitando duplicidade de ciclo ativo no mesmo periodo.", "ScheduleCycleRequest")
+        ));
         paths.put("/api/v1/scheduling/cycles/{id}", pathGet(get("Escala Inteligente", "Buscar ciclo mensal de escala", "Retorna um ciclo mensal de escala da empresa do usuario autenticado usando o UUID publico do ciclo.", pathParam("id", "UUID publico do ciclo mensal."))));
         paths.put("/api/v1/scheduling/cycles/{id}/assignments", path(
                 get("Escala Inteligente", "Listar atribuicoes do ciclo", "Lista as atribuicoes diarias do ciclo mensal usando o UUID publico do ciclo.", pathParam("id", "UUID publico do ciclo mensal.")),

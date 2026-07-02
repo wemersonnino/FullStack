@@ -37,4 +37,12 @@ public interface ScheduleCycleRepository extends JpaRepository<ScheduleCycle, UU
             @Param("month") int month,
             @Param("archivedStatus") ScheduleCycleStatus archivedStatus
     );
+
+    @Query("""
+            select cycle
+            from ScheduleCycle cycle
+            where cycle.company.id = :companyId
+            order by cycle.year desc, cycle.month desc
+            """)
+    java.util.List<ScheduleCycle> findAllByCompanyId(@Param("companyId") java.util.UUID companyId);
 }

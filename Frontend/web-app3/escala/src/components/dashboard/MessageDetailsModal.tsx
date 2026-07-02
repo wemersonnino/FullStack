@@ -14,7 +14,6 @@ interface MessageDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDecisionSuccess: () => void;
-  token: string;
 }
 
 export const MessageDetailsModal = ({
@@ -22,7 +21,6 @@ export const MessageDetailsModal = ({
   isOpen,
   onClose,
   onDecisionSuccess,
-  token,
 }: MessageDetailsModalProps) => {
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +29,7 @@ export const MessageDetailsModal = ({
   const handleDecision = async (decision: 'APPROVED' | 'REJECTED') => {
     setLoading(true);
     try {
-      await MessageService.decideMessage(message.id, decision, token);
+      await MessageService.decideMessage(message.id, decision);
       toast.success(`Solicitação ${decision === 'APPROVED' ? 'aprovada' : 'rejeitada'} com sucesso!`);
       onDecisionSuccess();
       onClose();

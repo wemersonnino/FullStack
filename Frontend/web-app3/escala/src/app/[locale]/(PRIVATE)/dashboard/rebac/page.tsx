@@ -1,12 +1,11 @@
-import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { RebacService } from '@/core/application/services/rebac.service';
 import { UserService } from '@/core/application/services/user.service';
 import { OrganizationService } from '@/core/application/services/organization.service';
 import { WorkPostService } from '@/core/application/services/workPost.service';
 import { RebacAdminView } from '@/features/rebac/components/RebacAdminView';
 import { ManagerScopeType } from '@/core/domain/models/rebac.model';
+import { getRequiredServerAuth } from '@/lib/auth/server-auth';
 
 async function safe<T>(promise: Promise<T>, fallback: T) {
   try {
@@ -17,30 +16,25 @@ async function safe<T>(promise: Promise<T>, fallback: T) {
 }
 
 export default async function RebacAdminPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.token) {
-    redirect('/login');
-  }
+  const { session, accessToken } = await getRequiredServerAuth();
 
   const roles = session.user.roles ?? [];
   if (!RebacService.canAdminister(roles)) {
     redirect('/dashboard');
   }
 
-  const token = session.user.token;
   const [currentUser, users, assignments, edges, closure, scopeTypes, roleLevels, sectors, projects, workPosts] =
     await Promise.all([
-      safe(UserService.getCurrentProfile(token), null),
-      safe(UserService.listUsers(token), []),
-      safe(RebacService.listAssignments(token), []),
-      safe(RebacService.listEdges(token), []),
-      safe(RebacService.listClosure(token), []),
-      safe(RebacService.listScopeTypes(token), []),
-      safe(RebacService.listRoleLevels(token), []),
-      safe(OrganizationService.listSectors(token), []),
-      safe(OrganizationService.listProjects(token), []),
-      safe(WorkPostService.list(token), []),
+      safe(UserService.getCurrentProfile(accessToken), null),
+      safe(UserService.listUsers(accessToken), []),
+      safe(RebacService.listAssignments(accessToken), []),
+      safe(RebacService.listEdges(accessToken), []),
+      safe(RebacService.listClosure(accessToken), []),
+      safe(RebacService.listScopeTypes(accessToken), []),
+      safe(RebacService.listRoleLevels(accessToken), []),
+      safe(OrganizationService.listSectors(accessToken), []),
+      safe(OrganizationService.listProjects(accessToken), []),
+      safe(WorkPostService.list(accessToken), []),
     ]);
 
   const scopeOptions = [
@@ -57,7 +51,6 @@ export default async function RebacAdminPage() {
 
   return (
     <RebacAdminView
-      token={token}
       users={users}
       assignments={assignments}
       edges={edges}

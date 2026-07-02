@@ -23,8 +23,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
               and (:sectorId is null or e.sector.id = :sectorId)
               and (
                     :query is null
-                    or lower(e.fullName) like concat('%', :query, '%')
-                    or lower(e.email) like concat('%', :query, '%')
+                    or lower(e.fullName) like concat('%', cast(:query as string), '%')
+                    or lower(e.email) like concat('%', cast(:query as string), '%')
                   )
             order by e.fullName asc
             """)
@@ -40,6 +40,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     boolean existsByCompanyIdAndEmailIgnoreCase(UUID companyId, String email);
     boolean existsByCompanyIdAndEmailIgnoreCaseAndIdNot(UUID companyId, String email, UUID id);
     Optional<Employee> findByEmail(String email);
+    List<Employee> findAllByEmailIgnoreCase(String email);
     Optional<Employee> findByUserEmail(String email);
     Optional<Employee> findByEmailAndCompanySlug(String email, String companySlug);
     Optional<Employee> findByUserEmailAndCompanySlug(String email, String companySlug);

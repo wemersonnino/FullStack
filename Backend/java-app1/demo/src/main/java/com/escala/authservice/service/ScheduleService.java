@@ -35,11 +35,13 @@ public class ScheduleService {
     private final AbsenceRepository absenceRepository;
     private final ProjectRepository projectRepository;
     private final SectorRepository sectorRepository;
+    private final CompanyRepository companyRepository;
     private final AuditLogService auditLogService;
     private final UserRepository userRepository;
     private final PolicyService policyService;
     private final CurrentUserService currentUserService;
     private final com.escala.authservice.core.scheduling.application.GenerateScheduleService generateScheduleUseCase;
+    private final DistributedLockService distributedLockService;
     private final LaborRuleEngine laborRuleEngine = new LaborRuleEngine();
 
     private Company resolveCompany(String userEmail) {
@@ -237,9 +239,13 @@ public class ScheduleService {
     }
 
     public List<UsuarioEscalaResponse> usuariosEscalaveis(UUID projectId, UUID sectorId, UUID companyId, String query, String userEmail) {
-        Company myCompany = resolveCompany(userEmail);
         User user = currentUserService.requireCurrentUser(userEmail);
-        
+        policyService.requireCanManageSchedules(user);
+
+        Company targetCompany = resolveTargetCompany(user, companyId);
+        UUID targetCompanyId = targetCompany.getId();
+        validateSchedulingScope(user, targetCompanyId, projectId, sectorId);
+
         UUID finalSectorId = sectorId;
         if (policyService.isScopedManagerOnly(user)) {
             List<UUID> sectorIds = policyService.managedSectorIds(user);
@@ -250,7 +256,7 @@ public class ScheduleService {
                 policyService.requireCanAccessSector(user, sectorId);
             } else {
                 String normalizedQuery = normalizeSearchQuery(query);
-                List<Employee> list = employeeRepository.findSchedulableEmployees(myCompany.getId(), projectId, null, normalizedQuery);
+                List<Employee> list = employeeRepository.findSchedulableEmployees(targetCompanyId, projectId, null, normalizedQuery);
                 return list.stream()
                         .filter(e -> e.getSector() != null && sectorIds.contains(e.getSector().getId()))
                         .map(UsuarioEscalaResponse::from)
@@ -259,20 +265,55 @@ public class ScheduleService {
         }
 
         String normalizedQuery = normalizeSearchQuery(query);
-        return employeeRepository.findSchedulableEmployees(myCompany.getId(), projectId, finalSectorId, normalizedQuery).stream()
+        return employeeRepository.findSchedulableEmployees(targetCompanyId, projectId, finalSectorId, normalizedQuery).stream()
                 .map(UsuarioEscalaResponse::from)
                 .toList();
     }
 
     public UsuarioEscalaResponse usuarioEscalavel(UUID id, String userEmail) {
-        Company company = resolveCompany(userEmail);
         User user = currentUserService.requireCurrentUser(userEmail);
-        Employee employee = employeeRepository.findById(id).orElseThrow();
-        if (!Objects.equals(employee.getCompany().getId(), company.getId())) {
+        policyService.requireCanManageSchedules(user);
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Funcionario nao encontrado"));
+        if (!policyService.isSystemAdmin(user)
+                && !Objects.equals(employee.getCompany().getId(), user.getCompany() != null ? user.getCompany().getId() : null)) {
             throw new org.springframework.security.access.AccessDeniedException("Funcionario nao pertence a sua empresa");
         }
         policyService.requireCanAccessEmployee(user, employee);
         return UsuarioEscalaResponse.from(employee);
+    }
+
+    private Company resolveTargetCompany(User user, UUID requestedCompanyId) {
+        if (requestedCompanyId != null) {
+            if (!policyService.isSystemAdmin(user) && (user.getCompany() == null || !Objects.equals(user.getCompany().getId(), requestedCompanyId))) {
+                throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a consultar outra empresa");
+            }
+            return companyRepository.findById(requestedCompanyId)
+                    .orElseThrow(() -> new IllegalArgumentException("Empresa nao encontrada"));
+        }
+
+        if (user.getCompany() == null) {
+            throw new IllegalArgumentException("Empresa obrigatoria para a consulta");
+        }
+
+        return user.getCompany();
+    }
+
+    private void validateSchedulingScope(User user, UUID companyId, UUID projectId, UUID sectorId) {
+        if (sectorId != null) {
+            Sector sector = sectorRepository.findById(sectorId).orElseThrow();
+            if (!Objects.equals(sector.getCompany().getId(), companyId)) {
+                throw new org.springframework.security.access.AccessDeniedException("Setor nao pertence a empresa consultada");
+            }
+            policyService.requireCanAccessSector(user, sectorId);
+        }
+
+        if (projectId != null) {
+            Project project = projectRepository.findById(projectId).orElseThrow();
+            if (!Objects.equals(project.getCompany().getId(), companyId)) {
+                throw new org.springframework.security.access.AccessDeniedException("Projeto nao pertence a empresa consultada");
+            }
+        }
     }
 
     @Transactional
@@ -280,19 +321,24 @@ public class ScheduleService {
         Company company = resolveCompany(userEmail);
         User user = currentUserService.requireCurrentUser(userEmail);
         policyService.requireCanManageSchedules(user);
-        
-        // Delegar para o Core Hexagonal (Lógica de Negócio Pura)
-        var generated = generateScheduleUseCase.generate(request, company.getId());
 
-        auditLogService.record(
-                userEmail,
-                "SCHEDULE_MONTH_GENERATED",
-                "WorkShift",
-                YearMonth.of(request.getYear(), request.getMonth()),
-                "Escalas geradas: " + generated.size() + "; modalidade=" + request.getWorkMode()
-        );
+        DistributedLockService.LockHandle lockHandle =
+                distributedLockService.acquireScheduleGenerationLock(company.getId(), request.getYear(), request.getMonth());
+        try {
+            var generated = generateScheduleUseCase.generate(request, company.getId());
 
-        return listMonth(request.getYear(), request.getMonth(), userEmail);
+            auditLogService.record(
+                    userEmail,
+                    "SCHEDULE_MONTH_GENERATED",
+                    "WorkShift",
+                    YearMonth.of(request.getYear(), request.getMonth()),
+                    "Escalas geradas: " + generated.size() + "; modalidade=" + request.getWorkMode()
+            );
+
+            return listMonth(request.getYear(), request.getMonth(), userEmail);
+        } finally {
+            distributedLockService.release(lockHandle);
+        }
     }
 
     public DashboardSummaryResponse dashboardSummary(int year, int month, String userEmail) {

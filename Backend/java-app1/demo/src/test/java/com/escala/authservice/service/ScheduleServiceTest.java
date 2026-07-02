@@ -4,11 +4,13 @@ import com.escala.authservice.dto.escala.EscalaRequest;
 import com.escala.authservice.entity.Company;
 import com.escala.authservice.entity.Employee;
 import com.escala.authservice.entity.Project;
+import com.escala.authservice.entity.Role;
 import com.escala.authservice.entity.Sector;
 import com.escala.authservice.entity.ShiftStatus;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.entity.WorkShift;
 import com.escala.authservice.repository.AbsenceRepository;
+import com.escala.authservice.repository.CompanyRepository;
 import com.escala.authservice.repository.EmployeeRepository;
 import com.escala.authservice.repository.ProjectRepository;
 import com.escala.authservice.repository.SectorRepository;
@@ -26,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,6 +52,8 @@ class ScheduleServiceTest {
     private ProjectRepository projectRepository;
     @Mock
     private SectorRepository sectorRepository;
+    @Mock
+    private CompanyRepository companyRepository;
     @Mock
     private AuditLogService auditLogService;
     @Mock
@@ -136,5 +141,54 @@ class ScheduleServiceTest {
 
         assertEquals(1, created.size());
         assertEquals(LocalDate.of(2026, 7, 2), created.getFirst().getShiftDate());
+    }
+
+    @Test
+    void usuariosEscalaveisRejectsForeignCompanyForNonSystemAdmin() {
+        Company companyA = Company.builder().id(UUID.randomUUID()).slug("empresa-a").build();
+        Company companyB = Company.builder().id(UUID.randomUUID()).slug("empresa-b").build();
+        User requester = User.builder()
+                .id(UUID.randomUUID())
+                .email("admin@empresa-a.com")
+                .company(companyA)
+                .roles(Set.of(Role.builder().name("ADMIN").build()))
+                .build();
+
+        when(currentUserService.requireCurrentUser("admin@empresa-a.com")).thenReturn(requester);
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> scheduleService.usuariosEscalaveis(null, null, companyB.getId(), null, "admin@empresa-a.com")
+        );
+    }
+
+    @Test
+    void usuariosEscalaveisAllowsSystemAdminToQueryAnotherCompany() {
+        Company companyA = Company.builder().id(UUID.randomUUID()).slug("empresa-a").build();
+        Company companyB = Company.builder().id(UUID.randomUUID()).slug("empresa-b").build();
+        User requester = User.builder()
+                .id(UUID.randomUUID())
+                .email("sys@empresa-a.com")
+                .company(companyA)
+                .roles(Set.of(Role.builder().name("SYSTEM_ADMIN").build()))
+                .build();
+        Employee employee = Employee.builder()
+                .id(UUID.randomUUID())
+                .company(companyB)
+                .fullName("Funcionario B")
+                .email("funcionario@empresa-b.com")
+                .active(true)
+                .build();
+
+        when(currentUserService.requireCurrentUser("sys@empresa-a.com")).thenReturn(requester);
+        when(policyService.isSystemAdmin(requester)).thenReturn(true);
+        when(companyRepository.findById(companyB.getId())).thenReturn(Optional.of(companyB));
+        when(employeeRepository.findSchedulableEmployees(companyB.getId(), null, null, null)).thenReturn(List.of(employee));
+
+        List<com.escala.authservice.dto.escala.UsuarioEscalaResponse> usuarios =
+                scheduleService.usuariosEscalaveis(null, null, companyB.getId(), null, "sys@empresa-a.com");
+
+        assertEquals(1, usuarios.size());
+        assertEquals(employee.getId(), usuarios.getFirst().getId());
     }
 }

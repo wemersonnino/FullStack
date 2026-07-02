@@ -3,6 +3,7 @@ package com.escala.authservice.service;
 import com.escala.authservice.dto.GoogleLoginRequest;
 import com.escala.authservice.dto.RegisterRequest;
 import com.escala.authservice.entity.Company;
+import com.escala.authservice.entity.TeamInvitation;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.MarketingLeadRepository;
 import com.escala.authservice.repository.PasswordResetTokenRepository;
@@ -65,32 +66,45 @@ class AuthenticationServiceTest {
     @Mock
     private MarketingLeadRepository marketingLeadRepository;
 
+    @Mock
+    private SensitiveTokenService sensitiveTokenService;
+
     @InjectMocks
     private AuthenticationService authenticationService;
 
     @Test
-    void registerRejectsGloballyDuplicatedEmailBeforeCreatingCompany() {
+    void registerRejectsDuplicatedEmailInsideTenant() {
+        Company company = Company.builder().id(UUID.randomUUID()).slug("empresa-a").name("Empresa A").build();
+        TeamInvitation invitation = TeamInvitation.builder()
+                .email("owner@example.com")
+                .company(company)
+                .active(true)
+                .expiresAt(java.time.OffsetDateTime.now().plusDays(2))
+                .build();
         RegisterRequest request = RegisterRequest.builder()
                 .username("owner")
                 .email("OWNER@example.com")
                 .password("12345678")
-                .companyName("Empresa Nova")
+                .companySlug("empresa-a")
                 .build();
 
-        when(userRepository.existsByEmailIgnoreCase("owner@example.com")).thenReturn(true);
+        when(companyService.resolve("empresa-a")).thenReturn(company);
+        when(teamInvitationRepository.findByEmailIgnoreCaseAndCompanyId("owner@example.com", company.getId()))
+                .thenReturn(Optional.of(invitation));
+        when(userRepository.existsByCompanyIdAndEmailIgnoreCase(company.getId(), "owner@example.com")).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> authenticationService.register(request)
         );
 
-        assertEquals("Este email ja pertence a outro usuario", exception.getMessage());
-        verifyNoInteractions(companyService);
+        assertEquals("Este email ja pertence a um usuario desta empresa", exception.getMessage());
     }
 
     @Test
-    void authenticateGoogleRejectsExistingEmailFromAnotherCompany() {
+    void authenticateGoogleRequiresInvitationWhenEmailExistsInAnotherTenant() {
         Company companyA = Company.builder().id(UUID.randomUUID()).slug("empresa-a").name("Empresa A").build();
+        Company companyB = Company.builder().id(UUID.randomUUID()).slug("empresa-b").name("Empresa B").build();
         User existingUser = User.builder()
                 .id(UUID.randomUUID())
                 .email("user@example.com")
@@ -103,7 +117,10 @@ class AuthenticationServiceTest {
 
         when(googleIdentityService.verify("token-google"))
                 .thenReturn(new GoogleIdentityService.GoogleProfile("user@example.com", "User", "sub-1", null));
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(existingUser));
+        when(userRepository.findAllByEmailIgnoreCase("user@example.com")).thenReturn(java.util.List.of(existingUser));
+        when(companyService.resolve("empresa-b")).thenReturn(companyB);
+        when(teamInvitationRepository.findByEmailIgnoreCaseAndCompanyId("user@example.com", companyB.getId()))
+                .thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
@@ -111,7 +128,7 @@ class AuthenticationServiceTest {
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        assertEquals("Este email ja pertence a outra empresa", exception.getReason());
+        assertEquals("Nao ha nenhum convite ativo para este e-mail nesta empresa", exception.getReason());
     }
 
     @Test
@@ -123,9 +140,9 @@ class AuthenticationServiceTest {
 
         when(googleIdentityService.verify("token-google"))
                 .thenReturn(new GoogleIdentityService.GoogleProfile("user@example.com", "User", "sub-1", null));
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findAllByEmailIgnoreCase("user@example.com")).thenReturn(java.util.List.of());
         when(companyService.resolve("empresa-b")).thenReturn(company);
-        when(teamInvitationRepository.findByEmailAndCompanyId("user@example.com", company.getId())).thenReturn(Optional.empty());
+        when(teamInvitationRepository.findByEmailIgnoreCaseAndCompanyId("user@example.com", company.getId())).thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,

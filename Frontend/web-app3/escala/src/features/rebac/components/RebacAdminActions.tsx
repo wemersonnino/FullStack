@@ -31,7 +31,6 @@ type ScopeOption = {
 };
 
 type RebacAdminActionsProps = {
-  token: string;
   users: UserProfile[];
   scopeTypes: ManagerScopeTypeOption[];
   roleLevels: ManagerRoleLevelOption[];
@@ -44,7 +43,7 @@ function userLabel(user: UserProfile) {
   return `${user.username || user.email} (${user.email})`;
 }
 
-export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOptions }: RebacAdminActionsProps) {
+export function AssignmentForm({ users, scopeTypes, roleLevels, scopeOptions }: RebacAdminActionsProps) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
   const [scopeType, setScopeType] = useState<ManagerScopeType>(scopeTypes[0]?.name ?? 'COMPANY');
@@ -53,7 +52,7 @@ export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOpti
   async function handleSubmit(formData: FormData) {
     setSubmitting(true);
     try {
-      await RebacService.createAssignment(token, {
+      await RebacService.createAssignment(undefined, {
         managerUserId: formData.get('managerUserId')?.toString() || '',
         scopeType,
         scopeId: formData.get('scopeId')?.toString() || '',
@@ -69,11 +68,11 @@ export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOpti
   }
 
   return (
-    <form action={handleSubmit} className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-6">
+    <form action={handleSubmit} className="grid gap-3 rounded-2xl border bg-card p-4 md:grid-cols-6">
       <div className="space-y-1 md:col-span-2">
         <Label>Gestor</Label>
         <Select name="managerUserId" required>
-          <SelectTrigger><SelectValue placeholder="Selecionar usuário" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Selecionar gestor" /></SelectTrigger>
           <SelectContent>
             {users.map((user) => (
               <SelectItem key={user.id} value={user.id}>{userLabel(user)}</SelectItem>
@@ -97,7 +96,7 @@ export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOpti
       <div className="space-y-1 md:col-span-2">
         <Label>Entidade</Label>
         <Select name="scopeId" required>
-          <SelectTrigger><SelectValue placeholder="Selecionar destino" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Selecionar escopo" /></SelectTrigger>
           <SelectContent>
             {availableScopes.map((item) => (
               <SelectItem key={`${item.type}-${item.id}`} value={String(item.id)}>{item.label}</SelectItem>
@@ -109,7 +108,7 @@ export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOpti
       <div className="space-y-1">
         <Label>Nível</Label>
         <Select name="roleLevel" required>
-          <SelectTrigger><SelectValue placeholder="Role" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Selecionar nível" /></SelectTrigger>
           <SelectContent>
             {roleLevels.map((item) => (
               <SelectItem key={item.name} value={item.name}>{item.name} ({item.weight})</SelectItem>
@@ -133,21 +132,21 @@ export function AssignmentForm({ token, users, scopeTypes, roleLevels, scopeOpti
       <div className="flex items-end md:col-span-3">
         <Button type="submit" isLoading={isSubmitting}>
           <Plus className="size-4" />
-          Criar assignment
+          Criar alçada
         </Button>
       </div>
     </form>
   );
 }
 
-export function EdgeForm({ token, users }: RebacAdminActionsProps) {
+export function EdgeForm({ users }: RebacAdminActionsProps) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setSubmitting(true);
     try {
-      await RebacService.createEdge(token, {
+      await RebacService.createEdge(undefined, {
         parentUserId: formData.get('parentUserId')?.toString() || '',
         childUserId: formData.get('childUserId')?.toString() || '',
         relationType: formData.get('relationType')?.toString() || 'REPORTS_TO',
@@ -162,7 +161,7 @@ export function EdgeForm({ token, users }: RebacAdminActionsProps) {
   }
 
   return (
-    <form action={handleSubmit} className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-6">
+    <form action={handleSubmit} className="grid gap-3 rounded-2xl border bg-card p-4 md:grid-cols-6">
       <div className="space-y-1 md:col-span-2">
         <Label>Gestor superior</Label>
         <Select name="parentUserId" required>
@@ -186,7 +185,7 @@ export function EdgeForm({ token, users }: RebacAdminActionsProps) {
         </Select>
       </div>
       <div className="space-y-1">
-        <Label>Relação</Label>
+        <Label>Tipo de relação</Label>
         <Input name="relationType" defaultValue="REPORTS_TO" />
       </div>
       <label className="flex items-end gap-2 pb-2 text-sm">
@@ -204,21 +203,21 @@ export function EdgeForm({ token, users }: RebacAdminActionsProps) {
       <div className="flex items-end md:col-span-4">
         <Button type="submit" isLoading={isSubmitting}>
           <Network className="size-4" />
-          Criar edge
+          Criar relação
         </Button>
       </div>
     </form>
   );
 }
 
-export function DeleteAssignmentButton({ token, id }: { token: string; id: string }) {
+export function DeleteAssignmentButton({ id }: { id: string }) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
   async function handleClick() {
     setSubmitting(true);
     try {
-      await RebacService.deleteAssignment(token, id);
+      await RebacService.deleteAssignment(undefined, id);
       router.refresh();
     } finally {
       setSubmitting(false);
@@ -226,20 +225,20 @@ export function DeleteAssignmentButton({ token, id }: { token: string; id: strin
   }
 
   return (
-    <Button type="button" size="icon-sm" variant="ghost" isLoading={isSubmitting} onClick={handleClick} aria-label="Remover assignment">
+    <Button type="button" size="icon-sm" variant="ghost" isLoading={isSubmitting} onClick={handleClick} aria-label="Remover alçada">
       <Trash2 className="size-4" />
     </Button>
   );
 }
 
-export function DeleteEdgeButton({ token, id }: { token: string; id: string }) {
+export function DeleteEdgeButton({ id }: { id: string }) {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
   async function handleClick() {
     setSubmitting(true);
     try {
-      await RebacService.deleteEdge(token, id);
+      await RebacService.deleteEdge(undefined, id);
       router.refresh();
     } finally {
       setSubmitting(false);
@@ -247,20 +246,20 @@ export function DeleteEdgeButton({ token, id }: { token: string; id: string }) {
   }
 
   return (
-    <Button type="button" size="icon-sm" variant="ghost" isLoading={isSubmitting} onClick={handleClick} aria-label="Remover edge">
+    <Button type="button" size="icon-sm" variant="ghost" isLoading={isSubmitting} onClick={handleClick} aria-label="Remover relação">
       <Trash2 className="size-4" />
     </Button>
   );
 }
 
-export function RecalculateClosureButton({ token }: { token: string }) {
+export function RecalculateClosureButton() {
   const router = useRouter();
   const [isSubmitting, setSubmitting] = useState(false);
 
   async function handleClick() {
     setSubmitting(true);
     try {
-      await RebacService.recalculateClosure(token);
+      await RebacService.recalculateClosure(undefined);
       router.refresh();
     } finally {
       setSubmitting(false);

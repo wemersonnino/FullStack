@@ -1,6 +1,6 @@
 # OKRs — Gestao Inteligente de Escalas
 
-Data de referencia: 2026-06-25.
+Data de referencia: 2026-06-30.
 
 ## Visao
 
@@ -15,6 +15,8 @@ O produto deve comecar com uma promessa vendavel e defensavel: sair da planilha 
 - CMS: `Backend/cms-strapi`, restrito por decisao arquitetural a conteudo, SEO, landing pages, menus, legal pages, formularios editoriais e campanhas.
 - Banco: PostgreSQL em Docker, com bancos/usuarios separados para backend e Strapi.
 - Estado validado do backend: 24 testes, 0 falhas, suite concentrada no dominio de escala.
+- Escala Inteligente ja possui entrega inicial em SSR/BFF/UI com ciclo mensal e editor operacional.
+- Mensageria segue parcial: header + modal, sem central dedicada.
 
 ## OKR 1 — Reduzir esforco manual na criacao de escalas
 

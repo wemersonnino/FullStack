@@ -11,6 +11,37 @@ type RouteContext = {
 };
 
 const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
+const DENIED_BACKEND_PREFIXES = [
+  'api/v1/auth',
+  'api/v1/public',
+  'api/v1/billing/webhook',
+  'api/v1/webhooks',
+  'actuator',
+  'swagger-ui',
+  'v3/api-docs',
+  'webjars',
+] as const;
+const ALLOWED_BACKEND_PREFIXES = [
+  'api/v1/users',
+  'api/v1/learning-progress',
+  'api/v1/companies',
+  'api/v1/employees',
+  'api/v1/organization',
+  'api/v1/work-posts',
+  'api/v1/escala',
+  'api/v1/schedules',
+  'api/v1/check-in',
+  'api/v1/reports',
+  'api/v1/stats',
+  'api/v1/team/invitations',
+  'api/v1/leads',
+  'api/v1/messages',
+  'api/v1/operational-capacities',
+  'api/v1/audit-logs',
+  'api/v1/rebac',
+  'api/v1/billing',
+  'api/v1/ai',
+] as const;
 const HOP_BY_HOP_HEADERS = new Set([
   'connection',
   'content-length',
@@ -35,6 +66,23 @@ function jsonError(message: string, status: number) {
       },
     }
   );
+}
+
+function normalizeEndpointPath(endpoint: string[]) {
+  return endpoint
+    .filter(Boolean)
+    .map((segment) => decodeURIComponent(segment).trim())
+    .filter(Boolean)
+    .join('/');
+}
+
+function isAllowedBackendPath(path: string) {
+  if (!path) return false;
+  if (path.includes('..')) return false;
+  if (DENIED_BACKEND_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) {
+    return false;
+  }
+  return ALLOWED_BACKEND_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
 
 function buildBackendUrl(endpoint: string[], request: NextRequest) {
@@ -97,6 +145,10 @@ async function proxyToBackend(request: NextRequest, context: RouteContext) {
   const { endpoint = [] } = await context.params;
   if (endpoint.length === 0) {
     return jsonError('Endpoint nao informado', 400);
+  }
+  const normalizedPath = normalizeEndpointPath(endpoint);
+  if (!isAllowedBackendPath(normalizedPath)) {
+    return jsonError('Endpoint nao permitido pelo BFF', 403);
   }
 
   const backendUrl = buildBackendUrl(endpoint, request);

@@ -1,8 +1,7 @@
-import { getServerSession } from 'next-auth';
 import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { ENV } from '@/constants/env';
+import { getOptionalServerAccessToken } from '@/lib/auth/server-auth';
 
 type BackendRequestOptions = {
   method?: string;
@@ -32,6 +31,8 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     const forwardedFor = options.request.headers.get('x-forwarded-for');
     const realIp = options.request.headers.get('x-real-ip');
     const userAgent = options.request.headers.get('user-agent');
+    const forwardedProto = options.request.headers.get('x-forwarded-proto');
+    const forwardedHost = options.request.headers.get('x-forwarded-host') || options.request.headers.get('host');
 
     if (forwardedFor) {
       headers['X-Forwarded-For'] = forwardedFor;
@@ -41,6 +42,12 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     }
     if (userAgent) {
       headers['User-Agent'] = userAgent;
+    }
+    if (forwardedProto) {
+      headers['X-Forwarded-Proto'] = forwardedProto;
+    }
+    if (forwardedHost) {
+      headers['X-Forwarded-Host'] = forwardedHost;
     }
   }
 
@@ -54,18 +61,30 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
 
     // 1. Tenta extrair o token do cookie (NextAuth) se houver requisição
     if (options.request) {
-      const jwtToken = await getToken({ req: options.request as any, secret: process.env.NEXTAUTH_SECRET });
+      const jwtToken = await getToken({
+        req: options.request as any,
+        secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
+      });
       accessToken = accessToken || (typeof jwtToken?.accessToken === 'string' ? jwtToken.accessToken : undefined);
     }
 
     // 2. Fallback: tenta obter da sessão (necessário para Server Components e chamadas server-side)
     if (!accessToken) {
-      const session = await getServerSession(authOptions);
-      accessToken = session?.user?.token;
+      accessToken = (await getOptionalServerAccessToken()) ?? undefined;
     }
 
     if (!accessToken) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { message: 'Unauthorized' },
+        {
+          status: 401,
+          headers: {
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff',
+            'Referrer-Policy': 'strict-origin-when-cross-origin',
+          },
+        }
+      );
     }
     headers.Authorization = `Bearer ${accessToken}`;
   }
@@ -77,21 +96,55 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     body = JSON.stringify(options.body);
   }
 
-  const response = await fetch(url, {
-    method: options.method ?? 'GET',
-    headers,
-    body,
-    cache: 'no-store',
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: options.method ?? 'GET',
+      headers,
+      body,
+      cache: 'no-store',
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown backend connectivity error';
+    console.warn(`[BFF] ${options.method ?? 'GET'} ${url.toString()}: ${message}`);
+    return NextResponse.json(
+      {
+        message: 'Backend indisponivel no momento',
+        detail: message,
+      },
+      {
+        status: 503,
+        headers: {
+          'Cache-Control': 'no-store',
+          'X-Content-Type-Options': 'nosniff',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+        },
+      }
+    );
+  }
 
   const contentType = response.headers.get('content-type') ?? '';
   if (response.status === 204) {
-    return new NextResponse(null, { status: 204 });
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+      },
+    });
   }
 
   const data = contentType.includes('application/json') ? await response.json() : await response.text();
 
-  return NextResponse.json(data, { status: response.status });
+  return NextResponse.json(data, {
+    status: response.status,
+    headers: {
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    },
+  });
 }
 
 export async function readJson(request: Request) {

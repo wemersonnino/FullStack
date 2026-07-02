@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestClient;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -39,7 +40,9 @@ public class ApplicationConfig {
         try {
             return repository.findById(UUID.fromString(username));
         } catch (IllegalArgumentException ignored) {
-            return repository.findByEmail(username == null ? null : username.trim().toLowerCase(Locale.ROOT));
+            java.util.List<com.escala.authservice.entity.User> matches =
+                    repository.findAllByEmailIgnoreCase(username == null ? null : username.trim().toLowerCase(Locale.ROOT));
+            return matches.size() == 1 ? java.util.Optional.of(matches.getFirst()) : java.util.Optional.empty();
         }
     }
 
@@ -67,5 +70,10 @@ public class ApplicationConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public RestClient.Builder restClientBuilder() {
+        return RestClient.builder();
     }
 }
