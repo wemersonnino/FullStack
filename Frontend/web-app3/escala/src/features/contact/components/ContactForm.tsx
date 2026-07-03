@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useContactStore } from '../store/useContactStore';
+import { ENV } from '@/constants/env';
+import { getRecaptchaToken } from '@/lib/recaptcha';
 import { 
   Form, 
   FormControl, 
@@ -44,10 +46,18 @@ export function ContactForm() {
     setError(null);
     
     try {
+      const recaptchaToken = await getRecaptchaToken('public_contact_submit');
+      if (ENV.RECAPTCHA_ENABLED && !recaptchaToken) {
+        throw new Error('Nao foi possivel validar o reCAPTCHA. Tente novamente.');
+      }
+
       const response = await fetch('/api/bff/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          ...values,
+          recaptchaToken,
+        }),
       });
 
       if (!response.ok) throw new Error('Falha ao enviar mensagem');

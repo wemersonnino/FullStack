@@ -145,7 +145,7 @@ services:
       - /app/node_modules
       - /app/.next
     working_dir: /app
-    command: sh -lc "rm -rf /app/.next/* && pnpm dev"
+    command: sh -lc "CI=true pnpm install --frozen-lockfile --config.confirmModulesPurge=false && rm -rf /app/.next/* && pnpm dev"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/auth/session >/dev/null"]
       interval: 15s

@@ -1,6 +1,7 @@
 package com.escala.authservice.controller;
 
 import com.escala.authservice.dto.CheckInRequest;
+import com.escala.authservice.service.ClientIpResolver;
 import com.escala.authservice.service.CheckInService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CheckInController {
     private final CheckInService checkInService;
+    private final ClientIpResolver clientIpResolver;
 
     @PostMapping
     public ResponseEntity<Map<String, String>> register(
@@ -22,21 +24,10 @@ public class CheckInController {
             @RequestBody CheckInRequest request,
             HttpServletRequest servletRequest
     ) {
-        String ipAddress = servletRequest.getHeader("X-Forwarded-For");
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = servletRequest.getHeader("Proxy-Client-IP");
-        }
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = servletRequest.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-            ipAddress = servletRequest.getRemoteAddr();
-        } else {
-            ipAddress = ipAddress.split(",")[0].trim();
-        }
-        
+        String ipAddress = clientIpResolver.resolve(servletRequest);
+
         checkInService.validateAndRegister(authentication.getName(), request, ipAddress);
-        
+
         return ResponseEntity.ok(Map.of("message", "Ponto registrado com sucesso dentro da área permitida"));
     }
 }

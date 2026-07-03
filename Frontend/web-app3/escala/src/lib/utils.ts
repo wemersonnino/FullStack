@@ -49,8 +49,8 @@ export function normalizeStrapiUrl(url?: string | null): string {
 }
 
 /**
- * Normaliza URLs de Avatares (Google ou Upload Local do App).
- * Avatares não vêm do Strapi, mas sim do Google ou do diretório public/uploads/avatars do App.
+ * Normaliza URLs de Avatares (Google ou endpoint protegido do App).
+ * Avatares locais agora são servidos por rota autenticada do BFF.
  */
 export function normalizeAvatarUrl(url?: string | null): string {
   if (!url) return '';
@@ -60,13 +60,17 @@ export function normalizeAvatarUrl(url?: string | null): string {
     return url;
   }
 
-  // 2. Uploads locais do App (Next.js public folder)
-  // Não prefixamos com STRAPI_PUBLIC_URL pois estão no próprio app.
+  // 2. Uploads locais protegidos do App.
+  if (url.startsWith('/api/bff/avatar/files/')) {
+    return url;
+  }
+
+  // 3. Legado: uploads antigos em public/ do App.
   if (url.startsWith('/uploads/avatars')) {
     return url;
   }
 
-  // 3. Fallback para Strapi caso algum avatar antigo tenha vindo de lá
+  // 4. Fallback para Strapi caso algum avatar antigo tenha vindo de lá
   if (url.startsWith('/uploads')) {
     return `${ENV.STRAPI_PUBLIC_URL}${url}`;
   }

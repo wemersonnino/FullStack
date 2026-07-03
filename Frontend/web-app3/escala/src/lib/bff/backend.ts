@@ -9,6 +9,7 @@ type BackendRequestOptions = {
   authenticated?: boolean;
   searchParams?: URLSearchParams;
   request?: Request;
+  extraHeaders?: Record<string, string>;
 };
 
 export async function proxyBackend(path: string, options: BackendRequestOptions = {}) {
@@ -28,18 +29,10 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
   }
 
   if (options.request) {
-    const forwardedFor = options.request.headers.get('x-forwarded-for');
-    const realIp = options.request.headers.get('x-real-ip');
     const userAgent = options.request.headers.get('user-agent');
     const forwardedProto = options.request.headers.get('x-forwarded-proto');
     const forwardedHost = options.request.headers.get('x-forwarded-host') || options.request.headers.get('host');
 
-    if (forwardedFor) {
-      headers['X-Forwarded-For'] = forwardedFor;
-    }
-    if (realIp) {
-      headers['X-Real-IP'] = realIp;
-    }
     if (userAgent) {
       headers['User-Agent'] = userAgent;
     }
@@ -49,6 +42,10 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
     if (forwardedHost) {
       headers['X-Forwarded-Host'] = forwardedHost;
     }
+  }
+
+  if (options.extraHeaders) {
+    Object.assign(headers, options.extraHeaders);
   }
 
   if (options.authenticated !== false) {
@@ -65,7 +62,9 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
         req: options.request as any,
         secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
       });
-      accessToken = accessToken || (typeof jwtToken?.accessToken === 'string' ? jwtToken.accessToken : undefined);
+      const sessionAccessToken =
+        typeof jwtToken?.accessToken === 'string' ? jwtToken.accessToken : undefined;
+      accessToken = sessionAccessToken || accessToken;
     }
 
     // 2. Fallback: tenta obter da sessão (necessário para Server Components e chamadas server-side)

@@ -3,20 +3,19 @@ package com.escala.authservice.service;
 import com.escala.authservice.entity.AuditLog;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.AuditLogRepository;
-import com.escala.authservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuditLogService {
     private final AuditLogRepository auditLogRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     public void record(String actor, String action, String entityType, Object entityId, String details) {
-        User user = actor == null || actor.isBlank()
-                ? null
-                : userRepository.findAllByEmailIgnoreCase(actor).stream().findFirst().orElse(null);
+        User user = resolveActorUser(actor);
 
         auditLogRepository.save(AuditLog.builder()
                 .actor(actor == null || actor.isBlank() ? "system" : actor)
@@ -26,5 +25,16 @@ public class AuditLogService {
                 .details(details)
                 .company(user == null ? null : user.getCompany())
                 .build());
+    }
+
+    private User resolveActorUser(String actor) {
+        try {
+            return actor == null || actor.isBlank()
+                    ? currentUserService.requireCurrentUser()
+                    : currentUserService.requireCurrentUser(actor);
+        } catch (IllegalArgumentException exception) {
+            log.warn("Nao foi possivel resolver o tenant do audit log para actor={}: {}", actor, exception.getMessage());
+            return null;
+        }
     }
 }

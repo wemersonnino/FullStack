@@ -83,7 +83,7 @@ export function SectorManagement() {
       const data = await getSectors();
       setSectors(data);
     } catch (error) {
-      toast.error('Erro ao carregar setores.');
+      toast.error(`Erro ao carregar setores: ${error}`);
     } finally {
       setIsLoading(false);
     }
@@ -125,9 +125,9 @@ export function SectorManagement() {
       }
 
       setIsDialogOpen(false);
-      fetchSectors();
+      await fetchSectors();
     } catch (error) {
-      toast.error('Erro ao salvar setor.');
+      toast.error(`Erro ao salvar setor? ${error}`);
     }
   }
 
@@ -136,9 +136,9 @@ export function SectorManagement() {
       try {
         await deleteSector(id);
         toast.success('Setor excluído.');
-        fetchSectors();
+        await fetchSectors();
       } catch (error) {
-        toast.error('Erro ao excluir setor.');
+        toast.error(`Erro ao excluir setor? ${error}`);
       }
     }
   }

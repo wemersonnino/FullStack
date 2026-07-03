@@ -33,6 +33,52 @@ type SpringAuthResponse = {
 
 type AuthProvider = 'credentials' | 'google' | 'unknown';
 
+const DEFAULT_BACKEND_JWT_EXPIRATION_MS = 15 * 60 * 1000;
+const BACKEND_JWT_EXPIRATION_MS = Number.parseInt(
+  process.env.JWT_EXPIRATION_MS ?? `${DEFAULT_BACKEND_JWT_EXPIRATION_MS}`,
+  10
+);
+const SESSION_MAX_AGE_SECONDS = Math.max(
+  60,
+  Math.floor(
+    (Number.isFinite(BACKEND_JWT_EXPIRATION_MS) ? BACKEND_JWT_EXPIRATION_MS : DEFAULT_BACKEND_JWT_EXPIRATION_MS) /
+      1000
+  )
+);
+
+function decodeJwtPayload(token?: string | null): Record<string, unknown> | null {
+  if (!token) return null;
+  const [, payload] = token.split('.');
+  if (!payload) return null;
+
+  try {
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    const json = Buffer.from(padded, 'base64').toString('utf8');
+    return JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function getAccessTokenExpiresAtMs(accessToken?: string | null): number | null {
+  const payload = decodeJwtPayload(accessToken);
+  const exp = payload?.exp;
+
+  if (typeof exp === 'number' && Number.isFinite(exp)) {
+    return exp * 1000;
+  }
+
+  if (typeof exp === 'string') {
+    const parsed = Number.parseInt(exp, 10);
+    if (Number.isFinite(parsed)) {
+      return parsed * 1000;
+    }
+  }
+
+  return null;
+}
+
 const isGoogleAvatarUrl = (url?: unknown) =>
   typeof url === 'string' && url.includes('googleusercontent.com');
 
@@ -207,7 +253,14 @@ if (
 }
 
 export const authOptions: AuthOptions = {
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: SESSION_MAX_AGE_SECONDS,
+    updateAge: Math.min(5 * 60, SESSION_MAX_AGE_SECONDS),
+  },
+  jwt: {
+    maxAge: SESSION_MAX_AGE_SECONDS,
+  },
   secret: process.env.NEXTAUTH_SECRET,
   providers,
   callbacks: {
@@ -234,6 +287,7 @@ export const authOptions: AuthOptions = {
           token.position = authUser.user.position;
           token.function = authUser.user.function;
           token.accessToken = authUser.token;
+          token.accessTokenExpiresAt = getAccessTokenExpiresAtMs(authUser.token) ?? undefined;
           token.companySlug = authUser.user.companySlug;
           token.companyTheme = authUser.user.companyTheme;
           token.planType = authUser.user.planType;
@@ -261,6 +315,7 @@ export const authOptions: AuthOptions = {
         token.position = user.position;
         token.function = user.function;
         token.accessToken = (user as any).token;
+        token.accessTokenExpiresAt = getAccessTokenExpiresAtMs((user as any).token) ?? undefined;
         token.companySlug = (user as any).companySlug;
         token.companyTheme = (user as any).companyTheme;
         token.planType = (user as any).planType;

@@ -54,6 +54,16 @@ application:
       expiration: ${JWT_EXPIRATION_MS:900000}
       refresh-token:
         expiration: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+    trusted-proxies: ${TRUSTED_PROXIES:}
+    public-endpoints:
+      require-bff: ${PUBLIC_ENDPOINTS_REQUIRE_BFF:true}
+      bff-shared-secret: ${INTERNAL_BFF_SHARED_SECRET:}
+      contact:
+        limit: ${PUBLIC_CONTACT_RATE_LIMIT:10}
+        window: ${PUBLIC_CONTACT_RATE_LIMIT_WINDOW:PT15M}
+      leads:
+        limit: ${PUBLIC_LEADS_RATE_LIMIT:12}
+        window: ${PUBLIC_LEADS_RATE_LIMIT_WINDOW:PT15M}
     google:
       client-id: ${GOOGLE_CLIENT_ID:}
     recaptcha:

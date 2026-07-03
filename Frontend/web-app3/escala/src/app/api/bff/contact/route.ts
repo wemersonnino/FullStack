@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     name: 'public-contact',
     limit: 10,
     windowMs: 15 * 60 * 1000,
-    keyParts: [body?.email, body?.companyName],
+    keyParts: [body?.email, body?.subject],
   });
   if (limited) {
     return limited;
@@ -18,5 +18,9 @@ export async function POST(request: Request) {
     body,
     authenticated: false,
     request,
+    extraHeaders: {
+      'X-Requested-With': 'escala-next-bff',
+      'X-Escala-Bff-Secret': process.env.INTERNAL_BFF_SHARED_SECRET ?? '',
+    },
   });
 }

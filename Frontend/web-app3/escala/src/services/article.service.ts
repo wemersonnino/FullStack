@@ -1,5 +1,5 @@
 import { baseUrl } from '@/constants';
-import { httpGet } from '@/lib/http/request';
+import { strapiGet } from '@/lib/strapi/request';
 import { Article } from '@/interfaces/article/article.interface';
 import { StrapiResponse } from '@/interfaces/strapi/strapi-response.interface';
 import { mapArticle, mapArticles, fallbackArticles } from '@/dto';
@@ -14,7 +14,7 @@ export async function getArticles(limit = 6, locale?: string): Promise<Article[]
   try {
     const localeFilter = locale ? `&locale=${locale}` : '';
     const url = `${baseUrl}/api/articles?${ARTICLE_POPULATE}&pagination[limit]=${limit}${localeFilter}`;
-    const json = await httpGet<StrapiResponse<Article>>(url);
+    const json = await strapiGet<StrapiResponse<Article>>(url);
     if (!json?.data || json.data.length === 0) return fallbackArticles.slice(0, limit);
 
     return mapArticles(json.data);
@@ -28,7 +28,7 @@ export async function getArticleBySlug(slug: string, locale?: string): Promise<A
   try {
     const localeFilter = locale ? `&locale=${locale}` : '';
     const url = `${baseUrl}/api/articles?${ARTICLE_POPULATE}&filters[slug][$eq]=${slug}${localeFilter}`;
-    const json = await httpGet<{ data: any[] }>(url);
+    const json = await strapiGet<{ data: any[] }>(url);
     const data = json?.data?.[0];
     if (!data) return null;
     return mapArticle(data);

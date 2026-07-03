@@ -73,6 +73,7 @@ declare module "next-auth/jwt" {
     position?: string;
     function?: string;
     accessToken: string;
+    accessTokenExpiresAt?: number;
     companySlug?: string;
     companyTheme?: string;
     provider?: string;

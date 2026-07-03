@@ -106,7 +106,7 @@ type ProfileSchemaType = z.infer<typeof ProfileSchema>;
 type PasswordSchemaType = z.infer<typeof PasswordSchema>;
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
-const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const isGoogleAvatarUrl = (url?: string | null) => Boolean(url?.includes('googleusercontent.com'));
 
 export function ProfileForm({ user }: ProfileFormProps) {
@@ -210,7 +210,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     const file = e.target.files?.[0];
     if (file) {
       if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
-        toast.error('Use uma imagem JPG, PNG, GIF ou WebP.');
+        toast.error('Use uma imagem JPG, PNG ou WebP.');
         e.target.value = '';
         return;
       }

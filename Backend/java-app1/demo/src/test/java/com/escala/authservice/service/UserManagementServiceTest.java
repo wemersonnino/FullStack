@@ -1,5 +1,7 @@
 package com.escala.authservice.service;
 
+import com.escala.authservice.dto.UpdateCurrentUserRequest;
+import com.escala.authservice.entity.Company;
 import com.escala.authservice.entity.Role;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.RoleRepository;
@@ -13,12 +15,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -64,5 +69,57 @@ class UserManagementServiceTest {
 
         assertSame(expected, result);
         verify(userRepository).findAll(pageable);
+    }
+
+    @Test
+    void updateCurrentUserRejectsUntrustedAvatarUrl() {
+        Company company = Company.builder().id(UUID.randomUUID()).name("Empresa").slug("empresa").build();
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .email("admin@example.com")
+                .username("admin")
+                .company(company)
+                .build();
+        UpdateCurrentUserRequest request = new UpdateCurrentUserRequest();
+        request.setUsername("admin");
+        request.setEmail("admin@example.com");
+        request.setAvatarUrl("https://evil.example.com/avatar.png");
+
+        when(currentUserService.requireCurrentUser("admin@example.com")).thenReturn(user);
+        when(userRepository.existsByCompanyIdAndUsernameIgnoreCaseAndIdNot(company.getId(), "admin", user.getId())).thenReturn(false);
+        when(userRepository.existsByEmailIgnoreCaseAndIdNot("admin@example.com", user.getId())).thenReturn(false);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> userManagementService.updateCurrentUser("admin@example.com", request)
+        );
+
+        assertEquals("Avatar URL is not allowed", exception.getReason());
+    }
+
+    @Test
+    void updateCurrentUserAcceptsProtectedAvatarRoute() {
+        Company company = Company.builder().id(UUID.randomUUID()).name("Empresa").slug("empresa").build();
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .email("admin@example.com")
+                .username("admin")
+                .company(company)
+                .build();
+        UpdateCurrentUserRequest request = new UpdateCurrentUserRequest();
+        request.setUsername("admin");
+        request.setEmail("admin@example.com");
+        request.setAvatarUrl("/api/bff/avatar/files/abc-123.webp");
+
+        when(currentUserService.requireCurrentUser("admin@example.com")).thenReturn(user);
+        when(userRepository.existsByCompanyIdAndUsernameIgnoreCaseAndIdNot(company.getId(), "admin", user.getId())).thenReturn(false);
+        when(userRepository.existsByEmailIgnoreCaseAndIdNot("admin@example.com", user.getId())).thenReturn(false);
+        when(userRepository.save(user)).thenReturn(user);
+
+        User result = userManagementService.updateCurrentUser("admin@example.com", request);
+
+        assertSame(user, result);
+        assertEquals("/api/bff/avatar/files/abc-123.webp", user.getAvatarUrl());
+        verify(userRepository).save(user);
     }
 }

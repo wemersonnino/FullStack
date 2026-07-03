@@ -11,6 +11,7 @@ type ServerAuthContext = {
 };
 
 const SERVER_AUTH_DEBUG = process.env.DEBUG_SERVER_AUTH === 'true';
+const ACCESS_TOKEN_EXPIRY_SKEW_MS = 5_000;
 
 function debugServerAuth(message: string, payload?: unknown) {
   if (!SERVER_AUTH_DEBUG) {
@@ -53,6 +54,58 @@ async function readServerJwt(): Promise<JWT | null> {
   return jwt && typeof jwt === 'object' ? (jwt as JWT) : null;
 }
 
+function decodeJwtPayload(token?: string | null): Record<string, unknown> | null {
+  if (!token) return null;
+  const [, payload] = token.split('.');
+  if (!payload) return null;
+
+  try {
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    const json = Buffer.from(padded, 'base64').toString('utf8');
+    return JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function resolveAccessTokenExpiresAt(jwt: JWT): number | null {
+  if (typeof jwt.accessTokenExpiresAt === 'number' && Number.isFinite(jwt.accessTokenExpiresAt)) {
+    return jwt.accessTokenExpiresAt;
+  }
+
+  const payload = decodeJwtPayload(typeof jwt.accessToken === 'string' ? jwt.accessToken : null);
+  const exp = payload?.exp;
+
+  if (typeof exp === 'number' && Number.isFinite(exp)) {
+    return exp * 1000;
+  }
+
+  if (typeof exp === 'string') {
+    const parsed = Number.parseInt(exp, 10);
+    if (Number.isFinite(parsed)) {
+      return parsed * 1000;
+    }
+  }
+
+  return null;
+}
+
+function hasValidAccessToken(jwt: JWT | null): jwt is JWT {
+  if (!jwt || typeof jwt.accessToken !== 'string' || jwt.accessToken.trim() === '') {
+    debugServerAuth('[DEBUG server-auth] access token missing');
+    return false;
+  }
+
+  const expiresAt = resolveAccessTokenExpiresAt(jwt);
+  if (expiresAt !== null && expiresAt <= Date.now() + ACCESS_TOKEN_EXPIRY_SKEW_MS) {
+    debugServerAuth('[DEBUG server-auth] access token expired', { expiresAt });
+    return false;
+  }
+
+  return true;
+}
+
 function buildSessionFromJwt(jwt: JWT): Session {
   return {
     user: {
@@ -87,7 +140,7 @@ function buildSessionFromJwt(jwt: JWT): Session {
 
 export async function getOptionalServerSession(): Promise<Session | null> {
   const jwt = await readServerJwt();
-  if (!jwt?.id || !jwt?.email) {
+  if (!jwt?.id || !jwt?.email || !hasValidAccessToken(jwt)) {
     debugServerAuth('[DEBUG server-auth] getOptionalServerSession: missing id or email from JWT:', {
       id: jwt?.id,
       email: jwt?.email,
@@ -100,7 +153,7 @@ export async function getOptionalServerSession(): Promise<Session | null> {
 
 export async function getOptionalServerAccessToken(): Promise<string | null> {
   const jwt = await readServerJwt();
-  const token = typeof jwt?.accessToken === 'string' ? jwt.accessToken : null;
+  const token = hasValidAccessToken(jwt) ? jwt.accessToken : null;
   debugServerAuth('[DEBUG server-auth] getOptionalServerAccessToken:', token ? 'exists' : 'null');
   return token;
 }

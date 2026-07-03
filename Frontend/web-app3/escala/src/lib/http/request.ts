@@ -1,6 +1,6 @@
 import { api } from './axios';
 
-type RequestOptions = {
+export type RequestOptions = {
   authToken?: string;
   throwOnError?: boolean;
 };

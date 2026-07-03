@@ -1,5 +1,5 @@
 import { baseUrl } from '@/constants';
-import { httpGet } from '@/lib/http/request';
+import { strapiGet } from '@/lib/strapi/request';
 import { MenuItem } from '@/interfaces/menu/menu.interface';
 import { mapMenus } from '@/dto/menu.dto';
 import { MenuLocationEnum } from '@/interfaces/enums/menuLocation.enum';
@@ -16,7 +16,7 @@ export async function getMenu(
       '&populate[childItems][populate][icon]=true' +
       '&populate[childItems][sort]=order:asc';
     const url = `${baseUrl}/api/menus?${populate}&filters[location][$eq]=${location}&sort=order:asc`;
-    const json = await httpGet<{ data: any[] }>(url);
+    const json = await strapiGet<{ data: any[] }>(url);
 
     if (!json?.data) return [];
     return mapMenus(json.data);

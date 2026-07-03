@@ -30,4 +30,5 @@ public class LeadCaptureRequest {
     private String landingPageSlug;
     private String campaignSlug;
     private OffsetDateTime capturedAt;
+    private String recaptchaToken;
 }
