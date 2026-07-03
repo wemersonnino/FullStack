@@ -1,5 +1,5 @@
 import { API_ROUTES } from '@/constants';
-import { httpGet } from '@/lib/http/request';
+import { strapiGet } from '@/lib/strapi/request';
 import { Banner } from '@/interfaces/banner/banner.interface';
 import { mapBanners } from '@/dto/banner.dto';
 import { StrapiResponse } from '@/interfaces/strapi/strapi-response.interface';
@@ -10,7 +10,7 @@ import { StrapiResponse } from '@/interfaces/strapi/strapi-response.interface';
  */
 export async function getBanners(): Promise<Banner[]> {
   try {
-    const json = await httpGet<StrapiResponse<Banner>>(API_ROUTES.BANNERS);
+    const json = await strapiGet<StrapiResponse<Banner>>(API_ROUTES.BANNERS);
     if (!json?.data) return [];
 
     return mapBanners(json.data);

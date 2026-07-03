@@ -20,6 +20,7 @@ export interface LeadCapturePayload {
   source?: string;
   landingPageSlug?: string;
   campaignSlug?: string;
+  recaptchaToken?: string;
 }
 
 export interface LeadCaptureResponse {

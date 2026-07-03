@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -69,7 +71,13 @@ public class UserManagementService {
 
         if (request.getAvatarUrl() != null) {
             String avatarUrl = request.getAvatarUrl().trim();
-            user.setAvatarUrl(avatarUrl.isBlank() ? null : avatarUrl);
+            if (avatarUrl.isBlank()) {
+                user.setAvatarUrl(null);
+            } else if (!isAllowedAvatarUrl(avatarUrl)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Avatar URL is not allowed");
+            } else {
+                user.setAvatarUrl(avatarUrl);
+            }
         }
 
         user.setAddress(request.getAddress());
@@ -226,6 +234,24 @@ public class UserManagementService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Theme must be light, dark or system");
         }
         return normalized;
+    }
+
+    private boolean isAllowedAvatarUrl(String avatarUrl) {
+        if (avatarUrl.startsWith("/api/bff/avatar/files/")) {
+            return true;
+        }
+
+        try {
+            URI uri = new URI(avatarUrl);
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+            return "https".equalsIgnoreCase(scheme)
+                    && host != null
+                    && (host.equalsIgnoreCase("lh3.googleusercontent.com")
+                    || host.endsWith(".googleusercontent.com"));
+        } catch (URISyntaxException exception) {
+            return false;
+        }
     }
 
     private boolean isLastOwnerInCompany(User user) {

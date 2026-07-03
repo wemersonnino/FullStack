@@ -20,6 +20,19 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Strapi tokens
+
+Para endurecer o acesso ao CMS no ambiente server-side:
+
+- `STRAPI_API_TOKEN_READ_ONLY`: token do tipo `Read-only` para leituras editoriais feitas pelo servidor Next.js.
+- `STRAPI_API_TOKEN_UPLOAD`: token separado para upload de imagens no Strapi. Prefira `Custom` com permissão apenas no plugin de upload, em vez de `Full access`.
+
+Recomendação operacional:
+
+- nunca expor esses tokens no navegador ou em variáveis `NEXT_PUBLIC_*`;
+- manter uploads somente via rotas BFF autenticadas;
+- se as coleções editoriais deixarem de ser públicas no Strapi, as leituras SSR continuarão funcionando via token read-only.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

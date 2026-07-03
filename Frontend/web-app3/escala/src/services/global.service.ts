@@ -1,5 +1,5 @@
 import { API_ROUTES } from "@/constants";
-import { httpGet } from "@/lib/http/request";
+import { strapiGet } from "@/lib/strapi/request";
 import { normalizeStrapiUrl } from "@/lib/utils";
 import { GlobalInterface } from "@/interfaces/global/global.interface";
 
@@ -20,7 +20,7 @@ function mapMedia(media: any) {
  */
 export async function getGlobal(): Promise<GlobalInterface | null> {
   try {
-    const json = await httpGet<{ data: any }>(API_ROUTES.GLOBAL);
+    const json = await strapiGet<{ data: any }>(API_ROUTES.GLOBAL);
     const data = json?.data;
     if (!data) return null;
 

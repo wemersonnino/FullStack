@@ -10,6 +10,8 @@ declare namespace NodeJS {
         readonly GOOGLE_CLIENT_SECRET: string;
         readonly NEXTAUTH_SECRET: string;
         readonly NEXTAUTH_URL: string;
+        readonly STRAPI_API_TOKEN_READ_ONLY: string;
+        readonly STRAPI_API_TOKEN_UPLOAD: string;
         readonly NODE_ENV: 'development' | 'production' | 'test';
     }
 }

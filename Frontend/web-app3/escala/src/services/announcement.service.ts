@@ -1,6 +1,6 @@
 import { API_ROUTES } from '@/constants';
 import { Announcement } from '@/interfaces/announcement/announcement.interface';
-import { httpGet } from '@/lib/http/request';
+import { strapiGet } from '@/lib/strapi/request';
 import { normalizeStrapiUrl } from '@/lib/utils';
 
 type StrapiResponse<T> = {
@@ -24,7 +24,7 @@ function mapAnnouncement(item: any): Announcement {
 
 export async function getLatestAnnouncement(): Promise<Announcement | null> {
   try {
-    const response = await httpGet<StrapiResponse<any>>(
+    const response = await strapiGet<StrapiResponse<any>>(
       `${API_ROUTES.ANNOUNCEMENTS}&pagination[pageSize]=1&sort=updatedAt:desc`
     );
 

@@ -1,5 +1,5 @@
 import { API_ROUTES } from '@/constants';
-import { httpGet } from '@/lib/http/request';
+import { strapiGet } from '@/lib/strapi/request';
 
 export interface LegalPageContent {
   id: number | string;
@@ -24,7 +24,7 @@ function mapLegalPage(item: any): LegalPageContent {
 
 export async function getLegalPage(slug: string): Promise<LegalPageContent | null> {
   try {
-    const response = await httpGet<StrapiResponse<any>>(
+    const response = await strapiGet<StrapiResponse<any>>(
       `${API_ROUTES.LEGAL_PAGES}&filters[slug][$eq]=${encodeURIComponent(slug)}`
     );
 

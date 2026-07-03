@@ -1,15 +1,18 @@
 package com.escala.authservice.entity;
 
+import com.escala.authservice.entity.support.AppendOnlyEntityListener;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
+@EntityListeners(AppendOnlyEntityListener.class)
 @Table(
         name = "time_records",
         indexes = {
@@ -18,10 +21,10 @@ import java.util.UUID;
                 @Index(name = "idx_time_records_company_user_time", columnList = "company_id, user_id, recordTime DESC")
         }
 )
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeRecord {
     @Id
     @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
@@ -29,20 +32,26 @@ public class TimeRecord {
     private UUID id;
 
     @ManyToOne(optional = false)
+    @JoinColumn(nullable = false, updatable = false)
     private User user;
 
     @ManyToOne(optional = false)
+    @JoinColumn(nullable = false, updatable = false)
     private Company company;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private OffsetDateTime recordTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private TimeRecordType type;
 
+    @Column(updatable = false)
     private String ipAddress;
+    @Column(updatable = false)
     private Double latitude;
+    @Column(updatable = false)
     private Double longitude;
+    @Column(updatable = false)
     private String deviceFingerprint;
 }

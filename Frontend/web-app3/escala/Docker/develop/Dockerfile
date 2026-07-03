@@ -12,7 +12,7 @@ RUN corepack enable \
 
 # In develop, we usually copy everything or use volumes
 COPY --chown=node:node . .
-RUN mkdir -p /app/.next && chown -R node:node /app/.next /app
+RUN mkdir -p /app/.next && chown -R node:node /app/.next
 
 ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1

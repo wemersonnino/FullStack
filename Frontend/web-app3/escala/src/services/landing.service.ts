@@ -1,7 +1,7 @@
 import { API_ROUTES, ENV } from '@/constants';
 import { mapLandingPage, fallbackLandingPage, normalizeFeatures } from '@/dto/landing.dto';
 import { LandingPageContent, LandingPricingPlan, LandingTestimonial } from '@/interfaces/landing/landing.interface';
-import { httpGet } from '@/lib/http/request';
+import { strapiGet } from '@/lib/strapi/request';
 
 type StrapiResponse<T> = {
   data?: T[];
@@ -28,7 +28,7 @@ export async function getLandingPage(options: {
   const { locale, pageKey = 'home', slug } = options;
 
   try {
-    const response = await httpGet<any>(
+    const response = await strapiGet<any>(
       getPublicContentRoute(
         API_ROUTES.CONTENT_LANDING,
         PUBLIC_CONTENT_ROUTES.landing,
@@ -50,7 +50,7 @@ export async function getLandingPage(options: {
 
 export async function getPricingPlans(locale?: string): Promise<LandingPricingPlan[]> {
   try {
-    const response = await httpGet<StrapiResponse<any>>(
+    const response = await strapiGet<StrapiResponse<any>>(
       getPublicContentRoute(
         API_ROUTES.CONTENT_PRICING_PLANS,
         PUBLIC_CONTENT_ROUTES.pricingPlans,
@@ -110,7 +110,7 @@ export const fallbackTestimonials: LandingTestimonial[] = [
 
 export async function getTestimonials(locale?: string): Promise<LandingTestimonial[]> {
   try {
-    const response = await httpGet<StrapiResponse<any>>(
+    const response = await strapiGet<StrapiResponse<any>>(
       getPublicContentRoute(
         API_ROUTES.CONTENT_TESTIMONIALS,
         PUBLIC_CONTENT_ROUTES.testimonials,

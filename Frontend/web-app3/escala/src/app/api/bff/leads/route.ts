@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         Accept: 'application/json',
         'X-Requested-With': 'escala-next-bff',
+        'X-Escala-Bff-Secret': process.env.INTERNAL_BFF_SHARED_SECRET ?? '',
       },
       body: JSON.stringify(backendPayload),
       cache: 'no-store',

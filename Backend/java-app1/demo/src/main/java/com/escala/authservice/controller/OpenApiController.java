@@ -540,6 +540,7 @@ public class OpenApiController {
                 properties.put("email", Map.of("type", "string", "example", "joao@empresa.com"));
                 properties.put("subject", Map.of("type", "string", "example", "Dúvida sobre planos"));
                 properties.put("message", Map.of("type", "string", "example", "Gostaria de saber mais sobre o plano Professional."));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 break;
             case "LeadCaptureRequest":
                 properties.put("name", Map.of("type", "string", "example", "João Silva"));
@@ -552,6 +553,7 @@ public class OpenApiController {
                 properties.put("consentVersion", Map.of("type", "string", "example", "marketing-consent-v1"));
                 properties.put("landingPageSlug", Map.of("type", "string", "example", "seguranca-e-facilities"));
                 properties.put("campaignSlug", Map.of("type", "string", "example", "google-cpc-seguranca-6x1"));
+                properties.put("recaptchaToken", Map.of("type", "string", "example", "<recaptcha-token>"));
                 break;
             case "LearningProgressRequest":
                 properties.put("module", Map.of("type", "string", "example", "Treinamento Inicial"));

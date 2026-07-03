@@ -10,6 +10,7 @@ import { API_ROUTES } from '@/constants';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ENV } from '@/constants/env';
 import {
   Form,
   FormControl,
@@ -29,6 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { getRecaptchaToken } from '@/lib/recaptcha';
 import type { LeadCaptureResponse } from '@/types/campaign';
 
 type LeadCaptureFormProps = {
@@ -109,6 +111,11 @@ export function LeadCaptureForm({
     setResult(null);
 
     try {
+      const recaptchaToken = await getRecaptchaToken('marketing_lead_capture');
+      if (ENV.RECAPTCHA_ENABLED && !recaptchaToken) {
+        throw new Error('Nao foi possivel validar o reCAPTCHA. Tente novamente.');
+      }
+
       const response = await fetch(API_ROUTES.LEADS, {
         method: 'POST',
         headers: {
@@ -120,6 +127,7 @@ export function LeadCaptureForm({
           campaignSlug,
           consentVersion: 'marketing-consent-v1',
           source: 'LANDING_PAGE',
+          recaptchaToken,
         }),
       });
 

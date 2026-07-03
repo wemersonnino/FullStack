@@ -1,11 +1,11 @@
 import { API_ROUTES } from '@/constants';
-import { httpGet } from '@/lib/http/request';
+import { strapiGet } from '@/lib/strapi/request';
 import { FooterInterface } from '@/interfaces/footer/footer.interface';
 import { mapFooter } from '@/dto';
 
 export async function getFooter(): Promise<FooterInterface | null> {
   try {
-    const json = await httpGet<{ data: any }>(API_ROUTES.FOOTER);
+    const json = await strapiGet<{ data: any }>(API_ROUTES.FOOTER);
     const data = json?.data;
     if (!data) return null;
 
