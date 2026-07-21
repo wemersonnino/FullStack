@@ -111,7 +111,7 @@ services:
       - escala-network
 
   frontend:
-    container_name: escala-nextapp
+    container_name: escala-nextapp-web
     build:
       context: ./Frontend/web-app3/escala
       dockerfile: ./Docker/develop/Dockerfile
