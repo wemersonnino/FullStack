@@ -308,6 +308,20 @@ PostgreSQL.
 4. verificar testes existentes;
 5. propor implementação.
 
+## Fluxo obrigatório de implementação de issues
+
+1. Atualizar as referências remotas e partir da versão mais recente da branch `develop`.
+2. Criar uma branch dedicada antes de alterar código, sempre baseada em `develop`.
+3. Nomear a branch no formato `<tipo>/issue-<numero>-<slug-curto-em-kebab-case>`.
+4. Usar os tipos `security`, `feature`, `fix`, `docs`, `refactor`, `test` ou `chore`, escolhendo o que melhor representa a mudança. Exemplo: `security/issue-38-resource-authorization`.
+5. Implementar e validar na branch dedicada, preservando contratos, isolamento multi-tenant e testes existentes.
+6. Executar testes, lint aplicável e build. Ao alterar o backend, também iniciar o backend oficial em Docker e validar ao menos o health check e os endpoints Swagger/OpenAPI.
+7. Não integrar enquanto houver falha, erro de inicialização ou pendência crítica conhecida.
+8. Com todas as validações aprovadas, criar commit referenciando a issue, integrar primeiro em `develop` e depois promover `develop` para `main`, respeitando branch protection, Pull Requests e checks obrigatórios quando configurados.
+9. Fazer push das branches integradas e somente então fechar a issue com o inventário da mudança, comandos executados, resultados, riscos e rollback.
+
+Para repositórios com proteção de branch, `merge para develop e main` significa abrir e concluir os Pull Requests correspondentes; push direto ou bypass não deve ser usado para contornar a governança.
+
 ## Depois de implementar
 
 1. executar testes;

@@ -7,9 +7,11 @@ import com.escala.authservice.entity.Role;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.RoleRepository;
 import com.escala.authservice.repository.UserRepository;
+import com.escala.authservice.security.authorization.IamAuthorizationPolicy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
@@ -30,12 +32,14 @@ public class UserManagementService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final CurrentUserService currentUserService;
-    private final PolicyService policyService;
+    private final IamAuthorizationPolicy authorizationPolicy;
+    private final AuditLogService auditLogService;
 
     public org.springframework.data.domain.Page<User> list(String requesterEmail, org.springframework.data.domain.Pageable pageable) {
         User requester = currentUser(requesterEmail);
-        policyService.requireOwnerOrAdmin(requester, "Apenas administradores ou donos podem listar usuarios");
-        if (policyService.isSystemAdmin(requester)) {
+        authorizationPolicy.requireCanListUsers(requester);
+        if (authorizationPolicy.isSystemAdmin(requester)) {
+            auditGlobalAccess(requester, "LIST_USERS", null);
             return userRepository.findAll(pageable);
         }
         return userRepository.findByCompanyId(requester.getCompany().getId(), pageable);
@@ -121,104 +125,64 @@ public class UserManagementService {
         return user.getRoles().stream().anyMatch(r -> r.getName().equalsIgnoreCase(roleName));
     }
 
+    @Transactional
     public User grantRole(String requesterEmail, UUID userId, RoleChangeRequest request) {
         User requester = currentUser(requesterEmail);
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = roleTarget(requester, userId);
         String roleName = normalizeRole(request.getRoleName());
         
-        boolean requesterIsSystemAdmin = hasRole(requester, "SYSTEM_ADMIN");
-        boolean requesterIsAdminOrOwner = requesterIsSystemAdmin || hasRole(requester, "ADMIN") || hasRole(requester, "OWNER");
-        
-        if (!requesterIsAdminOrOwner) {
-            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores ou donos podem gerenciar papeis de usuarios");
-        }
-
-        if (!requesterIsSystemAdmin && (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId()))) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar roles de usuario de outra empresa");
-        }
-
-        boolean targetIsSystemAdmin = hasRole(user, "SYSTEM_ADMIN");
-        if (targetIsSystemAdmin && !requesterIsSystemAdmin) {
-            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores do sistema podem alterar roles de um SYSTEM_ADMIN");
-        }
+        authorizationPolicy.requireCanManageRole(requester, user, roleName);
 
         if (!MANAGEABLE_ROLES.contains(roleName)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role not allowed");
-        }
-        if ("SYSTEM_ADMIN".equalsIgnoreCase(roleName) && !requesterIsSystemAdmin) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao e permitido gerenciar o papel de SYSTEM_ADMIN via API");
-        }
-        if (("OWNER".equals(roleName) || "ADMIN".equals(roleName)) && !policyService.isOwner(requester)) {
-            throw new org.springframework.security.access.AccessDeniedException("Apenas owners podem conceder OWNER ou ADMIN");
         }
 
         Role role = roleRepository.findByName(roleName)
                 .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
         user.getRoles().add(role);
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        auditGlobalAccess(requester, "GRANT_ROLE", user);
+        return saved;
     }
 
+    @Transactional
     public User revokeRole(String requesterEmail, UUID userId, RoleChangeRequest request) {
         User requester = currentUser(requesterEmail);
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = roleTarget(requester, userId);
         String roleName = normalizeRole(request.getRoleName());
         
-        boolean requesterIsSystemAdmin = hasRole(requester, "SYSTEM_ADMIN");
-        boolean requesterIsAdminOrOwner = requesterIsSystemAdmin || hasRole(requester, "ADMIN") || hasRole(requester, "OWNER");
-        
-        if (!requesterIsAdminOrOwner) {
-            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores ou donos podem gerenciar papeis de usuarios");
-        }
-
-        if (!requesterIsSystemAdmin && (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId()))) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar roles de usuario de outra empresa");
-        }
-
-        boolean targetIsSystemAdmin = hasRole(user, "SYSTEM_ADMIN");
-        if (targetIsSystemAdmin && !requesterIsSystemAdmin) {
-            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores do sistema podem revogar roles de um SYSTEM_ADMIN");
-        }
+        authorizationPolicy.requireCanManageRole(requester, user, roleName);
 
         if (!MANAGEABLE_ROLES.contains(roleName)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role not allowed");
-        }
-        if ("SYSTEM_ADMIN".equalsIgnoreCase(roleName) && !requesterIsSystemAdmin) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao e permitido gerenciar o papel de SYSTEM_ADMIN via API");
-        }
-        if (("OWNER".equals(roleName) || "ADMIN".equals(roleName)) && !policyService.isOwner(requester)) {
-            throw new org.springframework.security.access.AccessDeniedException("Apenas owners podem revogar OWNER ou ADMIN");
         }
         if ("OWNER".equals(roleName) && isLastOwnerInCompany(user)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A empresa precisa manter ao menos um OWNER ativo");
         }
 
         user.getRoles().removeIf(role -> role.getName().equals(roleName));
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        auditGlobalAccess(requester, "REVOKE_ROLE", user);
+        return saved;
     }
 
+    @Transactional
     public User updateTheme(String requesterEmail, UUID userId, String theme) {
         User requester = currentUser(requesterEmail);
-        User user = userRepository.findById(userId).orElseThrow();
+        User user;
+        if (requester.getId().equals(userId)) {
+            user = requester;
+        } else {
+            authorizationPolicy.requireCanAdministerUsers(requester);
+            user = targetInAuthorizedScope(requester, userId);
+        }
         
-        boolean requesterIsSystemAdmin = hasRole(requester, "SYSTEM_ADMIN");
-        if (!requesterIsSystemAdmin && (user.getCompany() == null || !user.getCompany().getId().equals(requester.getCompany().getId()))) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar tema de usuario de outra empresa");
-        }
-
-        boolean isSelf = user.getId().equals(requester.getId());
-        boolean requesterIsAdminOrOwner = requesterIsSystemAdmin || hasRole(requester, "ADMIN") || hasRole(requester, "OWNER");
-        
-        if (!isSelf && !requesterIsAdminOrOwner) {
-            throw new org.springframework.security.access.AccessDeniedException("Nao autorizado a alterar o tema de outro usuario");
-        }
-
-        boolean targetIsSystemAdmin = hasRole(user, "SYSTEM_ADMIN");
-        if (targetIsSystemAdmin && !requesterIsSystemAdmin) {
-            throw new org.springframework.security.access.AccessDeniedException("Apenas administradores do sistema podem alterar dados de um SYSTEM_ADMIN");
-        }
+        authorizationPolicy.requireCanUpdateUser(requester, user);
 
         user.setTheme(normalizeTheme(theme));
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        auditGlobalAccess(requester, "UPDATE_USER_THEME", user);
+        return saved;
     }
 
     private String normalizeRole(String roleName) {
@@ -262,5 +226,33 @@ public class UserManagementService {
                 .filter(candidate -> hasRole(candidate, "OWNER"))
                 .count();
         return ownerCount <= 1 && hasRole(user, "OWNER");
+    }
+
+    private User roleTarget(User actor, UUID userId) {
+        authorizationPolicy.requireCanAdministerUsers(actor);
+        return targetInAuthorizedScope(actor, userId);
+    }
+
+    private User targetInAuthorizedScope(User actor, UUID userId) {
+        if (authorizationPolicy.isSystemAdmin(actor)) {
+            return userRepository.findById(userId)
+                    .orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("Operacao nao autorizada para este recurso"));
+        }
+        if (actor.getCompany() == null) {
+            throw new org.springframework.security.access.AccessDeniedException("Operacao nao autorizada para este recurso");
+        }
+        return userRepository.findByIdAndCompanyId(userId, actor.getCompany().getId())
+                .orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("Operacao nao autorizada para este recurso"));
+    }
+
+    private void auditGlobalAccess(User actor, String action, User target) {
+        if (!authorizationPolicy.isSystemAdmin(actor)) {
+            return;
+        }
+        String targetTenant = target != null && target.getCompany() != null
+                ? String.valueOf(target.getCompany().getId())
+                : "all";
+        auditLogService.record(actor.getEmail(), action, "User", target == null ? null : target.getId(),
+                "Privileged SYSTEM_ADMIN access; targetTenant=" + targetTenant);
     }
 }

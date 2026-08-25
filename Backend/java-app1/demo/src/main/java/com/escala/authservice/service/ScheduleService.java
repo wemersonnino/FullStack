@@ -55,6 +55,7 @@ public class ScheduleService {
     public List<WorkShift> listMonth(int year, int month, String userEmail) {
         Company company = resolveCompany(userEmail);
         User user = currentUserService.requireCurrentUser(userEmail);
+        policyService.requireCanManageSchedules(user);
         
         YearMonth yearMonth = YearMonth.of(year, month);
         if (policyService.isScopedManagerOnly(user)) {
@@ -80,6 +81,7 @@ public class ScheduleService {
     public List<EscalaResponse> listEscalas(LocalDate inicio, LocalDate fim, UUID usuarioId, UUID setorId, UUID projetoId, String userEmail) {
         Company company = resolveCompany(userEmail);
         User user = currentUserService.requireCurrentUser(userEmail);
+        policyService.requireCanManageSchedules(user);
         
         LocalDate start = inicio == null ? YearMonth.now().atDay(1) : inicio;
         LocalDate end = fim == null ? YearMonth.from(start).atEndOfMonth() : fim;
@@ -114,12 +116,13 @@ public class ScheduleService {
                 .toList();
     }
 
-    public List<EscalaResponse> listEscalasDoDia(LocalDate data, String userEmail, boolean admin) {
+    public List<EscalaResponse> listEscalasDoDia(LocalDate data, String userEmail) {
         if (data == null) {
             throw new IllegalArgumentException("Parametro data e obrigatorio");
         }
         Company company = resolveCompany(userEmail);
-        List<WorkShift> shifts = admin
+        User user = currentUserService.requireCurrentUser(userEmail);
+        List<WorkShift> shifts = policyService.canManageSchedules(user)
                 ? workShiftRepository.findByEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(company.getId(), data)
                 : workShiftRepository.findByEmployeeIdAndEmployeeCompanyIdAndShiftDateOrderByStartTimeAsc(resolveRequester(userEmail).getId(), company.getId(), data);
         return shifts.stream().map(EscalaResponse::from).toList();

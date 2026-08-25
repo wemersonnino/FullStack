@@ -69,6 +69,18 @@ class ScheduleServiceTest {
     private ScheduleService scheduleService;
 
     @Test
+    void listMonthRejectsAuthenticatedUserWithoutSchedulePermission() {
+        Company company = Company.builder().id(UUID.randomUUID()).slug("empresa-a").build();
+        User requester = User.builder().id(UUID.randomUUID()).email("user@empresa-a.com").company(company).build();
+        when(currentUserService.requireCurrentUser("user@empresa-a.com")).thenReturn(requester);
+        doThrow(new AccessDeniedException("Nao autorizado"))
+                .when(policyService).requireCanManageSchedules(requester);
+
+        assertThrows(AccessDeniedException.class,
+                () -> scheduleService.listMonth(2026, 8, "user@empresa-a.com"));
+    }
+
+    @Test
     void createEscalasRejectsSectorFromAnotherCompany() {
         Company companyA = Company.builder().id(UUID.randomUUID()).slug("empresa-a").build();
         Company companyB = Company.builder().id(UUID.randomUUID()).slug("empresa-b").build();
