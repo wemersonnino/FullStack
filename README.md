@@ -1,86 +1,223 @@
-# Gestao Inteligente de Escalas
+# Web App Escala - Full-Stack Application
 
-Monorepo do produto Escala, com frontend Next.js, backend Spring Boot, CMS Strapi e infraestrutura local em Docker Compose.
+**Projeto Full-Stack de Estudo e Prática**
 
-## Componentes oficiais
+Aplicação full-stack moderna para gestão de escalas e turnos de trabalho, construída para prática e aperfeiçoamento técnico, integrando arquitetura moderna, componentização avançada, autenticação segura e headless CMS.
 
-- Frontend principal: `Frontend/web-app3/escala`
-- Frontend legado/futuro: `Frontend/web-app1/app`
-- Backend oficial: `Backend/java-app1/demo`
-- CMS editorial: `Backend/cms-strapi`
-- Banco e compose local: `Data/postgres` e `docker-compose.yml`
-- Documentacao conceitual e operacional: `docs/`
-
-## Estado atual validado
-
-- Frontend: Next.js `16.2.6`, React `19.2.6`, TypeScript `5.9.3`, pnpm `10.33.3`
-- Backend: Spring Boot `4.1.0`, Java `25`, Maven
-- Banco: PostgreSQL em Docker, com segregacao para backend e Strapi
-- Swagger local: `http://localhost:8080/swagger-ui/index.html`
-- OpenAPI JSON local: `http://localhost:8080/v3/api-docs`
-- Dashboard privado com BFF em `src/app/api/bff/**`
-- Escala Inteligente disponivel em `/dashboard/escala/inteligente`
-
-## URLs locais
-
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:8080`
-- Strapi: `http://localhost:1337`
-- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
-
-## Subir o ambiente local
-
-```bash
-docker compose up -d --build
-```
-
-O compose atual usa `healthcheck` e `depends_on.condition: service_healthy` para reduzir erros de startup entre `postgres`, `backend`, `strapi` e `frontend`.
-
-## Comandos principais
+## 🚀 Stack Tecnológica
 
 ### Frontend
+- **Next.js 15** - Framework React com App Router
+- **TypeScript** - Tipagem estática
+- **Tailwind CSS 4** - Framework CSS utilitário
+- **NextAuth.js** - Autenticação e autorização
+- **next-themes** - Gerenciamento de temas (dark/light mode)
+- **next-intl** - Internacionalização (i18n) - PT/EN
+- **Zustand** - Gerenciamento de estado
+- **Zod** - Validação de schemas
+- **Radix UI** - Componentes acessíveis
+
+### Backend
+- **Strapi v5** - Headless CMS e REST API
+- **TypeScript** - Tipagem para o backend
+- **PostgreSQL 16** - Banco de dados relacional
+
+### Infraestrutura
+- **Docker & Docker Compose** - Containerização e orquestração
+- **Node.js 20** - Runtime JavaScript
+
+## 📋 Funcionalidades
+
+### Gestão de Usuários
+- Autenticação segura com NextAuth
+- Perfis de usuário
+- Controle de permissões
+
+### Gestão de Turnos
+- Cadastro de turnos de trabalho
+- Definição de horários (início/fim)
+- Ativação/desativação de turnos
+
+### Gestão de Escalas
+- Criação de escalas de trabalho
+- Associação de usuários e turnos
+- Períodos de vigência
+- Status (rascunho, ativo, concluído, cancelado)
+
+### Sistema de Anúncios
+- Criação de anúncios
+- Níveis de prioridade
+- Período de exibição
+- Direcionamento por usuário
+
+### Auditoria
+- Registro de todas as ações do sistema
+- Rastreamento de usuários
+- Logs de operações CRUD
+- Registro de login/logout
+
+## 🏗️ Estrutura do Projeto
+
+```
+FullStack/
+├── frontend/              # Aplicação Next.js
+│   ├── app/              # App Router
+│   │   ├── [locale]/    # Rotas internacionalizadas
+│   │   └── api/         # API Routes
+│   ├── components/       # Componentes React
+│   ├── lib/             # Utilitários e configurações
+│   ├── messages/        # Arquivos de tradução (i18n)
+│   └── i18n/            # Configuração de internacionalização
+├── backend/              # API Strapi
+│   ├── config/          # Configurações do Strapi
+│   ├── database/        # Configurações do banco
+│   └── src/
+│       └── api/         # Content Types e APIs
+│           ├── shift/           # Turnos
+│           ├── schedule/        # Escalas
+│           ├── announcement/    # Anúncios
+│           └── audit-log/       # Auditoria
+└── docker-compose.yml    # Orquestração Docker
+```
+
+## 🚀 Como Executar
+
+### Pré-requisitos
+- Docker e Docker Compose
+- Node.js 20+ (para desenvolvimento local)
+- npm ou yarn
+
+### Com Docker (Recomendado)
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/wemersonnino/FullStack.git
+cd FullStack
+```
+
+2. Copie o arquivo de exemplo de variáveis de ambiente:
+```bash
+cp .env.example .env
+```
+
+3. Inicie os containers:
+```bash
+docker-compose up -d
+```
+
+4. Acesse as aplicações:
+- **Frontend**: http://localhost:3000
+- **Backend (Strapi)**: http://localhost:1337/admin
+- **PostgreSQL**: localhost:5432
+
+### Desenvolvimento Local
+
+#### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+#### Backend
+```bash
+cd backend
+npm install
+npm run develop
+```
+
+## 🔧 Configuração
+
+### Variáveis de Ambiente
+
+Consulte o arquivo `.env.example` para todas as variáveis necessárias.
+
+**Principais variáveis:**
+- `DATABASE_*`: Configurações do PostgreSQL
+- `NEXTAUTH_SECRET`: Segredo para NextAuth
+- `JWT_SECRET`, `API_TOKEN_SALT`, etc.: Segredos do Strapi
+
+### Primeira Execução
+
+1. Ao acessar o Strapi pela primeira vez (http://localhost:1337/admin), crie um usuário administrador
+2. Configure as permissões das APIs em Settings > Users & Permissions
+3. Configure as chaves de API se necessário
+
+## 📚 APIs Disponíveis
+
+### Strapi REST API
+- `/api/shifts` - Gestão de turnos
+- `/api/schedules` - Gestão de escalas
+- `/api/announcements` - Gestão de anúncios
+- `/api/audit-logs` - Logs de auditoria
+- `/api/auth/local` - Autenticação
+
+## 🌍 Internacionalização
+
+A aplicação suporta múltiplos idiomas:
+- 🇧🇷 Português (padrão)
+- 🇺🇸 Inglês
+
+Arquivos de tradução em `frontend/messages/`.
+
+## 🎨 Temas
+
+Suporte para múltiplos temas via next-themes:
+- ☀️ Light mode
+- 🌙 Dark mode
+- 💻 System (automático)
+
+## 🧪 Testes
 
 ```bash
-cd Frontend/web-app3/escala
-pnpm run dev
-pnpm run typecheck
-pnpm run build
+# Frontend
+cd frontend
+npm test
+
+# Backend
+cd backend
+npm test
+```
+
+## 📦 Build para Produção
+
+### Frontend
+```bash
+cd frontend
+npm run build
+npm run start
 ```
 
 ### Backend
-
 ```bash
-cd Backend/java-app1/demo
-./mvnw test
-./mvnw clean package
+cd backend
+npm run build
+npm run start
 ```
 
-## Destaques de produto implementados
+## 🤝 Contribuindo
 
-- BFF explicito por dominio para auth, users, companies, employees, organization, escala, schedules, scheduling, reports, billing, messages, AI, ReBAC e stats
-- Dashboard privado com rotas SSR e componentes cliente para mutacoes
-- Escala Inteligente com:
-  - calendario mensal SSR
-  - feriados e legendas
-  - ciclo mensal com validacao, publicacao, retificacao e arquivamento
-  - editor operacional de atribuicoes em grade mensal
-  - operacoes de produtividade: preencher semana, copiar mes, presets `5x2`/`6x1`/`12x36` e dif visual antes do PATCH bulk
-- Mensageria in-app parcial via dropdown no header e modal de decisao
-- Hardening de sessao do perfil para evitar update excessivo de dados no `next-auth`
+Este é um projeto de estudo. Contribuições são bem-vindas!
 
-## Documentacao principal
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-- [docs/decisoes-tecnicas.md](docs/decisoes-tecnicas.md)
-- [docs/frontend-backend-route-coverage.md](docs/frontend-backend-route-coverage.md)
-- [docs/api/swagger-openapi.md](docs/api/swagger-openapi.md)
-- [docs/ambientes.md](docs/ambientes.md)
-- [docs/plano-implementacao-gestao-mensal-inteligente-escalas.md](docs/plano-implementacao-gestao-mensal-inteligente-escalas.md)
-- [docs/Arquitetura/Arquitetura.md](docs/Arquitetura/Arquitetura.md)
-- [docs/changelog.md](docs/changelog.md)
+## 📝 Licença
 
-## Observacoes arquiteturais
+Este projeto é open source e está disponível para fins educacionais.
 
-- O frontend nunca acessa banco diretamente.
-- O backend Spring Boot e a fonte da verdade para autenticacao, negocio e persistencia transacional.
-- O Strapi permanece restrito a conteudo editorial, SEO, menus, campanhas e formularios.
-- O BFF do Next.js mascara URLs internas e agrega dados quando faz sentido para SSR e UX.
+## 👤 Autor
+
+**Wemerson Nino**
+- GitHub: [@wemersonnino](https://github.com/wemersonnino)
+
+## 🙏 Agradecimentos
+
+Projeto desenvolvido para estudo e prática de tecnologias modernas de desenvolvimento full-stack.
+
+---
+
+**Stack:** Next.js 15 • TypeScript • Tailwind CSS 4 • Strapi v5 • PostgreSQL 16 • Docker

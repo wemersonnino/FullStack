@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log",
+    "description": "System audit logging"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "action": {
+      "type": "enumeration",
+      "enum": ["create", "read", "update", "delete", "login", "logout"],
+      "required": true
+    },
+    "entityType": {
+      "type": "string",
+      "required": true
+    },
+    "entityId": {
+      "type": "string"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "ipAddress": {
+      "type": "string"
+    },
+    "userAgent": {
+      "type": "string"
+    },
+    "details": {
+      "type": "json"
+    },
+    "timestamp": {
+      "type": "datetime",
+      "default": "{{ new Date() }}"
+    }
+  }
+}
