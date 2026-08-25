@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.time.OffsetDateTime;
 
 @Entity
+@org.hibernate.annotations.Filter(name = "tenantFilter", condition = "company_id = :tenantId")
 @Table(name = "invoices")
 @Data
 @Builder

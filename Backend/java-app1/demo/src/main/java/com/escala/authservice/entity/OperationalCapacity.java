@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
+@org.hibernate.annotations.Filter(name = "tenantFilter", condition = "company_id = :tenantId")
 @Table(name = "operational_capacities")
 @Data
 @Builder

@@ -4,6 +4,7 @@ import com.escala.authservice.entity.Sector;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface SectorRepository extends JpaRepository<Sector, UUID> {
@@ -12,4 +13,5 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
     List<Sector> findByManagerEmail(String email);
     List<Sector> findByCompanyIdAndManagerEmail(UUID companyId, String email);
     org.springframework.data.domain.Page<Sector> findByCompanyIdAndManagerEmail(UUID companyId, String email, org.springframework.data.domain.Pageable pageable);
+    Optional<Sector> findByIdAndCompanyId(UUID id, UUID companyId);
 }

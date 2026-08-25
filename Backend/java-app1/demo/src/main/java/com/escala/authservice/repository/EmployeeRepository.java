@@ -48,6 +48,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     org.springframework.data.domain.Page<Employee> findByCompanyId(UUID companyId, org.springframework.data.domain.Pageable pageable);
     List<Employee> findByIdInAndActiveTrueAndCompanyId(List<UUID> ids, UUID companyId);
     Optional<Employee> findByPublicIdAndCompanyId(UUID publicId, UUID companyId);
+    Optional<Employee> findByIdAndCompanyId(UUID id, UUID companyId);
     long countBySectorIdAndCompanyId(UUID sectorId, UUID companyId);
     long countByProjectIdAndCompanyId(UUID projectId, UUID companyId);
 }

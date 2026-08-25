@@ -17,6 +17,7 @@
 		<java.version>25</java.version>
 		<lombok.version>1.18.46</lombok.version>
 		<testcontainers.version>1.21.3</testcontainers.version>
+		<integration.test.excludes>**/integration/**</integration.test.excludes>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -49,8 +50,12 @@
 			<version>5.32.2</version>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
+			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -124,6 +129,15 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>${integration.test.excludes}</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<annotationProcessorPaths>
@@ -149,5 +163,14 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>integration</id>
+			<properties>
+				<integration.test.excludes>**/__no_integration_test_excluded__/**</integration.test.excludes>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>

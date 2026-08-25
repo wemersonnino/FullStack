@@ -11,6 +11,7 @@ import com.escala.authservice.repository.ProjectRepository;
 import com.escala.authservice.repository.SectorRepository;
 import com.escala.authservice.repository.UserRepository;
 import com.escala.authservice.repository.WorkPostRepository;
+import com.escala.authservice.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -29,10 +30,12 @@ public class OrganizationService {
     private final WorkPostRepository workPostRepository;
     private final CurrentUserService currentUserService;
     private final PolicyService policyService;
+    private final TenantContext tenantContext;
 
     private Company getRequesterCompany(String requesterEmail) {
         Company company = currentUserService.requireCurrentUser(requesterEmail).getCompany();
-        if (company == null) {
+        UUID tenantId = tenantContext.requireTenantId();
+        if (company == null || !tenantId.equals(company.getId())) {
             throw new IllegalArgumentException("Usuario requisitante ou empresa nao encontrados");
         }
         return company;
@@ -56,7 +59,6 @@ public class OrganizationService {
     public Sector createSector(String requesterEmail, SectorRequest request) {
         User requester = currentUserService.requireCurrentUser(requesterEmail);
         Company company = getRequesterCompany(requesterEmail);
-        boolean isSystemAdmin = policyService.isSystemAdmin(requester);
         boolean isAdminOrOwner = policyService.isOwnerOrAdmin(requester);
         if (!isAdminOrOwner) {
             throw new AccessDeniedException("Apenas administradores e donos podem criar setores");
@@ -64,8 +66,8 @@ public class OrganizationService {
         validateSectorRequest(request);
         User manager = null;
         if (request.getManagerId() != null) {
-            manager = userRepository.findById(request.getManagerId()).orElse(null);
-            if (manager != null && !isSystemAdmin && (manager.getCompany() == null || !manager.getCompany().getId().equals(company.getId()))) {
+            manager = userRepository.findByIdAndCompanyId(request.getManagerId(), company.getId()).orElse(null);
+            if (manager == null) {
                 throw new AccessDeniedException("O gerente do setor deve pertencer a mesma empresa");
             }
         }
@@ -81,20 +83,16 @@ public class OrganizationService {
     public Sector updateSector(String requesterEmail, UUID id, SectorRequest request) {
         User requester = currentUserService.requireCurrentUser(requesterEmail);
         Company company = getRequesterCompany(requesterEmail);
-        boolean isSystemAdmin = policyService.isSystemAdmin(requester);
         boolean isAdminOrOwner = policyService.isOwnerOrAdmin(requester);
         if (!isAdminOrOwner) {
             throw new AccessDeniedException("Apenas administradores e donos podem alterar setores");
         }
         validateSectorRequest(request);
-        Sector sector = sectorRepository.findById(id).orElseThrow();
-        if (!isSystemAdmin && (sector.getCompany() == null || !sector.getCompany().getId().equals(company.getId()))) {
-            throw new AccessDeniedException("Nao autorizado a alterar setor de outra empresa");
-        }
+        Sector sector = findAccessibleSector(id, company.getId());
         User manager = null;
         if (request.getManagerId() != null) {
-            manager = userRepository.findById(request.getManagerId()).orElse(null);
-            if (manager != null && !isSystemAdmin && (manager.getCompany() == null || !manager.getCompany().getId().equals(company.getId()))) {
+            manager = userRepository.findByIdAndCompanyId(request.getManagerId(), sector.getCompany().getId()).orElse(null);
+            if (manager == null) {
                 throw new AccessDeniedException("O gerente do setor deve pertencer a mesma empresa");
             }
         }
@@ -108,16 +106,12 @@ public class OrganizationService {
     public void deleteSector(String requesterEmail, UUID id) {
         User requester = currentUserService.requireCurrentUser(requesterEmail);
         Company company = getRequesterCompany(requesterEmail);
-        boolean isSystemAdmin = policyService.isSystemAdmin(requester);
         boolean isAdminOrOwner = policyService.isOwnerOrAdmin(requester);
         if (!isAdminOrOwner) {
             throw new AccessDeniedException("Apenas administradores e donos podem excluir setores");
         }
-        Sector sector = sectorRepository.findById(id).orElseThrow();
-        if (!isSystemAdmin && (sector.getCompany() == null || !sector.getCompany().getId().equals(company.getId()))) {
-            throw new AccessDeniedException("Nao autorizado a excluir setor de outra empresa");
-        }
-        if (employeeRepository.countBySectorIdAndCompanyId(sector.getId(), company.getId()) > 0) {
+        Sector sector = findAccessibleSector(id, company.getId());
+        if (employeeRepository.countBySectorIdAndCompanyId(sector.getId(), sector.getCompany().getId()) > 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Nao e permitido excluir setor com funcionarios vinculados");
         }
         sectorRepository.delete(sector);
@@ -131,7 +125,6 @@ public class OrganizationService {
     public Project createProject(String requesterEmail, ProjectRequest request) {
         User requester = currentUserService.requireCurrentUser(requesterEmail);
         Company company = getRequesterCompany(requesterEmail);
-        boolean isSystemAdmin = policyService.isSystemAdmin(requester);
         boolean isAdminOrOwner = policyService.isOwnerOrAdmin(requester);
         if (!isAdminOrOwner) {
             throw new AccessDeniedException("Apenas administradores e donos podem criar projetos");
@@ -148,16 +141,12 @@ public class OrganizationService {
     public Project updateProject(String requesterEmail, UUID id, ProjectRequest request) {
         User requester = currentUserService.requireCurrentUser(requesterEmail);
         Company company = getRequesterCompany(requesterEmail);
-        boolean isSystemAdmin = policyService.isSystemAdmin(requester);
         boolean isAdminOrOwner = policyService.isOwnerOrAdmin(requester);
         if (!isAdminOrOwner) {
             throw new AccessDeniedException("Apenas administradores e donos podem alterar projetos");
         }
         validateProjectRequest(request);
-        Project project = projectRepository.findById(id).orElseThrow();
-        if (!isSystemAdmin && (project.getCompany() == null || !project.getCompany().getId().equals(company.getId()))) {
-            throw new AccessDeniedException("Nao autorizado a alterar projeto de outra empresa");
-        }
+        Project project = findAccessibleProject(id, company.getId());
         project.setName(request.getName().trim());
         project.setDescription(normalizeText(request.getDescription()));
         if (request.getActive() != null) {
@@ -169,16 +158,12 @@ public class OrganizationService {
     public void deleteProject(String requesterEmail, UUID id) {
         User requester = currentUserService.requireCurrentUser(requesterEmail);
         Company company = getRequesterCompany(requesterEmail);
-        boolean isSystemAdmin = policyService.isSystemAdmin(requester);
         boolean isAdminOrOwner = policyService.isOwnerOrAdmin(requester);
         if (!isAdminOrOwner) {
             throw new AccessDeniedException("Apenas administradores e donos podem excluir projetos");
         }
-        Project project = projectRepository.findById(id).orElseThrow();
-        if (!isSystemAdmin && (project.getCompany() == null || !project.getCompany().getId().equals(company.getId()))) {
-            throw new AccessDeniedException("Nao autorizado a excluir projeto de outra empresa");
-        }
-        if (employeeRepository.countByProjectIdAndCompanyId(project.getId(), company.getId()) > 0) {
+        Project project = findAccessibleProject(id, company.getId());
+        if (employeeRepository.countByProjectIdAndCompanyId(project.getId(), project.getCompany().getId()) > 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Nao e permitido excluir projeto com funcionarios vinculados");
         }
         if (workPostRepository.countByProjectId(project.getId()) > 0) {
@@ -194,6 +179,20 @@ public class OrganizationService {
         if (request.getMaxSeats() != null && request.getMaxSeats() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Capacidade maxima do setor deve ser positiva");
         }
+    }
+
+    private Sector findAccessibleSector(UUID id, UUID tenantId) {
+        if (tenantContext.hasGlobalTenantAccess()) {
+            return sectorRepository.findById(id).orElseThrow();
+        }
+        return sectorRepository.findByIdAndCompanyId(id, tenantId).orElseThrow();
+    }
+
+    private Project findAccessibleProject(UUID id, UUID tenantId) {
+        if (tenantContext.hasGlobalTenantAccess()) {
+            return projectRepository.findById(id).orElseThrow();
+        }
+        return projectRepository.findByIdAndCompanyId(id, tenantId).orElseThrow();
     }
 
     private void validateProjectRequest(ProjectRequest request) {

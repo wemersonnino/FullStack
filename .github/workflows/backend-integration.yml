@@ -1,0 +1,28 @@
+name: Backend integration
+
+on:
+  pull_request:
+    paths:
+      - 'Backend/java-app1/demo/**'
+      - '.github/workflows/backend-integration.yml'
+  push:
+    branches: [develop]
+    paths:
+      - 'Backend/java-app1/demo/**'
+      - '.github/workflows/backend-integration.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend/java-app1/demo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Run mandatory unit and integration tests
+        run: chmod +x mvnw && ./mvnw -Pintegration verify

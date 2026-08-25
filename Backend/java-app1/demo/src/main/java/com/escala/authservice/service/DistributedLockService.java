@@ -40,6 +40,7 @@ public class DistributedLockService {
             if (Boolean.TRUE.equals(acquired)) {
                 return new LockHandle(key, value, false);
             }
+            throw new IllegalStateException("Ja existe uma operacao concorrente em andamento para este recurso");
         } catch (DataAccessException ignored) {
             // Fallback local para development/test quando Redis nao estiver disponivel.
         }

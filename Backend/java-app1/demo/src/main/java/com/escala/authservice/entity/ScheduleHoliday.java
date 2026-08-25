@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
+@org.hibernate.annotations.Filter(name = "tenantFilter", condition = "company_id = :tenantId")
 @Table(
         name = "schedule_holidays",
         indexes = {

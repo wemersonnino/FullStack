@@ -4,6 +4,7 @@ import com.escala.authservice.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
@@ -12,4 +13,5 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     List<Project> findByActiveTrueAndCompanyId(UUID companyId);
     List<Project> findByCompanyId(UUID companyId);
     org.springframework.data.domain.Page<Project> findByCompanyId(UUID companyId, org.springframework.data.domain.Pageable pageable);
+    Optional<Project> findByIdAndCompanyId(UUID id, UUID companyId);
 }

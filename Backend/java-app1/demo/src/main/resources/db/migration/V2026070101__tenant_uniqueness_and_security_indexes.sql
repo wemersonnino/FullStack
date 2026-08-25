@@ -117,7 +117,7 @@ do $$
 begin
     if to_regclass('public.schedule_cycle_assignments') is not null then
         create index if not exists idx_schedule_cycle_assignments_cycle_date_employee
-            on schedule_cycle_assignments (cycle_id, assignment_date, employee_full_name);
+            on schedule_cycle_assignments (cycle_id, assignment_date, employee_id);
     end if;
 end $$;
 

@@ -33,6 +33,7 @@ class TeamInvitationIntegrationTest extends AbstractIntegrationTest {
 
         TeamInvitationService.IssuedInvitation secondIssued = teamInvitationService.invite(owner.getEmail(), request);
         TeamInvitation secondInvitation = teamInvitationRepository.findById(secondIssued.invitation().getId()).orElseThrow();
+        firstInvitation = teamInvitationRepository.findById(firstIssued.invitation().getId()).orElseThrow();
 
         assertThat(firstIssued.plainToken()).isNotBlank();
         assertThat(firstInvitation.getToken()).isNull();

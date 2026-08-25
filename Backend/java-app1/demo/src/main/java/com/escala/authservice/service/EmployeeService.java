@@ -10,6 +10,7 @@ import com.escala.authservice.repository.ProjectRepository;
 import com.escala.authservice.repository.SectorRepository;
 import com.escala.authservice.repository.UserRepository;
 import com.escala.authservice.core.commercial.usecase.CheckPlanLimitUseCase;
+import com.escala.authservice.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +29,15 @@ public class EmployeeService {
     private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
     private final PolicyService policyService;
+    private final TenantContext tenantContext;
 
     private Company getRequesterCompany(String requesterEmail) {
-        return currentUserService.requireCurrentUser(requesterEmail).getCompany();
+        Company company = currentUserService.requireCurrentUser(requesterEmail).getCompany();
+        UUID tenantId = tenantContext.requireTenantId();
+        if (company == null || !tenantId.equals(company.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Empresa do usuario diverge do tenant autenticado");
+        }
+        return company;
     }
 
     public org.springframework.data.domain.Page<Employee> list(String requesterEmail, org.springframework.data.domain.Pageable pageable) {
@@ -74,7 +81,8 @@ public class EmployeeService {
     }
 
     public Employee update(String requesterEmail, UUID id, EmployeeRequest request) {
-        Employee employee = employeeRepository.findById(id).orElseThrow();
+        Company requesterCompany = getRequesterCompany(requesterEmail);
+        Employee employee = findAccessibleEmployee(id, requesterCompany.getId());
         checkEmployeeAdmin(requesterEmail, employee.getCompany());
         validateEmployeeRequest(employee.getCompany(), request, employee.getId());
 
@@ -82,14 +90,14 @@ public class EmployeeService {
         employee.setEmail(normalizeEmail(request.getEmail()));
         if (request.getActive() != null) employee.setActive(request.getActive());
         
-        Company company = getRequesterCompany(requesterEmail);
-        employee.setSector(resolveSector(company, request.getSectorId()));
-        employee.setProject(resolveProject(company, request.getProjectId()));
+        employee.setSector(resolveSector(employee.getCompany(), request.getSectorId()));
+        employee.setProject(resolveProject(employee.getCompany(), request.getProjectId()));
         return employeeRepository.save(employee);
     }
 
     public void remove(String requesterEmail, UUID id) {
-        Employee employee = employeeRepository.findById(id).orElseThrow();
+        Company requesterCompany = getRequesterCompany(requesterEmail);
+        Employee employee = findAccessibleEmployee(id, requesterCompany.getId());
         checkEmployeeAdmin(requesterEmail, employee.getCompany());
 
         employee.setActive(false);
@@ -98,20 +106,19 @@ public class EmployeeService {
 
     private Sector resolveSector(Company company, UUID id) {
         if (id == null) return null;
-        Sector sector = sectorRepository.findById(id).orElseThrow();
-        if (sector.getCompany() == null || !sector.getCompany().getId().equals(company.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Setor nao pertence a empresa do requisitante");
-        }
-        return sector;
+        return sectorRepository.findByIdAndCompanyId(id, company.getId()).orElseThrow();
     }
 
     private Project resolveProject(Company company, UUID id) {
         if (id == null) return null;
-        Project project = projectRepository.findById(id).orElseThrow();
-        if (project.getCompany() == null || !project.getCompany().getId().equals(company.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Projeto nao pertence a empresa do requisitante");
+        return projectRepository.findByIdAndCompanyId(id, company.getId()).orElseThrow();
+    }
+
+    private Employee findAccessibleEmployee(UUID id, UUID tenantId) {
+        if (tenantContext.hasGlobalTenantAccess()) {
+            return employeeRepository.findById(id).orElseThrow();
         }
-        return project;
+        return employeeRepository.findByIdAndCompanyId(id, tenantId).orElseThrow();
     }
 
     private void validateEmployeeRequest(Company company, EmployeeRequest request, UUID employeeId) {

@@ -75,7 +75,27 @@ Estado atual nesta branch:
   - convites com `tokenHash` e desativacao de convite anterior no mesmo tenant
   - lock distribuido com Redis
   - publicacao, retificacao e arquivamento de ciclo
-- quando o ambiente nao expoe Docker valido ao Testcontainers, esses testes ficam **skipped** por desenho e a suite unitaria continua executando normalmente
+- `mvn test` executa a suite unitaria rapida e exclui `integration/**`; este e o modo local sem Docker
+- `mvn -Pintegration verify` executa obrigatoriamente testes unitarios e de integracao; se o Docker estiver indisponivel, o build **falha**, nunca fica verde por `skip`
+
+#### Docker Desktop 29 no Windows
+
+O Testcontainers 1.21.3 precisa usar uma API Docker compativel e o socket do
+engine Linux do Docker Desktop. No PowerShell:
+
+```powershell
+$env:DOCKER_HOST='npipe:////./pipe/dockerDesktopLinuxEngine'
+.\mvnw.cmd '-Dapi.version=1.44' -Pintegration verify
+```
+
+`DOCKER_API_VERSION` no ambiente nao substitui `-Dapi.version=1.44` neste
+cliente. Em Linux/CI, onde o socket padrao e reconhecido, basta
+`./mvnw -Pintegration verify`.
+
+As migrations Flyway sao a fonte do schema. O profile `test` mantem
+`spring.jpa.hibernate.ddl-auto=validate`, de modo que cada execucao parte de
+um PostgreSQL vazio, aplica todas as migrations e falha se qualquer entidade
+JPA divergir do banco.
 
 ### 3.2 Testes de integracao Redis
 
