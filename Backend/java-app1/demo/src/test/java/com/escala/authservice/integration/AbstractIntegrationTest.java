@@ -8,12 +8,15 @@ import com.escala.authservice.repository.CompanyRepository;
 import com.escala.authservice.repository.EmployeeRepository;
 import com.escala.authservice.repository.RoleRepository;
 import com.escala.authservice.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -35,6 +38,9 @@ import java.util.stream.Collectors;
 @Testcontainers(disabledWithoutDocker = false)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 abstract class AbstractIntegrationTest {
+
+    protected record TenantFixture(Company company, User owner, Employee employee) {
+    }
 
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine")
@@ -78,6 +84,7 @@ abstract class AbstractIntegrationTest {
 
     @BeforeEach
     void resetState() {
+        SecurityContextHolder.clearContext();
         flushRedis();
         jdbcTemplate.execute("""
                 TRUNCATE TABLE
@@ -94,6 +101,37 @@ abstract class AbstractIntegrationTest {
                   companies
                 RESTART IDENTITY CASCADE
                 """);
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
+    protected TenantFixture persistTenantFixture(String key) {
+        Company company = persistCompany(key);
+        User owner = persistUser(company, "owner@" + key + ".test", "owner-" + key, "OWNER");
+        Employee employee = persistEmployee(
+                company,
+                owner,
+                "employee@" + key + ".test",
+                "Funcionario " + key
+        );
+        return new TenantFixture(company, owner, employee);
+    }
+
+    protected void authenticateAs(TenantFixture fixture, String... roleNames) {
+        Set<String> roles = Arrays.stream(roleNames).collect(Collectors.toSet());
+        var principal = new com.escala.authservice.security.AuthenticatedUserPrincipal(
+                fixture.owner().getId(),
+                fixture.owner().getEmail(),
+                fixture.company().getId(),
+                fixture.company().getSlug(),
+                roles
+        );
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null, Set.of())
+        );
     }
 
     protected Company persistCompany(String slug) {
