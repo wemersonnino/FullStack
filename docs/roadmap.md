@@ -6,6 +6,51 @@ Data de referencia: 2026-06-30.
 
 O roadmap prioriza uma entrada de Oceano Azul: PMEs que ainda operam com Excel, WhatsApp, lousa ou papel. A primeira versao vendavel deve resolver escala mensal com templates, feriados, contadores, alertas e publicacao auditavel. Recursos como ponto completo, banco de horas avancado, dimensionamento e IA entram por fases, para evitar competir cedo demais com suites maduras de ponto/RH.
 
+## Backlog por epicos
+
+As fases abaixo continuam representando a evolucao do produto. Para governanca
+tecnica no GitHub/Jira, o backlog transversal deve ser classificado nos oito
+epicos seguintes, evitando misturar vulnerabilidades, operacao e refatoracoes
+sob uma unica categoria de divida tecnica.
+
+| Codigo | Epico | Escopo |
+|---|---|---|
+| `EPIC-SEC` | Security & IAM | Autenticacao, autorizacao, JWT, sessoes, RBAC/ReBAC, secrets e hardening |
+| `EPIC-TENANT` | Multi-Tenant Isolation | Resolucao de tenant, filtros, queries, constraints e testes contra cross-tenant leak |
+| `EPIC-PLATFORM` | CI/CD & Engineering Governance | Gates obrigatorios, pipelines, qualidade, supply chain e regras de branch |
+| `EPIC-INFRA` | AWS & Production Infrastructure | Rede, compute, banco, storage, secrets, backup, disaster recovery e ambientes |
+| `EPIC-BILLING` | Billing, Trial & Plan Enforcement | Trial, assinatura, cobranca, limites de plano, webhooks e reconciliacao |
+| `EPIC-OBS` | Observability & Operations | Logs, metricas, traces, alertas, SLOs, runbooks e resposta a incidentes |
+| `EPIC-COMP` | LGPD, Audit & Compliance | Consentimento, retencao, direitos do titular, auditoria append-only e evidencias |
+| `EPIC-ARCH` | Modular Architecture & Technical Debt | Limites de dominio, arquitetura hexagonal, dependencias e divida estrutural |
+
+### Matriz de prioridade P0-P3
+
+| Prioridade | Criterio | Tratamento esperado |
+|---|---|---|
+| `P0` | Pode causar vazamento, fraude, indisponibilidade grave ou impedir operacao segura | Interrompe evolucao conflitante, exige responsavel, teste de regressao e gate obrigatorio |
+| `P1` | Necessario para operar clientes reais com confiabilidade e governanca | Planejado antes da ampliacao comercial/operacional relacionada |
+| `P2` | Reduz fortemente divida, acoplamento e probabilidade de problemas futuros | Priorizado por impacto arquitetural e custo crescente de postergacao |
+| `P3` | Otimizacao ou evolucao condicionada a escala ou necessidade comprovada | Executado mediante metrica, capacidade ou demanda validada |
+
+### Gates multi-tenant obrigatorios
+
+- `P0-01`: a identidade do tenant deve vir exclusivamente do principal
+  autenticado e ser disponibilizada por um contexto server-side fail-closed.
+- `P0-02`: todo recurso tenant-bound deve possuir isolamento na persistencia e
+  queries tenant-aware, com constraints e testes de tentativa cross-tenant.
+- `P0-03`: migrations, validacao Hibernate e testes de integracao com
+  PostgreSQL/Redis reais devem executar em CI obrigatorio, sem falso verde
+  quando Docker/Testcontainers estiver indisponivel.
+- Nenhuma feature nova pode introduzir recurso tenant-bound enquanto
+  `P0-01`, `P0-02` e `P0-03` nao estiverem estabelecidos para o dominio
+  afetado. Excecoes exigem decisao arquitetural documentada e aprovacao
+  explicita de seguranca.
+
+Estado de referencia em 2026-08-25: a fundacao destes tres gates foi entregue
+pelas issues `#27` e `#28`; novos dominios ainda devem demonstrar conformidade
+com os mesmos gates antes do merge.
+
 ## Mapa por fases
 
 | Fase | Horizonte | Foco | Entregaveis principais |
