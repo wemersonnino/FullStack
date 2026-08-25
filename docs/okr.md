@@ -14,7 +14,7 @@ O produto deve comecar com uma promessa vendavel e defensavel: sair da planilha 
 - Backend oficial: `Backend/java-app1/demo`, com Spring Boot 4.1.0, Java 25, JWT, empresas, usuarios, funcionarios, setores, projetos, escalas, trocas, ponto web basico, marketing leads, auditoria, capacidade operacional, billing e IA mock.
 - CMS: `Backend/cms-strapi`, restrito por decisao arquitetural a conteudo, SEO, landing pages, menus, legal pages, formularios editoriais e campanhas.
 - Banco: PostgreSQL em Docker, com bancos/usuarios separados para backend e Strapi.
-- Estado validado do backend: 24 testes, 0 falhas, suite concentrada no dominio de escala.
+- Estado validado do backend: 110 testes, 0 falhas, 0 erros e 0 ignorados no gate completo com PostgreSQL e Redis reais.
 - Escala Inteligente ja possui entrega inicial em SSR/BFF/UI com ciclo mensal e editor operacional.
 - Mensageria segue parcial: header + modal, sem central dedicada.
 
@@ -77,6 +77,45 @@ O produto deve comecar com uma promessa vendavel e defensavel: sair da planilha 
 - KR3: reforcar isolamento por tenant/company em repositories, services, BFF e DTOs.
 - KR4: alinhar RBAC/ReBAC para Owner, Admin, Manager, HR e Employee sem quebrar fluxos existentes.
 - KR5: ampliar testes de integracao para autenticacao, JPA, JWT, endpoints de escala, leads, ponto e auditoria.
+
+## OKR 6 - Institucionalizar governanca de risco e operacao
+
+**Objetivo:** organizar o backlog tecnico por risco e garantir que seguranca,
+isolamento e operabilidade evoluam antes de ampliar a superficie do produto.
+
+**Resultados-chave:**
+
+- KR1: classificar 100% do backlog tecnico em um dos epicos `EPIC-SEC`,
+  `EPIC-TENANT`, `EPIC-PLATFORM`, `EPIC-INFRA`, `EPIC-BILLING`, `EPIC-OBS`,
+  `EPIC-COMP` ou `EPIC-ARCH`.
+- KR2: classificar 100% das tarefas tecnicas em `P0`, `P1`, `P2` ou `P3`,
+  usando impacto de seguranca/operacao e nao apenas esforco de implementacao.
+- KR3: impedir via revisao e CI que novos recursos tenant-bound sejam
+  integrados sem cumprir `P0-01`, `P0-02` e `P0-03` no dominio afetado.
+- KR4: manter o gate de integracao obrigatorio sem testes ignorados por falta
+  de Docker e com migrations aplicadas sobre PostgreSQL vazio.
+- KR5: vincular toda issue P0 a um epico, responsavel, evidencia de teste,
+  criterio de rollback e decisao explicita de fechamento.
+
+### Epicos oficiais de governanca
+
+| Codigo | Resultado estrategico associado |
+|---|---|
+| `EPIC-SEC` | Identidade e autorizacao seguras, com menor superficie de ataque |
+| `EPIC-TENANT` | Ausencia de vazamento ou alteracao cross-tenant |
+| `EPIC-PLATFORM` | Entregas repetiveis, auditaveis e bloqueadas quando gates falham |
+| `EPIC-INFRA` | Producao resiliente, recuperavel e com privilegio minimo |
+| `EPIC-BILLING` | Receita e limites comerciais aplicados de forma consistente |
+| `EPIC-OBS` | Deteccao e resposta rapidas a degradacoes e incidentes |
+| `EPIC-COMP` | Evidencias LGPD/auditoria integras durante todo o ciclo do dado |
+| `EPIC-ARCH` | Menor acoplamento e evolucao modular sem overengineering |
+
+### Definicao executiva de prioridade
+
+- `P0`: risco de vazamento, fraude, indisponibilidade grave ou operacao insegura.
+- `P1`: requisito para clientes reais com confiabilidade e governanca.
+- `P2`: reducao relevante de divida, acoplamento e risco futuro.
+- `P3`: otimizacao condicionada a escala ou necessidade comprovada.
 
 ## Metricas de produto
 
