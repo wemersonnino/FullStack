@@ -6,6 +6,7 @@ import com.escala.authservice.entity.Role;
 import com.escala.authservice.entity.User;
 import com.escala.authservice.repository.RoleRepository;
 import com.escala.authservice.repository.UserRepository;
+import com.escala.authservice.security.authorization.IamAuthorizationPolicy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -43,7 +45,10 @@ class UserManagementServiceTest {
     private CurrentUserService currentUserService;
 
     @Mock
-    private PolicyService policyService;
+    private IamAuthorizationPolicy authorizationPolicy;
+
+    @Mock
+    private AuditLogService auditLogService;
 
     @InjectMocks
     private UserManagementService userManagementService;
@@ -62,7 +67,7 @@ class UserManagementServiceTest {
         ));
 
         when(currentUserService.requireCurrentUser("root@example.com")).thenReturn(requester);
-        when(policyService.isSystemAdmin(requester)).thenReturn(true);
+        when(authorizationPolicy.isSystemAdmin(requester)).thenReturn(true);
         when(userRepository.findAll(pageable)).thenReturn(expected);
 
         Page<User> result = userManagementService.list("root@example.com", pageable);
@@ -121,5 +126,20 @@ class UserManagementServiceTest {
         assertSame(user, result);
         assertEquals("/api/bff/avatar/files/abc-123.webp", user.getAvatarUrl());
         verify(userRepository).save(user);
+    }
+
+    @Test
+    void updateThemeDoesNotLoadUserFromAnotherTenant() {
+        Company company = Company.builder().id(UUID.randomUUID()).name("Empresa").slug("empresa").build();
+        User admin = User.builder().id(UUID.randomUUID()).email("admin@example.com").company(company).build();
+        UUID foreignUserId = UUID.randomUUID();
+
+        when(currentUserService.requireCurrentUser("admin@example.com")).thenReturn(admin);
+        when(userRepository.findByIdAndCompanyId(foreignUserId, company.getId())).thenReturn(java.util.Optional.empty());
+
+        assertThrows(AccessDeniedException.class,
+                () -> userManagementService.updateTheme("admin@example.com", foreignUserId, "dark"));
+
+        verify(userRepository).findByIdAndCompanyId(foreignUserId, company.getId());
     }
 }
