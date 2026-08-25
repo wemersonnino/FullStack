@@ -267,3 +267,51 @@ Encaixe funcional:
 - **Integridade da Auditoria:** Operações de auditoria e logs no banco de dados devem ser persistidos via append-only, sendo proibida a deleção física ou atualização desses dados.
 - **Cookies & Headers:** Configurar cabeçalhos HSTS, Content Security Policy (CSP), X-Frame-Options e SameSite nos cookies para proteção do Frontend contra XSS, CSRF e clickjacking.
 
+# Projeto Escala
+
+## Arquitetura
+
+Este repositório contém o SaaS Escala.
+
+Backend:
+Java + Spring Boot.
+
+Frontend:
+Next.js + TypeScript.
+
+CMS:
+Strapi.
+
+Database:
+PostgreSQL.
+
+## Regras
+
+- Não introduzir novas dependências sem justificativa.
+- Não alterar contratos REST sem avaliar frontend e backend.
+- Manter isolamento multi-tenant.
+- Nunca confiar em tenantId recebido diretamente do frontend.
+- Validar autorização no backend.
+- Criar testes para regras de negócio.
+- Evitar lógica de negócio em controllers.
+- Evitar lógica de negócio em componentes React.
+- Manter DTOs separados das entidades de persistência.
+- Não armazenar segredos no repositório.
+- Avaliar impacto LGPD.
+- Evitar overengineering.
+
+## Antes de implementar
+
+1. analisar código existente;
+2. identificar impacto;
+3. listar arquivos que serão alterados;
+4. verificar testes existentes;
+5. propor implementação.
+
+## Depois de implementar
+
+1. executar testes;
+2. executar lint;
+3. verificar build;
+4. apresentar git diff;
+5. informar riscos ou pendências.
