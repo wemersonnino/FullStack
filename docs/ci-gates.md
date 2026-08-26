@@ -34,6 +34,7 @@ Os quatro checks detalhados permanecem visiveis para diagnostico, enquanto o gat
 
 ## Diagnostico
 
+- `startup_failure` antes da criacao dos jobs: confirmar que o workflow nao referencia actions externas; a organizacao permite somente actions e workflows locais.
 - Falha antes dos testes de integracao em `docker info`: o runner nao oferece Docker; o job deve permanecer vermelho.
 - Relatorio de integracao ausente ou com `Skipped`: investigar Testcontainers; nao remover a verificacao para obter verde.
 - Falha Flyway/Hibernate: tratar a migration ou incompatibilidade de schema em issue propria.
