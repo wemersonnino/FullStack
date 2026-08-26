@@ -5,7 +5,7 @@ function hasHref(url?: string | null) {
   return Boolean(url?.trim());
 }
 
-export const Footer = ({ data }: { data: FooterInterface | null }) => {
+export const Footer = ({ data = null }: { data?: FooterInterface | null }) => {
   if (!data) return null;
 
   return (

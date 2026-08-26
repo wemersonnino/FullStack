@@ -1,28 +1,182 @@
-name: Backend integration
+name: Monorepo CI
 
 on:
   pull_request:
-    paths:
-      - 'Backend/java-app1/demo/**'
-      - '.github/workflows/backend-integration.yml'
+    branches:
+      - develop
+      - main
   push:
-    branches: [develop]
-    paths:
-      - 'Backend/java-app1/demo/**'
-      - '.github/workflows/backend-integration.yml'
+    branches:
+      - develop
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: monorepo-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Backend/java-app1/demo
+  backend-unit:
+    name: Backend / Unit and Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '25'
-          cache: maven
-      - name: Run mandatory unit and integration tests
-        run: chmod +x mvnw && ./mvnw -Pintegration verify
+      - name: Checkout repository
+        run: |
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+
+      - name: Require Docker
+        run: docker info
+
+      - name: Run unit tests
+        working-directory: Backend/java-app1/demo
+        run: docker run --rm -v "$PWD:/workspace" -w /workspace maven:3.9-eclipse-temurin-25 mvn -B test
+
+      - name: Build backend artifact
+        working-directory: Backend/java-app1/demo
+        run: docker run --rm -v "$PWD:/workspace" -w /workspace maven:3.9-eclipse-temurin-25 mvn -B package -DskipTests
+
+  backend-integration:
+    name: Backend / Integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        run: |
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+
+      - name: Require Docker for Testcontainers
+        run: docker info
+
+      - name: Run integration tests with PostgreSQL, Redis and Flyway
+        working-directory: Backend/java-app1/demo
+        run: >-
+          docker run --rm --network host
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v "$PWD:/workspace" -w /workspace
+          maven:3.9-eclipse-temurin-25
+          mvn -B -Pintegration test
+
+      - name: Reject skipped, empty or missing integration tests
+        shell: bash
+        working-directory: Backend/java-app1/demo
+        run: |
+          shopt -s nullglob
+          reports=(target/surefire-reports/com.escala.authservice.integration.*IntegrationTest.txt)
+          if (( ${#reports[@]} == 0 )); then
+            echo "No integration test report was produced."
+            exit 1
+          fi
+          for report in "${reports[@]}"; do
+            if ! grep -Eq 'Tests run: [1-9][0-9]*, Failures: 0, Errors: 0, Skipped: 0' "$report"; then
+              echo "Integration report is skipped, empty or unsuccessful: $report"
+              exit 1
+            fi
+          done
+
+  frontend:
+    name: Frontend / Quality and Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      CI: "true"
+      NEXTAUTH_SECRET: ci-only-nextauth-secret-not-for-production
+      NEXTAUTH_URL: http://localhost:3000
+      API_BASE_URL: http://localhost:8080
+      NEXT_INTERNAL_API_BASE_URL: http://localhost:8080
+      NEXT_INTERNAL_STRAPI_URL: http://localhost:1337
+      NEXT_PUBLIC_STRAPI_PUBLIC_URL: http://localhost:1337
+      NEXT_PUBLIC_RECAPTCHA_ENABLED: "false"
+    steps:
+      - name: Checkout repository
+        run: |
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+
+      - name: Install, lint, typecheck and build frontend
+        working-directory: Frontend/web-app3/escala
+        run: >-
+          docker run --rm
+          -e CI -e NEXTAUTH_SECRET -e NEXTAUTH_URL -e API_BASE_URL
+          -e NEXT_INTERNAL_API_BASE_URL -e NEXT_INTERNAL_STRAPI_URL
+          -e NEXT_PUBLIC_STRAPI_PUBLIC_URL -e NEXT_PUBLIC_RECAPTCHA_ENABLED
+          -v "$PWD:/workspace" -w /workspace node:22-bookworm-slim
+          sh -c "corepack enable && corepack prepare pnpm@10.33.3 --activate &&
+          pnpm install --frozen-lockfile && pnpm run lint &&
+          pnpm run typecheck && pnpm run build"
+
+  cms:
+    name: CMS / Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      NODE_ENV: production
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: localhost
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: strapi_ci
+      DATABASE_USERNAME: strapi_ci
+      DATABASE_PASSWORD: ci-only-not-for-production
+      DATABASE_SSL: "false"
+      APP_KEYS: ci-app-key-1,ci-app-key-2,ci-app-key-3,ci-app-key-4
+      API_TOKEN_SALT: ci-api-token-salt
+      ADMIN_JWT_SECRET: ci-admin-jwt-secret
+      TRANSFER_TOKEN_SALT: ci-transfer-token-salt
+      ENCRYPTION_KEY: ci-encryption-key
+      STRAPI_CRON_ENABLED: "false"
+    steps:
+      - name: Checkout repository
+        run: |
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+
+      - name: Install and build Strapi CMS
+        working-directory: Backend/cms-strapi
+        run: >-
+          docker run --rm
+          -e NODE_ENV -e DATABASE_CLIENT -e DATABASE_HOST -e DATABASE_PORT
+          -e DATABASE_NAME -e DATABASE_USERNAME -e DATABASE_PASSWORD -e DATABASE_SSL
+          -e APP_KEYS -e API_TOKEN_SALT -e ADMIN_JWT_SECRET
+          -e TRANSFER_TOKEN_SALT -e ENCRYPTION_KEY -e STRAPI_CRON_ENABLED
+          -v "$PWD:/workspace" -w /workspace node:22-bookworm-slim
+          sh -c "npm ci && npm run build"
+
+  required-gate:
+    name: CI / Required Gate
+    if: always()
+    needs:
+      - backend-unit
+      - backend-integration
+      - frontend
+      - cms
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every CI job to succeed
+        shell: bash
+        run: |
+          results=(
+            "${{ needs.backend-unit.result }}"
+            "${{ needs.backend-integration.result }}"
+            "${{ needs.frontend.result }}"
+            "${{ needs.cms.result }}"
+          )
+          printf 'Required job result: %s\n' "${results[@]}"
+          for result in "${results[@]}"; do
+            if [[ "$result" != "success" ]]; then
+              exit 1
+            fi
+          done
