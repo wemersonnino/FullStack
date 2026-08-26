@@ -1,3 +1,5 @@
+'use client';
+
 // /app/(PUBLIC)/(home)/artigo/loading.tsx
 // Fallback UI while /artigo/[slug]/page.tsx streams server components
 
