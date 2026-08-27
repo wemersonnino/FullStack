@@ -10,11 +10,9 @@ COPY package.json pnpm-lock.yaml* ./
 
 RUN corepack enable \
     && corepack prepare pnpm@10.33.3 --activate \
-    && pnpm install --frozen-lockfile \
     && mkdir -p /app/.next \
-    && chown -R node:node /app \
     && mkdir -p /home/node/.cache \
-    && chown -R node:node /home/node/.cache
+    && chown -R node:node /app/.next /home/node/.cache
 
 # In develop, we usually copy everything or use volumes
 COPY --chown=node:node . .

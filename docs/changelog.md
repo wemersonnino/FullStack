@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-26 - Compose alinhado ao Spring Boot e CMS oficial
+
+### Corrigido
+
+- Removida a referencia do Compose ao Strapi duplicado diretamente em `Backend/`.
+- O servico `backend` volta a construir `Backend/java-app1/demo`; o servico `strapi` usa exclusivamente `Backend/cms-strapi`.
+- PostgreSQL inicializa bancos e usuarios separados para Spring Boot e Strapi por script parametrizado, sem senhas hardcoded.
+- Arquivos `.env` reais deixam de ser versionados; `.env.compose.example` contem somente placeholders.
+- README, setup e documentacao de ambientes foram alinhados a arquitetura vigente.
+
+### Evidencia
+
+- Inventario e justificativas: `docs/limpeza-strapi-duplicado-issue-42.md`.
+- Issue relacionada: #42.
+
 ## 2026-07-01 - Hardening multitenant, Redis operacional, tokens sensiveis com hash e BFF seguro
 
 ### Adicionado

@@ -1,9 +1,9 @@
 services:
   postgres:
-    container_name: web-app-postgres
+    container_name: escala-postgres
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Docker/develop/Dockerfile
     image: escala-postgres:16-alpine
     restart: unless-stopped
     env_file:
@@ -11,12 +11,17 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - web_app_pg_data:/var/lib/postgresql/data/
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - escala_pg_data:/var/lib/postgresql/data/
+      - ./init-multiple-databases.sh:/docker-entrypoint-initdb.d/10-init-multiple-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     networks:
       escala-network:
 volumes:
-  web_app_pg_data:
+  escala_pg_data:
 
 networks:
   escala-network:
