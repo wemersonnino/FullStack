@@ -187,7 +187,7 @@ services:
     environment:
       - POSTGRES_DB=fundep_db
       - POSTGRES_USER=fundep_user
-      - POSTGRES_PASSWORD=fundep_pass
+      - POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD}
 ```
 
 ---

@@ -186,7 +186,7 @@ services:
     environment:
       - POSTGRES_DB=escala_db
       - POSTGRES_USER=escala_user
-      - POSTGRES_PASSWORD=escala_pass
+      - POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD}
 ```
 
 ---

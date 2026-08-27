@@ -54,7 +54,7 @@ services:
       - DB_PORT=5432
       - DB_NAME=fundep_db
       - DB_USER=fundep_user
-      - DB_PASS=fundep_pass
+      - DB_PASS=${ESCALA_DB_PASSWORD}
     depends_on:
       - postgres
     networks:
@@ -66,7 +66,7 @@ services:
     environment:
       - POSTGRES_DB=fundep_db
       - POSTGRES_USER=fundep_user
-      - POSTGRES_PASSWORD=fundep_pass
+      - POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -129,7 +129,7 @@ networks:
 
 `@Component`
 `public class JwtUtil {`
-  `private final String SECRET = "secret-key";`
+  `private final String secret = environment.getRequiredProperty("JWT_SECRET");`
 
   `public String generateToken(User user) {`
     `return Jwts.builder()`

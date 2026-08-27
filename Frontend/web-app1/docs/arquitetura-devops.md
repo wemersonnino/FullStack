@@ -61,7 +61,7 @@ services:
     environment:
       - POSTGRES_DB=fundep_db
       - POSTGRES_USER=fundep_user
-      - POSTGRES_PASSWORD=fundep_pass
+      - POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -84,7 +84,7 @@ networks:
 ```ini
 # Ambiente Next.js
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=dev-secret
+NEXTAUTH_SECRET=replace-with-a-long-random-value
 
 # APIs
 NEXT_PUBLIC_API_BASE=http://localhost:8080
@@ -92,7 +92,7 @@ NEXT_PUBLIC_STRAPI_API=http://localhost:1337
 NEXT_PUBLIC_DOTNET_API=http://localhost:5000
 
 # Banco (se acessar direto)
-DATABASE_URL=postgresql://fundep_user:fundep_pass@localhost:5432/fundep_db
+DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@localhost:5432/${DB_NAME}
 
 # Tema e Analytics
 NEXT_PUBLIC_THEME_DEFAULT=system
@@ -107,7 +107,7 @@ DB_HOST=postgres
 DB_PORT=5432
 DB_NAME=fundep_db
 DB_USER=fundep_user
-DB_PASS=fundep_pass
+DB_PASS=${ESCALA_DB_PASSWORD}
 ```
 
 ---
