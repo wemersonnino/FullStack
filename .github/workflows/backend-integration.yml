@@ -19,6 +19,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  versioned-secret-scan:
+    name: Security / Versioned Secret Scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        run: |
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+
+      - name: Reject hardcoded credentials in tracked files
+        shell: pwsh
+        run: ./scripts/security/check-versioned-secrets.ps1
+
   backend-unit:
     name: Backend / Unit and Build
     runs-on: ubuntu-24.04
@@ -158,6 +174,7 @@ jobs:
     name: CI / Required Gate
     if: always()
     needs:
+      - versioned-secret-scan
       - backend-unit
       - backend-integration
       - frontend
@@ -169,6 +186,7 @@ jobs:
         shell: bash
         run: |
           results=(
+            "${{ needs.versioned-secret-scan.result }}"
             "${{ needs.backend-unit.result }}"
             "${{ needs.backend-integration.result }}"
             "${{ needs.frontend.result }}"
