@@ -15,10 +15,10 @@ O ambiente local oficial usa o `docker-compose.yml` da raiz e sobe quatro servic
 
 ### postgres
 
-- imagem local: `escala-postgres:16-alpine`
-- origem: `Data/postgres/Docker/develop/Dockerfile`
+- imagem oficial: `postgres:16-alpine`
 - volume: `escala_pg_data`
-- script de init montado como somente leitura
+- script parametrizado `Data/postgres/init-multiple-databases.sh` montado como somente leitura
+- bancos/usuarios separados: `escala_core`/`escala_api_user` e `strapi_cms`/`strapi_user`
 - `healthcheck` com `pg_isready`
 
 ### backend
@@ -27,7 +27,7 @@ O ambiente local oficial usa o `docker-compose.yml` da raiz e sobe quatro servic
 - origem: `Backend/java-app1/demo/Docker/develop/Dockerfile`
 - depende de `postgres` saudavel
 - `healthcheck` em `GET /actuator/health`
-- `.env` montado como arquivo externo
+- configuracao injetada a partir do `.env` ignorado na raiz
 
 ### strapi
 
@@ -36,10 +36,11 @@ O ambiente local oficial usa o `docker-compose.yml` da raiz e sobe quatro servic
 - depende de `postgres` saudavel
 - `healthcheck` em `GET /admin`
 - volumes montados para `config`, `src`, `scripts`, `data` e uploads
+- nenhuma referencia a uma instalacao Strapi diretamente em `Backend/`
 
 ### frontend
 
-- imagem local: `fullstack-frontend:develop`
+- imagem local: `escala-frontend:develop`
 - origem: `Frontend/web-app3/escala/Docker/develop/Dockerfile`
 - depende de `backend` e `strapi` saudaveis
 - `healthcheck` em `GET /api/auth/session`
@@ -101,10 +102,12 @@ Os healthchecks e `depends_on.condition: service_healthy` passaram a ser obrigat
 - nao acoplar o browser diretamente ao Spring Boot para fluxos autenticados
 - segredos devem entrar por `.env`, `env_file` ou secret manager, nunca hardcoded no codigo
 - mudancas de REST no backend exigem revisao do BFF e do `OpenApiController`
+- cada responsabilidade deve ter uma unica etapa: no Compose de desenvolvimento, dependencias do frontend sao materializadas no volume persistente na primeira subida; nao sao instaladas novamente no build de desenvolvimento. Imagens de producao permanecem autocontidas e fazem install/build durante o build.
 
 ## Validacoes minimas apos mudancas estruturais
 
 ```bash
+cp .env.compose.example .env
 docker compose config
 docker compose up -d --build
 docker compose ps

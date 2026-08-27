@@ -1,223 +1,85 @@
-# Web App Escala - Full-Stack Application
+# Escala
 
-**Projeto Full-Stack de Estudo e Prática**
+SaaS para gestao mensal inteligente de escalas, com publicacao auditavel, regras operacionais, trocas, ponto web, conteudo editorial e isolamento multi-tenant.
 
-Aplicação full-stack moderna para gestão de escalas e turnos de trabalho, construída para prática e aperfeiçoamento técnico, integrando arquitetura moderna, componentização avançada, autenticação segura e headless CMS.
+## Arquitetura oficial
 
-## 🚀 Stack Tecnológica
+- Frontend: `Frontend/web-app3/escala` — Next.js 16, React 19 e TypeScript.
+- Backend: `Backend/java-app1/demo` — Spring Boot 4.1, Java 25 e Maven.
+- CMS: `Backend/cms-strapi` — Strapi 5 restrito a conteudo, SEO, menus e URLs editoriais.
+- Dados: PostgreSQL 16, com banco/usuario separados para Spring Boot e Strapi.
+- Estado efemero: Redis para locks e rate limit.
 
-### Frontend
-- **Next.js 15** - Framework React com App Router
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS 4** - Framework CSS utilitário
-- **NextAuth.js** - Autenticação e autorização
-- **next-themes** - Gerenciamento de temas (dark/light mode)
-- **next-intl** - Internacionalização (i18n) - PT/EN
-- **Zustand** - Gerenciamento de estado
-- **Zod** - Validação de schemas
-- **Radix UI** - Componentes acessíveis
+O frontend nao acessa o banco diretamente. Fluxos operacionais passam pelo Spring Boot/BFF; o Strapi nao autentica usuarios finais nem armazena regras de escala, auditoria operacional ou turnos.
 
-### Backend
-- **Strapi v5** - Headless CMS e REST API
-- **TypeScript** - Tipagem para o backend
-- **PostgreSQL 16** - Banco de dados relacional
+## Executar com Docker
 
-### Infraestrutura
-- **Docker & Docker Compose** - Containerização e orquestração
-- **Node.js 20** - Runtime JavaScript
+Pre-requisitos: Git, Docker Desktop/Engine e Docker Compose v2.
 
-## 📋 Funcionalidades
-
-### Gestão de Usuários
-- Autenticação segura com NextAuth
-- Perfis de usuário
-- Controle de permissões
-
-### Gestão de Turnos
-- Cadastro de turnos de trabalho
-- Definição de horários (início/fim)
-- Ativação/desativação de turnos
-
-### Gestão de Escalas
-- Criação de escalas de trabalho
-- Associação de usuários e turnos
-- Períodos de vigência
-- Status (rascunho, ativo, concluído, cancelado)
-
-### Sistema de Anúncios
-- Criação de anúncios
-- Níveis de prioridade
-- Período de exibição
-- Direcionamento por usuário
-
-### Auditoria
-- Registro de todas as ações do sistema
-- Rastreamento de usuários
-- Logs de operações CRUD
-- Registro de login/logout
-
-## 🏗️ Estrutura do Projeto
-
-```
-FullStack/
-├── frontend/              # Aplicação Next.js
-│   ├── app/              # App Router
-│   │   ├── [locale]/    # Rotas internacionalizadas
-│   │   └── api/         # API Routes
-│   ├── components/       # Componentes React
-│   ├── lib/             # Utilitários e configurações
-│   ├── messages/        # Arquivos de tradução (i18n)
-│   └── i18n/            # Configuração de internacionalização
-├── backend/              # API Strapi
-│   ├── config/          # Configurações do Strapi
-│   ├── database/        # Configurações do banco
-│   └── src/
-│       └── api/         # Content Types e APIs
-│           ├── shift/           # Turnos
-│           ├── schedule/        # Escalas
-│           ├── announcement/    # Anúncios
-│           └── audit-log/       # Auditoria
-└── docker-compose.yml    # Orquestração Docker
-```
-
-## 🚀 Como Executar
-
-### Pré-requisitos
-- Docker e Docker Compose
-- Node.js 20+ (para desenvolvimento local)
-- npm ou yarn
-
-### Com Docker (Recomendado)
-
-1. Clone o repositório:
 ```bash
-git clone https://github.com/wemersonnino/FullStack.git
+git clone https://github.com/DesignArtWorks/FullStack.git
 cd FullStack
+cp .env.compose.example .env
 ```
 
-2. Copie o arquivo de exemplo de variáveis de ambiente:
+Substitua todos os placeholders `change-me`/`replace-with` do `.env` por valores locais fortes. O arquivo `.env` e ignorado pelo Git.
+
 ```bash
-cp .env.example .env
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps
 ```
 
-3. Inicie os containers:
+Servicos:
+
+- Frontend: http://localhost:3000
+- Spring Boot: http://localhost:8080
+- Health do backend: http://localhost:8080/actuator/health
+- Swagger local: http://localhost:8080/swagger-ui/index.html
+- Strapi: http://localhost:1337/admin
+- PostgreSQL: localhost:5432
+- Redis: localhost:6379
+
+## Comandos por componente
+
+Backend:
+
 ```bash
-docker-compose up -d
+cd Backend/java-app1/demo
+./mvnw test
+./mvnw -Pintegration test
 ```
 
-4. Acesse as aplicações:
-- **Frontend**: http://localhost:3000
-- **Backend (Strapi)**: http://localhost:1337/admin
-- **PostgreSQL**: localhost:5432
+Frontend:
 
-### Desenvolvimento Local
-
-#### Frontend
 ```bash
-cd frontend
-npm install
-npm run dev
+cd Frontend/web-app3/escala
+corepack pnpm install --frozen-lockfile
+pnpm run lint
+pnpm run typecheck
+pnpm run build
 ```
 
-#### Backend
-```bash
-cd backend
-npm install
-npm run develop
-```
-
-## 🔧 Configuração
-
-### Variáveis de Ambiente
-
-Consulte o arquivo `.env.example` para todas as variáveis necessárias.
-
-**Principais variáveis:**
-- `DATABASE_*`: Configurações do PostgreSQL
-- `NEXTAUTH_SECRET`: Segredo para NextAuth
-- `JWT_SECRET`, `API_TOKEN_SALT`, etc.: Segredos do Strapi
-
-### Primeira Execução
-
-1. Ao acessar o Strapi pela primeira vez (http://localhost:1337/admin), crie um usuário administrador
-2. Configure as permissões das APIs em Settings > Users & Permissions
-3. Configure as chaves de API se necessário
-
-## 📚 APIs Disponíveis
-
-### Strapi REST API
-- `/api/shifts` - Gestão de turnos
-- `/api/schedules` - Gestão de escalas
-- `/api/announcements` - Gestão de anúncios
-- `/api/audit-logs` - Logs de auditoria
-- `/api/auth/local` - Autenticação
-
-## 🌍 Internacionalização
-
-A aplicação suporta múltiplos idiomas:
-- 🇧🇷 Português (padrão)
-- 🇺🇸 Inglês
-
-Arquivos de tradução em `frontend/messages/`.
-
-## 🎨 Temas
-
-Suporte para múltiplos temas via next-themes:
-- ☀️ Light mode
-- 🌙 Dark mode
-- 💻 System (automático)
-
-## 🧪 Testes
+CMS:
 
 ```bash
-# Frontend
-cd frontend
-npm test
-
-# Backend
-cd backend
-npm test
-```
-
-## 📦 Build para Produção
-
-### Frontend
-```bash
-cd frontend
+cd Backend/cms-strapi
+npm ci
 npm run build
-npm run start
 ```
 
-### Backend
-```bash
-cd backend
-npm run build
-npm run start
-```
+## Documentacao
 
-## 🤝 Contribuindo
+- [Ambientes](docs/ambientes.md)
+- [Arquitetura](docs/Arquitetura/Arquitetura.md)
+- [DevOps](docs/Arquitetura/Arquitetura-Devops.md)
+- [Gate de CI](docs/ci-gates.md)
+- [Roadmap](docs/roadmap.md)
+- [OKRs](docs/okr.md)
 
-Este é um projeto de estudo. Contribuições são bem-vindas!
+## Seguranca
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📝 Licença
-
-Este projeto é open source e está disponível para fins educacionais.
-
-## 👤 Autor
-
-**Wemerson Nino**
-- GitHub: [@wemersonnino](https://github.com/wemersonnino)
-
-## 🙏 Agradecimentos
-
-Projeto desenvolvido para estudo e prática de tecnologias modernas de desenvolvimento full-stack.
-
----
-
-**Stack:** Next.js 15 • TypeScript • Tailwind CSS 4 • Strapi v5 • PostgreSQL 16 • Docker
+- Nunca versionar `.env`, senhas, tokens, dumps ou chaves privadas.
+- Somente `/actuator/health` e publico; demais endpoints do Actuator devem permanecer protegidos.
+- Dados de tenant devem ser derivados do usuario autenticado, nunca confiados diretamente ao frontend.
+- Incidentes e suspeitas de vazamento devem resultar em rotacao imediata dos segredos afetados.

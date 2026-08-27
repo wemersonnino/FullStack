@@ -1,64 +1,161 @@
-version: '3.8'
+name: escala-production
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: escala-postgres-prod
     restart: always
     environment:
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:?POSTGRES_ADMIN_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?POSTGRES_ADMIN_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_ADMIN_DB:-postgres}
+      ESCALA_DB_NAME: ${ESCALA_DB_NAME:-escala_core}
+      ESCALA_DB_USER: ${ESCALA_DB_USER:-escala_api_user}
+      ESCALA_DB_PASSWORD: ${ESCALA_DB_PASSWORD:?ESCALA_DB_PASSWORD is required}
+      STRAPI_DB_NAME: ${STRAPI_DB_NAME:-strapi_cms}
+      STRAPI_DB_USER: ${STRAPI_DB_USER:-strapi_user}
+      STRAPI_DB_PASSWORD: ${STRAPI_DB_PASSWORD:?STRAPI_DB_PASSWORD is required}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - escala_prod_pg_data:/var/lib/postgresql/data
+      - ./Data/postgres/init-multiple-databases.sh:/docker-entrypoint-initdb.d/10-init-multiple-databases.sh:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME}"]
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 10s
+    networks: [escala-production]
+
+  redis:
+    image: redis:7.4-alpine
+    restart: always
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD is required}"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    volumes:
+      - escala_prod_redis_data:/data
+    networks: [escala-production]
 
   backend:
+    image: escala-backend:production
     build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: escala-backend-prod
+      context: ./Backend/java-app1/demo
+      dockerfile: ./Docker/production/Dockerfile
     restart: always
     environment:
-      NODE_ENV: production
-      DATABASE_CLIENT: postgres
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: ${DATABASE_NAME}
-      DATABASE_USERNAME: ${DATABASE_USERNAME}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      API_TOKEN_SALT: ${API_TOKEN_SALT}
-      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
-      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT}
-      APP_KEYS: ${APP_KEYS}
-    ports:
-      - "1337:1337"
+      SPRING_PROFILES_ACTIVE: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${ESCALA_DB_NAME:-escala_core}
+      DB_USER: ${ESCALA_DB_USER:-escala_api_user}
+      DB_PASS: ${ESCALA_DB_PASSWORD:?ESCALA_DB_PASSWORD is required}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      JWT_SECRET: ${BACKEND_JWT_SECRET:?BACKEND_JWT_SECRET is required}
+      INTERNAL_BFF_SHARED_SECRET: ${INTERNAL_BFF_SHARED_SECRET:?INTERNAL_BFF_SHARED_SECRET is required}
+      STRAPI_BASE_URL: http://strapi:1337
+      PUBLIC_ENDPOINTS_REQUIRE_BFF: "true"
+      OPENAPI_ENABLED: "false"
+      OPENAPI_INCLUDE_ADMIN: "false"
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/actuator/health | grep '\"status\":\"UP\"' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+    networks: [escala-production]
 
-  frontend:
+  strapi:
+    image: cms-strapi:production
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
-    container_name: escala-frontend-prod
+      context: ./Backend/cms-strapi
+      dockerfile: ./Docker/production/Dockerfile
     restart: always
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-      NEXTAUTH_URL: ${NEXTAUTH_URL}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-    ports:
-      - "3000:3000"
+      HOST: 0.0.0.0
+      PORT: 1337
+      PUBLIC_URL: ${STRAPI_PUBLIC_URL:?STRAPI_PUBLIC_URL is required}
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${STRAPI_DB_NAME:-strapi_cms}
+      DATABASE_USERNAME: ${STRAPI_DB_USER:-strapi_user}
+      DATABASE_PASSWORD: ${STRAPI_DB_PASSWORD:?STRAPI_DB_PASSWORD is required}
+      DATABASE_SCHEMA: public
+      DATABASE_SSL: ${DATABASE_SSL:-false}
+      APP_KEYS: ${STRAPI_APP_KEYS:?STRAPI_APP_KEYS is required}
+      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:?STRAPI_API_TOKEN_SALT is required}
+      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:?STRAPI_ADMIN_JWT_SECRET is required}
+      TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT:?STRAPI_TRANSFER_TOKEN_SALT is required}
+      JWT_SECRET: ${STRAPI_JWT_SECRET:?STRAPI_JWT_SECRET is required}
+      ENCRYPTION_KEY: ${STRAPI_ENCRYPTION_KEY:?STRAPI_ENCRYPTION_KEY is required}
+      STRAPI_CRON_ENABLED: ${STRAPI_CRON_ENABLED:-true}
     depends_on:
-      - backend
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${STRAPI_PORT:-1337}:1337"
+    volumes:
+      - escala_prod_uploads:/opt/app/public/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:1337/admin >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+    networks: [escala-production]
+
+  frontend:
+    image: escala-frontend:production
+    build:
+      context: ./Frontend/web-app3/escala
+      dockerfile: ./Docker/production/Dockerfile
+    restart: always
+    environment:
+      NODE_ENV: production
+      NEXTAUTH_URL: ${NEXTAUTH_URL:?NEXTAUTH_URL is required}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET is required}
+      API_BASE_URL: http://backend:8080
+      NEXT_INTERNAL_API_BASE_URL: http://backend:8080
+      NEXT_INTERNAL_STRAPI_URL: http://strapi:1337
+      NEXT_PUBLIC_STRAPI_PUBLIC_URL: ${STRAPI_PUBLIC_URL:?STRAPI_PUBLIC_URL is required}
+      INTERNAL_BFF_SHARED_SECRET: ${INTERNAL_BFF_SHARED_SECRET:?INTERNAL_BFF_SHARED_SECRET is required}
+      REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379
+    depends_on:
+      backend:
+        condition: service_healthy
+      strapi:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/auth/session >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+    networks: [escala-production]
 
 volumes:
-  postgres-data:
+  escala_prod_pg_data:
+  escala_prod_redis_data:
+  escala_prod_uploads:
+
+networks:
+  escala-production:
+    driver: bridge

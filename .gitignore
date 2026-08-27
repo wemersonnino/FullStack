@@ -34,13 +34,14 @@ out/
 .tmp/
 
 # Strapi
-backend/.cache/
-backend/build/
-backend/exports/
-backend/.strapi/
+Backend/cms-strapi/.cache/
+Backend/cms-strapi/build/
+Backend/cms-strapi/exports/
+Backend/cms-strapi/.strapi/
 
 # Docker
 docker-compose.override.yml
+**/Dockerfile.local
 volumes/
 
 # Logs

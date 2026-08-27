@@ -2,6 +2,10 @@ FROM maven:3.9-eclipse-temurin-25
 
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV HOME=/tmp \
     MAVEN_CONFIG=/tmp/.m2 \
     MAVEN_USER_HOME=/tmp/.m2

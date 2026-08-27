@@ -6,6 +6,8 @@ Data: 2026-06-30
 
 O ambiente local oficial roda pelo `docker-compose.yml` na raiz do monorepo.
 
+Antes da primeira subida, copie `.env.compose.example` para `.env` na raiz e substitua todos os placeholders. Os antigos `.env` versionados por componente nao sao fonte de configuracao do Compose.
+
 ### Servicos expostos
 
 - Frontend Next.js: `http://localhost:3000`
@@ -48,8 +50,8 @@ Isso foi introduzido porque o frontend estava tentando chamar o backend e o Stra
 
 ### Backend
 
-- `.env` montado em `Backend/java-app1/demo/.env`
-- `.env.example` documenta apenas placeholders e defaults locais seguros
+- variaveis sao injetadas pelo Compose a partir do `.env` ignorado na raiz
+- `Backend/java-app1/demo/.env.example` documenta execucao isolada do componente
 - `application.yml` nao deve mais conter fallback versionado para `JWT_SECRET`, `STRAPI_BASE_URL`, banco ou Redis
 - credenciais JWT e integracoes externas ficam fora da imagem
 - o backend expoe `GET /actuator/health` para readiness local
@@ -67,7 +69,8 @@ Isso foi introduzido porque o frontend estava tentando chamar o backend e o Stra
 
 ### Strapi
 
-- `.env` proprio em `Backend/cms-strapi/.env`
+- variaveis sao injetadas pelo Compose a partir do `.env` ignorado na raiz
+- `Backend/cms-strapi/.env.example` documenta execucao isolada do componente
 - `DATABASE_*` apontando para o `postgres`
 - `STRAPI_CRON_ENABLED`, `STRAPI_AUTO_SEED_MARKETING` e `STRAPI_FORCE_MARKETING_SEED` governam bootstrap editorial
 
@@ -113,3 +116,4 @@ Diretrizes minimas:
 - O BFF do Next.js deve ser a porta de entrada do browser para fluxos autenticados
 - O Strapi permanece como fonte editorial; dados transacionais seguem no backend Java
 - O `.env` local do backend pode existir em desenvolvimento, mas o valor real de `JWT_SECRET` deve ser rotacionado e retirado do Git antes de homolog/producao
+- Nenhuma aplicacao Strapi deve existir diretamente em `Backend/`; o unico CMS suportado e `Backend/cms-strapi`
