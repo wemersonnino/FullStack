@@ -18,17 +18,17 @@ ENV HOST=0.0.0.0
 ENV PORT=1337
 
 WORKDIR /opt/
-COPY package.json package-lock.json ./
-RUN npm install -g node-gyp \
-    && npm config set fetch-retry-maxtimeout 600000 -g \
-    && npm ci --legacy-peer-deps \
+RUN mkdir -p /opt/app /opt/node_modules /opt/npm-global \
+    && chown -R node:node /opt/app /opt/node_modules /opt/npm-global
+COPY --chown=node:node package.json package-lock.json ./
+USER node
+RUN npm install -g node-gyp --prefix /opt/npm-global \
+    && npm_config_fetch_retry_maxtimeout=600000 npm ci --legacy-peer-deps \
     && npm cache clean --force
-ENV PATH=/opt/node_modules/.bin:$PATH
+ENV PATH=/opt/node_modules/.bin:/opt/npm-global/bin:$PATH
 
 WORKDIR /opt/app
 COPY --chown=node:node . .
-RUN chown -R node:node /opt/app /opt/node_modules
-USER node
 
 EXPOSE 1337
 
