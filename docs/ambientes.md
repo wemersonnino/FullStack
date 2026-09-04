@@ -89,6 +89,7 @@ Diretrizes:
 - `JWT_SECRET`, `DB_PASS`, `REDIS_PASSWORD`, `STRAPI_BASE_URL`, Stripe, Google e Recaptcha devem vir de secret manager ou variaveis injetadas pelo ambiente
 - Swagger nao deve ficar publico sem restricao fora do ambiente local
 - logs e tracing habilitados
+- A decisao normativa de armazenamento, IAM, KMS, rotacao e recuperacao esta em [ADR-005](adr-005-secrets-producao-aws.md). Homologacao usa cofre e roles proprios, nunca valores ou referencias de producao.
 
 ## Ambiente de producao
 
@@ -101,6 +102,7 @@ Diretrizes minimas:
 - banco com backup automatizado e restore testado
 - headers de seguranca no frontend
 - observabilidade de aplicacao e infraestrutura
+- Secrets Manager e o mecanismo padrao para chaves e credenciais; SSM Parameter Store `SecureString` + KMS fica restrito a configuracoes sensiveis estaveis justificadas. Consulte [ADR-005](adr-005-secrets-producao-aws.md).
 
 ## Subdominios esperados para producao
 

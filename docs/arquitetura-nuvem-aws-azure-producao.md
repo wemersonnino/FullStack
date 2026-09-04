@@ -210,7 +210,7 @@ Seguranca:
 
 - AWS WAF em CloudFront/ALB.
 - Rate limit no WAF e tambem na aplicacao para rotas sensiveis.
-- Secrets Manager para senhas, JWT secret, Stripe, Google, Recaptcha.
+- Secrets Manager para senhas, JWT secret, Stripe, Google, Recaptcha. A classificacao, uso excepcional de SSM SecureString, IAM minimo e rotacao sao normatizados pela [ADR-005](adr-005-secrets-producao-aws.md).
 - KMS para criptografia.
 - IAM least privilege por task.
 - CORS por ambiente.
