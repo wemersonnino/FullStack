@@ -4,6 +4,8 @@ Este documento descreve as diretrizes para a publicação do SaaS em ambiente pr
 
 ## 1. Opções de Provedores Cloud
 
+> A decisão vigente para a primeira produção é AWS. A baseline normativa de VPC, ECS/Fargate, ALB/TLS, RDS, Redis, ECR, deploy e rollback está na [ADR-006](adr-006-infraestrutura-minima-producao-aws.md); este documento é um checklist complementar, não uma alternativa para operar produção em Docker Compose.
+
 ### Opção A: Amazon Web Services (AWS) - Recomendado
 - **Frontend (Next.js):** AWS Amplify ou Vercel (para melhor performance de SSR/Edge).
 - **Backend (Spring Boot):** AWS ECS (Elastic Container Service) com Fargate ou App Runner.

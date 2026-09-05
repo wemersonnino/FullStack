@@ -19,6 +19,8 @@ O cenario mais propicio para a primeira producao robusta e escalavel e:
 
 **AWS como provedor principal, com ECS Fargate para containers, RDS PostgreSQL Multi-AZ, ElastiCache Redis/Valkey, CloudFront, AWS WAF, S3, Secrets Manager, OpenTelemetry Collector, Prometheus/Grafana e logs centralizados.**
 
+O baseline operacional obrigatório da primeira produção — topologia de rede, Security Groups, imagens imutáveis, deploy, rollback e orçamento — está consolidado na [ADR-006](adr-006-infraestrutura-minima-producao-aws.md). A estratégia de segredos complementar está na [ADR-005](adr-005-secrets-producao-aws.md).
+
 Motivos:
 
 - O projeto ja esta naturalmente conteinerizado.
