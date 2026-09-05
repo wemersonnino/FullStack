@@ -141,7 +141,7 @@ public class OpenApiController {
         Map<String, Object> paths = new LinkedHashMap<>();
 
         paths.put("/api/v1/auth/register", pathPost(postPublic("Auth", "Registrar usuario", "Cria uma nova conta, empresa inicial quando aplicavel, usuario OWNER/ADMIN e retorna tokens de autenticacao.", "RegisterRequest")));
-        paths.put("/api/v1/auth/authenticate", pathPost(postPublic("Auth", "Autenticar usuario", "Valida email e senha e retorna access token e refresh token da sessao.", "AuthenticationRequest")));
+        paths.put("/api/v1/auth/authenticate", pathPost(postPublic("Auth", "Autenticar usuario", "Valida email e senha e retorna um access token de curta duracao para a sessao BFF.", "AuthenticationRequest")));
         paths.put("/api/v1/auth/forgot-password", pathPost(postPublic("Auth", "Solicitar recuperacao de senha", "Recebe o email do usuario e inicia o fluxo de recuperacao de senha.", "ForgotPasswordRequest")));
         paths.put("/api/v1/auth/reset-password", pathPost(postPublic("Auth", "Redefinir senha", "Valida token de recuperacao e troca a senha do usuario.", "ResetPasswordRequest")));
         paths.put("/api/v1/auth/complete-registration", pathPost(post("Auth", "Concluir cadastro convidado", "Completa os dados de um usuario previamente convidado para uma equipe.", "CompleteRegistrationRequest")));
@@ -869,7 +869,6 @@ public class OpenApiController {
         switch (responseName) {
             case "AuthResponse":
                 properties.put("token", Map.of("type", "string", "example", "<jwt-token>"));
-                properties.put("refreshToken", Map.of("type", "string", "example", "<refresh-token>"));
                 properties.put("user", Map.of(
                     "type", "object",
                     "properties", Map.of(

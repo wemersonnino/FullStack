@@ -3,6 +3,7 @@ import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { ENV } from '@/constants/env';
+import { rejectCrossSiteBffRequest } from '@/lib/bff/request-origin';
 
 type RouteContext = {
   params: Promise<{
@@ -134,6 +135,9 @@ async function proxyToBackend(request: NextRequest, context: RouteContext) {
   if (!ALLOWED_METHODS.includes(request.method as (typeof ALLOWED_METHODS)[number])) {
     return jsonError('Metodo nao permitido', 405);
   }
+
+  const originError = rejectCrossSiteBffRequest(request);
+  if (originError) return originError;
 
   const jwt = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
   const accessToken = typeof jwt?.accessToken === 'string' ? jwt.accessToken : undefined;

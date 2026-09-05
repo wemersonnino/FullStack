@@ -118,7 +118,9 @@ public class SecurityConfiguration {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "If-Match", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("ETag"));
-        configuration.setAllowCredentials(true);
+        // Spring receives only Authorization: Bearer from the BFF, never a
+        // browser session cookie. CORS credentials would add CSRF surface.
+        configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
