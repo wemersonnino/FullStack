@@ -141,7 +141,7 @@ public class UserManagementService {
                 .orElseGet(() -> roleRepository.save(Role.builder().name(roleName).build()));
         user.getRoles().add(role);
         User saved = userRepository.save(user);
-        auditGlobalAccess(requester, "GRANT_ROLE", user);
+        auditIdentityChange(requester, "GRANT_ROLE", user, roleName);
         return saved;
     }
 
@@ -162,7 +162,7 @@ public class UserManagementService {
 
         user.getRoles().removeIf(role -> role.getName().equals(roleName));
         User saved = userRepository.save(user);
-        auditGlobalAccess(requester, "REVOKE_ROLE", user);
+        auditIdentityChange(requester, "REVOKE_ROLE", user, roleName);
         return saved;
     }
 
@@ -254,5 +254,13 @@ public class UserManagementService {
                 : "all";
         auditLogService.record(actor.getEmail(), action, "User", target == null ? null : target.getId(),
                 "Privileged SYSTEM_ADMIN access; targetTenant=" + targetTenant);
+    }
+
+    private void auditIdentityChange(User actor, String action, User target, String roleName) {
+        String targetTenant = target != null && target.getCompany() != null
+                ? String.valueOf(target.getCompany().getId())
+                : "unknown";
+        auditLogService.record(actor.getEmail(), action, "User", target == null ? null : target.getId(),
+                "role=" + roleName + "; targetTenant=" + targetTenant);
     }
 }

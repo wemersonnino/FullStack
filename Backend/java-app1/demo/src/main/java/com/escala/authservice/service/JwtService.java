@@ -91,6 +91,13 @@ public class JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
+    public boolean isTokenValidForSubject(String token, UUID userId) {
+        if (userId == null) {
+            return false;
+        }
+        return userId.toString().equals(extractUsername(token)) && !isTokenExpired(token);
+    }
+
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
