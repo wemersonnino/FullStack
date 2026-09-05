@@ -23,7 +23,7 @@ NextAuth ------------------------------------------> Spring Boot
                                            identidade JWT + companyId confiavel
 ```
 
-O `companyId` vem exclusivamente do JWT validado pelo Spring e e aplicado por `TenantIsolationFilter`; BFF, payload, query string e cookie nao podem escolher tenant arbitrariamente.
+O JWT identifica somente o sujeito assinado. A cada request autenticada, o Spring resolve novamente usuario ativo, empresa e roles no banco e aplica o `companyId` atual via `TenantIsolationFilter`; BFF, payload, query string e cookie nao podem escolher tenant arbitrariamente.
 
 ## Transporte, CORS e CSRF
 

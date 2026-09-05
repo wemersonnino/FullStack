@@ -29,6 +29,7 @@ public class ApplicationConfig {
                 .map(user -> org.springframework.security.core.userdetails.User.builder()
                         .username(resolvePrincipal(username, user.getEmail(), user.getId()))
                         .password(user.getPassword())
+                        .disabled(!user.isActive() || user.getCompany() == null || !user.getCompany().isActive())
                         .authorities(user.getRoles().stream()
                                 .map(role -> role.getName())
                                 .toArray(String[]::new))

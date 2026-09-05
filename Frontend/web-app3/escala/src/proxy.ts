@@ -6,6 +6,13 @@ import { routing } from './i18n/routing';
 const intlMiddleware = createMiddleware(routing);
 
 const PRIVATE_ROUTES = ['/dashboard', '/users'];
+const ACCESS_TOKEN_EXPIRY_SKEW_MS = 5_000;
+const NEXTAUTH_SESSION_COOKIES = [
+  'next-auth.session-token',
+  '__Secure-next-auth.session-token',
+  'authjs.session-token',
+  '__Secure-authjs.session-token',
+];
 
 function stripLocale(pathname: string) {
   return pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?(\/|$)/, '/');
@@ -15,6 +22,29 @@ function getLocalePrefix(pathname: string) {
   const localeMatch = pathname.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)(?=\/|$)/);
   if (!localeMatch || localeMatch[1] === routing.defaultLocale) return '';
   return `/${localeMatch[1]}`;
+}
+
+function hasValidAccessToken(token: Awaited<ReturnType<typeof getToken>>) {
+  if (!token || typeof token === 'string') {
+    return false;
+  }
+
+  const jwt = token as Record<string, unknown>;
+  if (typeof jwt.accessToken !== 'string' || jwt.accessToken.trim() === '') return false;
+
+  const expiresAt = typeof jwt.accessTokenExpiresAt === 'number'
+    ? jwt.accessTokenExpiresAt
+    : typeof jwt.exp === 'number'
+      ? jwt.exp * 1000
+      : null;
+
+  return expiresAt !== null && expiresAt > Date.now() + ACCESS_TOKEN_EXPIRY_SKEW_MS;
+}
+
+function clearExpiredSession(response: NextResponse) {
+  for (const cookieName of NEXTAUTH_SESSION_COOKIES) {
+    response.cookies.delete(cookieName);
+  }
 }
 
 export async function proxy(req: NextRequest) {
@@ -33,13 +63,16 @@ export async function proxy(req: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
     });
 
-    if (token) {
+    if (hasValidAccessToken(token)) {
       response = intlMiddleware(req);
     } else {
       const loginUrl = req.nextUrl.clone();
       loginUrl.pathname = `${getLocalePrefix(req.nextUrl.pathname)}/login`;
       loginUrl.searchParams.set('callbackUrl', `${req.nextUrl.pathname}${req.nextUrl.search}`);
       response = NextResponse.redirect(loginUrl);
+      if (token) {
+        clearExpiredSession(response);
+      }
     }
   }
 
