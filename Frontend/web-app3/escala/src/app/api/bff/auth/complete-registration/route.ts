@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { ENV } from '@/constants/env';
 import { getOptionalServerAccessToken } from '@/lib/auth/server-auth';
+import { rejectCrossSiteBffRequest } from '@/lib/bff/request-origin';
 
 export async function POST(request: Request) {
+  const originError = rejectCrossSiteBffRequest(request);
+  if (originError) return originError;
+
   const accessToken = await getOptionalServerAccessToken();
   if (!accessToken) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

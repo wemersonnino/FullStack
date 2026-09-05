@@ -100,6 +100,7 @@ Diretrizes minimas:
 - frontend, backend e Strapi em rede privada quando possivel
 - Redis privado, sem exposicao publica e com auth/TLS quando o provedor suportar
 - Em producao, portas expostas pelo Compose local nao sao permitidas: a matriz de rotas publicas, servicos internos e administracao esta na [ADR-007](adr-007-exposicao-servicos-producao.md).
+- O contrato de autenticacao entre browser, NextAuth/BFF e Spring (cookies, Bearer, CORS, CSRF, logout e ausencia atual de refresh) esta na [ADR-008](adr-008-autenticacao-bff-nextauth-spring.md).
 - banco com backup automatizado e restore testado
 - headers de seguranca no frontend
 - observabilidade de aplicacao e infraestrutura
