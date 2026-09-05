@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O workflow `.github/workflows/backend-integration.yml` e o gate tecnico de Pull Requests destinados a `develop` e `main`. Ele tambem executa em pushes nessas branches e pode ser disparado manualmente para diagnostico. O caminho historico foi preservado para que o proprio Pull Request de bootstrap execute o workflow ja reconhecido pelo GitHub.
+O workflow `.github/workflows/backend-integration.yml` e o gate tecnico de Pull Requests destinados a `develop` e `main`. Ele tambem executa em pushes para `main` e pode ser disparado manualmente para diagnostico. Pushes em `develop` nao iniciam uma segunda execucao: essa branch so recebe mudancas por Pull Request ja validado, e a promocao para `main` abre outro Pull Request. O caminho historico foi preservado para que o proprio Pull Request de bootstrap execute o workflow ja reconhecido pelo GitHub.
 
 O workflow nao usa filtros por caminho: uma mudanca transversal sempre executa todos os checks obrigatorios. O `GITHUB_TOKEN` possui somente `contents: read`, e nenhuma validacao basica depende de secrets de producao.
 
