@@ -12,6 +12,8 @@ O `docker-compose.yml` e exclusivamente um ambiente local. A primeira producao d
 
 Esta e uma arquitetura compartilhada por tenants. Por isso, banco, cache e workloads nao recebem IP publico, e um erro de rede ou IAM e tratado como evento de alto blast radius. A estrategia de segredos e complementar e esta definida na [ADR-005](adr-005-secrets-producao-aws.md).
 
+A matriz normativa de endpoints publicos, servicos internos, diagnostico sem SSH e testes de bloqueio fica na [ADR-007](adr-007-exposicao-servicos-producao.md).
+
 ## Diagrama do baseline
 
 ```text
