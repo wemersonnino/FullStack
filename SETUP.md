@@ -35,6 +35,20 @@ docker compose up -d --build
 docker compose ps
 ```
 
+Esse e o unico Compose suportado para a stack completa. Os antigos arquivos
+`Docker/docker-compose.yml` dos componentes foram removidos porque duplicavam a
+orquestracao da raiz e referenciavam Dockerfiles inexistentes.
+
+No primeiro `up --build`, cada imagem instala suas dependencias uma vez. Os
+volumes nomeados recebem os artefatos da imagem. Em reinicios normais use:
+
+```bash
+docker compose restart
+```
+
+O restart nao executa `npm ci`, `pnpm install` ou Maven. Depois de alterar
+`pom.xml`, `package.json` ou lockfiles, reconstrua com `docker compose up -d --build`.
+
 O primeiro boot inicializa dois bancos e usuarios independentes:
 
 - `escala_core` / `escala_api_user`: Spring Boot e dados operacionais;

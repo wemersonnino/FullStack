@@ -50,13 +50,9 @@ jobs:
       - name: Require Docker
         run: docker info
 
-      - name: Run unit tests
+      - name: Test and build backend artifact
         working-directory: Backend/java-app1/demo
-        run: docker run --rm -v "$PWD:/workspace" -w /workspace maven:3.9-eclipse-temurin-25 mvn -B test
-
-      - name: Build backend artifact
-        working-directory: Backend/java-app1/demo
-        run: docker run --rm -v "$PWD:/workspace" -w /workspace maven:3.9-eclipse-temurin-25 mvn -B package -DskipTests
+        run: docker run --rm -v "$PWD:/workspace" -w /workspace maven:3.9-eclipse-temurin-25 mvn -B package
 
   backend-integration:
     name: Backend / Integration
