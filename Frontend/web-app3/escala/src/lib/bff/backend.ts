@@ -2,6 +2,7 @@ import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import { ENV } from '@/constants/env';
 import { getOptionalServerAccessToken } from '@/lib/auth/server-auth';
+import { rejectCrossSiteBffRequest } from '@/lib/bff/request-origin';
 
 type BackendRequestOptions = {
   method?: string;
@@ -13,6 +14,11 @@ type BackendRequestOptions = {
 };
 
 export async function proxyBackend(path: string, options: BackendRequestOptions = {}) {
+  if (options.request) {
+    const originError = rejectCrossSiteBffRequest(options.request);
+    if (originError) return originError;
+  }
+
   const url = new URL(path, ENV.API_BASE_URL);
   if (options.searchParams) {
     options.searchParams.forEach((value, key) => url.searchParams.set(key, value));
@@ -50,12 +56,6 @@ export async function proxyBackend(path: string, options: BackendRequestOptions 
 
   if (options.authenticated !== false) {
     let accessToken: string | undefined;
-    const incomingAuthorization = options.request?.headers.get('authorization');
-
-    if (incomingAuthorization?.startsWith('Bearer ')) {
-      accessToken = incomingAuthorization.slice('Bearer '.length).trim();
-    }
-
     // 1. Tenta extrair o token do cookie (NextAuth) se houver requisição
     if (options.request) {
       const jwtToken = await getToken({

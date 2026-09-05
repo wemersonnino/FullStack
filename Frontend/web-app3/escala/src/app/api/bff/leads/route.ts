@@ -3,6 +3,7 @@ import { ENV } from '@/constants/env';
 import { enforceRateLimit } from '@/lib/bff/rate-limit';
 import { getMarketingAttribution } from '@/services/campaign';
 import { LeadCapturePayload } from '@/types/campaign';
+import { rejectCrossSiteBffRequest } from '@/lib/bff/request-origin';
 
 const ALLOWED_METHODS = ['POST'] as const;
 
@@ -48,6 +49,9 @@ export async function POST(request: NextRequest) {
   if (!ALLOWED_METHODS.includes(request.method as (typeof ALLOWED_METHODS)[number])) {
     return jsonError('Metodo nao permitido', 405);
   }
+
+  const originError = rejectCrossSiteBffRequest(request);
+  if (originError) return originError;
 
   let payload: LeadCapturePayload & Record<string, unknown>;
   try {
