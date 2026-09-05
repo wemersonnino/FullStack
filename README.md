@@ -30,6 +30,10 @@ docker compose up -d --build
 docker compose ps
 ```
 
+`docker compose up -d --build` e o fluxo local unico. As dependencias ficam nas
+imagens e nos volumes nomeados; `docker compose restart` nao reinstala pacotes.
+Quando um lockfile mudar, execute novamente o comando com `--build`.
+
 Servicos:
 
 - Frontend: http://localhost:3000
@@ -74,6 +78,7 @@ npm run build
 - [Arquitetura](docs/Arquitetura/Arquitetura.md)
 - [DevOps](docs/Arquitetura/Arquitetura-Devops.md)
 - [Gate de CI](docs/ci-gates.md)
+- [Auditoria de pipelines da issue 47](docs/auditoria-pipelines-issue-47.md)
 - [Roadmap](docs/roadmap.md)
 - [OKRs](docs/okr.md)
 

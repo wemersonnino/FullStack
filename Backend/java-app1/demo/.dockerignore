@@ -1,5 +1,12 @@
 .git
+.github
 .idea
+.mvn
+.settings
 target
 *.log
+.classpath
+.project
 HELP.md
+mvnw
+mvnw.cmd

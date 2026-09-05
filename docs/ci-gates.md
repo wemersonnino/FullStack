@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O workflow `.github/workflows/backend-integration.yml` e o gate tecnico de Pull Requests destinados a `develop` e `main`. Ele tambem executa em pushes nessas branches e pode ser disparado manualmente para diagnostico. O caminho historico foi preservado para que o proprio Pull Request de bootstrap execute o workflow ja reconhecido pelo GitHub.
+O workflow `.github/workflows/backend-integration.yml` e o gate tecnico de Pull Requests destinados a `develop` e `main`. Ele tambem executa em pushes para `main` e pode ser disparado manualmente para diagnostico. Pushes em `develop` nao iniciam uma segunda execucao: essa branch so recebe mudancas por Pull Request ja validado, e a promocao para `main` abre outro Pull Request. O caminho historico foi preservado para que o proprio Pull Request de bootstrap execute o workflow ja reconhecido pelo GitHub.
 
 O workflow nao usa filtros por caminho: uma mudanca transversal sempre executa todos os checks obrigatorios. O `GITHUB_TOKEN` possui somente `contents: read`, e nenhuma validacao basica depende de secrets de producao.
 
@@ -12,7 +12,7 @@ A organizacao restringe o GitHub Actions a workflows e actions locais. Por isso 
 
 | Check | Comandos e garantias |
 | --- | --- |
-| `Backend / Unit and Build` | `mvn -B test` e `mvn -B package -DskipTests` em `maven:3.9-eclipse-temurin-25` |
+| `Backend / Unit and Build` | uma unica execucao `mvn -B package`, que compila, executa os testes unitarios e gera o artefato em `maven:3.9-eclipse-temurin-25` |
 | `Backend / Integration` | exige `docker info`, executa `mvn -B -Pintegration test` em Java 25 com acesso ao Docker/Testcontainers e rejeita relatorios ausentes, vazios ou com testes ignorados |
 | `Frontend / Quality and Build` | `pnpm install --frozen-lockfile`, `pnpm run lint`, `pnpm run typecheck` e `pnpm run build` |
 | `CMS / Build` | `npm ci` e `npm run build` no Strapi oficial |
@@ -42,6 +42,16 @@ Os quatro checks detalhados permanecem visiveis para diagnostico, enquanto o gat
 - Falha de cache: caches aceleram a instalacao, mas os comandos continuam usando os lockfiles como fonte deterministica.
 
 Os relatorios Surefire permanecem no workspace durante o job e seus resumos aparecem nos logs Maven. Logs nao devem conter credenciais reais.
+
+## Responsabilidade unica por ambiente
+
+- CI valida e gera artefatos; nao inicia a stack de desenvolvimento.
+- Dockerfiles instalam dependencias e geram os artefatos das respectivas imagens.
+- O Compose raiz somente orquestra imagens, volumes, configuracao e healthchecks.
+- Restart de containers somente reinicia processos; instalacoes ocorrem em rebuilds.
+
+O inventario e as evidencias da consolidacao estao em
+`docs/auditoria-pipelines-issue-47.md`.
 
 ## Rollback
 
