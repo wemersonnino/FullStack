@@ -15,6 +15,7 @@ frameworks, gerenciadores de pacotes e cobertura funcional nao foram alterados.
 | CI integracao | suite com perfil `integration` separada da suite unitaria | separacao justificada por Docker/Testcontainers e diagnostico independente | job `Backend / Integration` | manter job e verificacao explicita de relatorios; nao e duplicacao da suite unitaria |
 | CI frontend | instalacao, lint, typecheck e build no mesmo container | uma unica instalacao alimenta tres gates | job `Frontend / Quality and Build` | manter consolidado; ainda nao ha suite automatizada confiavel para adicionar |
 | CI CMS | instalacao e build no mesmo container | uma unica instalacao por job | job `CMS / Build` | manter sem jobs sobrepostos |
+| Gatilhos CI | o merge em `develop` disparava `push` e o PR de promocao disparava o mesmo workflow para o mesmo SHA | duas suites completas simultaneas, com custo e checks duplicados | workflow do monorepo | manter PRs para `develop`/`main`, push somente em `main` e disparo manual; governanca proibe push direto em `develop` |
 | Docker local frontend | Dockerfile preparava Corepack, mas o Compose executava `pnpm install` em todo start/restart | restart dependente de rede e do tempo de instalacao; volume podia esconder os modulos da imagem | Dockerfile de desenvolvimento | instalar no build da imagem; o volume nomeado `/app/node_modules` e inicializado pela imagem; o container executa somente `pnpm dev` |
 | Docker local backend | imagem contem fontes e usa cache Maven nomeado | rebuild resolve codigo; restart nao recompila nem reinstala | Dockerfile de desenvolvimento | manter; o cache acelera rebuilds e nao esconde artefato de runtime |
 | Docker local CMS | dependencias ficam em `/opt/node_modules` e somente fontes/config/uploads sao montados | evita que bind mount esconda dependencias da imagem | Dockerfile de desenvolvimento | manter volumes seletivos; uploads continuam persistentes no host local |
@@ -44,6 +45,7 @@ um worktree imutavel de `origin/develop` e novamente na branch da issue.
 | invocacoes Maven no job unit/build | 2 | 1 | -50% e o mesmo teste/package |
 | instalacoes pnpm por restart do frontend | 1 | 0 | instalacao removida do caminho de restart |
 | Compose suportados para a stack | 3 (1 valido, 2 historicos quebrados) | 1 | entrada operacional unica |
+| suites CI simultaneas no mesmo SHA ao promover `develop` | 2 | 1 | elimina duplicacao `push develop` + `pull_request main` |
 | contexto Docker backend | 852,32 kB | 852,32 kB | checkout limpo igual; arquivos locais Maven/IDE agora excluidos |
 | contexto Docker frontend | 3,37 MB | 3,37 MB | checkout limpo igual; caches e relatorios locais agora excluidos |
 | contexto Docker CMS | 11,36 MB | 11,36 MB | checkout limpo igual; uploads e caches locais agora excluidos |
